@@ -15,6 +15,7 @@
 <Script file='libraries\spinbar.lua'/>
 <Script file='libraries\sound.lua'/>
 <Script file='libraries\time.lua'/>
+<Script file='libraries\zone.lua'/>
 <Script file='libraries\tooltipscanner.lua'/>
 <Script file='libraries\tooltip.lua'/>
 <Script file='libraries\fader.lua'/>
