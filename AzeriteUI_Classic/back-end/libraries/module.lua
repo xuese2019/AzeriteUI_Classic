@@ -1,4 +1,4 @@
-local LibModule = CogWheel:Set("LibModule", 31)
+local LibModule = CogWheel:Set("LibModule", 32)
 if (not LibModule) then	
 	return
 end
@@ -534,13 +534,16 @@ local ModuleProtoType = {
 
 			-- colorize numbers yellow
 			-- *DO THIS FIRST
-			msg = msg:gsub("(%d+)", "|cffffd200%1|r") 
+			msg = msg:gsub("(%A)(%d+)", "%1|cffffd200%2|r") 
 
 			-- colorize chat commands blue
 			msg = msg:gsub("/(%w+)", "|cff77aaff/%1|r") 
 
 			-- camelcase or other words suspected to be code references
 			msg = msg:gsub("(%u?)(%l+)(%u)(%l+)", "|cff33ff33%1%2%3%4|r") 
+
+			-- assume bracketed entries are intended to be highlighted
+			msg = msg:gsub("%[(.-)%]", "|cff33ff33%1|r") 
 
 			-- color strings red
 			msg = msg:gsub("\"(.-)\"", "|cffa0a0a0\"|r|cffff8833%1|r|cffa0a0a0\"|r") 
