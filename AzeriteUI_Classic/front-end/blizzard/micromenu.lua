@@ -177,16 +177,21 @@ end
 -- is used as a callback from global methods too! 
 Module.UpdateMicroButtons = function()
 	if InCombatLockdown() then 
+		Module:AddDebugMessageFormatted("Attempted to adjust MicroMenu in combat, queueing up the action for combat end.")
 		return Module:RegisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
 	end 
 
 	local buttons = Module:GetConfigButtons()
 	local window = Module:GetConfigWindow()
 
+	local strata = window:GetFrameStrata()
+	local level = window:GetFrameLevel()
 	local numVisible = 0
 	for id,microButton in ipairs(buttons) do
 		if (microButton and microButton:IsShown()) then
 			microButton:SetParent(window) 
+			microButton:SetFrameStrata(strata)
+			microButton:SetFrameLevel(level + 1)
 			microButton:SetSize(buttonWidth*sizeMod, buttonHeight*sizeMod)
 			microButton:ClearAllPoints()
 			microButton:SetPoint("BOTTOM", window, "BOTTOM", 0, buttonSpacing + buttonHeight*sizeMod*numVisible + buttonSpacing*numVisible)
@@ -415,7 +420,55 @@ Module.PreInit = function(self)
 	CoreLayout = CogWheel("LibDB"):GetDatabase(PREFIX..":[Core]")
 end
 
+Module.HandleBartenderMicroBar = function(self)
+	self:AddDebugMessageFormatted("[Bartender4 - MicroMenu] bar loaded, handling incompatible elements.")
+	local MicroMenuMod = Bartender4:GetModule("MicroMenu")
+	if MicroMenuMod.bar then 
+		MicroMenuMod.bar.UpdateButtonLayout = function() end
+		self:AddDebugMessageFormatted("[Bartender4 - MicroMenu] handling, updating MicroButtons.")
+		self:UpdateMicroButtons()
+	end
+end
+
+Module.HandleBartender = function(self)
+	self:AddDebugMessageFormatted("[Bartender4] loaded, handling incompatible elements.")
+	local Bartender4 = Bartender4
+	local MicroMenuMod = Bartender4:GetModule("MicroMenu", true)
+	if MicroMenuMod then 
+		self:AddDebugMessageFormatted("[MicroMenu] module detected.")
+		MicroMenuMod.MicroMenuBarShow = function() end
+		MicroMenuMod.BlizzardBarShow = function() end
+		MicroMenuMod.UpdateButtonLayout = function() end
+		if MicroMenuMod.bar then 
+			self:AddDebugMessageFormatted("[Bartender4 - MicroMenu] bar detected.")
+			self:HandleBartenderMicroBar()
+		else
+			self:AddDebugMessageFormatted("[Bartender4 - MicroMenu] bar not yet created, adding handle action to queue.")
+			hooksecurefunc(MicroMenuMod, "OnEnable", function() 
+				self:HandleBartenderMicroBar()
+			end)
+		end 
+	end
+
+end
+
+Module.ListenForBartender = function(self, event, addon)
+	if (addon == "Bartender4") then 
+		self:HandleBartender()
+		self:UnregisterEvent("ADDON_LOADED", "ListenForBartender")
+	end
+end
+
 Module.OnInit = function(self)
+	if self:IsAddOnEnabled("Bartender4") then 
+		self:AddDebugMessageFormatted("[Bartender4] detected.")
+		if IsAddOnLoaded("Bartender4") then 
+			self:HandleBartender()
+		else 
+			self:AddDebugMessageFormatted("[Bartender4] not yet loaded, adding handle action to queue.")
+			self:RegisterEvent("ADDON_LOADED", "ListenForBartender")
+		end 
+	end
 	self:AddOptionsToMenuWindow()
 end 
 
@@ -423,4 +476,3 @@ Module.OnEnable = function(self)
 	self:AddOptionsToMenuButton()
 	self:UpdatePerformanceBar()
 end 
-	
