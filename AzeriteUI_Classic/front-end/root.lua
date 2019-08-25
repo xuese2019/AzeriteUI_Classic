@@ -1,7 +1,7 @@
 local ADDON, Private = ...
 
 -- Wooh! 
-local Core = CogWheel("LibModule"):NewModule(ADDON, "LibDB", "LibMessage", "LibEvent", "LibBlizzard", "LibFrame", "LibSlash", "LibAura")
+local Core = CogWheel("LibModule"):NewModule(ADDON, "LibDB", "LibMessage", "LibEvent", "LibBlizzard", "LibFrame", "LibSlash", "LibSwitcher", "LibAura")
 
 -- Tell the back-end what addon to look for before 
 -- initializing this module and all its submodules. 
@@ -11,14 +11,8 @@ Core:SetAddon(ADDON)
 -- *it's important that we're doing this here, before any module configs are created.
 Core:RegisterSavedVariablesGlobal(ADDON.."_DB")
 
--- Can't have both us and these
-Core:SetIncompatible("DiabolicUI")
-Core:SetIncompatible("DiabolicTwo")
-Core:SetIncompatible("GoldieSix")
-Core:SetIncompatible("GoldpawUI")
-Core:SetIncompatible("KkthnxUI")
-Core:SetIncompatible("Tukui")
-Core:SetIncompatible("ElvUI")
+-- Make sure that duplicate UIs aren't loaded
+Core:SetIncompatible(Core:GetInterfaceList())
 
 -- Lua API
 local _G = _G
@@ -112,15 +106,6 @@ local fixMinimap = function()
 		end 
 	end 
 end
-
-Core.SwitchTo = function(self, editBox, ...)
-	local addon = ...
-	if (addon and (addon ~= "") and self.EasySwitch.Cmd[addon]) then
-		DisableAddOn(ADDON, true)
-		EnableAddOn(self.EasySwitch.Cmd[addon], true)
-		ReloadUI()
-	end  
-end 
 
 Core.IsModeEnabled = function(self, modeName)
 	-- Not actually called by the menu, since we're not
@@ -392,28 +377,6 @@ Core.OnEnable = function(self)
 	-- Experimental stuff we move to relevant modules once done
 	------------------------------------------------------------------------------------
 	self:ApplyExperimentalFeatures()
-
-	-- Add chat command to fast switch to other UIs 
-	------------------------------------------------------------------------------------
-	if self.layout.UseEasySwitch then 
-		local counter = 0
-		local easySwitch = { Addons = {}, Cmd = {} }
-		for addon,list in pairs(self.layout.EasySwitch) do 
-			if self:IsAddOnAvailable(addon) then 
-				counter = counter + 1
-				easySwitch.Addons[addon] = list
-
-				for cmd in pairs(list) do 
-					easySwitch.Cmd[cmd] = addon
-				end 
-			end 
-		end 
-		if (counter > 0) then 
-			self:RegisterChatCommand("goto", "SwitchTo")
-			self:RegisterChatCommand("go", "SwitchTo")
-			self.EasySwitch = easySwitch
-		end 
-	end 
 
 	-- Apply startup smoothness and sweetness
 	------------------------------------------------------------------------------------

@@ -775,12 +775,6 @@ local Core = {
 		{ ID = 5, Name = "InterfaceOptionsActionBarsPanel" },
 		--{ ID = 10, Name = "CompactUnitFrameProfiles" }
 	},
-	UseEasySwitch = true, 
-		EasySwitch = {
-			["GoldieSix"] = { goldpawui = true, goldpaw = true, goldui = true, gui5 = true, gui = true },
-			["DiabolicUI"] = { diabolicui2 = true, diabolicui = true, diabolic = true, diabloui = true, dui2 = true, dui = true }
-		},
-		
 	UseMenu = true, 
 		MenuPlace = { "BOTTOMRIGHT", -41, 32 },
 		MenuSize = { 320 -10, 70 }, 
