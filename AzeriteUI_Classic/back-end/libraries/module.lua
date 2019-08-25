@@ -1,4 +1,4 @@
-local LibModule = CogWheel:Set("LibModule", 32)
+local LibModule = CogWheel:Set("LibModule", 35)
 if (not LibModule) then	
 	return
 end
@@ -199,7 +199,18 @@ end
 -------------------------------------------------------------
 local ModuleProtoType = {
 	Init = function(self, ...)
-		if (self:IsIncompatible() or self:DependencyFailed()) then
+		local isIncompatible, conflictingAddon = self:IsIncompatible()
+		if (isIncompatible) then 
+			if (self:IsTopLevel()) then 
+				local ourAddon = self:GetAddon()
+				if (ourAddon) and (conflictLists[ourAddon] ~= conflictingAddon) then
+					conflictLists[conflictingAddon] = ourAddon
+					local ourName = GetAddOnMetadata(ourAddon, "Title") or ourAddon
+					local conflictingAddonName = GetAddOnMetadata(conflictingAddon, "Title") or conflictingAddon
+					print(("|cffcc0000Cannot have both |r|cff888888'|r%s|cff888888'|r|cffcc0000 and |r|cff888888'|r%s|cff888888'|r|cffcc0000 enabled!"):format(ourName, conflictingAddonName))
+				end 
+			end 
+		elseif (self:DependencyFailed()) then
 			return
 		end
 
@@ -293,14 +304,18 @@ local ModuleProtoType = {
 		if (not addonIncompatibilities[self]) then
 			return false
 		end
+		local thisAddon = moduleAddon[self]
 		for addonName, condition in pairs(addonIncompatibilities[self]) do
-			if (type(condition) == "function") then
-				if LibModule:IsAddOnEnabled(addonName) then
-					return condition(self)
-				end
-			else
-				if LibModule:IsAddOnEnabled(addonName) then
-					return true
+			-- Don't fire as incompatible if self is on the list
+			if (addonName ~= thisAddon) then
+				if (type(condition) == "function") then
+					if LibModule:IsAddOnEnabled(addonName) then
+						return condition(self)
+					end
+				else
+					if LibModule:IsAddOnEnabled(addonName) then
+						return true
+					end
 				end
 			end
 		end
@@ -332,13 +347,13 @@ local ModuleProtoType = {
 		if (not addonIncompatibilities[self]) then
 			addonIncompatibilities[self] = {}
 		end
+		local thisAddon = moduleAddon[self]
 		local numArgs = select("#", ...)
 		local currentArg = 1
 
 		while currentArg <= numArgs do
 			local addonName = select(currentArg, ...)
 			check(addonName, currentArg, "string")
-
 			local condition
 			if (numArgs > currentArg) then
 				local nextArg = select(currentArg + 1, ...)
@@ -348,7 +363,10 @@ local ModuleProtoType = {
 				end
 			end
 			currentArg = currentArg + 1
-			addonIncompatibilities[self][addonName] = condition and condition or true
+			-- Don't add self to the list
+			if (thisAddon ~= addonName) then 
+				addonIncompatibilities[self][addonName] = condition and condition or true
+			end
 		end
 	end,
 
@@ -647,14 +665,11 @@ LibModule.NewModule = function(self, name, ...)
 end
 
 -- Retrieve a previously registered module
-LibModule.GetModule = function(self, name, silentFail)
+LibModule.GetModule = function(self, name)
 	check(name, 1, "string")
 	check(silentFail, 2, "boolean", "nil")
 	if self.modules[name] then
 		return self.modules[name]
-	end
-	if (not silentFail) then
-		return error(("Bad argument #%.0f to '%s': No module named '%s' exist!"):format(1, "Get", name))
 	end
 end
 
@@ -731,6 +746,17 @@ LibModule.IsAddOnEnabled = function(self, target)
 			if enabled then
 				return true
 			end
+		end
+	end
+end
+
+-- Check if an addon exists	in the addon listing
+LibModule.IsAddOnAvailable = function(self, target)
+	local target = string_lower(target)
+	for i = 1,GetNumAddOns() do
+		local name, title, notes, enabled, loadable, reason, security = _GetAddOnInfo(i)
+		if string_lower(name) == target then
+			return true
 		end
 	end
 end
