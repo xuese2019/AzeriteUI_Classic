@@ -3236,7 +3236,7 @@ local UnitFrameTarget = {
 -- Target of Target
 local UnitFrameToT = setmetatable({
 	Place = { "RIGHT", "UICenter", "TOPRIGHT", -492, -96 + 6 }, -- adding 4 pixels up to avoid it covering the targetframe health percentage / cast time values
-
+	 
 	UseName = true, 
 		NamePlace = { "BOTTOMRIGHT", -(Constant.SmallFrame[1] - Constant.SmallBar[1])/2, Constant.SmallFrame[2] - Constant.SmallBar[2] + 16 - 4 }, 
 		NameDrawLayer = { "OVERLAY", 1 },

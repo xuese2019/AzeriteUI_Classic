@@ -575,7 +575,7 @@ local Enable = function(self)
 		-- Events don't fire for nameplate units in Classic, 
 		-- so we're disabling for now. Will add combatlog system later. 
 		local unit = self.unit
-		if (string_find(unit, "nameplate")) then 
+		if (string_find(unit, "nameplate")) or (string_find(unit, "target")) then 
 			element:Hide()
 			return 
 		end 
@@ -618,5 +618,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (CogWheel("LibUnitFrame", true)), (CogWheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 28)
+	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 29)
 end 
