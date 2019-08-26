@@ -2145,48 +2145,44 @@ local UnitFramePlayer = {
 			WinterVeilManaColor = { 1, 1, 1 }, 
 			--WinterVeilManaColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
 
-	UseAuras = true,
-		AuraSize = 40, -- aurasize
-		AuraSpaceH = 6, -- horizontal spacing between auras
-		AuraSpaceV = 6, -- vertical spacing between auras
-		AuraMax = 8, -- max number of auras
-		AuraMaxBuffs = nil, -- max number of buffs
-		AuraMaxDebuffs = 3, -- max number of debuffs
-		AuraDebuffsFirst = true, -- display debuffs before buffs
-		AuraGrowthX = "RIGHT", -- horizontal growth of auras
-		AuraGrowthY = "UP", -- vertical growth of auras
-		AuraFilter = nil, -- general aura filter, only used if the below aren't here
-		AuraBuffFilter = "HELPFUL", -- buff specific filter passed to blizzard API calls
-		AuraDebuffFilter = "HARMFUL", -- debuff specific filter passed to blizzard API calls
-		AuraFilterFunc = nil, -- general aura filter function, called when the below aren't there
-		BuffFilterFunc = GetAuraFilterFunc("player"), -- buff specific filter function
-		DebuffFilterFunc = GetAuraFilterFunc("player"), -- debuff specific filter function
-		--BuffFilterFunc = function() return true end, -- buff specific filter function
-		--DebuffFilterFunc = function() return true end, -- debuff specific filter function
-		AuraFrameSize = { 40*8 + 6*7, 40 },
-		AuraFramePlace = { "BOTTOMLEFT", 27 + 10, 27 + 24 + 40 },
-		AuraTooltipDefaultPosition = nil,
-		AuraTooltipPoint = "BOTTOMLEFT",
-		AuraTooltipAnchor = nil,
-		AuraTooltipRelPoint = "TOPLEFT",
-		AuraTooltipOffsetX = 8,
-		AuraTooltipOffsetY = 16,
-		ShowAuraCooldownSpirals = false, -- show cooldown spirals on auras
-		ShowAuraCooldownTime = true, -- show time text on auras
-		AuraIconPlace = { "CENTER", 0, 0 },
-		AuraIconSize = { 40 - 6, 40 - 6 },
-		AuraIconTexCoord = { 5/64, 59/64, 5/64, 59/64 }, -- aura icon tex coords
-		AuraCountPlace = { "BOTTOMRIGHT", 9, -6 },
-		AuraCountFont = GetFont(14, true),
-		AuraCountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
-		AuraTimePlace = { "TOPLEFT", -6, 6 }, -- { "CENTER", 0, 0 },
-		AuraTimeFont = GetFont(14, true),
-		AuraBorderFramePlace = { "CENTER", 0, 0 }, 
-		AuraBorderFrameSize = { 40 + 14, 40 + 14 },
-		AuraBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 16 },
-		AuraBorderBackdropColor = { 0, 0, 0, 0 },
-		AuraBorderBackdropBorderColor = { Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3 },
-
+		UseAuras = true,
+			AuraProperties = {
+				growthX = "RIGHT", 
+				growthY = "UP", 
+				spacingH = 6, 
+				spacingV = 6, 
+				auraSize = 40, auraWidth = nil, auraHeight = nil, 
+				maxVisible = 8, maxBuffs = nil, maxDebuffs = 3, 
+				filter = nil, filterBuffs = "HELPFUL", filterDebuffs = "HARMFUL", 
+				func = nil, funcBuffs = GetAuraFilterFunc("player"), funcDebuffs = GetAuraFilterFunc("player"), 
+				debuffsFirst = true, 
+				disableMouse = false, 
+				showSpirals = false, 
+				showDurations = true, 
+				showLongDurations = false,
+				tooltipDefaultPosition = false, 
+				tooltipPoint = "BOTTOMLEFT",
+				tooltipAnchor = nil,
+				tooltipRelPoint = "TOPLEFT",
+				tooltipOffsetX = 8,
+				tooltipOffsetY = 16
+			},
+			AuraFrameSize = { 40*8 + 6*7, 40 },
+			AuraFramePlace = { "BOTTOMLEFT", 27 + 10, 27 + 24 + 40 },
+			AuraIconPlace = { "CENTER", 0, 0 },
+			AuraIconSize = { 40 - 6, 40 - 6 },
+			AuraIconTexCoord = { 5/64, 59/64, 5/64, 59/64 }, -- aura icon tex coords
+			AuraCountPlace = { "BOTTOMRIGHT", 9, -6 },
+			AuraCountFont = GetFont(14, true),
+			AuraCountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
+			AuraTimePlace = { "TOPLEFT", -6, 6 }, -- { "CENTER", 0, 0 },
+			AuraTimeFont = GetFont(14, true),
+			AuraBorderFramePlace = { "CENTER", 0, 0 }, 
+			AuraBorderFrameSize = { 40 + 14, 40 + 14 },
+			AuraBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 16 },
+			AuraBorderBackdropColor = { 0, 0, 0, 0 },
+			AuraBorderBackdropBorderColor = { Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3 },
+	
 	UseProgressiveFrames = true,
 		UseProgressiveManaForeground = true, 
 
@@ -2973,46 +2969,44 @@ local UnitFrameTarget = {
 			CastBarValueFont = GetFont(18, true),
 			CastBarValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
 
-	UseAuras = true,
-		AuraSize = 40, -- aurasize
-		AuraSpaceH = 6, -- horizontal spacing between auras
-		AuraSpaceV = 6, -- vertical spacing between auras
-		AuraMax = 7, -- max number of auras
-		AuraMaxBuffs = 3, -- max number of buffs
-		AuraMaxDebuffs = nil, -- max number of debuffs
-		AuraDebuffsFirst = true, -- display debuffs before buffs
-		AuraGrowthX = "LEFT", -- horizontal growth of auras
-		AuraGrowthY = "DOWN", -- vertical growth of auras
-		AuraFilter = nil, -- general aura filter, only used if the below aren't here
-		AuraBuffFilter = "HELPFUL", -- buff specific filter passed to blizzard API calls
-		AuraDebuffFilter = "HARMFUL", -- debuff specific filter passed to blizzard API calls
-		AuraFilterFunc = nil, -- general aura filter function, called when the below aren't there
-		BuffFilterFunc = GetAuraFilterFunc("target"), -- buff specific filter function
-		DebuffFilterFunc = GetAuraFilterFunc("target"), -- debuff specific filter function
-		AuraFrameSize = { 40*7 + 6*(7 -1), 40 },
-		AuraFramePlace = { "TOPRIGHT", -(27 + 10), -(27 + 40 + 20) },
-		AuraTooltipDefaultPosition = nil,
-		AuraTooltipPoint = "TOPRIGHT",
-		AuraTooltipAnchor = nil,
-		AuraTooltipRelPoint = "BOTTOMRIGHT",
-		AuraTooltipOffsetX = -8,
-		AuraTooltipOffsetY = -16,
-		ShowAuraCooldownSpirals = false, -- show cooldown spirals on auras
-		ShowAuraCooldownTime = true, -- show time text on auras
-		AuraIconPlace = { "CENTER", 0, 0 },
-		AuraIconSize = { 40 - 6, 40 - 6 },
-		AuraIconTexCoord = { 5/64, 59/64, 5/64, 59/64 }, -- aura icon tex coords
-		AuraCountPlace = { "BOTTOMRIGHT", 9, -6 },
-		AuraCountFont = GetFont(14, true),
-		AuraCountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
-		AuraTimePlace = { "TOPLEFT", -6, 6 }, -- { "CENTER", 0, 0 },
-		AuraTimeFont = GetFont(14, true),
-		AuraBorderFramePlace = { "CENTER", 0, 0 }, 
-		AuraBorderFrameSize = { 40 + 14, 40 + 14 },
-		AuraBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 16 },
-		AuraBorderBackdropColor = { 0, 0, 0, 0 },
-		AuraBorderBackdropBorderColor = { Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3 }, 
-
+		UseAuras = true,
+			AuraProperties = {
+				growthX = "LEFT", 
+				growthY = "DOWN", 
+				spacingH = 6, 
+				spacingV = 6, 
+				auraSize = 40, auraWidth = nil, auraHeight = nil, 
+				maxVisible = 7, maxBuffs = 3, maxDebuffs = nil, 
+				filter = nil, filterBuffs = "HELPFUL", filterDebuffs = "HARMFUL", 
+				func = nil, funcBuffs = GetAuraFilterFunc("target"), funcDebuffs = GetAuraFilterFunc("target"), 
+				debuffsFirst = true, 
+				disableMouse = false, 
+				showSpirals = false, 
+				showDurations = true, 
+				showLongDurations = false,
+				tooltipDefaultPosition = false, 
+				tooltipPoint = "TOPRIGHT",
+				tooltipAnchor = nil,
+				tooltipRelPoint = "BOTTOMRIGHT",
+				tooltipOffsetX = -8,
+				tooltipOffsetY = -16
+			},
+			AuraFrameSize = { 40*7 + 6*(7 -1), 40 },
+			AuraFramePlace = { "TOPRIGHT", -(27 + 10), -(27 + 40 + 20) },
+			AuraIconPlace = { "CENTER", 0, 0 },
+			AuraIconSize = { 40 - 6, 40 - 6 },
+			AuraIconTexCoord = { 5/64, 59/64, 5/64, 59/64 }, -- aura icon tex coords
+			AuraCountPlace = { "BOTTOMRIGHT", 9, -6 },
+			AuraCountFont = GetFont(14, true),
+			AuraCountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
+			AuraTimePlace = { "TOPLEFT", -6, 6 }, -- { "CENTER", 0, 0 },
+			AuraTimeFont = GetFont(14, true),
+			AuraBorderFramePlace = { "CENTER", 0, 0 }, 
+			AuraBorderFrameSize = { 40 + 14, 40 + 14 },
+			AuraBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 16 },
+			AuraBorderBackdropColor = { 0, 0, 0, 0 },
+			AuraBorderBackdropBorderColor = { Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3 }, 
+	
 	UseName = true, 
 		NamePlace = { "TOPRIGHT", -40, 18 },
 		NameSize = { 250, 18 },

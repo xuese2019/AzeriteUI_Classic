@@ -332,6 +332,11 @@ end
 
 auraFilters.player = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
 
+	-- redoing for classic
+	do 
+		return true
+	end 
+
 	-- Retrieve filter flags
 	local infoFlags = auraInfoFlags[spellID]
 	local userFlags = auraUserFlags[spellID]
@@ -378,6 +383,11 @@ end
 
 auraFilters.target = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
 
+	-- redoing for classic
+	do 
+		return UnitCanAttack("player", unit) and (not isBuff) or isBuff
+	end 
+	
 	-- Retrieve filter flags
 	local infoFlags = auraInfoFlags[spellID]
 	local userFlags = auraUserFlags[spellID]
