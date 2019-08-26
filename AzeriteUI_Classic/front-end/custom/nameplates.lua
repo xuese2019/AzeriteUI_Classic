@@ -187,7 +187,7 @@ end
 -- Called when certain bindable blizzard settings change, 
 -- or when the VARIABLES_LOADED event fires. 
 Module.PostUpdateNamePlateOptions = function(self, isInInstace)
-	local Layout = self.layout
+	local layout = self.layout
 
 	-- Make an extra call to the preupdate
 	self:PreUpdateNamePlateOptions()
@@ -201,9 +201,9 @@ Module.PostUpdateNamePlateOptions = function(self, isInInstace)
 	-- Setting the base size involves changing the size of secure unit buttons, 
 	-- but since we're using our out of combat wrapper, we should be safe.
 	-- Default size 110, 45
-	C_NamePlate.SetNamePlateFriendlySize(unpack(Layout.Size))
-	C_NamePlate.SetNamePlateEnemySize(unpack(Layout.Size))
-	C_NamePlate.SetNamePlateSelfSize(unpack(Layout.Size))
+	C_NamePlate.SetNamePlateFriendlySize(unpack(layout.Size))
+	C_NamePlate.SetNamePlateEnemySize(unpack(layout.Size))
+	C_NamePlate.SetNamePlateSelfSize(unpack(layout.Size))
 
 	--NamePlateDriverFrame.UpdateNamePlateOptions = function() end
 end
