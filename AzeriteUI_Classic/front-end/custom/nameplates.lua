@@ -236,7 +236,7 @@ Module.PostCreateNamePlate = function(self, plate, baseFrame)
 		health.colorCivilian = Layout.HealthColorCivilian
 		health.colorReaction = Layout.HealthColorReaction
 		health.colorHealth = Layout.HealthColorHealth -- color anything else in the default health color
-		health.colorPlayer = layout.HealthColorPlayer
+		health.colorPlayer = Layout.HealthColorPlayer
 		health.frequent = Layout.HealthFrequent
 		plate.Health = health
 
