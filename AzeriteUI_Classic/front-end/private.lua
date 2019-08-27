@@ -402,12 +402,16 @@ auraFilters.target = function(element, isBuff, unit, isOwnedByPlayer, name, icon
 		timeLeft = expirationTime - GetTime()
 	end
 
+	-- For some reason this happened
+	if not unit or not UnitExists(unit) then 
+		return 
+	end 
+	
 	if InCombatLockdown() then 
 		if (isBuff and (timeLeft > 300)) then 
 			return 
 		else
 			return UnitCanAttack("player", unit) and (not isBuff) or isBuff
-			--return true
 		end
 	else 
 		return true
