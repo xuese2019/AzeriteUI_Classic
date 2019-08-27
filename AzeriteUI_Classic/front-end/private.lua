@@ -339,7 +339,7 @@ auraFilters.player = function(element, isBuff, unit, isOwnedByPlayer, name, icon
 	end
 
 	if InCombatLockdown() then 
-		if (isBuff and (timeLeft > 300)) then 
+		if (isBuff and (timeLeft and (timeLeft > 300))) then 
 			return 
 		else
 			return true
@@ -403,12 +403,12 @@ auraFilters.target = function(element, isBuff, unit, isOwnedByPlayer, name, icon
 	end
 
 	-- For some reason this happened
-	if not unit or not UnitExists(unit) then 
+	if ((not unit) or (not UnitExists(unit))) then 
 		return 
 	end 
 	
 	if InCombatLockdown() then 
-		if (isBuff and (timeLeft > 300)) then 
+		if (isBuff and (timeLeft and (timeLeft > 300))) then 
 			return 
 		else
 			return UnitCanAttack("player", unit) and (not isBuff) or isBuff
@@ -499,7 +499,7 @@ auraFilters.nameplate = function(element, isBuff, unit, isOwnedByPlayer, name, i
 		timeLeft = expirationTime - GetTime()
 	end
 
-	if (isBuff and (timeLeft > 300)) or (not isOwnedByPlayer) then 
+	if (isBuff and (timeLeft and (timeLeft > 300))) or (not isOwnedByPlayer) then 
 		return 
 	else
 		return UnitCanAttack("player", unit) and (not isBuff) or isBuff
