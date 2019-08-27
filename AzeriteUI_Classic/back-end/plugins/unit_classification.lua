@@ -41,6 +41,10 @@ local Update = function(self, event, unit)
 		element:PreUpdate(unit)
 	end
 
+	if element.hideInCombat and UnitAffectingCombat("player") then
+		return element:Hide()
+	end
+
 	-- classification to be used in post updates
 	local classification
 
@@ -128,7 +132,9 @@ local Enable = function(self)
 		self:RegisterEvent("UNIT_CLASSIFICATION_CHANGED", Proxy)
 		self:RegisterEvent("UNIT_FACTION", Proxy)
 		self:RegisterEvent("ZONE_CHANGED_NEW_AREA", Proxy, true)
-		
+		self:RegisterEvent("PLAYER_REGEN_ENABLED", Proxy, true)
+		self:RegisterEvent("PLAYER_REGEN_DISABLED", Proxy, true)
+
 		return true 
 	end
 end 
@@ -141,10 +147,12 @@ local Disable = function(self)
 		self:UnregisterEvent("UNIT_CLASSIFICATION_CHANGED", Proxy)
 		self:UnregisterEvent("UNIT_FACTION", Proxy)
 		self:UnregisterEvent("ZONE_CHANGED_NEW_AREA", Proxy)
+		self:UnregisterEvent("PLAYER_REGEN_ENABLED", Proxy)
+		self:UnregisterEvent("PLAYER_REGEN_DISABLED", Proxy)
 	end
 end 
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (CogWheel("LibUnitFrame", true)), (CogWheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Classification", Enable, Disable, Proxy, 4)
+	Lib:RegisterElement("Classification", Enable, Disable, Proxy, 5)
 end 

@@ -2656,6 +2656,29 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, Layout, ...)
 		end
 	end 
 
+	-- Unit Classification (PvP Status)
+	if Layout.UseClassificationIndicator then 
+
+		local classification = overlay:CreateFrame("Frame")
+		classification:SetPoint(unpack(Layout.ClassificationPlace))
+		classification:SetSize(unpack(Layout.ClassificationSize))
+		self.Classification = classification
+
+		local alliance = classification:CreateTexture()
+		alliance:SetPoint("CENTER", 0, 0)
+		alliance:SetSize(unpack(Layout.ClassificationSize))
+		alliance:SetTexture(Layout.ClassificationIndicatorAllianceTexture)
+		alliance:SetVertexColor(unpack(Layout.ClassificationColor))
+		self.Classification.Alliance = alliance
+
+		local horde = classification:CreateTexture()
+		horde:SetPoint("CENTER", 0, 0)
+		horde:SetSize(unpack(Layout.ClassificationSize))
+		horde:SetTexture(Layout.ClassificationIndicatorHordeTexture)
+		horde:SetVertexColor(unpack(Layout.ClassificationColor))
+		self.Classification.Horde = horde
+	end
+
 	-- Auras
 	-----------------------------------------------------------
 	if Layout.UseAuras then 

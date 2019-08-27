@@ -2102,6 +2102,14 @@ local UnitFramePlayer = {
 			LoveCombatIndicatorDrawLayer = {"OVERLAY", -2 },
 			LoveCombatIndicatorColor = { Colors.ui.stone[1] *.75, Colors.ui.stone[2] *.75, Colors.ui.stone[3] *.75 }, 
 		
+
+	UseClassificationIndicator = true, 
+		ClassificationPlace ={ "BOTTOMLEFT", -(41 + 80/2), (22 - 80/2) },
+		ClassificationSize = { 84, 84 },
+		ClassificationColor = { 1, 1, 1 },
+		ClassificationIndicatorAllianceTexture = GetMedia("icon_badges_alliance"),
+		ClassificationIndicatorHordeTexture = GetMedia("icon_badges_horde"),
+		
 	UseMana = true, 
 		ManaType = "Orb",
 		ManaExclusiveResource = "MANA", 
