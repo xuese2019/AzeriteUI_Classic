@@ -1,4 +1,4 @@
-local LibBlizzard = CogWheel:Set("LibBlizzard", 27)
+local LibBlizzard = CogWheel:Set("LibBlizzard", 28)
 if (not LibBlizzard) then 
 	return
 end
@@ -16,6 +16,7 @@ local debugstack = debugstack
 local error = error
 local pairs = pairs
 local select = select
+local string_format = string.format
 local string_join = string.join
 local string_match = string.match
 local type = type
@@ -136,96 +137,99 @@ local killUnitFrame = function(baseName, keepParent)
 end
 
 UIWidgets["ActionBars"] = function(self)
-	UIWidgets["ActionBarsMainBar"](self)
-	UIWidgets["ActionBarsBagBarAnims"](self)
-end 
 
-UIWidgets["ActionBarsMainBar"] = function(self)
+	for _,object in pairs({
+		"MainMenuBarVehicleLeaveButton",
+		"PetActionBarFrame",
+		"StanceBarFrame",
+		"TutorialFrameAlertButton1",
+		"TutorialFrameAlertButton2",
+		"TutorialFrameAlertButton3",
+		"TutorialFrameAlertButton4",
+		"TutorialFrameAlertButton5",
+		"TutorialFrameAlertButton6",
+		"TutorialFrameAlertButton7",
+		"TutorialFrameAlertButton8",
+		"TutorialFrameAlertButton9",
+		"TutorialFrameAlertButton10",
+	}) do 
+		if (_G[object]) then 
+			_G[object]:UnregisterAllEvents()
+		else 
+			print(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
+		end
+	end 
+	for _,object in pairs({
+		"FramerateLabel",
+		"FramerateText",
+		"MainMenuBarArtFrame",
+		"MainMenuBarVehicleLeaveButton",
+		"MultiBarBottomLeft",
+		"MultiBarBottomRight",
+		"MultiBarLeft",
+		"MultiBarRight",
+		"PetActionBarFrame",
+		"StanceBarFrame",
+		"StreamingIcon"
+	}) do 
+		if (_G[object]) then 
+			_G[object]:SetParent(UIHider)
+		else 
+			print(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
+		end
+	end 
+	for _,object in pairs({
+		"MainMenuBarArtFrame",
+		"PetActionBarFrame",
+		"StanceBarFrame"
+	}) do 
+		if (_G[object]) then 
+			_G[object]:Hide()
+		else 
+			print(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
+		end
+	end 
+	for _,object in pairs({
+		"ActionButton", 
+		"MultiBarBottomLeftButton", 
+		"MultiBarBottomRightButton", 
+		"MultiBarRightButton",
+		"MultiBarLeftButton"
+	}) do 
+		for i = 1,NUM_ACTIONBAR_BUTTONS do
+			local button = _G[object..i]
+			button:Hide()
+			button:UnregisterAllEvents()
+			button:SetAttribute("statehidden", true)
+		end
+	end 
+	if PlayerTalentFrame then
+		PlayerTalentFrame:UnregisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
+	elseif TalentFrame_LoadUI then
+		hooksecurefunc("TalentFrame_LoadUI", function() PlayerTalentFrame:UnregisterEvent("ACTIVE_TALENT_GROUP_CHANGED") end)
+	end
+
 	MainMenuBar:EnableMouse(false)
+	MainMenuBar:SetAlpha(0)
 	MainMenuBar:UnregisterEvent("DISPLAY_SIZE_CHANGED")
 	MainMenuBar:UnregisterEvent("UI_SCALE_CHANGED")
 	MainMenuBar.slideOut:GetAnimations():SetOffset(0,0)
 
-	MainMenuBarArtFrame:Hide()
-	MainMenuBarArtFrame:SetParent(UIHider)
-	MainMenuExpBar:SetParent(UIHider)
-	MainMenuBarOverlayFrame:SetParent(UIHider)
-	MainMenuBarPerformanceBarFrame:SetParent(UIHider)
-	MultiBarBottomLeft:SetParent(UIHider)
-	MultiBarBottomRight:SetParent(UIHider)
-	MultiBarLeft:SetParent(UIHider)
-	MultiBarRight:SetParent(UIHider)
-	StreamingIcon:SetParent(UIHider)
-	FramerateLabel:SetParent(UIHider)
-	FramerateText:SetParent(UIHider)
-	
-	for i = 1,NUM_ACTIONBAR_BUTTONS do
-		local ActionButton = _G["ActionButton" .. i]
-		ActionButton:Hide()
-		ActionButton:UnregisterAllEvents()
-		ActionButton:SetAttribute("statehidden", true)
-
-		local MultiBarBottomLeftButton = _G["MultiBarBottomLeftButton" .. i]
-		MultiBarBottomLeftButton:Hide()
-		MultiBarBottomLeftButton:UnregisterAllEvents()
-		MultiBarBottomLeftButton:SetAttribute("statehidden", true)
-
-		local MultiBarBottomRightButton = _G["MultiBarBottomRightButton" .. i]
-		MultiBarBottomRightButton:Hide()
-		MultiBarBottomRightButton:UnregisterAllEvents()
-		MultiBarBottomRightButton:SetAttribute("statehidden", true)
-
-		local MultiBarRightButton = _G["MultiBarRightButton" .. i]
-		MultiBarRightButton:Hide()
-		MultiBarRightButton:UnregisterAllEvents()
-		MultiBarRightButton:SetAttribute("statehidden", true)
-
-		local MultiBarLeftButton = _G["MultiBarLeftButton" .. i]
-		MultiBarLeftButton:Hide()
-		MultiBarLeftButton:UnregisterAllEvents()
-		MultiBarLeftButton:SetAttribute("statehidden", true)
+	-- Gets rid of the loot anims
+	MainMenuBarBackpackButton:UnregisterEvent("ITEM_PUSH") 
+	for slot = 0,3 do
+		_G["CharacterBag"..slot.."Slot"]:UnregisterEvent("ITEM_PUSH") 
 	end
-	
+
 	UIPARENT_MANAGED_FRAME_POSITIONS["MainMenuBar"] = nil
 	UIPARENT_MANAGED_FRAME_POSITIONS["StanceBarFrame"] = nil
-	UIPARENT_MANAGED_FRAME_POSITIONS["PossessBarFrame"] = nil
 	UIPARENT_MANAGED_FRAME_POSITIONS["PETACTIONBAR_YPOS"] = nil
-
-	StanceBarFrame:UnregisterAllEvents()
-	StanceBarFrame:Hide()
-	StanceBarFrame:SetParent(UIHider)
-
-	PetActionBarFrame:UnregisterAllEvents()
-	PetActionBarFrame:Hide()
-	PetActionBarFrame:SetParent(UIHider)
-
-	-- Still used to exit flights early, regardles of its name. 
-	MainMenuBarVehicleLeaveButton:UnregisterAllEvents()
-	MainMenuBarVehicleLeaveButton:SetParent(UIHider)
-
-	--UIPARENT_MANAGED_FRAME_POSITIONS["MultiBarRight"] = nil
-	--UIPARENT_MANAGED_FRAME_POSITIONS["MultiBarLeft"] = nil
-	--UIPARENT_MANAGED_FRAME_POSITIONS["MultiBarBottomLeft"] = nil
-	--UIPARENT_MANAGED_FRAME_POSITIONS["MultiBarBottomRight"] = nil
 	UIPARENT_MANAGED_FRAME_POSITIONS["MultiCastActionBarFrame"] = nil
 	UIPARENT_MANAGED_FRAME_POSITIONS["MULTICASTACTIONBAR_YPOS"] = nil
-	
+
+	--UIWidgets["ActionBarsMainBar"](self)
+	--UIWidgets["ActionBarsBagBarAnims"](self)
 end 
-
-UIWidgets["ActionBarsBagBarAnims"] = function(self)
-	-- Gets rid of the loot anims when items go into the backpack
-	local backpackButton = _G.MainMenuBarBackpackButton
-	backpackButton:UnregisterEvent("ITEM_PUSH") 
-
-	-- Gets rid of the loot anims when items go into the bags
-	for slot = 0,3 do
-		local bagSlot = _G["CharacterBag"..slot.."Slot"]
-		bagSlot:UnregisterEvent("ITEM_PUSH") 
-	end
-
-	-- Hook event removal to any buttons we somehow missed
-	hooksecurefunc("ItemAnim_OnLoad", function(self) self:UnregisterEvent("ITEM_PUSH") end)
-end
 
 UIWidgets["Alerts"] = function(self)
 	local AlertFrame = _G.AlertFrame
