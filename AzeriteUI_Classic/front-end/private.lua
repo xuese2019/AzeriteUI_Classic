@@ -333,18 +333,31 @@ end
 auraFilters.player = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
 
 	-- redoing for classic
-	do 
+	local timeLeft 
+	if (expirationTime and expirationTime > 0) then 
+		timeLeft = expirationTime - GetTime()
+	end
+
+	if InCombatLockdown() then 
+		if (isBuff and (timeLeft > 300)) then 
+			return 
+		else
+			return true
+		end
+	else 
 		return true
+	end 
+
+	-- Cut off the rest, 
+	-- just don't delete yet, 
+	-- I need it for reference!
+	do 
+		return
 	end 
 
 	-- Retrieve filter flags
 	local infoFlags = auraInfoFlags[spellID]
 	local userFlags = auraUserFlags[spellID]
-
-	local timeLeft 
-	if (expirationTime and expirationTime > 0) then 
-		timeLeft = expirationTime - GetTime()
-	end
 
 	if (isBossDebuff or isBossDebuff or (userFlags and (bit_band(userFlags, PrioBoss) ~= 0)) or (unitCaster == "vehicle")) then
 		return true
@@ -384,8 +397,27 @@ end
 auraFilters.target = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
 
 	-- redoing for classic
+	local timeLeft 
+	if (expirationTime and expirationTime > 0) then 
+		timeLeft = expirationTime - GetTime()
+	end
+
+	if InCombatLockdown() then 
+		if (isBuff and (timeLeft > 300)) then 
+			return 
+		else
+			return UnitCanAttack("player", unit) and (not isBuff) or isBuff
+			--return true
+		end
+	else 
+		return true
+	end 
+
+	-- Cut off the rest, 
+	-- just don't delete yet, 
+	-- I need it for reference!
 	do 
-		return UnitCanAttack("player", unit) and (not isBuff) or isBuff
+		return
 	end 
 	
 	-- Retrieve filter flags
@@ -456,10 +488,25 @@ end
 
 auraFilters.nameplate = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
 
+
+	-- redoing for classic
 	local timeLeft 
 	if (expirationTime and expirationTime > 0) then 
 		timeLeft = expirationTime - GetTime()
 	end
+
+	if (isBuff and (timeLeft > 300)) or (not isOwnedByPlayer) then 
+		return 
+	else
+		return UnitCanAttack("player", unit) and (not isBuff) or isBuff
+	end 
+
+	-- Cut off the rest, 
+	-- just don't delete yet, 
+	-- I need it for reference!
+	do 
+		return
+	end 
 
 	local infoFlags = auraInfoFlags[spellID]
 	local userFlags = auraUserFlags[spellID]
@@ -474,10 +521,6 @@ auraFilters.nameplate = function(element, isBuff, unit, isOwnedByPlayer, name, i
 		end 
 	end 
 end 
-
-auraFilters.focus = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
-	return auraFilters.target(element, button, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
-end
 
 auraFilters.targettarget = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
 	return auraFilters.target(element, button, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
