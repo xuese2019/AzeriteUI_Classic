@@ -1,4 +1,4 @@
-local LibBlizzard = CogWheel:Set("LibBlizzard", 28)
+local LibBlizzard = CogWheel:Set("LibBlizzard", 29)
 if (not LibBlizzard) then 
 	return
 end
@@ -203,11 +203,6 @@ UIWidgets["ActionBars"] = function(self)
 			button:SetAttribute("statehidden", true)
 		end
 	end 
-	if PlayerTalentFrame then
-		PlayerTalentFrame:UnregisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
-	elseif TalentFrame_LoadUI then
-		hooksecurefunc("TalentFrame_LoadUI", function() PlayerTalentFrame:UnregisterEvent("ACTIVE_TALENT_GROUP_CHANGED") end)
-	end
 
 	MainMenuBar:EnableMouse(false)
 	MainMenuBar:SetAlpha(0)
