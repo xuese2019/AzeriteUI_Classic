@@ -280,6 +280,13 @@ Core.ApplyExperimentalFeatures = function(self)
 		end 
 	end
 
+	-- No taint?
+	if WorldMapFrame then 
+		WorldMapFrame.BlackoutFrame:Hide()
+		WorldMapFrame:SetFrameStrata("HIGH")
+		WorldMapFrame:SetIgnoreParentScale(false)
+	end 
+
 end
 
 -- We could add this into the back-end, leaving it here for now, though. 
