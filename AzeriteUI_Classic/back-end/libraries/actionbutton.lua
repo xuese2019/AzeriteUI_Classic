@@ -1,4 +1,4 @@
-local LibSecureButton = CogWheel:Set("LibSecureButton", 60)
+local LibSecureButton = CogWheel:Set("LibSecureButton", 62)
 if (not LibSecureButton) then	
 	return
 end
@@ -737,7 +737,7 @@ ActionButton.UpdateUsable = function(self)
 		self.Icon:SetVertexColor(.4, .4, .4)
 
 	elseif self.outOfRange then
-		self.Icon:SetDesaturated(false)
+		self.Icon:SetDesaturated(true)
 		self.Icon:SetVertexColor(1, .15, .15)
 
 	else
