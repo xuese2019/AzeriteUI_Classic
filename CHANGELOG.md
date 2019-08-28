@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.26-RC] 2019-08-29
+### Added
+- Added a player PvP icon. It is placed where the combat indicator is, and thus hidden while in combat. 
+
+### Changed
+- Made the world map smaller, and stopped it from blocking out the world. We are aware that the overlay to click on zones is slightly misaligned, working on that. 
+- Changed the aura filters to be pretty all inclusive. Will tune it for classic later on. 
+
+### Fixed
+- Fixed the display of Druid cat form combo points. It should now appear. If you're wondering why the points disappear everytime you change target, that's not a bug. That's a classic feature. 
+- Fixed a bug when opening the talent window. 
+- Fixed a lot of small issues and bugs related to auras and castbars. 
+
+### Removed
+- Disabled all castbars on frames other than the player and the pet. We will add a limited tracking system for hostile player casts by tracking combat log events later on. 
+
 ## [1.0.16-RC] 2019-08-12
 ### Changed
 - The quest tracker now looks far more awesome. 
