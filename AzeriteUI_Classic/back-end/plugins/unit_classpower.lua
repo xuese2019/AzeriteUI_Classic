@@ -21,7 +21,8 @@ local UnitPowerDisplayMod = _G.UnitPowerDisplayMod
 local UnitPowerType = _G.UnitPowerType
 
 -- Sourced from BlizzardInterfaceResources/Resources/EnumerationTables.lua
-local SPELL_POWER_COMBO_POINTS = Enum and Enum.PowerType.ComboPoints or SPELL_POWER_COMBO_POINTS or 4 
+local SPELL_POWER_COMBO_POINTS = Enum.PowerType.ComboPoints or 4 
+local SPELL_POWER_ENERGY = Enum.PowerType.Energy or 3
 
 -- Sourced from FrameXML/TargetFrame.lua
 local MAX_COMBO_POINTS = _G.MAX_COMBO_POINTS or 5
@@ -206,7 +207,7 @@ ClassPower.ComboPoints = setmetatable({
 		local element = self.ClassPower
 		if (PLAYERCLASS == "DRUID") then 
 			local powerType = UnitPowerType("player")
-			if (IsPlayerSpell(5221) and (powerType == SPELL_POWER_ENERGY)) then 
+			if (powerType == SPELL_POWER_ENERGY) then 
 				return true
 			end 
 		else 
@@ -249,7 +250,6 @@ ClassPower.ComboPoints = setmetatable({
 		end
 		min = UnitPower("player", element.powerID) or 0
 		max = UnitPowerMax("player", element.powerID) or 0
-
 		if (not element.isEnabled) then 
 			element:Hide()
 			return 
@@ -409,5 +409,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (CogWheel("LibUnitFrame", true)), (CogWheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("ClassPower", Enable, Disable, Proxy, 32)
+	Lib:RegisterElement("ClassPower", Enable, Disable, Proxy, 33)
 end 
