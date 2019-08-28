@@ -499,7 +499,7 @@ auraFilters.nameplate = function(element, isBuff, unit, isOwnedByPlayer, name, i
 		timeLeft = expirationTime - GetTime()
 	end
 
-	if (isBuff and (timeLeft and (timeLeft > 300))) or (not isOwnedByPlayer) then 
+	if (isBuff and (timeLeft and (timeLeft > 300))) or (not isOwnedByPlayer) or (not isCastByPlayer) then 
 		return 
 	else
 		return UnitCanAttack("player", unit) and (not isBuff) or isBuff

@@ -769,6 +769,7 @@ local Core = {
 		--UnitFrameRaid = true,
 		UnitFrameBoss = true,
 		--Warnings = true,
+		WorldMap = true, -- only fixes it
 		ZoneText = true
 	},
 	DisableUIMenuPages = {
@@ -1003,7 +1004,7 @@ local BlizzardFloaterHUD = {
 	Colors = Colors,
 	StyleDurabilityFrame = true, DurabilityFramePlace = { "CENTER", 190, 0 },
 	StyleErrorFrame = true, ErrorFrameStrata = "LOW",
-	StyleQuestTimerFrame = true, QuestTimerFramePlace = { "CENTER", UIParent, "CENTER", 0, 160 }
+	StyleQuestTimerFrame = true, QuestTimerFramePlace = { "CENTER", UIParent, "CENTER", 0, 220 }
 }
 
 -- Blizzard Game Menu (Esc)
@@ -2109,7 +2110,7 @@ local UnitFramePlayer = {
 		ClassificationColor = { 1, 1, 1 },
 		ClassificationIndicatorAllianceTexture = GetMedia("icon_badges_alliance"),
 		ClassificationIndicatorHordeTexture = GetMedia("icon_badges_horde"),
-		
+
 	UseMana = true, 
 		ManaType = "Orb",
 		ManaExclusiveResource = "MANA", 

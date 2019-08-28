@@ -1,4 +1,4 @@
-local LibBlizzard = CogWheel:Set("LibBlizzard", 29)
+local LibBlizzard = CogWheel:Set("LibBlizzard", 31)
 if (not LibBlizzard) then 
 	return
 end
@@ -163,6 +163,8 @@ UIWidgets["ActionBars"] = function(self)
 		"FramerateLabel",
 		"FramerateText",
 		"MainMenuBarArtFrame",
+		"MainMenuBarOverlayFrame",
+		"MainMenuExpBar",
 		"MainMenuBarVehicleLeaveButton",
 		"MultiBarBottomLeft",
 		"MultiBarBottomRight",
@@ -422,6 +424,29 @@ UIWidgets["UnitFrameBoss"] = function(self)
 		killUnitFrame(("Boss%.0fTargetFrame"):format(i))
 	end
 end
+
+UIWidgets["WorldMap"] = function(self)
+	
+	-- This is the real default size too
+	local mapW,mapH = 1024,768 
+	local canvasW,canvasH = mapW - (11 + 11), mapH - (-70-30)
+
+	WorldMapFrame.BlackoutFrame:Hide()
+	WorldMapFrame:SetSize(mapW,mapH)
+	WorldMapFrame:SetFrameStrata("HIGH")
+	WorldMapFrame:SetIgnoreParentScale(false)
+
+	-- contains the actual map. 
+	local Canvas = WorldMapFrame.ScrollContainer
+	--Canvas:SetCanvasSize(canvasW,canvasH)
+
+	--WorldMapFrame.ScrollContainer.Child:SetIgnoreParentScale(false)
+	--WorldMapFrame.ScrollContainer.Child:SetAllPoints()
+	--WorldMapFrame.ScrollContainer.Child:ClearAllPoints()
+	--WorldMapFrame.ScrollContainer.Child:SetPoint("TOPLEFT", WorldMapFrame, "TOPLEFT", 11, -70)
+	--WorldMapFrame.ScrollContainer.Child:SetPoint("BOTTOMRIGHT", WorldMapFrame, "BOTTOMRIGHT", -11, 30)
+end
+UIWidgetDependency["WorldMap"] = "Blizzard_WorldMap"
 
 UIWidgets["ZoneText"] = function(self)
 	local ZoneTextFrame = _G.ZoneTextFrame
