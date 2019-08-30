@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.32-RC] 2019-08-30
+### Fixed
+- Fixed a typo causing an error when summoning pets. 
+
 ## [1.0.31-RC] 2019-08-30
 ### Changed
 - Fixed some aura border coloring inconsistencies, as well as applied debuff type coloring to most auras that have a type. 
