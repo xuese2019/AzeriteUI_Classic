@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.28-RC] 2019-08-30
+### Fixed
+- Player PvP icon should now properly be hidden while engaged in combat, to make room for the combat indicator. 
+
 ## [1.0.27-RC] 2019-08-30
 ### Added
 - Added Pet Happiness as an experimental message to the bottom of the screen. 
