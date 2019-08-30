@@ -324,7 +324,7 @@ Core.ApplyExperimentalFeatures = function(self)
 		end
 
 		if (loyaltyRate and (loyaltyRate > 0)) then 
-			element:SetFormattedText(element.msg, level, rate, damage)
+			element:SetFormattedText(element.msg, level, loyaltyRate, damage)
 		else 
 			element:SetFormattedText(element.msgShort, level, damage)
 		end 
