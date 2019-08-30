@@ -413,7 +413,7 @@ auraFilters.target = function(element, isBuff, unit, isOwnedByPlayer, name, icon
 		else
 			return UnitCanAttack("player", unit) and (not isBuff) or isBuff
 		end
-	else 
+	else
 		return true
 	end 
 

@@ -26,6 +26,12 @@ local LoadAddOn = _G.LoadAddOn
 local ReloadUI = _G.ReloadUI
 local SetActionBarToggles = _G.SetActionBarToggles
 
+-- Private Addon API
+local GetAuraFilterFunc = Private.GetAuraFilterFunc
+local GetFont = Private.GetFont
+local GetMedia = Private.GetMedia
+local Colors = Private.Colors
+
 -- Addon localization
 local L = CogWheel("LibLocale"):GetLocale(ADDON)
 
@@ -279,6 +285,61 @@ Core.ApplyExperimentalFeatures = function(self)
 			self:AddAuraUserFlags(spellID,flags)
 		end 
 	end
+
+	-- Pet Happiness
+	local GetPetHappiness = GetPetHappiness
+	local HasPetUI = HasPetUI
+
+	local happyContainer = CreateFrame("Frame", nil, self:GetFrame("UICenter"))
+	local happy = happyContainer:CreateFontString()
+	happy:SetFontObject(GetFont(12,true))
+	happy:SetPoint("BOTTOM", self:GetFrame("UICenter"), "BOTTOM", 0, 10)
+	happy.msg = "|cffffffff"..HAPPINESS..":|r %s |cff888888(%s)|r |cffffffff- "..STAT_DPS_SHORT..":|r %s"
+	happy.msgShort = "|cffffffff"..HAPPINESS..":|r %s |cffffffff- "..STAT_DPS_SHORT..":|r %s"
+
+	happy.Update = function(element)
+
+		local happiness, damagePercentage, loyaltyRate = GetPetHappiness()
+		local _, hunterPet = HasPetUI()
+		local level, damage
+
+		if (not (happiness or hunterPet)) then
+			return element:Hide()
+		end
+
+		-- Happy
+		if (happiness == 3) then
+			level = "|cff20c000" .. PET_HAPPINESS3 .. "|r"
+			damage = "|cff20c000" .. damagePercentage .. "|r"
+
+		-- Content
+		elseif (happiness == 2) then
+			level = "|cfffe8a0e" .. PET_HAPPINESS2 .. "|r"
+			damage = "|cfffe8a0e" .. damagePercentage "|r"
+
+		-- Unhappy
+		else
+			level = "|cffff0303" .. PET_HAPPINESS1 .. "|r"
+			damage = "|cffff0303" .. damagePercentage .. "|r"
+		end
+
+		if (loyaltyRate and (loyaltyRate > 0)) then 
+			element:SetFormattedText(element.msg, level, rate, damage)
+		else 
+			element:SetFormattedText(element.msgShort, level, damage)
+		end 
+
+		element:Show()
+	end
+
+	happyContainer:SetScript("OnEvent", function(self, event, ...) 
+		happy:Update()
+	end)
+
+	happyContainer:RegisterEvent("PLAYER_ENTERING_WORLD")
+	happyContainer:RegisterEvent("PET_UI_UPDATE")
+	happyContainer:RegisterEvent("UNIT_HAPPINESS")
+	happyContainer:RegisterUnitEvent("UNIT_PET", "player")
 
 end
 
