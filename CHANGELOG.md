@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.29-RC] 2019-08-30
+### Added
+- Added a fix for players that suffered from AzeriteUI not loading because they mistakingly has TukUI or ElvUI installed. AzeriteUI should now load anyway, despite that horrible addon list. 
+
 ## [1.0.28-RC] 2019-08-30
 ### Fixed
 - Player PvP icon should now properly be hidden while engaged in combat, to make room for the combat indicator. 
