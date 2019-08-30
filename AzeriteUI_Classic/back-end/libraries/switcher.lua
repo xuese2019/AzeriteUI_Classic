@@ -1,4 +1,4 @@
-local LibSwitcher = CogWheel:Set("LibSwitcher", 1)
+local LibSwitcher = CogWheel:Set("LibSwitcher", 2)
 if (not LibSwitcher) then
 	return
 end
@@ -23,6 +23,7 @@ local select = select
 local string_format = string.format
 local string_join = string.join
 local string_match = string.match
+local table_insert = table.insert
 local tonumber = tonumber
 local type = type
 
