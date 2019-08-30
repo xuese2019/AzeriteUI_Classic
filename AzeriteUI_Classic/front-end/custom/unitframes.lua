@@ -2662,6 +2662,7 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, Layout, ...)
 		local classification = overlay:CreateFrame("Frame")
 		classification:SetPoint(unpack(Layout.ClassificationPlace))
 		classification:SetSize(unpack(Layout.ClassificationSize))
+		classification.hideInCombat = true
 		self.Classification = classification
 
 		local alliance = classification:CreateTexture()

@@ -4,6 +4,7 @@ local pairs = pairs
 
 -- WoW API
 local GetPVPTimer = _G.GetPVPTimer
+local UnitAffectingCombat = _G.UnitAffectingCombat
 local UnitClassification = _G.UnitClassification
 local UnitFactionGroup = _G.UnitFactionGroup
 local UnitIsPlayer = _G.UnitIsPlayer
@@ -41,7 +42,7 @@ local Update = function(self, event, unit)
 		element:PreUpdate(unit)
 	end
 
-	if element.hideInCombat and UnitAffectingCombat("player") then
+	if (element.hideInCombat and UnitAffectingCombat("player")) then 
 		return element:Hide()
 	end
 
@@ -154,5 +155,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (CogWheel("LibUnitFrame", true)), (CogWheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Classification", Enable, Disable, Proxy, 5)
+	Lib:RegisterElement("Classification", Enable, Disable, Proxy, 6)
 end 
