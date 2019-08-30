@@ -431,20 +431,37 @@ UIWidgets["WorldMap"] = function(self)
 	local mapW,mapH = 1024,768 
 	local canvasW,canvasH = mapW - (11 + 11), mapH - (-70-30)
 
-	WorldMapFrame.BlackoutFrame:Hide()
-	WorldMapFrame:SetSize(mapW,mapH)
-	WorldMapFrame:SetFrameStrata("HIGH")
-	WorldMapFrame:SetIgnoreParentScale(false)
+	local Canvas = WorldMapFrame
+	Canvas.BlackoutFrame:Hide()
+	Canvas:SetSize(mapW,mapH)
+	Canvas:SetFrameStrata("HIGH")
+	Canvas:SetIgnoreParentScale(false)
+	Canvas:RefreshDetailLayers()
 
-	-- contains the actual map. 
-	local Canvas = WorldMapFrame.ScrollContainer
-	--Canvas:SetCanvasSize(canvasW,canvasH)
+	-- Contains the actual map. 
+	local Container = WorldMapFrame.ScrollContainer
+	Container.GetCanvasScale = function(self)
+		return self:GetScale()
+	end
+	Container.NormalizeUIPosition = function(self, x, y)
+		return Saturate(self:NormalizeHorizontalSize(x / self:GetCanvasScale() - self.Child:GetLeft())),
+		       Saturate(self:NormalizeVerticalSize(self.Child:GetTop() - y / self:GetCanvasScale()))
+	end
+	Container.GetCursorPosition = function(self)
+		local currentX, currentY = GetCursorPosition()
+		local scale = UIParent:GetScale()
+		if not(currentX and currentY and scale) then 
+			return 0,0
+		end 
+		local scaledX, scaledY = currentX/scale, currentY/scale
+		return scaledX, scaledY
+	end
+	Container.GetNormalizedCursorPosition = function(self)
+		local x,y = self:GetCursorPosition()
+		return self:NormalizeUIPosition(x,y)
+	end
+	
 
-	--WorldMapFrame.ScrollContainer.Child:SetIgnoreParentScale(false)
-	--WorldMapFrame.ScrollContainer.Child:SetAllPoints()
-	--WorldMapFrame.ScrollContainer.Child:ClearAllPoints()
-	--WorldMapFrame.ScrollContainer.Child:SetPoint("TOPLEFT", WorldMapFrame, "TOPLEFT", 11, -70)
-	--WorldMapFrame.ScrollContainer.Child:SetPoint("BOTTOMRIGHT", WorldMapFrame, "BOTTOMRIGHT", -11, 30)
 end
 UIWidgetDependency["WorldMap"] = "Blizzard_WorldMap"
 
