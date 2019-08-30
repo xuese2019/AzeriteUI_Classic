@@ -443,10 +443,13 @@ UIWidgets["WorldMap"] = function(self)
 	Container.GetCanvasScale = function(self)
 		return self:GetScale()
 	end
+
+	local Saturate = Saturate
 	Container.NormalizeUIPosition = function(self, x, y)
 		return Saturate(self:NormalizeHorizontalSize(x / self:GetCanvasScale() - self.Child:GetLeft())),
 		       Saturate(self:NormalizeVerticalSize(self.Child:GetTop() - y / self:GetCanvasScale()))
 	end
+
 	Container.GetCursorPosition = function(self)
 		local currentX, currentY = GetCursorPosition()
 		local scale = UIParent:GetScale()
@@ -456,11 +459,11 @@ UIWidgets["WorldMap"] = function(self)
 		local scaledX, scaledY = currentX/scale, currentY/scale
 		return scaledX, scaledY
 	end
+
 	Container.GetNormalizedCursorPosition = function(self)
 		local x,y = self:GetCursorPosition()
 		return self:NormalizeUIPosition(x,y)
 	end
-	
 
 end
 UIWidgetDependency["WorldMap"] = "Blizzard_WorldMap"
