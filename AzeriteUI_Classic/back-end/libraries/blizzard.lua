@@ -1,4 +1,4 @@
-local LibBlizzard = CogWheel:Set("LibBlizzard", 31)
+local LibBlizzard = CogWheel:Set("LibBlizzard", 32)
 if (not LibBlizzard) then 
 	return
 end
