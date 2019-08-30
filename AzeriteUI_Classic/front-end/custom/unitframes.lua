@@ -419,13 +419,6 @@ end
 local PostUpdateAuraButton = function(element, button)
 	local colors = element._owner.colors
 	local Layout = element._owner.layout
-	if (not button) or (not button:IsVisible()) or (not button.unit) or (not UnitExists(button.unit)) then 
-		local color = Layout.AuraBorderBackdropBorderColor
-		if color then 
-			button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
-		end 
-		return 
-	end 
 	if UnitIsFriend("player", button.unit) then 
 		if button.isBuff then 
 			local color = Layout.AuraBorderBackdropBorderColor
@@ -450,7 +443,7 @@ local PostUpdateAuraButton = function(element, button)
 				button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
 			end 
 		else
-			local color = colors.debuff.none or Layout.AuraBorderBackdropBorderColor
+			local color = colors.debuff[button.debuffType or "none"] or Layout.AuraBorderBackdropBorderColor
 			if color then 
 				button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
 			end 
