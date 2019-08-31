@@ -1,4 +1,4 @@
-local ADDON = ...
+local ADDON, Private = ...
 local Core = CogWheel("LibModule"):GetModule(ADDON)
 if (not Core) then 
 	return 
@@ -41,6 +41,9 @@ local longXPString = "%s / %s"
 local fullXPString = "%s / %s (%s)"
 local restedString = " (%s%% %s)"
 local shortLevelString = "%s %.0f"
+
+-- Cache of buttons and ranks
+local Cache = {}
 
 -- Is ConsolePort loaded?
 local CONSOLEPORT = Module:IsAddOnEnabled("ConsolePort")
@@ -464,8 +467,88 @@ ActionButton.PostLeave = function(self)
 	self:UpdateMouseOver()
 end 
 
+ActionButton.SetRankVisibility = function(self, visible)
+	local cache = Cache[self]
+
+	-- Show rank on self
+	if (visible) then 
+
+		-- Create rank text if needed
+		if (not self.Rank) then 
+			local count = self.Count
+			local rank = self:CreateFontString()
+			rank:SetParent(count:GetParent())
+			--rank:SetFontObject(count:GetFontObject()) -- nah, this one changes based on count!
+			rank:SetFontObject(Private.GetFont(14,true)) -- use the smaller font
+			rank:SetDrawLayer(count:GetDrawLayer())
+			rank:SetTextColor(self.colors.quest.gray[1], self.colors.quest.gray[2], self.colors.quest.gray[3])
+			rank:SetPoint(count:GetPoint())
+			self.Rank = rank
+		end
+		self.Rank:SetText(cache.spellRank)
+
+	-- Hide rank on self, if it exists. 
+	elseif (not visible) and (self.Rank) then 
+		self.Rank:SetText("")
+	end 
+end
+
 ActionButton.PostUpdate = function(self)
 	self:UpdateMouseOver()
+
+	local cache = Cache[self]
+	if (not cache) then 
+		Cache[self] = {}
+		cache = Cache[self]
+	end
+
+	-- Retrieve the previous info, if any.
+	local oldCount = cache.spellCount -- counter of the amount of multiples
+	local oldName = cache.spellName -- used as identifier for multiples
+	local oldRank = cache.spellRank -- rank of this instance of the multiple
+
+	-- Update cached info 
+	cache.spellRank = self:GetSpellRank()
+	cache.spellName = GetSpellInfo(self:GetSpellID())
+
+	-- Button spell changed?
+	if (cache.spellName ~= oldName) then 
+
+		-- We had a spell before, and there were more of it.
+		-- We need to find the old ones, update their counts,
+		-- and hide them if there's only a single one left. 
+		if (oldRank and (oldCount > 1)) then 
+			local newCount = oldCount - 1
+			for button,otherCache in pairs(Cache) do 
+				-- Ignore self, as we no longer have the same counter. 
+				if (button ~= self) and (otherCache.spellName == oldName) then 
+					otherCache.spellCount = newCount
+					button:SetRankVisibility((newCount > 1))
+				end
+			end
+		end 
+	end 
+
+	-- Counter for number of duplicates of the current spell
+	local howMany = 0
+	if (cache.spellRank) then 
+		for button,otherCache in pairs(Cache) do 
+			if (otherCache.spellName == cache.spellName) then 
+				howMany = howMany + 1
+			end 
+		end
+	end 
+
+	-- Update stored counter
+	cache.spellCount = howMany
+
+	-- Update all rank texts and counters
+	for button,otherCache in pairs(Cache) do 
+		if (otherCache.spellName == cache.spellName) then 
+			otherCache.spellCount = howMany
+			button:SetRankVisibility((howMany > 1))
+		end 
+	end
 end 
 
 ActionButton.PostCreate = function(self, ...)

@@ -255,10 +255,17 @@ end
 
 -- ActionButton stack/charge count Post Update
 local ActionButton_StackCount_PostUpdate = function(self, count)
-	local font = GetFont(((tonumber(count) or 0) < 10) and 18 or 14, true) 
+	count = tonumber(count) or 0
+	local font = GetFont((count < 10) and 18 or 14, true) 
 	if (self.Count:GetFontObject() ~= font) then 
 		self.Count:SetFontObject(font)
 	end
+	-- Hide the rank text element if a count exists. 
+	-- I don't think this'll ever happen (?), 
+	-- but better safe than sorry. 
+	if self.Rank then 
+		self.Rank:SetShown((count == 0))
+	end 
 end
 
 -- General bind mode border creation method
