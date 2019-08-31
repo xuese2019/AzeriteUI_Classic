@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.33-RC] 2019-08-31
+### Added
+- Added an experimental feature to show spell rank on actionbuttons when more than one instance of the spell currently exists on your buttons. 
+
+### Changed
+- Made the difference between usable and not usable spells more distinct. 
+
 ## [1.0.32-RC] 2019-08-30
 ### Fixed
 - Fixed a typo causing an error when summoning pets. 
