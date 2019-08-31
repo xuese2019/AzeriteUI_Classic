@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.35-RC] 2019-08-31
+### Fixed
+- Locked the main chat in a manner not affecting its DropDown, thus preventing taint from spreading to the Compact group frames. 
+
 ## [1.0.34-RC] 2019-08-31
 ### Fixed
 - Fixed a typo causing the UI to bug out when your pet was just content, not happy. I thought this was a feature? :)
