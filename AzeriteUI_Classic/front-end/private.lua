@@ -332,197 +332,41 @@ end
 
 auraFilters.player = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
 
-	-- redoing for classic
 	local timeLeft 
 	if (expirationTime and expirationTime > 0) then 
 		timeLeft = expirationTime - GetTime()
 	end
-
 	if InCombatLockdown() then 
-		if (isBuff and (timeLeft and (timeLeft > 300))) then 
-			return 
-		else
+		if (timeLeft and (timeLeft > 0) and (timeLeft < 300)) then 
 			return true
+		else
+			return
 		end
 	else 
 		return true
-	end 
-
-	-- Cut off the rest, 
-	-- just don't delete yet, 
-	-- I need it for reference!
-	do 
-		return
-	end 
-
-	-- Retrieve filter flags
-	local infoFlags = auraInfoFlags[spellID]
-	local userFlags = auraUserFlags[spellID]
-
-	if (isBossDebuff or isBossDebuff or (userFlags and (bit_band(userFlags, PrioBoss) ~= 0)) or (unitCaster == "vehicle")) then
-		return true
-
-	elseif InCombatLockdown() then 
-		if userFlags then 
-			if unitIsPlayer[unit] and (bit_band(userFlags, OnPlayer) ~= 0) then 
-				return true  
-			end
-
-		elseif infoFlags then 
-			if (unitCaster and isOwnedByPlayer) and (bit_band(infoFlags, infoFilter.IsPlayerSpell) ~= 0) then 
-				return true  
-			end
-		end
-
-		-- Auras from hostile npc's
-		if (not unitCaster) or (UnitCanAttack("player", unitCaster) and (not UnitPlayerControlled(unitCaster))) then 
-			return ((not isBuff) and (duration and duration < 180))
-		end
-
-	else 
-		if userFlags then 
-			if unitIsPlayer[unit] and (bit_band(userFlags, OnPlayer) ~= 0) then 
-				return true  
-			end
-		elseif isBuff then 
-			if (not duration) or (duration <= 0) or (duration > 180) or (timeLeft and (timeLeft > 180)) then 
-				return true
-			end 
-		else
-			return true
-		end 
 	end 
 end 
 
 auraFilters.target = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
 
-	-- redoing for classic
-	local timeLeft 
-	if (expirationTime and expirationTime > 0) then 
-		timeLeft = expirationTime - GetTime()
-	end
-
-	-- For some reason this happened
-	if ((not unit) or (not UnitExists(unit))) then 
-		return 
-	end 
-	
 	if InCombatLockdown() then 
-		if (isBuff and (timeLeft and (timeLeft > 300))) then 
-			return 
-		else
-			return UnitCanAttack("player", unit) and (not isBuff) or isBuff
-		end
+		return auraFilters.nameplate(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
 	else
 		return true
-	end 
-
-	-- Cut off the rest, 
-	-- just don't delete yet, 
-	-- I need it for reference!
-	do 
-		return
-	end 
-	
-	-- Retrieve filter flags
-	local infoFlags = auraInfoFlags[spellID]
-	local userFlags = auraUserFlags[spellID]
-	
-	-- Figure out time currently left
-	local timeLeft 
-	if (expirationTime and expirationTime > 0) then 
-		timeLeft = expirationTime - GetTime()
-	end
-
-	-- Stealable and boss auras
-	if (isStealable or isBossDebuff or (userFlags and (bit_band(userFlags, PrioBoss) ~= 0))) then 
-		return true 
-
-	-- Auras on enemies
-	elseif UnitCanAttack("player", unit) then 
-		if InCombatLockdown() then 
-
-			-- Show filtered auras on hostiles
-			if infoFlags then 
-				if (bit_band(infoFlags, infoFilter.IsPlayerSpell) ~= 0) then 
-					return isOwnedByPlayer 
-				elseif (bit_band(infoFlags, PlayerIsTank) ~= 0) then 
-					return (GetPlayerRole() == "TANK")
-				else
-					return (bit_band(infoFlags, OnEnemy) ~= 0)
-				end 
-			end 
-
-			-- Show short self-buffs on enemies 
-			if isBuff then 
-				if unitCaster and UnitIsUnit(unit, unitCaster) and UnitCanAttack("player", unit) then 
-					return ((duration and (duration > 0) and (duration < 180)) or (timeLeft and (timeLeft < 180)))
-				end
-			end 
-		else 
-
-			-- Show long/no duration auras out of combat
-			if (not duration) or (duration <= 0) or (duration > 180) or (timeLeft and (timeLeft > 180)) then 
-				return true
-			end 
-		end 
-
-	-- Auras on friends
-	else 
-		if InCombatLockdown() then 
-
-			-- Show filtered auras
-			if infoFlags then 
-				if (userFlags and (bit_band(userFlags, OnFriend) ~= 0)) then 
-					return true
-				elseif (bit_band(infoFlags, infoFilter.IsPlayerSpell) ~= 0) then 
-					return isOwnedByPlayer 
-				end
-			end 
-
-		else 
-
-			-- Show long/no duration auras out of combat
-			if (not duration) or (duration <= 0) or (duration > 180) or (timeLeft and (timeLeft > 180)) then 
-				return true
-			end 
-		end 
 	end 
 end
 
 auraFilters.nameplate = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
 
-
-	-- redoing for classic
-	local timeLeft 
-	if (expirationTime and expirationTime > 0) then 
-		timeLeft = expirationTime - GetTime()
-	end
-
-	if (isBuff and (timeLeft and (timeLeft > 300))) or (not isOwnedByPlayer) or (not isCastByPlayer) then 
-		return 
-	else
-		return UnitCanAttack("player", unit) and (not isBuff) or isBuff
-	end 
-
-	-- Cut off the rest, 
-	-- just don't delete yet, 
-	-- I need it for reference!
-	do 
-		return
-	end 
-
-	local infoFlags = auraInfoFlags[spellID]
-	local userFlags = auraUserFlags[spellID]
-
-	if infoFlags then 
-		if (unitCaster and isOwnedByPlayer) and (bit_band(infoFlags, infoFilter.IsPlayerSpell) ~= 0) then 
-			if (userFlags and (bit_band(userFlags, NeverOnPlate) ~= 0)) then 
-				return
-			else
-				return ((duration and (duration > 0) and (duration < 180)) or (timeLeft and (timeLeft < 180)))
-			end
-		end 
+	if (UnitInParty(unit) or UnitInRaid(unit)) then 
+		if (timeLeft and (timeLeft > 0) and (timeLeft < 300)) then 
+			return true
+		else
+			return
+		end
+	else 
+		-- This. Is a problem. 
+		return true
 	end 
 end 
 
@@ -532,44 +376,11 @@ end
 
 auraFilters.party = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
 
-	local userFlags = auraUserFlags[spellID]
-
-	if userFlags then
-		return (bit_band(userFlags, OnFriend) ~= 0)
-	else
-		return isBossDebuff or (userFlags and (bit_band(userFlags, PrioBoss) ~= 0))
-	end
 end
 
 auraFilters.boss = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
-
-	local infoFlags = auraInfoFlags[spellID]
-	local userFlags = auraUserFlags[spellID]
-
-	if infoFlags then
-		if (bit_band(infoFlags, infoFilter.IsPlayerSpell) ~= 0) then 
-			return isOwnedByPlayer 
-		else 
-			return userFlags and (bit_band(userFlags, OnEnemy) ~= 0)
-		end 
-	else
-		return isBossDebuff or (userFlags and (bit_band(userFlags, PrioBoss) ~= 0))
-	end
 end
 
-auraFilters.arena = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
-
-	local infoFlags = auraInfoFlags[spellID]
-	local userFlags = auraUserFlags[spellID]
-
-	if infoFlags then
-		if (bit_band(infoFlags, infoFilter.IsPlayerSpell) ~= 0) then 
-			return isOwnedByPlayer 
-		else 
-			return userFlags and (bit_band(userFlags, OnEnemy) ~= 0)
-		end 
-	end
-end
 
 -- Add a fallback system
 -- *needed in case non-existing unit filters are requested 
