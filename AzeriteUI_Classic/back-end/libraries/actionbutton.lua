@@ -1,4 +1,4 @@
-local LibSecureButton = CogWheel:Set("LibSecureButton", 62)
+local LibSecureButton = CogWheel:Set("LibSecureButton", 63)
 if (not LibSecureButton) then	
 	return
 end
@@ -54,6 +54,8 @@ local GetBindingKey = _G.GetBindingKey
 local GetCursorInfo = _G.GetCursorInfo
 local GetMacroSpell = _G.GetMacroSpell
 local GetOverrideBarIndex = _G.GetOverrideBarIndex
+local GetSpellInfo = _G.GetSpellInfo
+local GetSpellSubtext = _G.GetSpellSubtext
 local GetTempShapeshiftBarIndex = _G.GetTempShapeshiftBarIndex
 local GetTime = _G.GetTime
 local HasAction = _G.HasAction
@@ -734,7 +736,7 @@ end
 ActionButton.UpdateUsable = function(self) 
 	if UnitIsDeadOrGhost("player") then 
 		self.Icon:SetDesaturated(true)
-		self.Icon:SetVertexColor(.4, .4, .4)
+		self.Icon:SetVertexColor(.3, .3, .3)
 
 	elseif self.outOfRange then
 		self.Icon:SetDesaturated(true)
@@ -747,18 +749,32 @@ ActionButton.UpdateUsable = function(self)
 			self.Icon:SetVertexColor(1, 1, 1)
 
 		elseif notEnoughMana then
-			self.Icon:SetDesaturated(false)
-			self.Icon:SetVertexColor(.35, .35, 1)
+			self.Icon:SetDesaturated(true)
+			self.Icon:SetVertexColor(.25, .25, 1)
 
 		else
-			self.Icon:SetDesaturated(false)
-			self.Icon:SetVertexColor(.4, .4, .4)
+			self.Icon:SetDesaturated(true)
+			self.Icon:SetVertexColor(.3, .3, .3)
 		end
 	end
 end 
 
 -- Getters
 ----------------------------------------------------
+ActionButton.GetSpellRank = function(self)
+	local spellID = self:GetSpellID()
+	if (spellID) then 
+		local name, _, icon, castTime, minRange, maxRange, spellId = GetSpellInfo(spellID)
+		local rankMsg = GetSpellSubtext(spellID)
+		if rankMsg then 
+			local rank = string_match(rankMsg, "(%d+)")
+			if rank then 
+				return tonumber(rank)
+			end 
+		end 
+	end 
+end
+
 ActionButton.GetAction = function(self)
 	local actionpage = tonumber(self:GetAttribute("actionpage"))
 	local id = self:GetID()
