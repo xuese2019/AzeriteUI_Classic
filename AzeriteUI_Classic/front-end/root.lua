@@ -18,6 +18,7 @@ Core:SetIncompatible(Core:GetInterfaceList())
 local _G = _G
 local ipairs = ipairs
 local string_find = string.find
+local string_format = string.format
 
 -- WoW API
 local DisableAddOn = _G.DisableAddOn
@@ -42,11 +43,16 @@ local defaults = {
 
 	-- Loads all child modules with debug functionality, 
 	-- doesn't actually load any consoles. 
-	loadDebugConsole = true, 	
+	loadDebugConsole = true, 
 
 	-- Enable console visibility. 
 	-- Requires the above to be true. 
-	enableDebugConsole = false  
+	enableDebugConsole = false,
+
+	-- Block group invite spam
+	blockGroupInvites = false, 
+	allowGuildInvites = true,
+	blockCounter = {}
 }
 
 local SECURE = {
@@ -285,6 +291,58 @@ Core.ApplyExperimentalFeatures = function(self)
 			self:AddAuraUserFlags(spellID,flags)
 		end 
 	end
+
+	-- Auto block group invite spam
+	self.OnBlockEvent = function(self, event, name)
+		if self.db.allowGuildInvites and (IsInGuild() and (name and UnitIsInMyGuild(name))) then 
+			AcceptGroup()
+		else 
+			-- Decline the group invite
+			DeclineGroup()
+
+			-- Log the block 
+			self.db.blockCounter[name] = (self.db.blockCounter[name] or 0) + 1
+
+			-- Send a message to the chat. 
+			if (self.db.blockCounter[name] > 1) then 
+				print(string_format("Declined a group invite from: %s (%d)", name, self.db.blockCounter[name]))
+			else 
+				print(string_format("Declined a group invite from: %s", name))
+			end 
+		end
+	end
+
+	self.SetInvitesBlocked = function(self)
+		self.db.blockGroupInvites = true
+		UIParent:UnregisterEvent("PARTY_INVITE_REQUEST")
+		UIParent:UnregisterEvent("PARTY_INVITE_CANCEL")
+		if (not self:IsEventRegistered("PARTY_INVITE_REQUEST", "OnBlockEvent")) then 
+			self:RegisterEvent("PARTY_INVITE_REQUEST", "OnBlockEvent")
+		end
+		self:AddDebugMessageFormatted("Group Invite Blocking was enabled.")
+	end
+
+	self.SetInvitesAllowed = function(self)
+		self.db.blockGroupInvites = false
+		UIParent:RegisterEvent("PARTY_INVITE_REQUEST")
+		UIParent:RegisterEvent("PARTY_INVITE_CANCEL")
+		if (self:IsEventRegistered("PARTY_INVITE_REQUEST", "OnBlockEvent")) then 
+			self:UnregisterEvent("PARTY_INVITE_REQUEST", "OnBlockEvent")
+		end
+		self:AddDebugMessageFormatted("Group Invite Blocking was disabled.")
+	end
+
+	self:RegisterChatCommand("blockinvites", "SetInvitesBlocked")
+	self:RegisterChatCommand("allowinvites", "SetInvitesAllowed")
+
+	-- Inital setting
+	self:AddDebugMessageFormatted("Group Invite Blocking is available.")
+	if self.db.blockGroupInvites then 
+		self:SetInvitesBlocked()
+	else
+		self:SetInvitesAllowed()
+	end
+	self:AddDebugMessageFormatted("Type /allowinvites or /blockinvites to toggle blocking!")
 
 end
 
