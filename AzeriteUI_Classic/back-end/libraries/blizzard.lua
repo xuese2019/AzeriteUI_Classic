@@ -1,4 +1,4 @@
-local LibBlizzard = CogWheel:Set("LibBlizzard", 32)
+local LibBlizzard = CogWheel:Set("LibBlizzard", 34)
 if (not LibBlizzard) then 
 	return
 end
@@ -434,7 +434,6 @@ UIWidgets["WorldMap"] = function(self)
 	local Canvas = WorldMapFrame
 	Canvas.BlackoutFrame:Hide()
 	Canvas:SetSize(mapW,mapH)
-	Canvas:SetFrameStrata("HIGH")
 	Canvas:SetIgnoreParentScale(false)
 	Canvas:RefreshDetailLayers()
 
