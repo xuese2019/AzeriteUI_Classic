@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.34-RC] 2019-08-31
+### Fixed
+- Fixed a typo causing the UI to bug out when your pet was just content, not happy. I thought this was a feature? :)
+
+### Changed
+- Made the aura filters even less filterish. We need actual lists here, since we can't check any real meta info of units not in our group. Will get myself up a few levels, then take a day to get this right!
+- Removed the 3 limit buff cap on the target frame aura element. When you're a healer, you probably need to see more than just 3 happy ones. 
+- Added an extra row of auras to the target frame, just to make sure we don't miss stuff while the filters are unfilterish. 
+
 ## [1.0.33-RC] 2019-08-31
 ### Added
 - Added an experimental feature to show spell rank on actionbuttons when more than one instance of the spell currently exists on your buttons. 
