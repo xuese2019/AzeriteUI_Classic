@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.36-RC] 2019-09-01
+### Added
+- Added a "secret" feature to automate group invites and declines a bit. The commands `/blockinvites` and `/allowinvites` have been added, where the latter is the normal all manual mode, and the former is an automated mode where invites from wow friends, bnet friends and guild are automatically accepted, and everything else automatically declined. No options for this behavior exists as of yet, except the ability to turn it on. It is disabled by default, but there for those that me that are dead tired of brainless muppets spamming invites without ever uttering a single word. 
+
+### Changed
+- Toned down the opacity and reduced the number of messages visible at once in the red error message frame. Because I get it, there's not enough energy to do that now. I get it. 
+- Slightly tuned the tracker size and position for better alignment with everything else. You probably didn't even notice it, so subtle was it. 
+- The World Map now becomes slightly transparent when the player is moving. Just feels better to not completely block out the center of the screen when traveling from place to place on a fresh and very ganky PvP realm. 
+
 ## [1.0.35-RC] 2019-08-31
 ### Fixed
 - Locked the main chat in a manner not affecting its DropDown, thus preventing taint from spreading to the Compact group frames. 
