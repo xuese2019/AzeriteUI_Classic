@@ -83,17 +83,10 @@ Module.StyleDurabilityFrame = function(self)
 end 
 
 Module.StyleErrorFrame = function(self)
-	if (not Layout.StyleErrorFrame) then 
-		return 
-	end 
-
 	local frame = UIErrorsFrame
-
-	if Layout.ErrorFrameStrata then 
-		frame:SetFrameStrata(Layout.ErrorFrameStrata)
-	end 
-	frame:SetAlpha(.5) -- yay or nay?
-	
+	frame:SetFrameStrata("LOW")
+	frame:SetHeight(20)
+	frame:SetAlpha(.75)
 end 
 
 Module.StyleQuestTimerFrame = function(self)
