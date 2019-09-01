@@ -1058,8 +1058,8 @@ local BlizzardObjectivesTracker = {
 	Colors = Colors,
 
 	--Place = { "TOPRIGHT", -60, -260 },
-	Place = { "BOTTOMRIGHT", -50, 380 },
-	Width = 235, -- 280 classic default
+	Place = { "BOTTOMRIGHT", -60, 380 },
+	Width = 255, -- 280 classic default
 	Scale = 1.0, 
 	SpaceTop = 260, 
 	SpaceBottom = 380, 
