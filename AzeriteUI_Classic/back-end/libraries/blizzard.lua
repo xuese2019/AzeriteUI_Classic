@@ -1,4 +1,4 @@
-local LibBlizzard = CogWheel:Set("LibBlizzard", 34)
+local LibBlizzard = CogWheel:Set("LibBlizzard", 35)
 if (not LibBlizzard) then 
 	return
 end
@@ -464,6 +464,55 @@ UIWidgets["WorldMap"] = function(self)
 		return self:NormalizeUIPosition(x,y)
 	end
 
+	local frame = CreateFrame("Frame")
+	frame.elapsed = 0
+	frame.stopAlpha = .9
+	frame.moveAlpha = .65
+	frame.stepIn = .05
+	frame.stepOut = .05
+	frame.throttle = .02
+	frame:SetScript("OnEvent", function(selv, event) 
+		if (event == "PLAYER_STARTED_MOVING") then 
+			frame.alpha = Canvas:GetAlpha()
+			frame:SetScript("OnUpdate", frame.Starting)
+
+		elseif (event == "PLAYER_STOPPED_MOVING") or (event == "PLAYER_ENTERING_WORLD") then 
+			frame.alpha = Canvas:GetAlpha()
+			frame:SetScript("OnUpdate", frame.Stopping)
+		end
+	end)
+
+	frame.Stopping = function(self, elapsed) 
+		self.elapsed = self.elapsed + elapsed
+		if (self.elapsed < frame.throttle) then
+			return 
+		end 
+		if (frame.alpha + frame.stepIn < frame.stopAlpha) then 
+			frame.alpha = frame.alpha + frame.stepIn
+		else 
+			frame.alpha = frame.stopAlpha
+			frame:SetScript("OnUpdate", nil)
+		end 
+		Canvas:SetAlpha(frame.alpha)
+	end
+
+	frame.Starting = function(self, elapsed) 
+		self.elapsed = self.elapsed + elapsed
+		if (self.elapsed < frame.throttle) then
+			return 
+		end 
+		if (frame.alpha - frame.stepOut > frame.moveAlpha) then 
+			frame.alpha = frame.alpha - frame.stepOut
+		else 
+			frame.alpha = frame.moveAlpha
+			frame:SetScript("OnUpdate", nil)
+		end 
+		Canvas:SetAlpha(frame.alpha)
+	end
+
+	frame:RegisterEvent("PLAYER_ENTERING_WORLD")
+	frame:RegisterEvent("PLAYER_STARTED_MOVING")
+	frame:RegisterEvent("PLAYER_STOPPED_MOVING")
 end
 UIWidgetDependency["WorldMap"] = "Blizzard_WorldMap"
 
