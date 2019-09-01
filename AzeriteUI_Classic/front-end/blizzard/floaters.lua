@@ -92,6 +92,8 @@ Module.StyleErrorFrame = function(self)
 	if Layout.ErrorFrameStrata then 
 		frame:SetFrameStrata(Layout.ErrorFrameStrata)
 	end 
+	frame:SetAlpha(.5) -- yay or nay?
+	
 end 
 
 Module.StyleQuestTimerFrame = function(self)
