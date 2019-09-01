@@ -21,8 +21,13 @@ local string_find = string.find
 local string_format = string.format
 
 -- WoW API
+local BNGetFriendGameAccountInfo = _G.BNGetFriendGameAccountInfo
+local BNGetNumFriendGameAccounts = _G.BNGetNumFriendGameAccounts
+local BNGetNumFriends = _G.BNGetNumFriends
 local DisableAddOn = _G.DisableAddOn
 local EnableAddOn = _G.EnableAddOn
+local GetFriendInfo = _G.GetFriendInfo
+local GetNumFriends = _G.GetNumFriends
 local LoadAddOn = _G.LoadAddOn
 local ReloadUI = _G.ReloadUI
 local SetActionBarToggles = _G.SetActionBarToggles
@@ -52,6 +57,7 @@ local defaults = {
 	-- Block group invite spam
 	blockGroupInvites = false, 
 	allowGuildInvites = true,
+	allowFriendInvites = true, 
 	blockCounter = {}
 }
 
@@ -294,20 +300,67 @@ Core.ApplyExperimentalFeatures = function(self)
 
 	-- Auto block group invite spam
 	self.OnBlockEvent = function(self, event, name)
-		if self.db.allowGuildInvites and (IsInGuild() and (name and UnitIsInMyGuild(name))) then 
+		local acceptInvite, isFriend, isBNFriend, isGuild
+		-- Is this a friend?
+		if (name) then 
+			if (self.db.allowFriendInvites) then 
+				-- Iterate the normal WoW friend's list
+				for friendIndex = 1, GetNumFriends() do
+					local friendName = GetFriendInfo(friendIndex)
+					if (name == friendName) then
+						acceptInvite = true
+						isFriend = true
+						break
+					end
+				end	
+				-- Iterate BN friends, see if they are playing a WoW char.  
+				local _, numFriends = BNGetNumFriends()
+				for bnIndex = 1, numFriends do
+					for toonIndex = 1, BNGetNumFriendGameAccounts(bnIndex) do
+						local _, toonName, client, realmName = BNGetFriendGameAccountInfo(bnIndex, toonIndex)
+						if (client == "WoW") then
+							if (toonName == name) or (toonName.."-"..realmName == name) then
+								acceptInvite = true
+								isBNFriend = true
+								break
+							end
+						end
+					end
+				end	
+			end 
+			-- Is it a guild member?
+			if (self.db.allowGuildInvites and (IsInGuild()) and (UnitIsInMyGuild(name))) then 
+				acceptInvite = true 
+				isGuild = true
+			end 
+		end 
+		if (acceptInvite) then
+			-- Accept this group invite.
 			AcceptGroup()
-		else 
-			-- Decline the group invite
+			-- Only send accept messages as debug output, don't output to the chat. 
+			self:AddDebugMessageFormatted(string_format("Accepted a group invite from [%s].", name))
+			-- Add all the appropriate info
+			if (isGuild) then 
+				self:AddDebugMessageFormatted("This person is in your Guild.")
+			end 
+			if (isBNFriend) then 
+				self:AddDebugMessageFormatted("This person is your BNet friend.")
+			end
+			if (isFriend) then 
+				self:AddDebugMessageFormatted("This person is on your local friend's list.")
+			end 
+		else
+			-- Decline this group
 			DeclineGroup()
-
-			-- Log the block 
+			-- Log the block amount.
 			self.db.blockCounter[name] = (self.db.blockCounter[name] or 0) + 1
-
-			-- Send a message to the chat. 
+			-- Output block messages both to the chat and to the debug console
 			if (self.db.blockCounter[name] > 1) then 
-				print(string_format("Declined a group invite from: %s (%d)", name, self.db.blockCounter[name]))
+				print(string_format("|cffaa0000Declined a group invite from:|r |cffffd200%s|r |cffaaaaaa(%d)|r", name, self.db.blockCounter[name]))
+				self:AddDebugMessageFormatted(string_format("Declined a group invite from [%s](%d).", name, self.db.blockCounter[name]))
 			else 
-				print(string_format("Declined a group invite from: %s", name))
+				print(string_format("|cffaa0000Declined a group invite from:|r |cffffd200%s|r", name))
+				self:AddDebugMessageFormatted(string_format("Declined a group invite from [%s].", name))
 			end 
 		end
 	end
@@ -320,6 +373,17 @@ Core.ApplyExperimentalFeatures = function(self)
 			self:RegisterEvent("PARTY_INVITE_REQUEST", "OnBlockEvent")
 		end
 		self:AddDebugMessageFormatted("Group Invite Blocking was enabled.")
+		if (self.db.allowFriendInvites) then 
+			self:AddDebugMessageFormatted("Requests from Friends and BNetFriends will be automatically accepted.")
+		end 
+		if (self.db.allowGuildInvites) then 
+			self:AddDebugMessageFormatted("Requests from Guild Members will be automatically accepted")
+		end 
+		if (self.db.allowFriendInvites) or (self.db.allowGuildInvites) then 
+			self:AddDebugMessageFormatted("Requests from anybody else will be automatically blocked.")
+		else 
+			self:AddDebugMessageFormatted("All requests will be automatically blocked.")
+		end 
 	end
 
 	self.SetInvitesAllowed = function(self)
@@ -330,6 +394,7 @@ Core.ApplyExperimentalFeatures = function(self)
 			self:UnregisterEvent("PARTY_INVITE_REQUEST", "OnBlockEvent")
 		end
 		self:AddDebugMessageFormatted("Group Invite Blocking was disabled.")
+		self:AddDebugMessageFormatted("All requests must now be handled manually by the user.")
 	end
 
 	self:RegisterChatCommand("blockinvites", "SetInvitesBlocked")
