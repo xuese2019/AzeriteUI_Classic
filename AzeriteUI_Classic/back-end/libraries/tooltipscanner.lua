@@ -1,4 +1,4 @@
-local LibTooltipScanner = CogWheel:Set("LibTooltipScanner", 30)
+local LibTooltipScanner = CogWheel:Set("LibTooltipScanner", 31)
 if (not LibTooltipScanner) then	
 	return
 end
@@ -107,6 +107,11 @@ local Constants = {
 	ItemEquipEffect = _G.ITEM_SPELL_TRIGGER_ONEQUIP, -- "Equip:"
 	ItemUseEffect = _G.ITEM_SPELL_TRIGGER_ONUSE, -- "Use:"
 	Level = _G.LEVEL,
+
+	PowerType1 = _G.POWER_TYPE_ENERGY,
+	PowerType2 = _G.POWER_TYPE_FOCUS,
+	PowerType3 = _G.POWER_TYPE_MANA,
+	PowerType4 = _G.POWER_TYPE_RED_POWER,
 
 	RangeCaster = _G.SPELL_RANGE_AREA,
 	RangeMelee = _G.MELEE_RANGE,
@@ -253,6 +258,12 @@ local Patterns = {
 	Range2 = 					"^" .. Constants.RangeUnlimited,
 	Range3 = 					"^" .. Constants.RangeCaster, 
 	Range4 = 					"^" .. string_gsub(Constants.RangeSpell, "%%s", "(%.+)"),
+
+	-- Power Types for Spell Cost 
+	PowerType1 = 				Constants.PowerType1,
+	PowerType2 = 				Constants.PowerType2,
+	PowerType3 = 				Constants.PowerType3,
+	PowerType4 = 				Constants.PowerType4,
 
 	-- Spell Requirements
 	SpellRequiresForm = 			   "(" .. (string_gsub(Constants.SpellRequiresForm, "%%s", "(.+)")) .. ")", 
@@ -670,6 +681,33 @@ LibTooltipScanner.GetTooltipDataForAction = function(self, actionSlot, tbl)
 
 			end 
 		end
+
+		-- Costs sometimes elude our previous filters. 
+		if (not foundCost) then 
+			for lineIndex = 2, (numLines < 4) and numLines or 4  do
+				left = _G[ScannerName.."TextLeft"..lineIndex]
+				if (left) then 
+	
+					local leftMsg = left:GetText()
+	
+					-- Left side iterations
+					if (leftMsg and (leftMsg ~= "")) then 
+						local id = 1
+						while Patterns["PowerType"..id] do 
+							if (string_find(leftMsg, Patterns["PowerType"..id])) then 
+						
+								-- found the cost line
+								foundCost = lineIndex
+								tbl.spellCost = leftMsg
+
+								break
+							end 
+							id = id + 1
+						end 
+					end
+				end
+			end
+		end 
 
 		-- Just assume all remaining lines are description, 
 		-- and bunch them together to a single line. 
