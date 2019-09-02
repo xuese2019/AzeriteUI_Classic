@@ -1,4 +1,4 @@
-local LibFader = CogWheel:Set("LibFader", 17)
+local LibFader = CogWheel:Set("LibFader", 18)
 if (not LibFader) then	
 	return
 end
@@ -47,6 +47,9 @@ local UnregisterAttributeDriver = _G.UnregisterAttributeDriver
 
 -- WoW Constants
 local DEBUFF_MAX_DISPLAY = _G.DEBUFF_MAX_DISPLAY or 16
+
+-- Player Constants
+local _,playerClass = UnitClass("player")
 
 -- Library registries
 LibFader.embeds = LibFader.embeds or {}
@@ -280,7 +283,7 @@ LibFader.CheckPower = function(self)
 	if (type == "MANA") then 
 		local min = UnitPower("player") or 0
 		local max = UnitPowerMax("player") or 0
-		if (max > 0) and (min/max < .75) then 
+		if (max > 0) and (min/max < .95) then 
 			Data.lowPower = true
 			return
 		end 
