@@ -2046,9 +2046,15 @@ local UnitFramePlayer = {
 		ManaTextFont = GetFont(14, true),
 		ManaTextColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
 		ManaTextOverride = function(element, unit, min, max)
-			if (min == 0) or (max == 0) or (min == max) then
+			if (not min) or (not max) or (min == 0) or (max == 0) or (min == max) then
 				element:SetText("")
 			else
+				local perc = min/max
+				if (perc < .25) then
+					element:SetTextColor(Colors.quest.red[1], Colors.quest.red[2], Colors.quest.red[3], .85)
+				else 
+					element:SetTextColor(Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5)
+				end 
 				element:SetFormattedText("%.0f", math_floor(min/max * 100))
 			end 
 		end,
