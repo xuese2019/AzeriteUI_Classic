@@ -1,4 +1,4 @@
-local LibBlizzard = CogWheel:Set("LibBlizzard", 35)
+local LibBlizzard = CogWheel:Set("LibBlizzard", 36)
 if (not LibBlizzard) then 
 	return
 end
@@ -426,14 +426,8 @@ UIWidgets["UnitFrameBoss"] = function(self)
 end
 
 UIWidgets["WorldMap"] = function(self)
-	
-	-- This is the real default size too
-	local mapW,mapH = 1024,768 
-	local canvasW,canvasH = mapW - (11 + 11), mapH - (-70-30)
-
 	local Canvas = WorldMapFrame
 	Canvas.BlackoutFrame:Hide()
-	Canvas:SetSize(mapW,mapH)
 	Canvas:SetIgnoreParentScale(false)
 	Canvas:RefreshDetailLayers()
 
