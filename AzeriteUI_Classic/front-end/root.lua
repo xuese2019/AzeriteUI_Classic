@@ -409,6 +409,8 @@ Core.ApplyExperimentalFeatures = function(self)
 	end
 	self:AddDebugMessageFormatted("Type /allowinvites or /blockinvites to toggle blocking!")
 
+	-- Add command to /clear the main chatframe
+	self:RegisterChatCommand("clear", function() ChatFrame1:Clear() end)
 end
 
 -- We could add this into the back-end, leaving it here for now, though. 
