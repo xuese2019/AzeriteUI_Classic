@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.37-RC] 2019-09-04
+### Added
+- Added the command `/clear` to clear the main chat window. Because why not. 
+
+### Changed
+- Most abilities should now have their resource cost displayed in the actionbar tooltips. 
+- The text on the power crystal showing druid mana in forms should now be colored red when very little mana is left. 
+
 ## [1.0.36-RC] 2019-09-01
 ### Added
 - Added a "secret" feature to automate group invites and declines a bit. The commands `/blockinvites` and `/allowinvites` have been added, where the latter is the normal all manual mode, and the former is an automated mode where invites from wow friends, bnet friends and guild are automatically accepted, and everything else automatically declined. No options for this behavior exists as of yet, except the ability to turn it on. It is disabled by default, but there for those that me that are dead tired of brainless muppets spamming invites without ever uttering a single word. 
