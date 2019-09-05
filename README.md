@@ -23,8 +23,8 @@ Looking for AzeriteUI for WoW Retail? Get it [here](https://www.curseforge.com/w
 
 ## **Other downloads:**
 * AzeriteUI for WoW Retail: [www.curseforge.com/wow/addons/azeriteui](https://www.curseforge.com/wow/addons/azeriteui)
-* AzeriteUI Masque Theme: [www.curseforge.com/wow/addons/masque-azerite](https://www.curseforge.com/wow/addons/masque-azerite)
-* AzeriteUI KuiNameplates theme: [www.curseforge.com/wow/addons/kuinameplates-azeriteui](https://www.curseforge.com/wow/addons/kuinameplates-azeriteui)
+* AzeriteUI Masque Theme: [www.curseforge.com/wow/addons/masque-azerite](https://www.curseforge.com/wow/addons/masque-azerite) _(compatible with Classic)_
+* AzeriteUI KuiNameplates theme: [www.curseforge.com/wow/addons/kuinameplates-azeriteui](https://www.curseforge.com/wow/addons/kuinameplates-azeriteui) _(not compatible with Classic)_
 
 ## **Frequently Asked Questions:**  
 ### **It's so big, how can I scale it down?**  
