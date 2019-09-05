@@ -22,14 +22,19 @@ local RegisterAttributeDriver = RegisterAttributeDriver
 local FauxScrollFrame_GetOffset = FauxScrollFrame_GetOffset
 local GetNumQuestLogEntries = GetNumQuestLogEntries
 local GetNumQuestWatches = GetNumQuestWatches
-local GetScreenHeight = GetScreenHeight
+local GetNumSubgroupMembers = GetNumSubgroupMembers
 local GetQuestGreenRange = GetQuestGreenRange
 local GetQuestIndexForWatch = GetQuestIndexForWatch
 local GetQuestLogLeaderBoard = GetQuestLogLeaderBoard
+local GetQuestLogSelection = GetQuestLogSelection
 local GetQuestLogTitle = GetQuestLogTitle
+local GetScreenHeight = GetScreenHeight
+local IsQuestWatched = IsQuestWatched
+local IsUnitOnQuest = IsUnitOnQuest
 
 -- Private API
 local Colors = Private.Colors
+local GetFont = Private.GetFont
 
 -- Returns the correct difficulty color compared to the player
 local GetQuestDifficultyColor = function(level, playerLevel)
@@ -47,132 +52,140 @@ local GetQuestDifficultyColor = function(level, playerLevel)
 	end
 end
 
-Module.StyleLog = function(self)
-	hooksecurefunc("QuestLog_Update", function() 
+local QuestLogTitleButton_OnEnter = function(self)
+	self.Text:SetTextColor(Colors.highlight[1], Colors.highlight[2], Colors.highlight[3])
+	_G[self:GetName().."Tag"]:SetTextColor(Colors.highlight[1], Colors.highlight[2], Colors.highlight[3])
+end
 
-		local numEntries, numQuests = GetNumQuestLogEntries()
+local QuestLogTitleButton_OnLeave = function(self)
+	self.Text:SetTextColor(self.r, self.g, self.b)
+	_G[self:GetName().."Tag"]:SetTextColor(self.r, self.g, self.b)
+end
 
-		local questIndex, questLogTitle, questTitleTag, questNumGroupMates, questNormalText, questHighlight, questCheck
-		local questLogTitleText, level, questTag, isHeader, isCollapsed, isComplete, color
-		local numPartyMembers, partyMembersOnQuest, tempWidth, textWidth
+local QuestLog_Update = function(self)
+	local numEntries, numQuests = GetNumQuestLogEntries()
 
-		for i = 1,QUESTS_DISPLAYED do
-			questIndex = i + FauxScrollFrame_GetOffset(QuestLogListScrollFrame)
-			questLogTitle = _G["QuestLogTitle"..i]
-			questTitleTag = _G["QuestLogTitle"..i.."Tag"]
-			questNumGroupMates = _G["QuestLogTitle"..i.."GroupMates"]
-			questCheck = _G["QuestLogTitle"..i.."Check"]
-			questNormalText = _G["QuestLogTitle"..i.."NormalText"]
-			questHighlight = _G["QuestLogTitle"..i.."Highlight"]
+	local questIndex, questLogTitle, questTitleTag, questNumGroupMates, questNormalText, questHighlight, questCheck
+	local questLogTitleText, level, questTag, isHeader, isCollapsed, isComplete, color
+	local numPartyMembers, partyMembersOnQuest, tempWidth, textWidth
 
-			if (questIndex <= numEntries) then
-				local questLogTitleText, level, questTag, isHeader, isCollapsed, isComplete, frequency, questID, startEvent, displayQuestID, isOnMap, hasLocalPOI, isTask, isBounty, isStory, isHidden, isScaling = GetQuestLogTitle(questIndex)
+	for i = 1,QUESTS_DISPLAYED do
+		questIndex = i + FauxScrollFrame_GetOffset(QuestLogListScrollFrame)
+		questLogTitle = _G["QuestLogTitle"..i]
+		questTitleTag = _G["QuestLogTitle"..i.."Tag"]
+		questNumGroupMates = _G["QuestLogTitle"..i.."GroupMates"]
+		questCheck = _G["QuestLogTitle"..i.."Check"]
+		questNormalText = _G["QuestLogTitle"..i.."NormalText"]
+		questHighlight = _G["QuestLogTitle"..i.."Highlight"]
 
-				if (not isHeader) then 
-					local msg = "  "..questLogTitleText
-					if (level) then 
-						msg = "[" .. level .. "]" .. msg
-					end 
-					questLogTitle:SetText(msg)
+		if (questIndex <= numEntries) then
+			local questLogTitleText, level, questTag, isHeader, isCollapsed, isComplete, frequency, questID, startEvent, displayQuestID, isOnMap, hasLocalPOI, isTask, isBounty, isStory, isHidden, isScaling = GetQuestLogTitle(questIndex)
 
-					--Set Dummy text to get text width *SUPER HACK*
-					QuestLogDummyText:SetText(msg)
-	
-					-- If not a header see if any nearby group mates are on this quest
-					partyMembersOnQuest = 0
-					for j=1, GetNumSubgroupMembers() do
-						if ( IsUnitOnQuest(questIndex, "party"..j) ) then
-							partyMembersOnQuest = partyMembersOnQuest + 1
-						end
-					end
-					if ( partyMembersOnQuest > 0 ) then
-						questNumGroupMates:SetText("["..partyMembersOnQuest.."]")
-					else
-						questNumGroupMates:SetText("")
+			if (not isHeader) then 
+				local msg = "  "..questLogTitleText
+				if (level) then 
+					msg = "[" .. level .. "]" .. msg
+				end 
+				questLogTitle:SetText(msg)
+
+				--Set Dummy text to get text width *SUPER HACK*
+				QuestLogDummyText:SetText(msg)
+
+				-- If not a header see if any nearby group mates are on this quest
+				partyMembersOnQuest = 0
+				for j=1, GetNumSubgroupMembers() do
+					if (IsUnitOnQuest(questIndex, "party"..j) ) then
+						partyMembersOnQuest = partyMembersOnQuest + 1
 					end
 				end
-
-				-- Set the quest tag
-				if ( isComplete and isComplete < 0 ) then
-					questTag = FAILED
-				elseif ( isComplete and isComplete > 0 ) then
-					questTag = COMPLETE
-				end
-				if ( questTag ) then
-					questTitleTag:SetText("("..questTag..")")
-					-- Shrink text to accomdate quest tags without wrapping
-					tempWidth = 275 - 15 - questTitleTag:GetWidth()
-					
-					if ( QuestLogDummyText:GetWidth() > tempWidth ) then
-						textWidth = tempWidth
-					else
-						textWidth = QuestLogDummyText:GetWidth()
-					end
-					
-					questNormalText:SetWidth(tempWidth)
-					
-					-- If there's quest tag position check accordingly
-					questCheck:Hide()
-					if ( IsQuestWatched(questIndex) ) then
-						if ( questNormalText:GetWidth() + 24 < 275 ) then
-							questCheck:SetPoint("LEFT", questLogTitle, "LEFT", textWidth+24, 0)
-						else
-							questCheck:SetPoint("LEFT", questLogTitle, "LEFT", textWidth+10, 0)
-						end
-						questCheck:Show()
-					end
+				if ( partyMembersOnQuest > 0 ) then
+					questNumGroupMates:SetText("["..partyMembersOnQuest.."]")
 				else
-					questTitleTag:SetText("")
-					-- Reset to max text width
-					if ( questNormalText:GetWidth() > 275 ) then
-						questNormalText:SetWidth(260);
-					end
-
-					-- Show check if quest is being watched
-					questCheck:Hide()
-					if ( IsQuestWatched(questIndex) ) then
-						if ( questNormalText:GetWidth() + 24 < 275 ) then
-							questCheck:SetPoint("LEFT", questLogTitle, "LEFT", QuestLogDummyText:GetWidth()+24, 0)
-						else
-							questCheck:SetPoint("LEFT", questNormalText, "LEFT", questNormalText:GetWidth(), 0)
-						end
-						questCheck:Show()
-					end
+					questNumGroupMates:SetText("")
 				end
-
-				-- Color the quest title and highlight according to the difficulty level
-				local playerLevel = UnitLevel("player")
-				if ( isHeader ) then
-					color = Colors.offwhite
-				else
-					color = GetQuestDifficultyColor(level, playerLevel)
-				end
-				questLogTitle:SetNormalFontObject(Private.GetFont(12))
-				questLogTitle.Text:SetTextColor(color[1], color[2], color[3])
-				questTitleTag:SetTextColor(color[1], color[2], color[3])
-				questNumGroupMates:SetTextColor(color[1], color[2], color[3])
-				questLogTitle.r = color[1]
-				questLogTitle.g = color[2]
-				questLogTitle.b = color[3]
 			end
-		end
-	end)
 
+			-- Set the quest tag
+			if ( isComplete and isComplete < 0 ) then
+				questTag = FAILED
+			elseif ( isComplete and isComplete > 0 ) then
+				questTag = COMPLETE
+			end
+			if ( questTag ) then
+				questTitleTag:SetText("("..questTag..")")
+				-- Shrink text to accomdate quest tags without wrapping
+				tempWidth = 275 - 15 - questTitleTag:GetWidth()
+				
+				if ( QuestLogDummyText:GetWidth() > tempWidth ) then
+					textWidth = tempWidth
+				else
+					textWidth = QuestLogDummyText:GetWidth()
+				end
+				
+				questNormalText:SetWidth(tempWidth)
+				
+				-- If there's quest tag position check accordingly
+				questCheck:Hide()
+				if ( IsQuestWatched(questIndex) ) then
+					if ( questNormalText:GetWidth() + 24 < 275 ) then
+						questCheck:SetPoint("LEFT", questLogTitle, "LEFT", textWidth+24, 0)
+					else
+						questCheck:SetPoint("LEFT", questLogTitle, "LEFT", textWidth+10, 0)
+					end
+					questCheck:Show()
+				end
+			else
+				questTitleTag:SetText("")
+				-- Reset to max text width
+				if ( questNormalText:GetWidth() > 275 ) then
+					questNormalText:SetWidth(260);
+				end
+
+				-- Show check if quest is being watched
+				questCheck:Hide()
+				if (IsQuestWatched(questIndex)) then
+					if (questNormalText:GetWidth() + 24 < 275) then
+						questCheck:SetPoint("LEFT", questLogTitle, "LEFT", QuestLogDummyText:GetWidth()+24, 0)
+					else
+						questCheck:SetPoint("LEFT", questNormalText, "LEFT", questNormalText:GetWidth(), 0)
+					end
+					questCheck:Show()
+				end
+			end
+
+			-- Color the quest title and highlight according to the difficulty level
+			local playerLevel = UnitLevel("player")
+			if ( isHeader ) then
+				color = Colors.offwhite
+			else
+				color = GetQuestDifficultyColor(level, playerLevel)
+			end
+
+			local r, g, b = color[1], color[2], color[3]
+			if (QuestLogFrame.selectedButtonID and GetQuestLogSelection() == questIndex) then
+				r, g, b = Colors.highlight[1], Colors.highlight[2], Colors.highlight[3]
+			end
+
+			questLogTitle.r, questLogTitle.g, questLogTitle.b = r, g, b
+			questLogTitle:SetNormalFontObject(GetFont(12))
+			questTitleTag:SetTextColor(r, g, b)
+			questLogTitle.Text:SetTextColor(r, g, b)
+			questNumGroupMates:SetTextColor(r, g, b)
+
+		end
+	end
+end
+
+Module.StyleLog = function(self)
+	-- Just hook the global functions as far as possible
+	hooksecurefunc("QuestLog_Update", QuestLog_Update)
+	hooksecurefunc("QuestLogTitleButton_OnEnter", QuestLogTitleButton_OnEnter)
+	-- These are defined directly in FrameXML
 	local i = 1 
 	while (_G["QuestLogTitle"..i]) do 
-		_G["QuestLogTitle"..i]:HookScript("OnLeave", function(self) 
-			if (self:GetID() ~= (QuestLogFrame.selectedButtonID - FauxScrollFrame_GetOffset(QuestLogListScrollFrame))) then
-				self.Text:SetTextColor(self.r, self.g, self.b)
-				_G[self:GetName().."Tag"]:SetTextColor(self.r, self.g, self.b)
-			end
-		end)
+		_G["QuestLogTitle"..i]:HookScript("OnLeave", QuestLogTitleButton_OnLeave)
 		i = i + 1
 	end
-
-	hooksecurefunc("QuestLogTitleButton_OnEnter", function(self)
-		self.Text:SetTextColor(Colors.highlight[1], Colors.highlight[2], Colors.highlight[3])
-		_G[self:GetName().."Tag"]:SetTextColor(Colors.highlight[1], Colors.highlight[2], Colors.highlight[3])
-	end)
 end
 
 Module.StyleTracker = function(self)
