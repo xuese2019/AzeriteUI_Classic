@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.39-RC] 2019-09-05
+### Changed
+- Changed some inconsistencies in the selection- and highlight coloring of the quest log. 
+
 ## [1.0.38-RC] 2019-09-05
 ### Added
 - Added quest levels to the quest log.
