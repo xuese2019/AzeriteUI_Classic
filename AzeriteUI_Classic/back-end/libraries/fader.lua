@@ -1,4 +1,4 @@
-local LibFader = CogWheel:Set("LibFader", 18)
+local LibFader = CogWheel:Set("LibFader", 21)
 if (not LibFader) then	
 	return
 end
@@ -13,7 +13,6 @@ LibFrame:Embed(LibFader)
 LibEvent:Embed(LibFader)
 
 -- Lua API
-local _G = _G
 local assert = assert
 local debugstack = debugstack
 local error = error
@@ -28,28 +27,31 @@ local table_insert = table.insert
 local type = type
 
 -- WoW API
-local CursorHasItem = _G.CursorHasItem
-local CursorHasSpell = _G.CursorHasSpell
-local GetCursorInfo = _G.GetCursorInfo
-local InCombatLockdown = _G.InCombatLockdown
-local IsInGroup = _G.IsInGroup
-local IsInInstance = _G.IsInInstance
-local RegisterAttributeDriver = _G.RegisterAttributeDriver
-local SpellFlyout = _G.SpellFlyout
-local UnitDebuff = _G.UnitDebuff
-local UnitExists = _G.UnitExists
-local UnitHealth = _G.UnitHealth
-local UnitHealthMax = _G.UnitHealthMax
-local UnitPower = _G.UnitPower
-local UnitPowerMax = _G.UnitPowerMax
-local UnitPowerType = _G.UnitPowerType
-local UnregisterAttributeDriver = _G.UnregisterAttributeDriver
+local CursorHasItem = CursorHasItem
+local CursorHasSpell = CursorHasSpell
+local GetCursorInfo = GetCursorInfo
+local InCombatLockdown = InCombatLockdown
+local IsInGroup = IsInGroup
+local IsInInstance = IsInInstance
+local RegisterAttributeDriver = RegisterAttributeDriver
+local SpellFlyout = SpellFlyout
+local UnitBuff = UnitBuff
+local UnitDebuff = UnitDebuff
+local UnitExists = UnitExists
+local UnitHealth = UnitHealth
+local UnitHealthMax = UnitHealthMax
+local UnitPower = UnitPower
+local UnitPowerMax = UnitPowerMax
+local UnitPowerType = UnitPowerType
+local UnregisterAttributeDriver = UnregisterAttributeDriver
 
 -- WoW Constants
-local DEBUFF_MAX_DISPLAY = _G.DEBUFF_MAX_DISPLAY or 16
+local DEBUFF_MAX_DISPLAY = DEBUFF_MAX_DISPLAY or 16
+local POWER_TYPE_MANA = Enum.PowerType.Mana
 
 -- Player Constants
 local _,playerClass = UnitClass("player")
+local playerLevel = UnitLevel("player")
 
 -- Library registries
 LibFader.embeds = LibFader.embeds or {}
@@ -64,8 +66,6 @@ LibFader.FORCED = nil -- we want this disabled from the start
 local Data = LibFader.data
 local Objects = LibFader.objects
 
--- TODO: Use the upcoming aura filter rewrite for this.
--- TODO2: Add in non-peril debuffs from BfA, and possibly Legion.
 local safeDebuffs = {
 	-- deserters
 	[ 26013] = true, -- PvP Deserter 
@@ -118,6 +118,24 @@ local safeDebuffs = {
 
 	-- BfA
 	[271571] = true, -- Ready! (when doing the "Shell Game" world quests) -- added 8.0.1
+}
+
+local unsafeBuffs = {
+	[  430] = true, -- Drink
+	[  431] = true, -- Drink
+	[  432] = true, -- Drink
+	[ 1133] = true, -- Drink
+	[ 1135] = true, -- Drink
+	[ 1137] = true, -- Drink
+	[10250] = true, -- Drink
+	[22734] = true, -- Drink
+	[24355] = true, -- Drink
+	[25696] = true, -- Drink
+	[26261] = true, -- Drink
+	[26402] = true, -- Drink
+	[26473] = true, -- Drink
+	[26475] = true, -- Drink
+	[29007] = true  -- Drink
 }
 
 -- Syntax check 
@@ -251,8 +269,22 @@ end
 
 -- TODO: Integration with LibAura
 LibFader.CheckAuras = function(self)
+	for i = 1, BUFF_MAX_DISPLAY do
+		local name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = UnitBuff("player", i)
+
+		-- No name means no more debuffs matching the filter
+		if (not name) then
+			break
+		end
+
+		-- Set the flag and return if a filtered buff is encountered
+		if (unsafeBuffs[spellId]) then
+			Data.badAura = true
+			return
+		end
+	end
 	for i = 1, DEBUFF_MAX_DISPLAY do
-		local name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = UnitDebuff("player", i, filter)
+		local name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = UnitDebuff("player", i)
 
 		-- No name means no more debuffs matching the filter
 		if (not name) then
@@ -279,21 +311,29 @@ LibFader.CheckHealth = function(self)
 end 
 
 LibFader.CheckPower = function(self)
-	local _, type = UnitPowerType("player")
-	if (type == "MANA") then 
+	local powerID, powerType = UnitPowerType("player")
+	if (powerType == "MANA") then 
 		local min = UnitPower("player") or 0
 		local max = UnitPowerMax("player") or 0
-		if (max > 0) and (min/max < .95) then 
+		if (max > 0) and (min/max < .75) then 
 			Data.lowPower = true
 			return
 		end 
-	elseif (type == "ENERGY" or type == "FOCUS") then 
+	elseif (powerType == "ENERGY" or powerType == "FOCUS") then 
 		local min = UnitPower("player") or 0
 		local max = UnitPowerMax("player") or 0
 		if (max > 0) and (min/max < .5) then 
 			Data.lowPower = true
 			return
 		end 
+		if (playerClass == "DRUID") then 
+			min = UnitPower("player", POWER_TYPE_MANA) or 0
+			max = UnitPowerMax("player", POWER_TYPE_MANA) or 0
+			if (max > 0) and (min/max < .5) then 
+				Data.lowPower = true
+				return
+			end 
+		end
 	end 
 	Data.lowPower = nil
 end 
@@ -349,7 +389,18 @@ LibFader.OnEvent = function(self, event, ...)
 		self.FORCED = nil
 		self.elapsed = 0
 		self.frame:SetScript("OnUpdate", InitiateDelay)
-
+	
+	elseif (event == "PLAYER_LEVEL_UP") then 
+			local level = ...
+			if (level and (level ~= playerLevel)) then
+				playerLevel = level
+			else
+				local level = UnitLevel("player")
+				if (not playerLevel) or (playerLevel < level) then
+					playerLevel = level
+				end
+			end
+		
 	elseif (event == "PLAYER_REGEN_DISABLED") then 
 		Data.inCombat = true
 
@@ -477,6 +528,7 @@ end
 
 LibFader:RegisterEvent("ZONE_CHANGED_NEW_AREA", "OnEvent")
 LibFader:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
+LibFader:RegisterEvent("PLAYER_LEVEL_UP", "OnEvent")
 LibFader:RegisterEvent("PLAYER_REGEN_DISABLED", "OnEvent") 
 LibFader:RegisterEvent("PLAYER_REGEN_ENABLED", "OnEvent") 
 LibFader:RegisterEvent("PLAYER_TARGET_CHANGED", "OnEvent") 
