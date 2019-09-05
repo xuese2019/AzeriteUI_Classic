@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.38-RC] 2019-09-05
+### Added
+- Added quest levels to the quest log.
+- Added a minor blacklist to the red error messages, mainly filtering out redundant information that was visually available elsewhere in the interface, or just became highly intrusive and spammy. Because we know there's not enough Energy to do that. We know. 
+
+### Changed
+- Using better quest difficulty coloring in the quest log, and not the slightly too easy looking default one. 
+- Improved the Explorer Mode logic for mana for druids, as well as prevented the fading while drinking. 
+
 ## [1.0.37-RC] 2019-09-04
 ### Added
 - Added the command `/clear` to clear the main chat window. Because why not. 
