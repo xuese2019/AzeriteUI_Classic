@@ -107,7 +107,7 @@ colorDB.ui = {
 colorDB.quest = {}
 colorDB.quest.red = createColor(204/255, 26/255, 26/255)
 colorDB.quest.orange = createColor(255/255, 128/255, 64/255)
-colorDB.quest.yellow = createColor(229/255, 178/255, 38/255)
+colorDB.quest.yellow = createColor(255/255, 208/255, 38/255)
 colorDB.quest.green = createColor(89/255, 201/255, 89/255)
 colorDB.quest.gray = createColor(120/255, 120/255, 120/255)
 
