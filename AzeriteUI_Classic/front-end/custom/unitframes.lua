@@ -1217,23 +1217,6 @@ local StyleSmallFrame = function(self, unit, id, Layout, ...)
 		end 
 	end
 
-	-- Absorb Value
-	if Layout.UseAbsorbValue then 
-		local absorbVal = overlay:CreateFontString()
-		if Layout.AbsorbValuePlaceFunction then 
-			absorbVal:SetPoint(Layout.AbsorbValuePlaceFunction(self))
-		else 
-			absorbVal:SetPoint(unpack(Layout.AbsorbValuePlace))
-		end 
-		absorbVal:SetDrawLayer(unpack(Layout.AbsorbValueDrawLayer))
-		absorbVal:SetJustifyH(Layout.AbsorbValueJustifyH)
-		absorbVal:SetJustifyV(Layout.AbsorbValueJustifyV)
-		absorbVal:SetFontObject(Layout.AbsorbValueFont)
-		absorbVal:SetTextColor(unpack(Layout.AbsorbValueColor))
-		self.Health.ValueAbsorb = absorbVal 
-		self.Health.ValueAbsorb.Override = SmallFrame_OverrideValue
-	end 
-
 	if (Layout.HideWhenUnitIsPlayer or Layout.HideWhenTargetIsCritter or Layout.HideWhenUnitIsTarget) then 
 		self.hideWhenUnitIsPlayer = Layout.HideWhenUnitIsPlayer
 		self.hideWhenUnitIsTarget = Layout.HideWhenUnitIsTarget
@@ -1760,23 +1743,6 @@ local StylePartyFrame = function(self, unit, id, Layout, ...)
 		end 
 	end
 
-	-- Absorb Value
-	if Layout.UseAbsorbValue then 
-		local absorbVal = overlay:CreateFontString()
-		if Layout.AbsorbValuePlaceFunction then 
-			absorbVal:SetPoint(Layout.AbsorbValuePlaceFunction(self))
-		else 
-			absorbVal:SetPoint(unpack(Layout.AbsorbValuePlace))
-		end 
-		absorbVal:SetDrawLayer(unpack(Layout.AbsorbValueDrawLayer))
-		absorbVal:SetJustifyH(Layout.AbsorbValueJustifyH)
-		absorbVal:SetJustifyV(Layout.AbsorbValueJustifyV)
-		absorbVal:SetFontObject(Layout.AbsorbValueFont)
-		absorbVal:SetTextColor(unpack(Layout.AbsorbValueColor))
-		self.Health.ValueAbsorb = absorbVal 
-		self.Health.ValueAbsorb.Override = TinyFrame_OverrideValue
-	end 
-
 	-- Target Highlighting
 	-----------------------------------------------------------
 	if Layout.UseTargetHighlight then
@@ -1797,7 +1763,6 @@ local StylePartyFrame = function(self, unit, id, Layout, ...)
 
 		self.TargetHighlight = targetHighlight
 	end
-
 
 end
 
@@ -2250,23 +2215,6 @@ local StyleRaidFrame = function(self, unit, id, Layout, ...)
 			self.Cast.Name = name
 		end 
 	end
-
-	-- Absorb Value
-	if Layout.UseAbsorbValue then 
-		local absorbVal = overlay:CreateFontString()
-		if Layout.AbsorbValuePlaceFunction then 
-			absorbVal:SetPoint(Layout.AbsorbValuePlaceFunction(self))
-		else 
-			absorbVal:SetPoint(unpack(Layout.AbsorbValuePlace))
-		end 
-		absorbVal:SetDrawLayer(unpack(Layout.AbsorbValueDrawLayer))
-		absorbVal:SetJustifyH(Layout.AbsorbValueJustifyH)
-		absorbVal:SetJustifyV(Layout.AbsorbValueJustifyV)
-		absorbVal:SetFontObject(Layout.AbsorbValueFont)
-		absorbVal:SetTextColor(unpack(Layout.AbsorbValueColor))
-		self.Health.ValueAbsorb = absorbVal 
-		self.Health.ValueAbsorb.Override = TinyFrame_OverrideValue
-	end 
 
 	if Layout.UseHealthValue then 
 		self:RegisterEvent("PLAYER_FLAGS_CHANGED", TinyFrame_OnEvent)
@@ -2777,22 +2725,6 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, Layout, ...)
 		healthVal:SetFontObject(Layout.HealthValueFont)
 		healthVal:SetTextColor(unpack(Layout.HealthValueColor))
 		self.Health.Value = healthVal
-	end 
-
-	-- Absorb Value
-	if Layout.UseAbsorbValue then 
-		local absorbVal = overlay:CreateFontString()
-		if Layout.AbsorbValuePlaceFunction then 
-			absorbVal:SetPoint(Layout.AbsorbValuePlaceFunction(self))
-		else 
-			absorbVal:SetPoint(unpack(Layout.AbsorbValuePlace))
-		end 
-		absorbVal:SetDrawLayer(unpack(Layout.AbsorbValueDrawLayer))
-		absorbVal:SetJustifyH(Layout.AbsorbValueJustifyH)
-		absorbVal:SetJustifyV(Layout.AbsorbValueJustifyV)
-		absorbVal:SetFontObject(Layout.AbsorbValueFont)
-		absorbVal:SetTextColor(unpack(Layout.AbsorbValueColor))
-		self.Health.ValueAbsorb = absorbVal 
 	end 
 
 	-- Power Value
@@ -3585,22 +3517,6 @@ UnitStyles.StyleTargetFrame = function(self, unit, id, Layout, ...)
 		healthPerc:SetFontObject(Layout.HealthPercentFont)
 		healthPerc:SetTextColor(unpack(Layout.HealthPercentColor))
 		self.Health.ValuePercent = healthPerc
-	end 
-
-	-- Absorb Value
-	if Layout.UseAbsorbValue then 
-		local absorbVal = overlay:CreateFontString()
-		if Layout.AbsorbValuePlaceFunction then 
-			absorbVal:SetPoint(Layout.AbsorbValuePlaceFunction(self))
-		else 
-			absorbVal:SetPoint(unpack(Layout.AbsorbValuePlace))
-		end 
-		absorbVal:SetDrawLayer(unpack(Layout.AbsorbValueDrawLayer))
-		absorbVal:SetJustifyH(Layout.AbsorbValueJustifyH)
-		absorbVal:SetJustifyV(Layout.AbsorbValueJustifyV)
-		absorbVal:SetFontObject(Layout.AbsorbValueFont)
-		absorbVal:SetTextColor(unpack(Layout.AbsorbValueColor))
-		self.Health.ValueAbsorb = absorbVal 
 	end 
 
 	-- Update textures according to player level

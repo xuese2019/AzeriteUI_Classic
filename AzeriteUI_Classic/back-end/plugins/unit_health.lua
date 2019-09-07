@@ -22,6 +22,8 @@ local UnitIsFriend = _G.UnitIsFriend
 local UnitGUID = _G.UnitGUID
 local UnitHealth = _G.UnitHealth
 local UnitHealthMax = _G.UnitHealthMax
+local UnitInParty = _G.UnitInParty
+local UnitInRaid = _G.UnitInRaid
 local UnitIsConnected = _G.UnitIsConnected
 local UnitIsDeadOrGhost = _G.UnitIsDeadOrGhost
 local UnitIsPlayer = _G.UnitIsPlayer
@@ -105,7 +107,7 @@ if (gameLocale == "zhCN") then
 	end
 end 
 
-local UpdateValues = function(health, unit, min, max)
+local UpdateValues = function(health, unit, min, max, minPerc, maxPerc)
 	local healthValue = health.Value
 	if healthValue then 
 		if healthValue.Override then 
@@ -129,6 +131,7 @@ local UpdateValues = function(health, unit, min, max)
 	end
 	local healthPercent = health.ValuePercent
 	if healthPercent then 
+		local min, max = minPerc or min, maxPerc or max
 		if healthPercent.Override then 
 			healthPercent:Override(unit, min, max)
 		else
@@ -266,12 +269,21 @@ local Update = function(self, event, unit)
 
 	health:SetMinMaxValues(0, maxHealth, forced)
 	health:SetValue(curHealth, forced)
-	health:UpdateValues(unit, curHealth, maxHealth)
 	health:UpdateColors(unit, curHealth, maxHealth)
 
 	-- Always force this to be instant regardless of bar settings. 
 	preview:SetMinMaxValues(0, maxHealth, true)
 	preview:SetValue(curHealth, true)
+
+	local minPerc, maxPerc
+	if not(UnitIsUnit(unit, "player") or UnitIsUnit(unit, "pet") or UnitInParty(unit) or UnitInRaid(unit)) then 
+		minPerc = curHealth
+		maxPerc = maxHealth
+		curHealth = LibPlayerData:UnitHealth(unit) or 0
+		maxHealth = LibPlayerData:UnitHealthMax(unit) or 0
+	end
+
+	health:UpdateValues(unit, curHealth, maxHealth, minPerc, maxPerc)
 
 	if (not health:IsShown()) then 
 		health:Show()
@@ -282,7 +294,7 @@ local Update = function(self, event, unit)
 	end 
 
 	if health.PostUpdate then
-		return health:PostUpdate(unit, curHealth, maxHealth)
+		return health:PostUpdate(unit, curHealth, maxHealth, minPerc, maxPerc)
 	end	
 end
 
@@ -374,5 +386,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (CogWheel("LibUnitFrame", true)), (CogWheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Health", Enable, Disable, Proxy, 36)
+	Lib:RegisterElement("Health", Enable, Disable, Proxy, 37)
 end 

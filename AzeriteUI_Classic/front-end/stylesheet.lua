@@ -675,17 +675,14 @@ local PlayerFrame_CastBarPostUpdate = function(element, unit)
 
 	if ((unitLevel and unitLevel == 1) and (not UnitIsPlayer("target"))) then 
 		health.Value:Hide()
-		health.ValueAbsorb:Hide()
 		cast.Value:Hide()
 		cast.Name:Hide()
 	elseif (cast.casting or cast.channeling) then 
 		health.Value:Hide()
-		health.ValueAbsorb:Hide()
 		cast.Value:Show()
 		cast.Name:Show()
 	else 
 		health.Value:Show()
-		health.ValueAbsorb:Show()
 		cast.Value:Hide()
 		cast.Name:Hide()
 	end 
@@ -704,20 +701,17 @@ local TargetFrame_CastBarPostUpdate = function(element, unit)
 
 	if ((unitLevel and unitLevel == 1) and (not UnitIsPlayer("target"))) then 
 		health.Value:Hide()
-		health.ValueAbsorb:Hide()
 		health.ValuePercent:Hide()
 		cast.Value:Hide()
 		cast.Name:Hide()
 	elseif (cast.casting or cast.channeling) then 
 		health.Value:Hide()
-		health.ValueAbsorb:Hide()
 		health.ValuePercent:Hide()
 		cast.Value:Show()
 		cast.Name:Show()
 	else 
 		health.Value:Show()
-		health.ValueAbsorb:Show()
-		health.ValuePercent:SetShown(isBoss or isPlayer or isEliteOrRare)
+		health.ValuePercent:Show()
 		cast.Value:Hide()
 		cast.Name:Hide()
 	end 
@@ -1966,19 +1960,11 @@ local UnitFramePlayer = {
 	UseHealthValue = true, 
 		HealthValuePlace = { "LEFT", 27, 4 },
 		HealthValueDrawLayer = { "OVERLAY", 1 },
-		HealthValueJustifyH = "CENTER", 
+		HealthValueJustifyH = "LEFT", 
 		HealthValueJustifyV = "MIDDLE", 
 		HealthValueFont = GetFont(18, true),
 		HealthValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
 
-		UseAbsorbValue = true, 
-			AbsorbValuePlaceFunction = function(self) return "LEFT", self.Health.Value, "RIGHT", 13, 0 end, 
-			AbsorbValueDrawLayer = { "OVERLAY", 1 }, 
-			AbsorbValueFont = GetFont(18, true),
-			AbsorbValueJustifyH = "CENTER", 
-			AbsorbValueJustifyV = "MIDDLE",
-			AbsorbValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-	
 	UsePowerBar = true,
 		PowerPlace = { "BOTTOMLEFT", -101, 38 },
 		PowerSize = { 120, 140 },
@@ -2756,7 +2742,7 @@ local UnitFrameTarget = {
 	UseHealthValue = true, 
 		HealthValuePlace = { "RIGHT", -27, 4 },
 		HealthValueDrawLayer = { "OVERLAY", 1 },
-		HealthValueJustifyH = "CENTER", 
+		HealthValueJustifyH = "RIGHT", 
 		HealthValueJustifyV = "MIDDLE", 
 		HealthValueFont = GetFont(18, true),
 		HealthValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
@@ -2764,19 +2750,10 @@ local UnitFrameTarget = {
 	UseHealthPercent = true, 
 		HealthPercentPlace = { "LEFT", 27, 4 },
 		HealthPercentDrawLayer = { "OVERLAY", 1 },
-		HealthPercentJustifyH = "CENTER",
+		HealthPercentJustifyH = "LEFT",
 		HealthPercentJustifyV = "MIDDLE",
 		HealthPercentFont = GetFont(18, true),
 		HealthPercentColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-
-
-		UseAbsorbValue = true, 
-			AbsorbValuePlaceFunction = function(self) return "RIGHT", self.Health.Value, "LEFT", -13, 0 end, 
-			AbsorbValueDrawLayer = { "OVERLAY", 1 }, 
-			AbsorbValueFont = GetFont(18, true),
-			AbsorbValueJustifyH = "CENTER", 
-			AbsorbValueJustifyV = "MIDDLE",
-			AbsorbValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
 
 	UsePowerBar = true,
 		PowerVisibilityFilter = function(element, unit) 
@@ -3105,7 +3082,7 @@ local UnitFrameTarget = {
 			{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
 		},
 		SeasonedHealthValueVisible = true, 
-		SeasonedHealthPercentVisible = false, 
+		SeasonedHealthPercentVisible = true, 
 		SeasonedHealthBackdropPlace = { "CENTER", -1, .5 }, 
 		SeasonedHealthBackdropSize = { 716, 188 },
 		SeasonedHealthBackdropTexture = GetMedia("hp_cap_case"),
@@ -3141,7 +3118,7 @@ local UnitFrameTarget = {
 			{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
 		},
 		HardenedHealthValueVisible = true, 
-		HardenedHealthPercentVisible = false, 
+		HardenedHealthPercentVisible = true, 
 		HardenedHealthBackdropPlace = { "CENTER", -1, -.5 }, 
 		HardenedHealthBackdropSize = { 716, 188 }, 
 		HardenedHealthBackdropTexture = GetMedia("hp_mid_case"),
@@ -3176,7 +3153,7 @@ local UnitFrameTarget = {
 			{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
 		},
 		NoviceHealthValueVisible = true, 
-		NoviceHealthPercentVisible = false, 
+		NoviceHealthPercentVisible = true, 
 		NoviceHealthBackdropPlace = { "CENTER", -1, -.5 }, 
 		NoviceHealthBackdropSize = { 716, 188 }, 
 		NoviceHealthBackdropTexture = GetMedia("hp_low_case"),
