@@ -1180,20 +1180,19 @@ local StyleSmallFrame = function(self, unit, id, Layout, ...)
 		healthVal:SetTextColor(unpack(Layout.HealthValueColor))
 		healthVal.showPercent = Layout.HealthShowPercent
 
-		if Layout.UseHealthPercent then 
-			local healthPerc = health:CreateFontString()
-			healthPerc:SetPoint(unpack(Layout.HealthPercentPlace))
-			healthPerc:SetDrawLayer(unpack(Layout.HealthPercentDrawLayer))
-			healthPerc:SetJustifyH(Layout.HealthPercentJustifyH)
-			healthPerc:SetJustifyV(Layout.HealthPercentJustifyV)
-			healthPerc:SetFontObject(Layout.HealthPercentFont)
-			healthPerc:SetTextColor(unpack(Layout.HealthPercentColor))
-			self.Health.ValuePercent = healthPerc
-		end 
-		
 		self.Health.Value = healthVal
-		self.Health.ValuePercent = healthPerc
 		self.Health.OverrideValue = Layout.HealthValueOverride or SmallFrame_OverrideHealthValue
+	end 
+
+	if Layout.UseHealthPercent then 
+		local healthPerc = health:CreateFontString()
+		healthPerc:SetPoint(unpack(Layout.HealthPercentPlace))
+		healthPerc:SetDrawLayer(unpack(Layout.HealthPercentDrawLayer))
+		healthPerc:SetJustifyH(Layout.HealthPercentJustifyH)
+		healthPerc:SetJustifyV(Layout.HealthPercentJustifyV)
+		healthPerc:SetFontObject(Layout.HealthPercentFont)
+		healthPerc:SetTextColor(unpack(Layout.HealthPercentColor))
+		self.Health.ValuePercent = healthPerc
 	end 
 
 	-- Cast Name

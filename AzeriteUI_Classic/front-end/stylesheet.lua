@@ -731,16 +731,36 @@ local SmallFrame_CastBarPostUpdate = function(element, unit)
 	if (status) then 
 		if (casting) then 
 			status:Hide()
-			health.Value:Hide()
+			if (health.Value) then 
+				health.Value:Hide()
+			end 
+			if (health.ValuePercent) then 
+				health.ValuePercent:Hide()
+			end 
 		elseif (status.status) then 
 			status:Show()
-			health.Value:Hide()
+			if (health.Value) then 
+				health.Value:Hide()
+			end 
+			if (health.ValuePercent) then 
+				health.ValuePercent:Hide()
+			end 
 		else 
 			status:Hide()
-			health.Value:Show()
+			if (health.Value) then 
+				health.Value:Show()
+			end 
+			if (health.ValuePercent) then 
+				health.ValuePercent:Show()
+			end 
 		end 
 	else 
-		health.Value:SetShown(not casting)
+		if (health.Value) then 
+			health.Value:SetShown(not casting)
+		end 
+		if (health.ValuePercent) then 
+			health.ValuePercent:SetShown(not casting)
+		end 
 	end 
 end
 
@@ -1699,15 +1719,13 @@ local Template_SmallFrame = {
 			HealthBackdropDrawLayer = { "BACKGROUND", -1 },
 			HealthBackdropColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
 
-		UseHealthValue = true, 
-			HealthValuePlace = { "CENTER", 0, 0 },
-			HealthValueDrawLayer = { "OVERLAY", 1 },
-			HealthValueJustifyH = "CENTER", 
-			HealthValueJustifyV = "MIDDLE", 
-			HealthValueFont = GetFont(14, true),
-			HealthValueColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
-			HealthShowPercent = true, 
-
+		UseHealthPercent = true, 
+			HealthPercentPlace = { "CENTER", 0, 0 },
+			HealthPercentDrawLayer = { "OVERLAY", 1 },
+			HealthPercentJustifyH = "CENTER", 
+			HealthPercentJustifyV = "MIDDLE", 
+			HealthPercentFont = GetFont(14, true),
+			HealthPercentColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
 
 	UseCastBar = true,
 		CastBarPlace = { "CENTER", 0, 0 },
