@@ -673,7 +673,7 @@ local PlayerFrame_CastBarPostUpdate = function(element, unit)
 	local isBoss = unitClassification == "boss" or unitClassification == "worldboss"
 	local isEliteOrRare = unitClassification == "rare" or unitClassification == "elite" or unitClassification == "rareelite"
 
-	if ((unitLevel and unitLevel == 1) and (not UnitIsPlayer("target"))) then 
+	if ((unitLevel and unitLevel == 1) and (not UnitIsPlayer("player"))) then 
 		health.Value:Hide()
 		cast.Value:Hide()
 		cast.Name:Hide()
