@@ -358,7 +358,11 @@ end
 
 auraFilters.nameplate = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
 
-	if (UnitInParty(unit) or UnitInRaid(unit)) then 
+	local timeLeft 
+	if (expirationTime and expirationTime > 0) then 
+		timeLeft = expirationTime - GetTime()
+	end
+	if (UnitIsUnit(unit, "player") or UnitIsUnit("pet") or UnitInParty(unit) or UnitInRaid(unit)) then 
 		if (timeLeft and (timeLeft > 0) and (timeLeft < 300)) then 
 			return true
 		else
