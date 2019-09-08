@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.41-RC] 2019-09-08
+### Fixed
+- Fixed the wrong function call introduced in the previous build. 
+
 ## [1.0.40-RC] 2019-09-08
 ### Changed
 - All target unit frames (except the tiny critter/novise frame) now shows the unit health percentage on the left side, and will only show the actual health value on the right side when it's currently available. For now that limits it to you, your pet, and your group. 
