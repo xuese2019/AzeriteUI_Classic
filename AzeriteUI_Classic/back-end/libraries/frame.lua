@@ -1,4 +1,4 @@
-local LibFrame = CogWheel:Set("LibFrame", 55)
+local LibFrame = CogWheel:Set("LibFrame", 56)
 if (not LibFrame) then	
 	return
 end
@@ -68,7 +68,7 @@ local round = function(value)
 	return (value + .5) - (value + .5)%1
 end
 
-local SetDisplaySize = function()
+local SetDisplaySizeOld = function()
 
 	--Retrieve UIParent size
 	local width, height = UIParent:GetSize()
@@ -126,6 +126,25 @@ local SetDisplaySize = function()
 	LibFrame.frame:SetScale(scale)
 	LibFrame.frame:SetSize(round(displayWidth), round(displayHeight))
 end 
+local SetDisplaySize = function()
+	local width, height = WorldFrame:GetSize()
+	width = round(width)
+	height = round(height)
+
+	local precision = 1e5
+	local scale = height/1080
+	local displayWidth = (((width/height) >= (16/10)*3) and width/3 or width)/scale
+	local displayHeight = height/scale
+	local displayRatio = displayWidth/displayHeight
+	
+	LibFrame.frame:SetIgnoreParentScale(true)
+	LibFrame.frame:SetFrameStrata(UIParent:GetFrameStrata())
+	LibFrame.frame:SetFrameLevel(UIParent:GetFrameLevel())
+	LibFrame.frame:ClearAllPoints()
+	LibFrame.frame:SetPoint("BOTTOM", UIParent, "BOTTOM")
+	LibFrame.frame:SetScale(scale)
+	LibFrame.frame:SetSize(round(displayWidth), round(displayHeight))
+end
 SetDisplaySize()
 
 -- Keep it and all its children hidden during pet battles. 
