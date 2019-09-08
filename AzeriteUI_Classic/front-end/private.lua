@@ -362,7 +362,7 @@ auraFilters.nameplate = function(element, isBuff, unit, isOwnedByPlayer, name, i
 	if (expirationTime and expirationTime > 0) then 
 		timeLeft = expirationTime - GetTime()
 	end
-	if (UnitIsUnit(unit, "player") or UnitIsUnit("pet") or UnitInParty(unit) or UnitInRaid(unit)) then 
+	if (UnitIsUnit(unit, "player") or UnitIsUnit(unit, "pet") or UnitInParty(unit) or UnitInRaid(unit)) then 
 		if (timeLeft and (timeLeft > 0) and (timeLeft < 300)) then 
 			return true
 		else
