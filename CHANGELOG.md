@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.40-RC] 2019-09-08
+### Changed
+- All target unit frames (except the tiny critter/novise frame) now shows the unit health percentage on the left side, and will only show the actual health value on the right side when it's currently available. For now that limits it to you, your pet, and your group. 
+
+### Fixed
+- Fixed a forgotten upvalue in the target unit frame aura filter which prevented most auras from being shown in combat.
+- Players will now see their health at level 1, they don't have to wait until level 2 anymore. Weird bug. 
+
 ## [1.0.39-RC] 2019-09-05
 ### Changed
 - Changed some inconsistencies in the selection- and highlight coloring of the quest log. 
