@@ -993,7 +993,7 @@ local BindMode = {
 local BlizzardChatFrames = {
 	Colors = Colors,
 
-	DefaultChatFramePlace = { "LEFT", 85, -60 },
+	DefaultChatFramePlace = { "BOTTOMLEFT", 85, 330 }, -- "LEFT", 85, -60
 	DefaultChatFrameSize = { 499, 176 }, -- 519, 196
 	DefaultClampRectInsets = { -54, -54, -310, -330 },
 
