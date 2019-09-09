@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.42-RC] 2019-09-09
+### Changed
+- Move the chat window slightly farther down the screen. 
+- Removed an unannounced experimental feature that I felt belonged in an addon of its own. 
+- Redid the scaling system to just be simpler. 
+
 ## [1.0.41-RC] 2019-09-08
 ### Fixed
 - Fixed the wrong function call introduced in the previous build. 
