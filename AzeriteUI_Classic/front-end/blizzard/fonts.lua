@@ -13,6 +13,7 @@ local _G = _G
 
 -- WoW API
 local GetLocale = _G.GetLocale
+local InCombatLockdown = _G.InCombatLockdown
 local IsAddOnLoaded = _G.IsAddOnLoaded
 local hooksecurefunc = _G.hooksecurefunc
 
@@ -32,11 +33,10 @@ Module.SetFontObjects = function(self)
 end
 
 Module.SetCombatText = function(self)
-
-	-- speed!
-	local CombatText_ClearAnimationList = _G.CombatText_ClearAnimationList
-	local CombatText_FountainScroll = _G.CombatText_FountainScroll
-	local CombatText_StandardScroll = _G.CombatText_StandardScroll
+	if InCombatLockdown() then 
+		self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
+		return 
+	end 
 
 	-- Various globals controlling the FCT
 	_G.NUM_COMBAT_TEXT_LINES = 10 -- 20
@@ -44,7 +44,7 @@ Module.SetCombatText = function(self)
 	_G.COMBAT_TEXT_CRIT_MINHEIGHT = 35 -- 30
 	--COMBAT_TEXT_CRIT_SCALE_TIME = 0.05
 	--COMBAT_TEXT_CRIT_SHRINKTIME = 0.2
-	_G.COMBAT_TEXT_FADEOUT_TIME = .75 -- 1.3
+	_G.COMBAT_TEXT_FADEOUT_TIME = .75 -- 1.3 -- got a taint message on this. Combat taint?
 	_G.COMBAT_TEXT_HEIGHT = 25 -- 25
 	--COMBAT_TEXT_LOW_HEALTH_THRESHOLD = 0.2
 	--COMBAT_TEXT_LOW_MANA_THRESHOLD = 0.2
@@ -56,36 +56,57 @@ Module.SetCombatText = function(self)
 
 	-- Hooking changes to text positions after blizz setting changes, 
 	-- to show the text in positions that work well with our UI. 
-	hooksecurefunc("CombatText_UpdateDisplayedMessages", function() 
-		if ( COMBAT_TEXT_FLOAT_MODE == "1" ) then
-			_G.COMBAT_TEXT_SCROLL_FUNCTION = CombatText_StandardScroll
-			_G.COMBAT_TEXT_LOCATIONS = {
-				startX = 0,
-				startY = 259 * _G.COMBAT_TEXT_Y_SCALE,
-				endX = 0,
-				endY = 389 * _G.COMBAT_TEXT_Y_SCALE
-			}
-		elseif ( COMBAT_TEXT_FLOAT_MODE == "2" ) then
-			_G.COMBAT_TEXT_SCROLL_FUNCTION = CombatText_StandardScroll
-			_G.COMBAT_TEXT_LOCATIONS = {
-				startX = 0,
-				startY = 389 * _G.COMBAT_TEXT_Y_SCALE,
-				endX = 0,
-				endY =  259 * _G.COMBAT_TEXT_Y_SCALE
-			}
-		else
-			_G.COMBAT_TEXT_SCROLL_FUNCTION = CombatText_FountainScroll
-			_G.COMBAT_TEXT_LOCATIONS = {
-				startX = 0,
-				startY = 389 * _G.COMBAT_TEXT_Y_SCALE,
-				endX = 0,
-				endY = 609 * _G.COMBAT_TEXT_Y_SCALE
-			}
-		end
-		CombatText_ClearAnimationList()
-	end)
-
+	hooksecurefunc("CombatText_UpdateDisplayedMessages", function() self:UpdateDisplayedMessages() end)
 end 
+
+Module.UpdateDisplayedMessages = function(self, event, ...)
+	if (InCombatLockdown()) then 
+		self:RegisterEvent("PLAYER_REGEN_ENABLED", "UpdateDisplayedMessages")
+		return 
+	elseif (event == "PLAYER_REGEN_ENABLED") then 
+		self:UnregisterEvent("PLAYER_REGEN_ENABLED", "UpdateDisplayedMessages")
+	end
+	if (COMBAT_TEXT_FLOAT_MODE == "1") then
+		_G.COMBAT_TEXT_SCROLL_FUNCTION = _G.CombatText_StandardScroll
+		_G.COMBAT_TEXT_LOCATIONS = {
+			startX = 0,
+			startY = 259 * _G.COMBAT_TEXT_Y_SCALE,
+			endX = 0,
+			endY = 389 * _G.COMBAT_TEXT_Y_SCALE
+		}
+	elseif (COMBAT_TEXT_FLOAT_MODE == "2") then
+		_G.COMBAT_TEXT_SCROLL_FUNCTION = _G.CombatText_StandardScroll
+		_G.COMBAT_TEXT_LOCATIONS = {
+			startX = 0,
+			startY = 389 * _G.COMBAT_TEXT_Y_SCALE,
+			endX = 0,
+			endY =  259 * _G.COMBAT_TEXT_Y_SCALE
+		}
+	else
+		_G.COMBAT_TEXT_SCROLL_FUNCTION = _G.CombatText_FountainScroll
+		_G.COMBAT_TEXT_LOCATIONS = {
+			startX = 0,
+			startY = 389 * _G.COMBAT_TEXT_Y_SCALE,
+			endX = 0,
+			endY = 609 * _G.COMBAT_TEXT_Y_SCALE
+		}
+	end
+	CombatText_ClearAnimationList()
+end
+
+Module.OnEvent = function(self, event, ...)
+	if (event == "ADDON_LOADED") then 
+		local addon = ...
+		if (addon == "Blizzard_CombatText") then 
+			self:UnregisterEvent("ADDON_LOADED", "OnEvent")
+			self:SetCombatText()
+		end 
+
+	elseif (event == "PLAYER_REGEN_ENABLED") then 
+		self:UnregisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
+		self:SetCombatText()
+	end
+end
 
 Module.PreInit = function(self)
 	local PREFIX = Core:GetPrefix()
@@ -98,15 +119,9 @@ Module.OnInit = function(self)
 	Module:SetFontObjects()
 
 	-- Just modifying floating combat text settings here, nothing else.
-	if IsAddOnLoaded("Blizzard_CombatText") then
+	if (IsAddOnLoaded("Blizzard_CombatText")) then
 		Module:SetCombatText()
 	else
-		Module.HookCombatText = function(self, event, addon, ...)
-			if (addon == "Blizzard_CombatText") then
-				self:SetCombatText()
-				self:UnregisterEvent("ADDON_LOADED", "HookCombatText")
-			end
-		end
-		Module:RegisterEvent("ADDON_LOADED", "HookCombatText")
+		Module:RegisterEvent("ADDON_LOADED", "OnEvent")
 	end
 end
