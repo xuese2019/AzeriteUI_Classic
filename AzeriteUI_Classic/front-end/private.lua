@@ -13,11 +13,11 @@ local tonumber = tonumber
 local unpack = unpack
 
 -- WoW API
-local GetTime = _G.GetTime
-local InCombatLockdown = _G.InCombatLockdown
-local UnitCanAttack = _G.UnitCanAttack
-local UnitIsUnit = _G.UnitIsUnit
-local UnitPlayerControlled = _G.UnitPlayerControlled
+local GetTime = GetTime
+local InCombatLockdown = InCombatLockdown
+local UnitCanAttack = UnitCanAttack
+local UnitIsUnit = UnitIsUnit
+local UnitPlayerControlled = UnitPlayerControlled
 
 -- Addon API
 local GetPlayerRole = CogWheel("LibPlayerData").GetPlayerRole
@@ -362,29 +362,14 @@ end
 
 auraFilters.target = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
 
-	if InCombatLockdown() then 
-		return auraFilters.nameplate(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
-	else
-		return true
-	end 
+	-- Classic limits everything. Just disable the whole filter for now. 
+	return true
 end
 
 auraFilters.nameplate = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
 
-	local timeLeft 
-	if (expirationTime and expirationTime > 0) then 
-		timeLeft = expirationTime - GetTime()
-	end
-	if (UnitIsUnit(unit, "player") or UnitIsUnit(unit, "pet") or UnitInParty(unit) or UnitInRaid(unit)) then 
-		if (timeLeft and (timeLeft > 0) and (timeLeft < 300)) then 
-			return true
-		else
-			return
-		end
-	else 
-		-- This. Is a problem. 
-		return true
-	end 
+	-- Same as above
+	return true
 end 
 
 auraFilters.targettarget = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
