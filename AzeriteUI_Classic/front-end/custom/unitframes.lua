@@ -518,8 +518,10 @@ local SmallFrame_PostUpdateAlpha = function(self)
 	-- Apply the new style
 	if (targetStyle == "Shown") then 
 		self:SetAlpha(1)
+		self:SendMessage("CG_UNITFRAME_TOT_VISIBLE")
 	elseif (targetStyle == "Hidden") then 
 		self:SetAlpha(0)
+		self:SendMessage("CG_UNITFRAME_TOT_INVISIBLE")
 	end
 
 	if self.TargetHighlight then 
@@ -807,6 +809,24 @@ local Target_PostUpdateTextures = function(self)
 	end 
 	
 end 
+
+local Target_PostUpdateName = function(self, event)
+	if (event == "CG_UNITFRAME_TOT_VISIBLE") then 
+		self.totVisible = true
+	elseif (event == "CG_UNITFRAME_TOT_INVISIBLE") then 
+		self.totVisible = nil
+	elseif (event == "CG_UNITFRAME_TOT_SHOWN") then 
+		self.totShown = true
+	elseif (event == "CG_UNITFRAME_TOT_HIDDEN") then
+		self.totShown = nil
+	end
+	if (self.totShown and self.totVisible) then 
+		self.Name:SetWidth(self.Name.smallWidth)
+	else 
+		self.Name:SetWidth(self.Name.fullWidth)
+	end 
+	--print(event, ...)
+end
 
 -----------------------------------------------------------
 -- Templates
@@ -3486,7 +3506,9 @@ UnitStyles.StyleTargetFrame = function(self, unit, id, Layout, ...)
 		name:SetFontObject(Layout.NameFont)
 		name:SetTextColor(unpack(Layout.NameColor))
 		if Layout.NameSize then 
-			name:SetSize(unpack(Layout.NameSize))
+			name.smallWidth = Layout.NameSize[1]
+			name.fullWidth = Layout.Size[1]*2
+			name:SetSize(name.fullWidth, Layout.NameSize[2])
 		end 
 		self.Name = name
 	end 
@@ -3523,6 +3545,11 @@ UnitStyles.StyleTargetFrame = function(self, unit, id, Layout, ...)
 		self.PostUpdateTextures = Target_PostUpdateTextures
 		self:PostUpdateTextures()
 	end 
+
+	self:RegisterMessage("CG_UNITFRAME_TOT_VISIBLE", Target_PostUpdateName)
+	self:RegisterMessage("CG_UNITFRAME_TOT_INVISIBLE", Target_PostUpdateName)
+	self:RegisterMessage("CG_UNITFRAME_TOT_SHOWN", Target_PostUpdateName)
+	self:RegisterMessage("CG_UNITFRAME_TOT_HIDDEN", Target_PostUpdateName)
 end
 
 UnitStyles.StyleToTFrame = function(self, unit, id, Layout, ...)
@@ -3750,6 +3777,8 @@ UnitFrameToT.OnInit = function(self)
 	self.frame = self:SpawnUnitFrame("targettarget", "UICenter", function(frame, unit, id, _, ...)
 		return UnitStyles.StyleToTFrame(frame, unit, id, self.layout, ...)
 	end)
+	self.frame:HookScript("OnShow", function(self) self:SendMessage("CG_UNITFRAME_TOT_SHOWN") end)
+	self.frame:HookScript("OnHide", function(self) self:SendMessage("CG_UNITFRAME_TOT_HIDDEN") end)
 end 
 
 -- Don't load the rest until we can fix it
