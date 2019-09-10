@@ -9,48 +9,56 @@ local Module = Core:NewModule("BlizzardFonts", "LibEvent")
 local Layout
 
 -- Lua API
-local _G = _G
+local ipairs = ipairs
 
 -- WoW API
-local GetLocale = _G.GetLocale
-local InCombatLockdown = _G.InCombatLockdown
-local IsAddOnLoaded = _G.IsAddOnLoaded
-local hooksecurefunc = _G.hooksecurefunc
+local GetLocale = GetLocale
+local InCombatLockdown = InCombatLockdown
+local IsAddOnLoaded = IsAddOnLoaded
+local hooksecurefunc = hooksecurefunc
 
 Module.SetFontObjects = function(self)
 	-- Various chat constants
-	_G.CHAT_FONT_HEIGHTS = { 12, 13, 14, 15, 16, 17, 18, 20, 22, 24, 28, 32 }
+	--CHAT_FONT_HEIGHTS = { 12, 13, 14, 15, 16, 17, 18, 20, 22, 24, 28, 32 }
+	if CHAT_FONT_HEIGHTS then 
+		for i = #CHAT_FONT_HEIGHTS, 1, -1 do  
+			CHAT_FONT_HEIGHTS[i] = nil
+		end 
+		for i,v in ipairs({ 14, 16, 18, 20, 22, 24, 28, 32 }) do 
+			CHAT_FONT_HEIGHTS[i] = v
+		end
+	end 
 
 	-- Chat Font
 	-- This is the cont used by chat windows and inputboxes. 
 	-- When set early enough in the loading process, all windows inherit this.
-	_G.ChatFontNormal:SetFontObject(Layout.ChatFont)
+	ChatFontNormal:SetFontObject(Layout.ChatFont)
 
 	-- Chat Bubble Font
 	-- This is what chat bubbles inherit from. 
 	-- We should use this in our custom bubbles too.
-	_G.ChatBubbleFont:SetFontObject(Layout.ChatBubbleFont)
+	ChatBubbleFont:SetFontObject(Layout.ChatBubbleFont)
 end
 
 Module.SetCombatText = function(self)
-	if InCombatLockdown() then 
+	if (InCombatLockdown()) then 
 		self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
 		return 
 	end 
 
 	-- Various globals controlling the FCT
-	_G.NUM_COMBAT_TEXT_LINES = 10 -- 20
-	_G.COMBAT_TEXT_CRIT_MAXHEIGHT = 70 -- 60
-	_G.COMBAT_TEXT_CRIT_MINHEIGHT = 35 -- 30
+	NUM_COMBAT_TEXT_LINES = 10 -- 20
+	COMBAT_TEXT_CRIT_MAXHEIGHT = 70 -- 60
+	COMBAT_TEXT_CRIT_MINHEIGHT = 35 -- 30
 	--COMBAT_TEXT_CRIT_SCALE_TIME = 0.05
 	--COMBAT_TEXT_CRIT_SHRINKTIME = 0.2
-	_G.COMBAT_TEXT_FADEOUT_TIME = .75 -- 1.3 -- got a taint message on this. Combat taint?
-	_G.COMBAT_TEXT_HEIGHT = 25 -- 25
+	COMBAT_TEXT_FADEOUT_TIME = .75 -- 1.3 -- got a taint message on this. Combat taint?
+	COMBAT_TEXT_HEIGHT = 25 -- 25
 	--COMBAT_TEXT_LOW_HEALTH_THRESHOLD = 0.2
 	--COMBAT_TEXT_LOW_MANA_THRESHOLD = 0.2
 	--COMBAT_TEXT_MAX_OFFSET = 130
-	_G.COMBAT_TEXT_SCROLLSPEED = 1.3 -- 1.9
-	_G.COMBAT_TEXT_SPACING = 2 * _G.COMBAT_TEXT_Y_SCALE --10
+	COMBAT_TEXT_SCROLLSPEED = 1.3 -- 1.9
+	COMBAT_TEXT_SPACING = 2 * COMBAT_TEXT_Y_SCALE --10
 	--COMBAT_TEXT_STAGGER_RANGE = 20
 	--COMBAT_TEXT_X_ADJUSTMENT = 80
 
@@ -66,30 +74,28 @@ Module.UpdateDisplayedMessages = function(self, event, ...)
 	elseif (event == "PLAYER_REGEN_ENABLED") then 
 		self:UnregisterEvent("PLAYER_REGEN_ENABLED", "UpdateDisplayedMessages")
 	end
+	-- Important that we do NOT replace the table down here, 
+	-- as that appears to sometimes taint the UIDropDowns.
+	-- Todo: check if it taints after having been in combat, then opening guild controls.
 	if (COMBAT_TEXT_FLOAT_MODE == "1") then
-		_G.COMBAT_TEXT_SCROLL_FUNCTION = _G.CombatText_StandardScroll
-		_G.COMBAT_TEXT_LOCATIONS = {
-			startX = 0,
-			startY = 259 * _G.COMBAT_TEXT_Y_SCALE,
-			endX = 0,
-			endY = 389 * _G.COMBAT_TEXT_Y_SCALE
-		}
+		COMBAT_TEXT_SCROLL_FUNCTION = CombatText_StandardScroll
+		COMBAT_TEXT_LOCATIONS.startX = 0
+		COMBAT_TEXT_LOCATIONS.startY = 259 * COMBAT_TEXT_Y_SCALE
+		COMBAT_TEXT_LOCATIONS.endX = 0
+		COMBAT_TEXT_LOCATIONS.endY = 389 * COMBAT_TEXT_Y_SCALE
+
 	elseif (COMBAT_TEXT_FLOAT_MODE == "2") then
-		_G.COMBAT_TEXT_SCROLL_FUNCTION = _G.CombatText_StandardScroll
-		_G.COMBAT_TEXT_LOCATIONS = {
-			startX = 0,
-			startY = 389 * _G.COMBAT_TEXT_Y_SCALE,
-			endX = 0,
-			endY =  259 * _G.COMBAT_TEXT_Y_SCALE
-		}
+		COMBAT_TEXT_SCROLL_FUNCTION = CombatText_StandardScroll
+		COMBAT_TEXT_LOCATIONS.startX = 0
+		COMBAT_TEXT_LOCATIONS.startY = 389 * COMBAT_TEXT_Y_SCALE
+		COMBAT_TEXT_LOCATIONS.endX = 0
+		COMBAT_TEXT_LOCATIONS.endY =  259 * COMBAT_TEXT_Y_SCALE
 	else
-		_G.COMBAT_TEXT_SCROLL_FUNCTION = _G.CombatText_FountainScroll
-		_G.COMBAT_TEXT_LOCATIONS = {
-			startX = 0,
-			startY = 389 * _G.COMBAT_TEXT_Y_SCALE,
-			endX = 0,
-			endY = 609 * _G.COMBAT_TEXT_Y_SCALE
-		}
+		COMBAT_TEXT_SCROLL_FUNCTION = CombatText_FountainScroll
+		COMBAT_TEXT_LOCATIONS.startX = 0
+		COMBAT_TEXT_LOCATIONS.startY = 389 * COMBAT_TEXT_Y_SCALE
+		COMBAT_TEXT_LOCATIONS.endX = 0
+		COMBAT_TEXT_LOCATIONS.endY = 609 * COMBAT_TEXT_Y_SCALE
 	end
 	CombatText_ClearAnimationList()
 end
@@ -118,7 +124,8 @@ Module.OnInit = function(self)
 	-- and the size, style and shadow of the chat bubble font.  
 	Module:SetFontObjects()
 
-	-- Just modifying floating combat text settings here, nothing else.
+	-- Note: This whole damn thing taints in Classic, or is it from somewhere else?
+	-- After disabling it, the same guildcontrol taint still occurred, just with no named source. Weird. 
 	if (IsAddOnLoaded("Blizzard_CombatText")) then
 		Module:SetCombatText()
 	else
