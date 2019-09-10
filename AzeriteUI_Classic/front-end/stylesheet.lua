@@ -993,13 +993,13 @@ local BindMode = {
 local BlizzardChatFrames = {
 	Colors = Colors,
 
-	DefaultChatFramePlace = { "BOTTOMLEFT", 85, 330 }, -- "LEFT", 85, -60
+	DefaultChatFramePlace = { "BOTTOMLEFT", 85, 350 }, -- "LEFT", 85, -60
 	DefaultChatFrameSize = { 499, 176 }, -- 519, 196
-	DefaultClampRectInsets = { -54, -54, -310, -330 },
+	DefaultClampRectInsets = { -54, -54, -310, -350 },
 
 	AlternateChatFramePlace = { "TOPLEFT", 85, -64 },
 	AlternateChatFrameSize = { 499, 176 }, -- 519, 196
-	AlternateClampRectInsets = { -54, -54, -310, -330 },
+	AlternateClampRectInsets = { -54, -54, -310, -350 },
 
 	ChatFadeTime = 5, 
 	ChatVisibleTime = 15, 
