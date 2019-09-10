@@ -93,9 +93,7 @@ colorDB.health = createColor(245/255, 0/255, 45/255)
 colorDB.cast = createColor(229/255, 204/255, 127/255)
 colorDB.disconnected = createColor(120/255, 120/255, 120/255)
 colorDB.tapped = createColor(121/255, 101/255, 96/255)
---colorDB.tapped = createColor(161/255, 141/255, 120/255)
 colorDB.dead = createColor(121/255, 101/255, 96/255)
---colorDB.dead = createColor(73/255, 25/255, 9/255)
 
 -- Global UI vertex coloring
 colorDB.ui = {
@@ -130,12 +128,10 @@ colorDB.class = {}
 colorDB.class.DEATHKNIGHT = createColor(176/255, 31/255, 79/255)
 colorDB.class.DEMONHUNTER = createColor(163/255, 48/255, 201/255)
 colorDB.class.DRUID = createColor(255/255, 125/255, 10/255)
---colorDB.class.DRUID = createColor(191/255, 93/255, 7/255)
 colorDB.class.HUNTER = createColor(191/255, 232/255, 115/255) 
 colorDB.class.MAGE = createColor(105/255, 204/255, 240/255)
 colorDB.class.MONK = createColor(0/255, 255/255, 150/255)
 colorDB.class.PALADIN = createColor(225/255, 160/255, 226/255)
---colorDB.class.PALADIN = createColor(245/255, 140/255, 186/255)
 colorDB.class.PRIEST = createColor(176/255, 200/255, 225/255)
 colorDB.class.ROGUE = createColor(255/255, 225/255, 95/255) 
 colorDB.class.SHAMAN = createColor(32/255, 122/255, 222/255) 
@@ -241,11 +237,6 @@ colorDB.threat[0] = colorDB.reaction[4] -- not really on the threat table
 colorDB.threat[1] = createColor(249/255, 158/255, 35/255) -- tanks having lost threat, dps overnuking 
 colorDB.threat[2] = createColor(255/255, 96/255, 12/255) -- tanks about to lose threat, dps getting aggro
 colorDB.threat[3] = createColor(255/255, 0/255, 0/255) -- securely tanking, or totally fucked :) 
---colorDB.threat[0] = createColor(175/255, 165/255, 155/255) 
---colorDB.threat[1] = createColor(255/255, 128/255, 64/255)  
---colorDB.threat[2] = createColor(255/255, 64/255, 12/255) 
---colorDB.threat[3] = createColor(255/255, 0/255, 0/255)  
---colorDB.reaction[8] = colorDB.threat[1] -- just testing
 
 -- zone names
 colorDB.zone = {}
