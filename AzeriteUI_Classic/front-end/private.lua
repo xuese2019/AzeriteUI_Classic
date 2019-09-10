@@ -36,6 +36,24 @@ local unitIsPlayer = { player = true, 	pet = true, vehicle = true }
 
 -- Utility Functions
 -----------------------------------------------------------------
+-- Emulate some of the Blizzard methods, 
+-- since they too do colors this way now. 
+-- Goal is not to be fully interchangeable. 
+local colorTemplate = {
+	GetRGB = function(self)
+		return self[1], self[2], self[3]
+	end,
+	GetRGBAsBytes = function(self)
+		return self[1]*255, self[2]*255, self[3]*255
+	end, 
+	GenerateHexColor = function(self)
+		return ("ff%02x%02x%02x"):format(math_floor(self[1]*255), math_floor(self[2]*255), math_floor(self[3]*255))
+	end, 
+	GenerateHexColorMarkup = function(self)
+		return "|c" .. self:GenerateHexColor()
+	end
+}
+
 -- Convert a Blizzard Color or RGB value set 
 -- into our own custom color table format. 
 local createColor = function(...)
@@ -53,8 +71,12 @@ local createColor = function(...)
 	else
 		tbl = { ... }
 	end
+	for name,method in pairs(colorTemplate) do 
+		tbl[name] = method
+	end
 	if (#tbl == 3) then
-		tbl.colorCode = ("|cff%02x%02x%02x"):format(math_floor(tbl[1]*255), math_floor(tbl[2]*255), math_floor(tbl[3]*255))
+		tbl.colorCode = tbl:GenerateHexColorMarkup()
+		tbl.colorCodeClean = tbl:GenerateHexColor()
 	end
 	return tbl
 end
