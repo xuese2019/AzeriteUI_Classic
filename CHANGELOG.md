@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.44-RC] 2019-09-11
+### Changed
+- I made something just about twenty percent brighter then they needed to be. Now hush! 
+
 ## [1.0.43-RC] 2019-09-10
 ### Changed
 - Disabling aura filters for now, until we can get a proper combat event tracking system in place, and maybe some durations for class abilities too.
