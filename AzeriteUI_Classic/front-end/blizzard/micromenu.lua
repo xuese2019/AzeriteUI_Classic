@@ -256,7 +256,7 @@ Module.AddOptionsToMenuButton = function(self)
 
 		local ToggleButton = self:GetToggleButton()
 		ToggleButton:SetFrameRef("MicroMenu", self:GetConfigWindow())
-		ToggleButton:SetAttribute("leftclick", [[
+		ToggleButton:SetAttribute("middleclick", [[
 			local window = self:GetFrameRef("MicroMenu");
 			if window:IsShown() then
 				window:Hide();
@@ -280,7 +280,7 @@ Module.AddOptionsToMenuButton = function(self)
 		for reference,frame in pairs(self:GetAutoHideReferences()) do 
 			self:GetConfigWindow():SetFrameRef(reference,frame)
 		end 
-		ToggleButton.leftButtonTooltip = L["%s to toggle Blizzard Menu."]:format(L["<Left-Click>"])
+		ToggleButton.middleButtonTooltip = "|TInterface\\TutorialFrame\\UI-TUTORIAL-FRAME:20:15:0:0:512:512:1:76:118:218|t " .. L["Game Panels"]
 	end 
 end 
 

@@ -226,9 +226,9 @@ local MenuWindow_OnHide = function(self)
 end
 
 Toggle.OnEnter = function(self)
-	if (not self.leftButtonTooltip) and (not self.rightButtonTooltip) then 
+	if (not self.leftButtonTooltip) and (not self.rightButtonTooltip) and (not self.middleButtonTooltip) then 
 		return 
-	end 
+	end
 	local tooltip = Module:GetOptionsMenuTooltip()
 	local window = Module:GetConfigWindow()
 	if window:IsShown() then 
@@ -237,19 +237,19 @@ Toggle.OnEnter = function(self)
 		end 
 		return 
 	end 
-	local Colors = Layout.Colors
+	local r,g,b = Layout.Colors.quest.green[1], Layout.Colors.quest.green[2], Layout.Colors.quest.green[3]
 	tooltip:SetDefaultAnchor(self)
-	tooltip:AddLine(L["Main Menu"], Colors.title[1], Colors.title[2], Colors.title[3])
-	tooltip:AddLine(L["Click here to get access to game panels."], Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], true)
-	if self.leftButtonTooltip then 
-		tooltip:AddLine(self.leftButtonTooltip, Colors.quest.green[1], Colors.quest.green[2], Colors.quest.green[3], true)
-	end 
-	if self.rightButtonTooltip then 
-		tooltip:AddLine(self.rightButtonTooltip, Colors.quest.green[1], Colors.quest.green[2], Colors.quest.green[3], true)
-	end 
-	if self.middleButtonTooltip then 
-		tooltip:AddLine(self.middleButtonTooltip, Colors.quest.green[1], Colors.quest.green[2], Colors.quest.green[3], true)
-	end 
+
+	if (self.leftButtonTooltip) then
+		tooltip:AddLine(self.leftButtonTooltip, r,g,b, true)
+	end
+	if (self.middleButtonTooltip) then
+		tooltip:AddLine(self.middleButtonTooltip, r,g,b, true)
+	end
+	if (self.rightButtonTooltip) then
+		tooltip:AddLine(self.rightButtonTooltip, r,g,b, true)
+	end
+
 	tooltip:Show()
 end
 
@@ -614,15 +614,15 @@ Module.AddOptionsToMenuButton = function(self)
 		local toggleButton = self:GetToggleButton()
 		toggleButton:SetFrameRef("OptionsMenu", menuWindow)
 		toggleButton:SetAttribute("rightclick", secureSnippets.menuToggle)
-		toggleButton:SetAttribute("middleclick", secureSnippets.bagToggle)
+		toggleButton:SetAttribute("leftclick", secureSnippets.bagToggle)
 		toggleButton.ToggleAllBags = function(self)
 			ToggleAllBags()
 		end
 		for reference,frame in pairs(self:GetAutoHideReferences()) do 
 			menuWindow:SetFrameRef(reference,frame)
 		end 
-		toggleButton.middleButtonTooltip = L["%s to toggle your Bags."]:format(L["<Middle-Click>"])
-		toggleButton.rightButtonTooltip = L["%s to toggle Options Menu."]:format(L["<Right-Click>"])
+		toggleButton.leftButtonTooltip = "|TInterface\\TutorialFrame\\UI-TUTORIAL-FRAME:20:15:0:0:512:512:1:76:218:318|t " .. BACKPACK_TOOLTIP
+		toggleButton.rightButtonTooltip = "|TInterface\\TutorialFrame\\UI-TUTORIAL-FRAME:20:15:0:0:512:512:1:76:321:421|t " .. OPTIONS_MENU
 	end
 end 
 
