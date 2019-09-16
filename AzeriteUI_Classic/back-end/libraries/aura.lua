@@ -1,4 +1,4 @@
-local LibAura = CogWheel:Set("LibAura", 8)
+local LibAura = CogWheel:Set("LibAura", 9)
 if (not LibAura) then	
 	return
 end
@@ -39,6 +39,7 @@ local type = type
 -- WoW API
 local GetSpellInfo = _G.GetSpellInfo
 local UnitAura = _G.UnitAura
+local UnitIsUnit = _G.UnitIsUnit
 
 -- WoW Constants
 local BUFF_MAX_DISPLAY = _G.BUFF_MAX_DISPLAY
@@ -171,13 +172,19 @@ LibAura.CacheUnitAurasByFilter = function(self, unit, filter)
 	-- Retrieve the aura cache for this unit and filter
 	local cache = Cache[unit][filter]
 
-	-- Clear info flags from the cache
+	-- Figure out if this is a unit we can get more info about
+	local queryUnit
+	if (UnitIsUnit(unit, "player")) then 
+		queryUnit = "player"
+	elseif (UnitIsUnit(unit, "pet")) then 
+		queryUnit = "pet"
+	end
 
 	local counter, limit = 0, string_match(filter, "HARMFUL") and DEBUFF_MAX_DISPLAY or BUFF_MAX_DISPLAY
 	for i = 1,limit do 
 
 		-- Retrieve buff information
-		local name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = UnitAura(unit, i, filter)
+		local name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = UnitAura(queryUnit or unit, i, filter)
 
 		-- No name means no more buffs matching the filter
 		if (not name) then
