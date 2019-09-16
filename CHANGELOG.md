@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.45-RC] 2019-09-16
+### Changed
+- Switch the middle- and left mouse button actions on our config button, and made the tooltip a bit more directly descriptive. 
+
+### Fixed
+- Fixed a potential nil bug in the quest tracker. I was unable to reproduce this, but put in a safeguard. 
+
 ## [1.0.44-RC] 2019-09-11
 ### Changed
 - I made something just about twenty percent brighter then they needed to be. Now hush! 
