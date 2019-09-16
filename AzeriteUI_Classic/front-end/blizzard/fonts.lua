@@ -115,8 +115,7 @@ Module.OnEvent = function(self, event, ...)
 end
 
 Module.PreInit = function(self)
-	local PREFIX = Core:GetPrefix()
-	Layout = CogWheel("LibDB"):GetDatabase(PREFIX..":[BlizzardFonts]")
+	Layout = CogWheel("LibDB"):GetDatabase(Core:GetPrefix()..":[BlizzardFonts]")
 end
 
 Module.OnInit = function(self)
