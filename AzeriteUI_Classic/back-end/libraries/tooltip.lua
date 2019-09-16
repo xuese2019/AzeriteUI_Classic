@@ -1,4 +1,4 @@
-local LibTooltip = CogWheel:Set("LibTooltip", 55)
+local LibTooltip = CogWheel:Set("LibTooltip", 56)
 if (not LibTooltip) then	
 	return
 end
@@ -254,7 +254,7 @@ local createNewLinePair = function(tooltip, lineIndex)
 	left:SetFontObject((lineIndex == 1) and FONT_TITLE or FONT_NORMAL)
 	left:SetTextColor(tooltip.colors.offwhite[1], tooltip.colors.offwhite[2], tooltip.colors.offwhite[3])
 	left:SetJustifyH("LEFT")
-	left:SetJustifyV("TOP")
+	left:SetJustifyV("MIDDLE")
 	left:SetIndentedWordWrap(false)
 	left:SetWordWrap(false)
 	left:SetNonSpaceWrap(false)
@@ -268,7 +268,7 @@ local createNewLinePair = function(tooltip, lineIndex)
 	right:SetFontObject((lineIndex == 1) and FONT_TITLE or FONT_NORMAL)
 	right:SetTextColor(tooltip.colors.offwhite[1], tooltip.colors.offwhite[2], tooltip.colors.offwhite[3])
 	right:SetJustifyH("RIGHT")
-	right:SetJustifyV("TOP") 
+	right:SetJustifyV("MIDDLE") 
 	right:SetIndentedWordWrap(false)
 	right:SetWordWrap(false)
 	right:SetNonSpaceWrap(false)
