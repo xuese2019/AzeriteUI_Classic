@@ -383,7 +383,11 @@ Module.StyleTracker = function(self)
 			line = _G["QuestWatchLine"..lineID]
 		end
 
-		QuestWatchFrame:SetHeight(top - bottom)
+		-- Avoid a nil bug that sometimes can happen with no objectives tracked, 
+		-- in weird circumstances I have been unable to reproduce. 
+		if (top and bottom) then 
+			QuestWatchFrame:SetHeight(top - bottom)
+		end
 
 	end)
 end
