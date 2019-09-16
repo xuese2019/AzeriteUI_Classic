@@ -81,13 +81,14 @@ L["%s to enable sticky bars."] = true
 -- *Doing it this way to keep the localization file generic, 
 --  while making sure the end result still is personalized to the addon.
 L["Main Menu"] = ADDON
+L["Game Panels"] = true
 L["Click here to get access to game panels."] = "Click here to get access to the various in-game windows such as the character paperdoll, spellbook, talents and similar, or to change various settings for the actionbars."
 
 -- These should be fairly short to fit in a single line without 
 -- having the tooltip grow to very high widths. 
-L["%s to toggle Blizzard Menu."] = "%s to toggle Blizzard Micro Menu."
-L["%s to toggle Options Menu."] = "%s to toggle "..ADDON.." Options Menu."
-L["%s to toggle your Bags."] = true
+L["%s to toggle Blizzard Menu."] = "%s to toggle the micro menu."
+L["%s to toggle Options Menu."] = "%s to toggle "..ADDON.." menu."
+L["%s to toggle your Bags."] = "%s to toggle your bags."
 
 -- Config Menu
 --------------------------------------------
