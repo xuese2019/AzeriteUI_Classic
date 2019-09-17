@@ -1,5 +1,8 @@
+-- Well this is fully broken in Classic, it seems. 
+do 
+	return 
+end 
 local ADDON, Private = ...
-
 local Core = CogWheel("LibModule"):GetModule(ADDON)
 if (not Core) then 
 	return 
