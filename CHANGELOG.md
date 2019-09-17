@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.46-RC] 2019-09-17
+### Removed
+- Removed our anti-spam chat throttle filter that was working fine in BfA, as it's fully borked in Classic and probably the cause of all the missing chat messages in new chat windows that people have been experiencing. 
+
 ## [1.0.45-RC] 2019-09-16
 ### Changed
 - Switch the middle- and left mouse button actions on our config button, and made the tooltip a bit more directly descriptive. 
