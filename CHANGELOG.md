@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.47-RC] 2019-09-18
+### Changed
+- If Leatrix Maps or Enhanced World Map for WoW Classic is loaded, this addon won't interfere with the World Map anymore.
+
 ## [1.0.46-RC] 2019-09-17
 ### Removed
 - Removed our anti-spam chat throttle filter that was working fine in BfA, as it's fully borked in Classic and probably the cause of all the missing chat messages in new chat windows that people have been experiencing. 
