@@ -6,6 +6,7 @@ with static layout data used during the setup phase.
 --]]--
 
 local ADDON, Private = ...
+local Layouts = {}
 
 local L = CogWheel("LibLocale"):GetLocale(ADDON)
 local LibDB = CogWheel("LibDB")
@@ -15,8 +16,10 @@ local LibDB = CogWheel("LibDB")
 ------------------------------------------------
 -- Lua API
 local _G = _G
+local math_ceil = math.ceil
 local math_cos = math.cos
 local math_floor = math.floor
+local math_max = math.max
 local math_pi = math.pi 
 local math_sin = math.sin
 local setmetatable = setmetatable
@@ -45,6 +48,9 @@ local Colors = Private.Colors
 -- Just because we repeat them so many times
 local MenuButtonFontSize, MenuButtonW, MenuButtonH = 14, 300, 50
 
+-- Generic single colored texture
+local BLANK_TEXTURE = [[Interface\ChatFrame\ChatFrameBackground]]
+
 ------------------------------------------------
 -- Utility Functions
 ------------------------------------------------
@@ -54,7 +60,7 @@ local degreesToRadians = function(degrees)
 end 
 
 ------------------------------------------------
--- Module Updates
+-- Module Callbacks
 ------------------------------------------------
 local Core_Window_CreateBorder = function(self)
 	local mod = 1 -- .75
@@ -790,7 +796,6 @@ local Core = {
 		--UnitFrameRaid = true,
 		UnitFrameBoss = true,
 		--Warnings = true,
-		WorldMap = true, -- only fixes it
 		ZoneText = true
 	},
 	DisableUIMenuPages = {
@@ -1659,6 +1664,13 @@ local TooltipStyling = {
 	PostCreateTooltip = Tooltip_PostCreate,
 	PostCreateLinePair = Tooltip_LinePair_PostCreate, 
 	PostCreateBar = Tooltip_Bar_PostCreate
+}
+
+------------------------------------------------
+-- Module Layouts
+------------------------------------------------
+Layouts.BlizzardWorldMap = {
+
 }
 
 ------------------------------------------------------------------
@@ -3955,7 +3967,6 @@ local UnitFrameRaid = setmetatable({
 
 }, { __index = Template_TinyFrame })
 
-
 LibDB:NewDatabase(ADDON..":[Core]", Core)
 LibDB:NewDatabase(ADDON..":[ActionBarMain]", ActionBars)
 LibDB:NewDatabase(ADDON..":[Bindings]", BindMode)
@@ -3981,3 +3992,9 @@ LibDB:NewDatabase(ADDON..":[UnitFrameBoss]", UnitFrameBoss)
 LibDB:NewDatabase(ADDON..":[UnitFrameArena]", UnitFrameArena)
 LibDB:NewDatabase(ADDON..":[UnitFrameParty]", UnitFrameParty)
 LibDB:NewDatabase(ADDON..":[UnitFrameRaid]", UnitFrameRaid)
+
+------------------------------------------------
+-- Private Addon API
+------------------------------------------------
+-- Retrieve layout
+Private.GetLayout = function(moduleName) return Layouts[moduleName] end 
