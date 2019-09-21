@@ -555,6 +555,10 @@ ActionButton.PostCreate = function(self, ...)
 
 	self:SetSize(unpack(Layout.ButtonSize))
 
+	if Layout.ButtonHitRects then
+		self:SetHitRectInsets(unpack(Layout.ButtonHitRects))
+	end
+
 	-- Assign our own global custom colors
 	self.colors = Layout.Colors or self.colors
 

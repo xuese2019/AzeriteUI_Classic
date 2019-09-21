@@ -848,6 +848,7 @@ local ActionBars = {
 	-------------------------------------------------------
 	-- Generic
 	ButtonSize = { 64, 64 },
+	ButtonHitRects = { -4, -4, -4, -4 },
 	MaskTexture = GetMedia("actionbutton_circular_mask"),
 
 	-- Icon
@@ -1949,6 +1950,8 @@ local UnitFramePlayer = {
 
 	Place = { "BOTTOMLEFT", 167, 100 },
 	Size = { 439, 93 },
+	HitRectInsets = { 0, 0, 0, 6 }, 
+
 	ExplorerHitRects = { 60, 0, -140, 0 },
 	
 	UseBorderBackdrop = false,
