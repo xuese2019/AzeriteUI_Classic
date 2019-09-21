@@ -56,6 +56,7 @@ local IsXPUserDisabled = _G.IsXPUserDisabled
 local RegisterAttributeDriver = _G.RegisterAttributeDriver
 local UnitClass = _G.UnitClass
 local UnitClassification = _G.UnitClassification
+local UnitCreatureType = _G.UnitCreatureType
 local UnitExists = _G.UnitExists
 local UnitIsConnected = _G.UnitIsConnected
 local UnitIsDeadOrGhost = _G.UnitIsDeadOrGhost
@@ -481,54 +482,6 @@ local SmallFrame_OverrideHealthValue = function(element, unit, min, max, disconn
 	end 
 end 
 
-local SmallFrame_PostUpdateAlpha = function(self)
-	local unit = self.unit
-	if (not unit) then 
-		return 
-	end 
-
-	local targetStyle
-
-	-- Hide it when tot is the same as the target
-	if self.hideWhenUnitIsPlayer and (UnitIsUnit(unit, "player")) then 
-		targetStyle = "Hidden"
-
-	elseif self.hideWhenUnitIsTarget and (UnitIsUnit(unit, "target")) then 
-		targetStyle = "Hidden"
-
-	elseif self.hideWhenTargetIsCritter then 
-		local level = UnitLevel("target")
-		if ((level and level == 1) and (not UnitIsPlayer("target"))) then 
-			targetStyle = "Hidden"
-		else 
-			targetStyle = "Shown"
-		end 
-	else 
-		targetStyle = "Shown"
-	end 
-
-	-- Silently return if there was no change
-	if (targetStyle == self.alphaStyle) then 
-		return 
-	end 
-
-	-- Store the new style
-	self.alphaStyle = targetStyle
-
-	-- Apply the new style
-	if (targetStyle == "Shown") then 
-		self:SetAlpha(1)
-		self:SendMessage("CG_UNITFRAME_TOT_VISIBLE")
-	elseif (targetStyle == "Hidden") then 
-		self:SetAlpha(0)
-		self:SendMessage("CG_UNITFRAME_TOT_INVISIBLE")
-	end
-
-	if self.TargetHighlight then 
-		self.TargetHighlight:ForceUpdate()
-	end
-end
-
 local TinyFrame_OverrideValue = function(element, unit, min, max, disconnected, dead, tapped)
 	if (min >= 1e8) then 		element.Value:SetFormattedText("%.0fm", min/1e6)  -- 100m, 1000m, 2300m, etc
 	elseif (min >= 1e6) then 	element.Value:SetFormattedText("%.1fm", min/1e6)  -- 1.0m - 99.9m 
@@ -717,6 +670,7 @@ local Target_PostUpdateTextures = function(self)
 	local targetLevel = UnitLevel("target") or 0
 	local maxLevel = GetEffectiveExpansionMaxLevel()
 	local classification = UnitClassification("target")
+	local creatureType = UnitCreatureType("target")
 
 	if UnitIsPlayer("target") then 
 		if ((targetLevel >= maxLevel) or (UnitIsUnit("target", "player") and (not PlayerHasXP()))) then 
@@ -732,7 +686,7 @@ local Target_PostUpdateTextures = function(self)
 		targetStyle = "Seasoned"
 	elseif (targetLevel >= Layout.HardenedLevel) then 
 		targetStyle = "Hardened"
-	elseif (targetLevel == 1) then 
+	elseif (creatureType == "Critter") then 
 		targetStyle = "Critter"
 	else
 		targetStyle = "Novice" 
@@ -810,7 +764,7 @@ local Target_PostUpdateTextures = function(self)
 	
 end 
 
-local Target_PostUpdateName = function(self, event)
+local Target_PostUpdateName = function(self, event, ...)
 	if (event == "CG_UNITFRAME_TOT_VISIBLE") then 
 		self.totVisible = true
 	elseif (event == "CG_UNITFRAME_TOT_INVISIBLE") then 
@@ -820,12 +774,63 @@ local Target_PostUpdateName = function(self, event)
 	elseif (event == "CG_UNITFRAME_TOT_HIDDEN") then
 		self.totShown = nil
 	end
-	if (self.totShown and self.totVisible) then 
+	if (self.totShown and self.totVisible and (not self.Name.usingSmallWidth)) then 
+		self.Name.usingSmallWidth = true
 		self.Name:SetWidth(self.Name.smallWidth)
-	else 
+		UnitFrameTarget:AddDebugMessageFormatted("UnitFrameTarget changed name element width to small.")
+	elseif (self.Name.usingSmallWidth) then
+		self.Name.usingSmallWidth = nil
 		self.Name:SetWidth(self.Name.fullWidth)
+		UnitFrameTarget:AddDebugMessageFormatted("UnitFrameTarget changed name element width to full.")
 	end 
-	--print(event, ...)
+end
+
+local ToTFrame_PostUpdateAlpha = function(self)
+	local unit = self.unit
+	if (not unit) then 
+		return 
+	end 
+
+	local targetStyle
+
+	-- Hide it when tot is the same as the target
+	if self.hideWhenUnitIsPlayer and (UnitIsUnit(unit, "player")) then 
+		targetStyle = "Hidden"
+
+	elseif self.hideWhenUnitIsTarget and (UnitIsUnit(unit, "target")) then 
+		targetStyle = "Hidden"
+
+	elseif self.hideWhenTargetIsCritter then 
+		local level = UnitLevel("target")
+		if ((level and level == 1) and (not UnitIsPlayer("target"))) then 
+			targetStyle = "Hidden"
+		else 
+			targetStyle = "Shown"
+		end 
+	else 
+		targetStyle = "Shown"
+	end 
+
+	-- Silently return if there was no change
+	if (targetStyle == self.alphaStyle) then 
+		return 
+	end 
+
+	-- Store the new style
+	self.alphaStyle = targetStyle
+
+	-- Apply the new style
+	if (targetStyle == "Shown") then 
+		self:SetAlpha(1)
+		self:SendMessage("CG_UNITFRAME_TOT_VISIBLE")
+	elseif (targetStyle == "Hidden") then 
+		self:SetAlpha(0)
+		self:SendMessage("CG_UNITFRAME_TOT_INVISIBLE")
+	end
+
+	if self.TargetHighlight then 
+		self.TargetHighlight:ForceUpdate()
+	end
 end
 
 -----------------------------------------------------------
@@ -1236,12 +1241,12 @@ local StyleSmallFrame = function(self, unit, id, Layout, ...)
 		end 
 	end
 
-	if (Layout.HideWhenUnitIsPlayer or Layout.HideWhenTargetIsCritter or Layout.HideWhenUnitIsTarget) then 
+	if (unit == "targettarget") and (Layout.HideWhenUnitIsPlayer or Layout.HideWhenTargetIsCritter or Layout.HideWhenUnitIsTarget) then 
 		self.hideWhenUnitIsPlayer = Layout.HideWhenUnitIsPlayer
 		self.hideWhenUnitIsTarget = Layout.HideWhenUnitIsTarget
 		self.hideWhenTargetIsCritter = Layout.HideWhenTargetIsCritter
-		self.PostUpdate = SmallFrame_PostUpdateAlpha
-		self:RegisterEvent("PLAYER_TARGET_CHANGED", SmallFrame_PostUpdateAlpha, true)
+		self.PostUpdate = ToTFrame_PostUpdateAlpha
+		self:RegisterEvent("PLAYER_TARGET_CHANGED", ToTFrame_PostUpdateAlpha, true)
 	end 
 
 end
