@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.48-RC] 2019-09-21
+### Changed
+- Healer Mode currently disabled, as it made no sense to switch just the chat around without the group frames. We'll re-introduce this option later once the group frames are in place. 
+- Slightly increased the size of the actionbutton hit rectangles, to make the tooltips feel a bit more responsive when hovering over the buttons. 
+
 ## [1.0.47-RC] 2019-09-18
 ### Changed
 - If Leatrix Maps or Enhanced World Map for WoW Classic is loaded, this addon won't interfere with the World Map anymore.
