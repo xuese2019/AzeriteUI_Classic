@@ -558,7 +558,8 @@ local ModuleProtoType = {
 			msg = msg:gsub("/(%w+)", "|cff77aaff/%1|r") 
 
 			-- camelcase or other words suspected to be code references
-			msg = msg:gsub("(%u?)(%l+)(%u)(%l+)", "|cff33ff33%1%2%3%4|r") 
+			msg = msg:gsub("(%u?%l+%u%l+)", "|cff33ff33%1|r") 
+			msg = msg:gsub("|r(%u%l+)", "%1|r") -- expands the coloring for multiple humps
 
 			-- assume bracketed entries are intended to be highlighted
 			msg = msg:gsub("%[(.-)%]", "|cff33ff33%1|r") 
