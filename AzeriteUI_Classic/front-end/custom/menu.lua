@@ -933,6 +933,7 @@ Module.CreateMenuTable = function(self)
 	end 
 
 	-- Healer Mode
+	--[[
 	table_insert(MenuTable, {
 		enabledTitle = L_ENABLED:format(L["Healer Mode"]),
 		disabledTitle = L_DISABLED:format(L["Healer Mode"]),
@@ -940,6 +941,7 @@ Module.CreateMenuTable = function(self)
 		configDB = "Core", configKey = "enableHealerMode", 
 		proxyModule = nil, useCore = true, modeName = "healerMode"
 	})
+	]]--
 
 end
 

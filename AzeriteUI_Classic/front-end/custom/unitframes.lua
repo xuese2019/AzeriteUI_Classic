@@ -3828,7 +3828,7 @@ UnitFrameParty.OnInit = function(self)
 	self.frame:SetFrameRef("HealerModeAnchor", self.frame.healerAnchor)
 
 	self.frame:Execute(SECURE.FrameTable_Create)
-	self.frame:SetAttribute("inHealerMode", self:GetConfig("Core").enableHealerMode)
+	--self.frame:SetAttribute("inHealerMode", self:GetConfig("Core").enableHealerMode)
 	self.frame:SetAttribute("sortFrames", SECURE.Party_SortFrames:format(
 		self.layout.GroupAnchor, 
 		self.layout.GrowthX, 
@@ -3892,7 +3892,7 @@ UnitFrameRaid.OnInit = function(self)
 	self.frame.healerAnchor:Place(unpack(self.layout.AlternatePlace)) 
 	self.frame:SetFrameRef("HealerModeAnchor", self.frame.healerAnchor)
 	self.frame:Execute(SECURE.FrameTable_Create)
-	self.frame:SetAttribute("inHealerMode", self:GetConfig("Core").enableHealerMode)
+	--self.frame:SetAttribute("inHealerMode", self:GetConfig("Core").enableHealerMode)
 	self.frame:SetAttribute("sortFrames", SECURE.Raid_SortFrames:format(
 		self.layout.GroupSizeNormal, 
 		self.layout.GrowthXNormal,

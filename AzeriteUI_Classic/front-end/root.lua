@@ -131,7 +131,7 @@ Core.IsModeEnabled = function(self, modeName)
 	-- We do however use our standard mode API so for other modules 
 	-- to be able to easily query if this fake mode is enabled. 
 	if (modeName == "healerMode") then 
-		return self.db.enableHealerMode 
+		return -- self.db.enableHealerMode 
 
 	-- This one IS a mode. 
 	elseif (modeName == "enableDebugConsole") then
