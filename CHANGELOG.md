@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.49-RC] 2019-09-22
+### Changed
+- Slightly adjusted the player aura filter to be more responsive to combat changes, and to only show long duration buffs in combat when they have 30 seconds or less time remaining before running out. Debuffs are displayed as before. This is not "the final filter", it's just a minor tweak to improve the current for as long as that may remain. 
+
 ## [1.0.48-RC] 2019-09-21
 ### Changed
 - Healer Mode currently disabled, as it made no sense to switch just the chat around without the group frames. We'll re-introduce this option later once the group frames are in place. 
