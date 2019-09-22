@@ -15,6 +15,7 @@ local unpack = unpack
 -- WoW API
 local GetTime = GetTime
 local InCombatLockdown = InCombatLockdown
+local UnitAffectingCombat = UnitAffectingCombat
 local UnitCanAttack = UnitCanAttack
 local UnitIsUnit = UnitIsUnit
 local UnitPlayerControlled = UnitPlayerControlled
@@ -349,12 +350,21 @@ auraFilters.player = function(element, isBuff, unit, isOwnedByPlayer, name, icon
 	if (expirationTime and expirationTime > 0) then 
 		timeLeft = expirationTime - GetTime()
 	end
-	if InCombatLockdown() then 
-		if (timeLeft and (timeLeft > 0) and (timeLeft < 300)) then 
-			return true
-		else
-			return
-		end
+	if UnitAffectingCombat(unit) then 
+		if isBuff then 
+			if (duration and (duration > 0) and (duration < 30))
+			or (timeLeft and (timeLeft > 0) and (timeLeft < 10)) then
+				return true
+			else
+				return
+			end
+		else 
+			if (timeLeft and (timeLeft > 0) and (timeLeft < 601)) then 
+				return true
+			else
+				return
+			end
+		end 
 	else 
 		return true
 	end 
