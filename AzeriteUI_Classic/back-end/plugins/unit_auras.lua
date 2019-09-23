@@ -599,14 +599,19 @@ local Update = function(self, event, unit, ...)
 			LibAura:CacheUnitDebuffsByFilter(unit, debuffFilter)
 		end 
 
-		local visible = 0
+		local visible, visibleBuffs, visibleDebuffs = 0, 0, 0
 		if Auras.debuffsFirst then 
-			visible = IterateDebuffs(Auras, unit, debuffFilter, debuffFilterFunc, visible) 
-			visible = IterateBuffs(Auras, unit, buffFilter, buffFilterFunc, visible)
+			visible, visibleDebuffs = IterateDebuffs(Auras, unit, debuffFilter, debuffFilterFunc, visible) 
+			visible, visibleBuffs = IterateBuffs(Auras, unit, buffFilter, buffFilterFunc, visible)
 		else 
-			visible = IterateBuffs(Auras, unit, buffFilter, buffFilterFunc, visible)
-			visible = IterateDebuffs(Auras, unit, debuffFilter, debuffFilterFunc, visible)
+			visible, visibleBuffs = IterateBuffs(Auras, unit, buffFilter, buffFilterFunc, visible)
+			visible, visibleDebuffs = IterateDebuffs(Auras, unit, debuffFilter, debuffFilterFunc, visible)
 		end 
+
+		-- Add in meta-info for filters
+		Auras.visibleAuras = visible
+		Auras.visibleBuffs = visibleBuffs
+		Auras.visibleDebuffs = visibleDebuffs
 
 		EvaluateVisibilities(Auras, visible)
 
@@ -772,5 +777,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (CogWheel("LibUnitFrame", true)), (CogWheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Auras", Enable, Disable, Proxy, 45)
+	Lib:RegisterElement("Auras", Enable, Disable, Proxy, 46)
 end 
