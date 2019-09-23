@@ -416,57 +416,68 @@ local ByPlayer = OnPlayer + OnTarget
 
 -- General Blacklist
 ------------------------------------------------------------------------
-auraUserFlags[17670] = Never -- Argent Dawn Commission
+auraUserFlags[17670] = Never 		-- Argent Dawn Commission
 
 -- Druid (Balance)
 ------------------------------------------------------------------------
-auraUserFlags[22812] = OnPlayer -- Barkskin
-auraUserFlags[18658] = OnTarget -- Hibernate (Rank 3)
-auraUserFlags[16689] = OnPlayer -- Nature's Grasp (Rank 1)
-auraUserFlags[16689] = OnPlayer -- Nature's Grasp (Rank 2)
-auraUserFlags[16689] = OnPlayer -- Nature's Grasp (Rank 3)
-auraUserFlags[16689] = OnPlayer -- Nature's Grasp (Rank 4)
-auraUserFlags[16689] = OnPlayer -- Nature's Grasp (Rank 5)
-auraUserFlags[16689] = OnPlayer -- Nature's Grasp (Rank 6)
-auraUserFlags[16870] = OnPlayer -- Omen of Clarity (Proc)
+auraUserFlags[22812] = OnPlayer 	-- Barkskin
+auraUserFlags[  339] = OnTarget 	-- Entangling Roots (Rank 1)
+auraUserFlags[ 1062] = OnTarget 	-- Entangling Roots (Rank 2)
+auraUserFlags[ 5195] = OnTarget 	-- Entangling Roots (Rank 3)
+auraUserFlags[ 5196] = OnTarget 	-- Entangling Roots (Rank 4)
+auraUserFlags[ 9852] = OnTarget 	-- Entangling Roots (Rank 5)
+auraUserFlags[ 9853] = OnTarget 	-- Entangling Roots (Rank 6)
+auraUserFlags[18658] = OnTarget 	-- Hibernate (Rank 3)
+auraUserFlags[16689] = OnPlayer 	-- Nature's Grasp (Rank 1)
+auraUserFlags[16689] = OnPlayer 	-- Nature's Grasp (Rank 2)
+auraUserFlags[16689] = OnPlayer 	-- Nature's Grasp (Rank 3)
+auraUserFlags[16689] = OnPlayer 	-- Nature's Grasp (Rank 4)
+auraUserFlags[16689] = OnPlayer 	-- Nature's Grasp (Rank 5)
+auraUserFlags[16689] = OnPlayer 	-- Nature's Grasp (Rank 6)
+auraUserFlags[16870] = OnPlayer 	-- Omen of Clarity (Proc)
+auraUserFlags[  770] = OnTarget 	-- Faerie Fire (Rank 1)
 
 -- Druid (Feral)
 ------------------------------------------------------------------------
-auraUserFlags[24932] = Never -- Leader of the Pack
-auraUserFlags[  768] = Never -- Cat Form
-auraUserFlags[ 9634] = Never -- Dire Bear Form
-auraUserFlags[ 5209] = OnTarget -- Challenging Roar(Taunt)
-auraUserFlags[ 9821] = OnPlayer -- Dash
-auraUserFlags[ 5229] = OnPlayer -- Enrage
-auraUserFlags[16857] = ByPlayer -- Faerie Fire (Feral)
-auraUserFlags[22896] = OnPlayer -- Frenzied Regeneration
-auraUserFlags[ 6795] = OnTarget -- Growl(Taunt)
-auraUserFlags[ 9826] = ByPlayer -- Pounce
-auraUserFlags[ 6783] = OnPlayer -- Prowl
-auraUserFlags[ 9904] = ByPlayer -- Rake
-auraUserFlags[ 9894] = ByPlayer -- Rip
-auraUserFlags[ 9845] = OnPlayer -- Tiger's Fury
+auraUserFlags[ 1066] = Never 		-- Aquatic Form
+auraUserFlags[ 8983] = OnTarget 	-- Bash
+auraUserFlags[  768] = Never 		-- Cat Form
+auraUserFlags[ 5209] = OnTarget 	-- Challenging Roar (Taunt)
+auraUserFlags[ 9821] = OnPlayer 	-- Dash
+auraUserFlags[ 9634] = Never 		-- Dire Bear Form
+auraUserFlags[ 5229] = OnPlayer 	-- Enrage
+auraUserFlags[16857] = ByPlayer 	-- Faerie Fire (Feral)
+auraUserFlags[22896] = OnPlayer 	-- Frenzied Regeneration
+auraUserFlags[ 6795] = OnTarget 	-- Growl (Taunt)
+auraUserFlags[24932] = Never 		-- Leader of the Pack
+auraUserFlags[ 9826] = ByPlayer 	-- Pounce
+auraUserFlags[ 6783] = OnPlayer 	-- Prowl
+auraUserFlags[ 9904] = ByPlayer 	-- Rake
+auraUserFlags[ 9894] = ByPlayer 	-- Rip
+auraUserFlags[ 9845] = OnPlayer 	-- Tiger's Fury
+auraUserFlags[  783] = Never 		-- Travel Form
 
 -- Druid (Restoration)
 ------------------------------------------------------------------------
-auraUserFlags[ 2893] = ByPlayer -- Abolish Poison
-auraUserFlags[29166] = ByPlayer -- Innervate
-auraUserFlags[  774] = ByPlayer -- Rejuvenation (Rank 1)
-auraUserFlags[ 1058] = ByPlayer -- Rejuvenation (Rank 2)
-auraUserFlags[ 1430] = ByPlayer -- Rejuvenation (Rank 3)
-auraUserFlags[ 2090] = ByPlayer -- Rejuvenation (Rank 4)
-auraUserFlags[ 2091] = ByPlayer -- Rejuvenation (Rank 5)
-auraUserFlags[ 3627] = ByPlayer -- Rejuvenation (Rank 6)
-auraUserFlags[ 8910] = ByPlayer -- Rejuvenation (Rank 7)
-auraUserFlags[ 9839] = ByPlayer -- Rejuvenation (Rank 8)
-auraUserFlags[ 9840] = ByPlayer -- Rejuvenation (Rank 9)
-auraUserFlags[ 9841] = ByPlayer -- Rejuvenation (Rank 10)
-auraUserFlags[ 8936] = ByPlayer -- Regrowth (Rank 1)
-auraUserFlags[ 8938] = ByPlayer -- Regrowth (Rank 2)
-auraUserFlags[ 8939] = ByPlayer -- Regrowth (Rank 3)
-auraUserFlags[ 8940] = ByPlayer -- Regrowth (Rank 4)
-auraUserFlags[ 8941] = ByPlayer -- Regrowth (Rank 5)
-auraUserFlags[ 9750] = ByPlayer -- Regrowth (Rank 6)
-auraUserFlags[ 9856] = ByPlayer -- Regrowth (Rank 7)
-auraUserFlags[ 9857] = ByPlayer -- Regrowth (Rank 8)
-auraUserFlags[  740] = ByPlayer -- Tranquility (Rank 1)
+auraUserFlags[ 2893] = ByPlayer 	-- Abolish Poison
+auraUserFlags[29166] = ByPlayer 	-- Innervate
+auraUserFlags[ 8936] = ByPlayer 	-- Regrowth (Rank 1)
+auraUserFlags[ 8938] = ByPlayer 	-- Regrowth (Rank 2)
+auraUserFlags[ 8939] = ByPlayer 	-- Regrowth (Rank 3)
+auraUserFlags[ 8940] = ByPlayer 	-- Regrowth (Rank 4)
+auraUserFlags[ 8941] = ByPlayer 	-- Regrowth (Rank 5)
+auraUserFlags[ 9750] = ByPlayer 	-- Regrowth (Rank 6)
+auraUserFlags[ 9856] = ByPlayer 	-- Regrowth (Rank 7)
+auraUserFlags[ 9857] = ByPlayer 	-- Regrowth (Rank 8)
+auraUserFlags[  774] = ByPlayer 	-- Rejuvenation (Rank 1)
+auraUserFlags[ 1058] = ByPlayer 	-- Rejuvenation (Rank 2)
+auraUserFlags[ 1430] = ByPlayer 	-- Rejuvenation (Rank 3)
+auraUserFlags[ 2090] = ByPlayer 	-- Rejuvenation (Rank 4)
+auraUserFlags[ 2091] = ByPlayer 	-- Rejuvenation (Rank 5)
+auraUserFlags[ 3627] = ByPlayer 	-- Rejuvenation (Rank 6)
+auraUserFlags[ 8910] = ByPlayer 	-- Rejuvenation (Rank 7)
+auraUserFlags[ 9839] = ByPlayer 	-- Rejuvenation (Rank 8)
+auraUserFlags[ 9840] = ByPlayer 	-- Rejuvenation (Rank 9)
+auraUserFlags[ 9841] = ByPlayer 	-- Rejuvenation (Rank 10)
+auraUserFlags[  740] = ByPlayer 	-- Tranquility (Rank 1)
+auraUserFlags[ 8918] = ByPlayer 	-- Tranquility (Rank 2)
