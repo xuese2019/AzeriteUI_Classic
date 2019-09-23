@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.50-RC] 2019-09-23
+### Fixed
+- Slight bug in yesterday's update that caused all auras to sometimes be hidden in combat. Working as intended with this fix. This too is temporary, as I'm currently in the process of overhauling the aura system with parsed combat log information to make it far more functional for Classic. 
+
 ## [1.0.49-RC] 2019-09-22
 ### Changed
 - Slightly adjusted the player aura filter to be more responsive to combat changes, and to only show long duration buffs in combat when they have 30 seconds or less time remaining before running out. Debuffs are displayed as before. This is not "the final filter", it's just a minor tweak to improve the current for as long as that may remain. 
