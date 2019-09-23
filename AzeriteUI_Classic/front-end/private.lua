@@ -314,47 +314,43 @@ local Always 			= tonumber("010000000000000000000000000000000", 2) -- Always sho
 
 local NeverOnPlate 		= tonumber("100000000000000000000000000000000", 2) -- Never show on plates (Blacklist)
 
+local hasFilter = function(flags, filter)
+	return flags and filter and (bit_band(flags, filter) ~= 0)
+end
+
 -- Aura Filter Functions
 -----------------------------------------------------------------
 auraFilters.default = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
 
-	local timeLeft 
-	if (expirationTime and expirationTime > 0) then 
-		timeLeft = expirationTime - GetTime()
-	end
-
-	if (isBossDebuff or (unitCaster == "vehicle")) then
-		return true
-	elseif (count and (count > 1)) then 
-		return true
-	elseif InCombatLockdown() then 
-		if (duration and (duration > 0) and (duration < 180)) or (timeLeft and (timeLeft < 180)) then
-			return true
-		end 
-	else 
-		if isBuff then 
-			if (not duration) or (duration <= 0) or (duration > 180) or (timeLeft and (timeLeft > 180)) then 
-				return true
-			end 
-		else
-			if (duration and (duration > 0) and (duration < 180)) or (timeLeft and (timeLeft < 180)) then
-				return true
-			end
-		end 
-	end 
+	return true
 end
 
 auraFilters.player = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
 
+	local all = element.all
+
+	local flags = auraUserFlags[spellID]
+	if flags then 
+		if hasFilter(flags, OnPlayer) then 
+			return true
+		elseif hasFilter(flags, Never) then 
+			return 
+		end
+	end
+
 	local timeLeft 
 	if (expirationTime and expirationTime > 0) then 
 		timeLeft = expirationTime - GetTime()
 	end
+
 	if UnitAffectingCombat(unit) then 
 		if isBuff then 
-			if (duration and (duration > 0) and (duration < 30))
-			or (timeLeft and (timeLeft > 0) and (timeLeft < 10)) then
-				return true
+			if (timeLeft and (timeLeft > 0) and (timeLeft < 30)) then
+				if (duration and (duration > 0) and (duration < 30)) then 
+					return true
+				else 
+					return
+				end
 			else
 				return
 			end
@@ -372,13 +368,20 @@ end
 
 auraFilters.target = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
 
-	-- Classic limits everything. Just disable the whole filter for now. 
+	local flags = auraUserFlags[spellID]
+	if flags then 
+		if hasFilter(flags, OnTarget) then 
+			return true
+		elseif hasFilter(flags, Never) then 
+			return 
+		end
+	end
+
 	return true
 end
 
 auraFilters.nameplate = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
 
-	-- Same as above
 	return true
 end 
 
@@ -407,326 +410,63 @@ Private.GetMedia = function(name, type) return ([[Interface\AddOns\%s\media\%s.%
 
 -----------------------------------------------------------------
 -- Aura Filter Flag Database
--- *Placing these at the end for tidyness 
 -----------------------------------------------------------------
+-- Will update this once we get proper combat log parsing going
+local ByPlayer = OnPlayer + OnTarget
 
--- For testing
+-- General Blacklist
 ------------------------------------------------------------------------
---auraUserFlags[  8936] = OnPlayer -- Regrowth
+auraUserFlags[17670] = Never -- Argent Dawn Commission
 
--- Musts that are game-breaking to not have there
+-- Druid (Balance)
 ------------------------------------------------------------------------
-auraUserFlags[304696] = OnPlayer -- Alpha Fin (constantly moving mount)
-auraUserFlags[295858] = OnPlayer -- Molted Shell (constantly moving mount)
-auraUserFlags[304037] = OnPlayer -- Fermented Deviate Fish (transform)
+auraUserFlags[22812] = OnPlayer -- Barkskin
+auraUserFlags[18658] = OnTarget -- Hibernate (Rank 3)
+auraUserFlags[16689] = OnPlayer -- Nature's Grasp (Rank 1)
+auraUserFlags[16689] = OnPlayer -- Nature's Grasp (Rank 2)
+auraUserFlags[16689] = OnPlayer -- Nature's Grasp (Rank 3)
+auraUserFlags[16689] = OnPlayer -- Nature's Grasp (Rank 4)
+auraUserFlags[16689] = OnPlayer -- Nature's Grasp (Rank 5)
+auraUserFlags[16689] = OnPlayer -- Nature's Grasp (Rank 6)
+auraUserFlags[16870] = OnPlayer -- Omen of Clarity (Proc)
 
--- Spammy stuff that is implicit and not really needed
---auraUserFlags[155722] = NeverOnPlate -- Rake (just for my own testing purposes)
-auraUserFlags[204242] = NeverOnPlate -- Consecration (talent Consecrated Ground)
+-- Druid (Feral)
+------------------------------------------------------------------------
+auraUserFlags[24932] = Never -- Leader of the Pack
+auraUserFlags[  768] = Never -- Cat Form
+auraUserFlags[ 9634] = Never -- Dire Bear Form
+auraUserFlags[ 5209] = OnTarget -- Challenging Roar(Taunt)
+auraUserFlags[ 9821] = OnPlayer -- Dash
+auraUserFlags[ 5229] = OnPlayer -- Enrage
+auraUserFlags[16857] = ByPlayer -- Faerie Fire (Feral)
+auraUserFlags[22896] = OnPlayer -- Frenzied Regeneration
+auraUserFlags[ 6795] = OnTarget -- Growl(Taunt)
+auraUserFlags[ 9826] = ByPlayer -- Pounce
+auraUserFlags[ 6783] = OnPlayer -- Prowl
+auraUserFlags[ 9904] = ByPlayer -- Rake
+auraUserFlags[ 9894] = ByPlayer -- Rip
+auraUserFlags[ 9845] = OnPlayer -- Tiger's Fury
 
--- NPC buffs that are completely useless
+-- Druid (Restoration)
 ------------------------------------------------------------------------
-auraUserFlags[ 63501] = Never -- Argent Crusade Champion's Pennant
-auraUserFlags[ 60023] = Never -- Scourge Banner Aura (Boneguard Commander in Icecrown)
-auraUserFlags[ 63406] = Never -- Darnassus Champion's Pennant
-auraUserFlags[ 63405] = Never -- Darnassus Valiant's Pennant
-auraUserFlags[ 63423] = Never -- Exodar Champion's Pennant
-auraUserFlags[ 63422] = Never -- Exodar Valiant's Pennant
-auraUserFlags[ 63396] = Never -- Gnomeregan Champion's Pennant
-auraUserFlags[ 63395] = Never -- Gnomeregan Valiant's Pennant
-auraUserFlags[ 63427] = Never -- Ironforge Champion's Pennant
-auraUserFlags[ 63426] = Never -- Ironforge Valiant's Pennant
-auraUserFlags[ 63433] = Never -- Orgrimmar Champion's Pennant
-auraUserFlags[ 63432] = Never -- Orgrimmar Valiant's Pennant
-auraUserFlags[ 63399] = Never -- Sen'jin Champion's Pennant
-auraUserFlags[ 63398] = Never -- Sen'jin Valiant's Pennant
-auraUserFlags[ 63403] = Never -- Silvermoon Champion's Pennant
-auraUserFlags[ 63402] = Never -- Silvermoon Valiant's Pennant
-auraUserFlags[ 62594] = Never -- Stormwind Champion's Pennant
-auraUserFlags[ 62596] = Never -- Stormwind Valiant's Pennant
-auraUserFlags[ 63436] = Never -- Thunder Bluff Champion's Pennant
-auraUserFlags[ 63435] = Never -- Thunder Bluff Valiant's Pennant
-auraUserFlags[ 63430] = Never -- Undercity Champion's Pennant
-auraUserFlags[ 63429] = Never -- Undercity Valiant's Pennant
-
--- Legion Consumables
-------------------------------------------------------------------------
-auraUserFlags[188030] = ByPlayer -- Leytorrent Potion (channeled)
-auraUserFlags[188027] = ByPlayer -- Potion of Deadly Grace
-auraUserFlags[188028] = ByPlayer -- Potion of the Old War
-auraUserFlags[188029] = ByPlayer -- Unbending Potion
-
--- Quest related auras
-------------------------------------------------------------------------
-auraUserFlags[127372] = OnPlayer -- Unstable Serum (Klaxxi Enhancement: Raining Blood)
-auraUserFlags[240640] = OnPlayer -- The Shadow of the Sentinax (Mark of the Sentinax)
-
--- Heroism
-------------------------------------------------------------------------
-auraUserFlags[ 90355] = OnPlayer + PrioHigh -- Ancient Hysteria
-auraUserFlags[  2825] = OnPlayer + PrioHigh -- Bloodlust
-auraUserFlags[ 32182] = OnPlayer + PrioHigh -- Heroism
-auraUserFlags[160452] = OnPlayer + PrioHigh -- Netherwinds
-auraUserFlags[ 80353] = OnPlayer + PrioHigh -- Time Warp
-
--- Deserters
-------------------------------------------------------------------------
-auraUserFlags[ 26013] = OnPlayer + PrioHigh -- Deserter
-auraUserFlags[ 99413] = OnPlayer + PrioHigh -- Deserter
-auraUserFlags[ 71041] = OnPlayer + PrioHigh -- Dungeon Deserter
-auraUserFlags[144075] = OnPlayer + PrioHigh -- Dungeon Deserter
-auraUserFlags[170616] = OnPlayer + PrioHigh -- Pet Deserter
-
--- Other big ones
-------------------------------------------------------------------------
-auraUserFlags[ 67556] = OnPlayer -- Cooking Speed
-auraUserFlags[ 29166] = OnPlayer -- Innervate
-auraUserFlags[102342] = OnPlayer -- Ironbark
-auraUserFlags[ 33206] = OnPlayer -- Pain Suppression
-auraUserFlags[ 10060] = OnPlayer -- Power Infusion
-auraUserFlags[ 64901] = OnPlayer -- Symbol of Hope
-
-auraUserFlags[ 57723] = OnPlayer -- Exhaustion "Cannot benefit from Heroism or other similar effects." (Alliance version)
-auraUserFlags[160455] = OnPlayer -- Fatigued "Cannot benefit from Netherwinds or other similar effects." (Pet version)
-auraUserFlags[243138] = OnPlayer -- Happy Feet event 
-auraUserFlags[246050] = OnPlayer -- Happy Feet buff gained restoring health
-auraUserFlags[ 95809] = OnPlayer -- Insanity "Cannot benefit from Ancient Hysteria or other similar effects." (Pet version)
-auraUserFlags[ 15007] = OnPlayer -- Resurrection Sickness
-auraUserFlags[ 57724] = OnPlayer -- Sated "Cannot benefit from Bloodlust or other similar effects." (Horde version)
-auraUserFlags[ 80354] = OnPlayer -- Temporal Displacement
-
-------------------------------------------------------------------------
--- BfA Dungeons
--- *some auras might be under the wrong dungeon, 
---  this is because wowhead doesn't always tell what casts this.
-------------------------------------------------------------------------
--- Atal'Dazar
-------------------------------------------------------------------------
-auraUserFlags[253721] = PrioBoss -- Bulwark of Juju
-auraUserFlags[253548] = PrioBoss -- Bwonsamdi's Mantle
-auraUserFlags[256201] = PrioBoss -- Incendiary Rounds
-auraUserFlags[250372] = PrioBoss -- Lingering Nausea
-auraUserFlags[257407] = PrioBoss -- Pursuit
-auraUserFlags[255434] = PrioBoss -- Serrated Teeth
-auraUserFlags[254959] = PrioBoss -- Soulburn
-auraUserFlags[256577] = PrioBoss -- Soulfeast
-auraUserFlags[254958] = PrioBoss -- Soulforged Construct
-auraUserFlags[259187] = PrioBoss -- Soulrend
-auraUserFlags[255558] = PrioBoss -- Tainted Blood
-auraUserFlags[255577] = PrioBoss -- Transfusion
-auraUserFlags[260667] = PrioBoss -- Transfusion
-auraUserFlags[260668] = PrioBoss -- Transfusion
-auraUserFlags[255371] = PrioBoss -- Terrifying Visage
-auraUserFlags[252781] = PrioBoss -- Unstable Hex
-auraUserFlags[250096] = PrioBoss -- Wracking Pain
-
--- Tol Dagor
-------------------------------------------------------------------------
-auraUserFlags[256199] = PrioBoss -- Azerite Rounds: Blast
-auraUserFlags[256955] = PrioBoss -- Cinderflame
-auraUserFlags[256083] = PrioBoss -- Cross Ignition
-auraUserFlags[256038] = PrioBoss -- Deadeye
-auraUserFlags[256044] = PrioBoss -- Deadeye
-auraUserFlags[258128] = PrioBoss -- Debilitating Shout
-auraUserFlags[256105] = PrioBoss -- Explosive Burst
-auraUserFlags[257785] = PrioBoss -- Flashing Daggers
-auraUserFlags[258075] = PrioBoss -- Itchy Bite
-auraUserFlags[260016] = PrioBoss -- Itchy Bite  NEEDS CHECK!
-auraUserFlags[258079] = PrioBoss -- Massive Chomp
-auraUserFlags[258317] = PrioBoss -- Riot Shield
-auraUserFlags[257495] = PrioBoss -- Sandstorm
-auraUserFlags[258153] = PrioBoss -- Watery Dome
-
--- The MOTHERLODE!!
-------------------------------------------------------------------------
-auraUserFlags[262510] = PrioBoss -- Azerite Heartseeker
-auraUserFlags[262513] = PrioBoss -- Azerite Heartseeker
-auraUserFlags[262515] = PrioBoss -- Azerite Heartseeker
-auraUserFlags[262516] = PrioBoss -- Azerite Heartseeker
-auraUserFlags[281534] = PrioBoss -- Azerite Heartseeker
-auraUserFlags[270276] = PrioBoss -- Big Red Rocket
-auraUserFlags[270277] = PrioBoss -- Big Red Rocket
-auraUserFlags[270278] = PrioBoss -- Big Red Rocket
-auraUserFlags[270279] = PrioBoss -- Big Red Rocket
-auraUserFlags[270281] = PrioBoss -- Big Red Rocket
-auraUserFlags[270282] = PrioBoss -- Big Red Rocket
-auraUserFlags[256163] = PrioBoss -- Blazing Azerite
-auraUserFlags[256493] = PrioBoss -- Blazing Azerite
-auraUserFlags[270882] = PrioBoss -- Blazing Azerite
-auraUserFlags[259853] = PrioBoss -- Chemical Burn
-auraUserFlags[280604] = PrioBoss -- Iced Spritzer
-auraUserFlags[260811] = PrioBoss -- Homing Missile
-auraUserFlags[260813] = PrioBoss -- Homing Missile
-auraUserFlags[260815] = PrioBoss -- Homing Missile
-auraUserFlags[260829] = PrioBoss -- Homing Missile
-auraUserFlags[260835] = PrioBoss -- Homing Missile
-auraUserFlags[260836] = PrioBoss -- Homing Missile
-auraUserFlags[260837] = PrioBoss -- Homing Missile
-auraUserFlags[260838] = PrioBoss -- Homing Missile
-auraUserFlags[257582] = PrioBoss -- Raging Gaze
-auraUserFlags[258622] = PrioBoss -- Resonant Pulse
-auraUserFlags[271579] = PrioBoss -- Rock Lance
-auraUserFlags[263202] = PrioBoss -- Rock Lance
-auraUserFlags[257337] = PrioBoss -- Shocking Claw
-auraUserFlags[262347] = PrioBoss -- Static Pulse
-auraUserFlags[275905] = PrioBoss -- Tectonic Smash
-auraUserFlags[275907] = PrioBoss -- Tectonic Smash
-auraUserFlags[269298] = PrioBoss -- Widowmaker Toxin
-
--- Temple of Sethraliss
-------------------------------------------------------------------------
-auraUserFlags[263371] = PrioBoss -- Conduction
-auraUserFlags[263573] = PrioBoss -- Cyclone Strike
-auraUserFlags[263914] = PrioBoss -- Blinding Sand
-auraUserFlags[256333] = PrioBoss -- Dust Cloud
-auraUserFlags[260792] = PrioBoss -- Dust Cloud
-auraUserFlags[272659] = PrioBoss -- Electrified Scales
-auraUserFlags[269670] = PrioBoss -- Empowerment
-auraUserFlags[266923] = PrioBoss -- Galvanize
-auraUserFlags[268007] = PrioBoss -- Heart Attack
-auraUserFlags[263246] = PrioBoss -- Lightning Shield
-auraUserFlags[273563] = PrioBoss -- Neurotoxin
-auraUserFlags[272657] = PrioBoss -- Noxious Breath
-auraUserFlags[275566] = PrioBoss -- Numb Hands
-auraUserFlags[269686] = PrioBoss -- Plague
-auraUserFlags[263257] = PrioBoss -- Static Shock
-auraUserFlags[272699] = PrioBoss -- Venomous Spit
-
--- Underrot
-------------------------------------------------------------------------
-auraUserFlags[272592] = PrioBoss -- Abyssal Reach
-auraUserFlags[264603] = PrioBoss -- Blood Mirror
-auraUserFlags[260292] = PrioBoss -- Charge
-auraUserFlags[265568] = PrioBoss -- Dark Omen
-auraUserFlags[272180] = PrioBoss -- Death Bolt
-auraUserFlags[273226] = PrioBoss -- Decaying Spores
-auraUserFlags[265377] = PrioBoss -- Hooked Snare
-auraUserFlags[260793] = PrioBoss -- Indigestion
-auraUserFlags[257437] = PrioBoss -- Poisoning Strike
-auraUserFlags[269301] = PrioBoss -- Putrid Blood
-auraUserFlags[264757] = PrioBoss -- Sanguine Feast
-auraUserFlags[265019] = PrioBoss -- Savage Cleave
-auraUserFlags[260455] = PrioBoss -- Serrated Fangs
-auraUserFlags[260685] = PrioBoss -- Taint of G'huun
-auraUserFlags[266107] = PrioBoss -- Thirst For Blood
-auraUserFlags[259718] = PrioBoss -- Upheaval
-auraUserFlags[269843] = PrioBoss -- Vile Expulsion
-auraUserFlags[273285] = PrioBoss -- Volatile Pods
-auraUserFlags[265468] = PrioBoss -- Withering Curse
-
--- Freehold
-------------------------------------------------------------------------
-auraUserFlags[258323] = PrioBoss -- Infected Wound
-auraUserFlags[257908] = PrioBoss -- Oiled Blade
-auraUserFlags[274555] = PrioBoss -- Scabrous Bite
-auraUserFlags[274507] = PrioBoss -- Slippery Suds
-auraUserFlags[265168] = PrioBoss -- Caustic Freehold Brew
-auraUserFlags[278467] = PrioBoss -- Caustic Freehold Brew
-auraUserFlags[265085] = PrioBoss -- Confidence-Boosting Freehold Brew
-auraUserFlags[265088] = PrioBoss -- Confidence-Boosting Freehold Brew
-auraUserFlags[264608] = PrioBoss -- Invigorating Freehold Brew
-auraUserFlags[265056] = PrioBoss -- Invigorating Freehold Brew
-auraUserFlags[257739] = PrioBoss -- Blind Rage
-auraUserFlags[258777] = PrioBoss -- Sea Spout
-auraUserFlags[257732] = PrioBoss -- Shattering Bellow
-auraUserFlags[274383] = PrioBoss -- Rat Traps
-auraUserFlags[268717] = PrioBoss -- Dive Bomb
-auraUserFlags[257305] = PrioBoss -- Cannon Barrage
-
--- Shrine of the Storm
-------------------------------------------------------------------------
-auraUserFlags[269131] = PrioBoss -- Ancient Mindbender
-auraUserFlags[268086] = PrioBoss -- Aura of Dread
-auraUserFlags[268214] = PrioBoss -- Carve Flesh
-auraUserFlags[264560] = PrioBoss -- Choking Brine
-auraUserFlags[267899] = PrioBoss -- Hindering Cleave
-auraUserFlags[268391] = PrioBoss -- Mental Assault
-auraUserFlags[268212] = PrioBoss -- Minor Reinforcing Ward
-auraUserFlags[268183] = PrioBoss -- Minor Swiftness Ward
-auraUserFlags[268184] = PrioBoss -- Minor Swiftness Ward
-auraUserFlags[267905] = PrioBoss -- Reinforcing Ward
-auraUserFlags[268186] = PrioBoss -- Reinforcing Ward
-auraUserFlags[268239] = PrioBoss -- Shipbreaker Storm
-auraUserFlags[267818] = PrioBoss -- Slicing Blast
-auraUserFlags[276286] = PrioBoss -- Slicing Hurricane
-auraUserFlags[264101] = PrioBoss -- Surging Rush
-auraUserFlags[274633] = PrioBoss -- Sundering Blow
-auraUserFlags[267890] = PrioBoss -- Swiftness Ward
-auraUserFlags[267891] = PrioBoss -- Swiftness Ward
-auraUserFlags[268322] = PrioBoss -- Touch of the Drowned
-auraUserFlags[264166] = PrioBoss -- Undertow
-auraUserFlags[268309] = PrioBoss -- Unending Darkness
-auraUserFlags[276297] = PrioBoss -- Void Seed
-auraUserFlags[267034] = PrioBoss -- Whispers of Power
-auraUserFlags[267037] = PrioBoss -- Whispers of Power
-auraUserFlags[269399] = PrioBoss -- Yawning Gate
-
--- Waycrest Manor
-------------------------------------------------------------------------
-auraUserFlags[268080] = PrioBoss -- Aura of Apathy
-auraUserFlags[260541] = PrioBoss -- Burning Brush
-auraUserFlags[268202] = PrioBoss -- Death Lens
-auraUserFlags[265881] = PrioBoss -- Decaying Touch
-auraUserFlags[268306] = PrioBoss -- Discordant Cadenza
-auraUserFlags[265880] = PrioBoss -- Dread Mark
-auraUserFlags[263943] = PrioBoss -- Etch
-auraUserFlags[278444] = PrioBoss -- Infest
-auraUserFlags[278456] = PrioBoss -- Infest
-auraUserFlags[260741] = PrioBoss -- Jagged Nettles
-auraUserFlags[261265] = PrioBoss -- Ironbark Shield
-auraUserFlags[265882] = PrioBoss -- Lingering Dread
-auraUserFlags[271178] = PrioBoss -- Ravaging Leap
-auraUserFlags[264694] = PrioBoss -- Rotten Expulsion
-auraUserFlags[264105] = PrioBoss -- Runic Mark
-auraUserFlags[261266] = PrioBoss -- Runic Ward
-auraUserFlags[261264] = PrioBoss -- Soul Armor
-auraUserFlags[260512] = PrioBoss -- Soul Harvest
-auraUserFlags[264923] = PrioBoss -- Tenderize
-auraUserFlags[265761] = PrioBoss -- Thorned Barrage
-auraUserFlags[260703] = PrioBoss -- Unstable Runic Mark
-auraUserFlags[261440] = PrioBoss -- Virulent Pathogen
-auraUserFlags[263961] = PrioBoss -- Warding Candles
-
--- King's Rest
-------------------------------------------------------------------------
-auraUserFlags[274387] = PrioBoss -- Absorbed in Darkness 
-auraUserFlags[266951] = PrioBoss -- Barrel Through
-auraUserFlags[268586] = PrioBoss -- Blade Combo
-auraUserFlags[267639] = PrioBoss -- Burn Corruption
-auraUserFlags[270889] = PrioBoss -- Channel Lightning
-auraUserFlags[271640] = PrioBoss -- Dark Revelation
-auraUserFlags[267626] = PrioBoss -- Dessication
-auraUserFlags[267618] = PrioBoss -- Drain Fluids
-auraUserFlags[271564] = PrioBoss -- Embalming Fluid
-auraUserFlags[269936] = PrioBoss -- Fixate
-auraUserFlags[268419] = PrioBoss -- Gale Slash
-auraUserFlags[270514] = PrioBoss -- Ground Crush
-auraUserFlags[265923] = PrioBoss -- Lucre's Call
-auraUserFlags[270284] = PrioBoss -- Purification Beam
-auraUserFlags[270289] = PrioBoss -- Purification Beam
-auraUserFlags[270507] = PrioBoss -- Poison Barrage
-auraUserFlags[265781] = PrioBoss -- Serpentine Gust
-auraUserFlags[266231] = PrioBoss -- Severing Axe
-auraUserFlags[270487] = PrioBoss -- Severing Blade
-auraUserFlags[266238] = PrioBoss -- Shattered Defenses
-auraUserFlags[265773] = PrioBoss -- Spit Gold
-auraUserFlags[270003] = PrioBoss -- Suppression Slam
-
--- Siege of Boralus
-------------------------------------------------------------------------
-auraUserFlags[269029] = PrioBoss -- Clear the Deck
-auraUserFlags[272144] = PrioBoss -- Cover
-auraUserFlags[257168] = PrioBoss -- Cursed Slash
-auraUserFlags[260954] = PrioBoss -- Iron Gaze
-auraUserFlags[261428] = PrioBoss -- Hangman's Noose
-auraUserFlags[273930] = PrioBoss -- Hindering Cut
-auraUserFlags[275014] = PrioBoss -- Putrid Waters
-auraUserFlags[272588] = PrioBoss -- Rotting Wounds
-auraUserFlags[257170] = PrioBoss -- Savage Tempest
-auraUserFlags[272421] = PrioBoss -- Sighted Artillery
-auraUserFlags[269266] = PrioBoss -- Slam
-auraUserFlags[275836] = PrioBoss -- Stinging Venom
-auraUserFlags[257169] = PrioBoss -- Terrifying Roar
-auraUserFlags[276068] = PrioBoss -- Tidal Surge
-auraUserFlags[272874] = PrioBoss -- Trample
-auraUserFlags[260569] = PrioBoss -- Wildfire (?) Waycrest Manor? CHECK!
+auraUserFlags[ 2893] = ByPlayer -- Abolish Poison
+auraUserFlags[29166] = ByPlayer -- Innervate
+auraUserFlags[  774] = ByPlayer -- Rejuvenation (Rank 1)
+auraUserFlags[ 1058] = ByPlayer -- Rejuvenation (Rank 2)
+auraUserFlags[ 1430] = ByPlayer -- Rejuvenation (Rank 3)
+auraUserFlags[ 2090] = ByPlayer -- Rejuvenation (Rank 4)
+auraUserFlags[ 2091] = ByPlayer -- Rejuvenation (Rank 5)
+auraUserFlags[ 3627] = ByPlayer -- Rejuvenation (Rank 6)
+auraUserFlags[ 8910] = ByPlayer -- Rejuvenation (Rank 7)
+auraUserFlags[ 9839] = ByPlayer -- Rejuvenation (Rank 8)
+auraUserFlags[ 9840] = ByPlayer -- Rejuvenation (Rank 9)
+auraUserFlags[ 9841] = ByPlayer -- Rejuvenation (Rank 10)
+auraUserFlags[ 8936] = ByPlayer -- Regrowth (Rank 1)
+auraUserFlags[ 8938] = ByPlayer -- Regrowth (Rank 2)
+auraUserFlags[ 8939] = ByPlayer -- Regrowth (Rank 3)
+auraUserFlags[ 8940] = ByPlayer -- Regrowth (Rank 4)
+auraUserFlags[ 8941] = ByPlayer -- Regrowth (Rank 5)
+auraUserFlags[ 9750] = ByPlayer -- Regrowth (Rank 6)
+auraUserFlags[ 9856] = ByPlayer -- Regrowth (Rank 7)
+auraUserFlags[ 9857] = ByPlayer -- Regrowth (Rank 8)
+auraUserFlags[  740] = ByPlayer -- Tranquility (Rank 1)
