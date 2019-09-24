@@ -484,3 +484,11 @@ auraUserFlags[  740] = ByPlayer 	-- Tranquility (Rank 1)
 auraUserFlags[ 8918] = ByPlayer 	-- Tranquility (Rank 2)
 auraUserFlags[ 9862] = ByPlayer 	-- Tranquility (Rank 3)
 auraUserFlags[ 9863] = ByPlayer 	-- Tranquility (Rank 4)
+
+-- Warrior (Arms)
+------------------------------------------------------------------------
+auraUserFlags[ 7922] = OnTarget 	-- Charge Stun
+
+-- Warrior (Fury)
+------------------------------------------------------------------------
+auraUserFlags[ 6673] = OnPlayer 	-- Battle Shout (Rank 1)
