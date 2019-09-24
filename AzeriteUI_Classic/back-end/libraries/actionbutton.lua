@@ -1334,7 +1334,6 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 		elseif (playerClass == "WARRIOR") then
 			driver = driver .. "; [bonusbar:1] 7; [bonusbar:2] 8" 
 		end
-		--driver = driver .. "; [form] 1; 1"
 		driver = driver .. "; 1"
 	else 
 		driver = tostring(barID)
