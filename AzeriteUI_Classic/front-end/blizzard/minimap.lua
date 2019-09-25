@@ -13,6 +13,7 @@ local MBF = Module:IsAddOnEnabled("MinimapButtonFrame")
 
 -- Lua API
 local _G = _G
+local ipairs = ipairs
 local math_floor = math.floor
 local math_pi = math.pi
 local select = select
@@ -20,10 +21,13 @@ local string_format = string.format
 local string_gsub = string.gsub
 local string_match = string.match
 local string_upper = string.upper
+local table_insert = table.insert
 local tonumber = tonumber
 local unpack = unpack
 
 -- WoW API
+local CancelTrackingBuff = _G.CancelTrackingBuff
+local CastSpellByID = _G.CastSpellByID
 local FindActiveAzeriteItem = C_AzeriteItem and C_AzeriteItem.FindActiveAzeriteItem
 local GetAzeriteItemXPInfo = C_AzeriteItem and C_AzeriteItem.GetAzeriteItemXPInfo
 local GetFactionInfo = _G.GetFactionInfo
@@ -33,8 +37,12 @@ local GetFriendshipReputation = _G.GetFriendshipReputation
 local GetNetStats = _G.GetNetStats
 local GetNumFactions = _G.GetNumFactions
 local GetPowerLevel = C_AzeriteItem and C_AzeriteItem.GetPowerLevel
+local GetSpellInfo = _G.GetSpellInfo
+local GetSpellTexture = _G.GetSpellTexture
+local GetTrackingTexture = _G.GetTrackingTexture
 local GetWatchedFactionInfo = _G.GetWatchedFactionInfo
 local IsFactionParagon = C_Reputation and C_Reputation.IsFactionParagon
+local IsPlayerSpell = _G.IsPlayerSpell
 local IsXPUserDisabled = _G.IsXPUserDisabled
 local SetCursor = _G.SetCursor
 local ToggleCalendar = _G.ToggleCalendar
@@ -162,6 +170,25 @@ local Performance_OnLeave = function(self)
 	Module:GetMinimapTooltip():Hide()
 	self.UpdateTooltip = nil
 end 
+
+local Tracking_OnClick = function(self, button)
+	if (button == "LeftButton") then
+		self:ShowMenu()
+	elseif (button == "RightButton") then
+		CancelTrackingBuff()
+	end
+end
+
+local Tracking_OnEnter = function(self)
+	local tooltip = Module:GetMinimapTooltip()
+	tooltip:SetDefaultAnchor(self)
+	tooltip:SetMaximumWidth(360)
+	tooltip:SetTrackingSpell()
+end
+
+local Tracking_OnLeave = function(self)
+	Module:GetMinimapTooltip():Hide()
+end
 
 -- This is the XP and AP tooltip (and rep/honor later on) 
 local Toggle_UpdateTooltip = function(toggle)
@@ -1101,6 +1128,92 @@ Module.SetUpMinimap = function(self)
 		Spinner[1] = ring1
 		Spinner[2] = ring2
 	end 
+
+	if Layout.UseTrackingButton then 
+		-- Tracking button
+		local tracking = Handler:CreateOverlayFrame("Button")
+		tracking:SetFrameLevel(tracking:GetFrameLevel() + 10) -- need this above the ring frame and the rings
+		tracking:SetPoint(unpack(Layout.TrackingButtonPlace))
+		tracking:SetSize(unpack(Layout.TrackingButtonSize))
+		tracking:EnableMouse(true)
+		tracking:RegisterForClicks("AnyUp")
+		tracking._owner = Handler
+
+		local trackingBackdrop = tracking:CreateTexture()
+		trackingBackdrop:SetDrawLayer("BACKGROUND")
+		trackingBackdrop:SetSize(unpack(Layout.TrackingButtonBackdropSize))
+		trackingBackdrop:SetPoint("CENTER", 0, 0)
+		trackingBackdrop:SetTexture(Layout.TrackingButtonBackdropTexture)
+		trackingBackdrop:SetVertexColor(unpack(Layout.TrackingButtonBackdropColor))
+
+		local trackingTextureBg = tracking:CreateTexture()
+		trackingTextureBg:SetDrawLayer("ARTWORK", 0)
+		trackingTextureBg:SetPoint("CENTER")
+		trackingTextureBg:SetSize(unpack(Layout.TrackingButtonIconBgSize))
+		trackingTextureBg:SetTexture(Layout.TrackingButtonIconBgTexture)
+		trackingTextureBg:SetVertexColor(0,0,0,1)
+
+		local trackingTexture = tracking:CreateTexture()
+		trackingTexture:SetDrawLayer("ARTWORK", 1)
+		trackingTexture:SetPoint("CENTER")
+		trackingTexture:SetSize(unpack(Layout.TrackingButtonIconSize))
+		trackingTexture:SetMask(Layout.TrackingButtonIconMask)
+		trackingTexture:SetTexture(GetTrackingTexture())
+		tracking.Texture = trackingTexture
+
+		local trackingMenuFrame = CreateFrame("Frame", ADDON.."MinimapTrackingButtonMenu", tracking, "UIDropDownMenuTemplate")
+
+		tracking.ShowMenu = function(self)
+			local hasTracking
+			local trackingMenu = { { text = "Select Tracking", isTitle = true } }
+			for _,spellID in ipairs({
+				 1494, --Track Beasts
+				19883, --Track Humanoids
+				19884, --Track Undead
+				19885, --Track Hidden
+				19880, --Track Elementals
+				19878, --Track Demons
+				19882, --Track Giants
+				19879, --Track Dragonkin
+				 5225, --Track Humanoids: Druid
+				 5500, --Sense Demons
+				 5502, --Sense Undead
+				 2383, --Find Herbs
+				 2580, --Find Minerals
+				 2481  --Find Treasure
+			}) do
+				if (IsPlayerSpell(spellID)) then
+					hasTracking = true
+					local spellName = GetSpellInfo(spellID)
+					local spellTexture = GetSpellTexture(spellID)
+					table_insert(trackingMenu, {
+						text = spellName,
+						icon = spellTexture,
+						func = function() CastSpellByID(spellID) end
+					})
+				end
+			end
+			if hasTracking then 
+				EasyMenu(trackingMenu, trackingMenuFrame, "cursor", 0 , 0, "MENU")
+			end 
+		end
+
+		tracking:SetScript("OnClick", Tracking_OnClick)
+		tracking:SetScript("OnEnter", Tracking_OnEnter)
+		tracking:SetScript("OnLeave", Tracking_OnLeave)
+
+		Minimap:SetScript("OnMouseUp", function(_, button)
+			if (button == "RightButton") then
+				tracking:ShowMenu()
+			else
+				Minimap_OnClick(Minimap)
+			end
+		end)
+
+		self:RegisterEvent("UNIT_AURA", "OnEvent")
+
+		Handler.Tracking = tracking
+	end
 end 
 
 -- Set up the MBB (MinimapButtonBag) integration
@@ -1283,6 +1396,17 @@ Module.UpdateBars = function(self, event, ...)
 	end 
 end
 
+Module.UpdateTracking = function(self)
+	local Handler = self:GetMinimapHandler()
+	local icon = GetTrackingTexture()
+	if (icon) then
+		Handler.Tracking.Texture:SetTexture(icon)
+		Handler.Tracking:Show()
+	else
+		Handler.Tracking:Hide()
+	end
+end
+
 Module.OnEvent = function(self, event, ...)
 	if (event == "PLAYER_LEVEL_UP") then 
 		local level = ...
@@ -1305,6 +1429,7 @@ Module.OnEvent = function(self, event, ...)
 	if (event == "PLAYER_ENTERING_WORLD") or (event == "VARIABLES_LOADED") then 
 		self:UpdateMinimapSize()
 		self:UpdateMinimapMask()
+		self:UpdateTracking()
 	end
 
 	if (event == "ADDON_LOADED") then 
@@ -1314,6 +1439,12 @@ Module.OnEvent = function(self, event, ...)
 			self:UnregisterEvent("ADDON_LOADED", "OnEvent")
 			return 
 		end 
+	end 
+
+	if Layout.UseTrackingButton then 
+		if (event == "UNIT_AURA") then 
+			self:UpdateTracking()
+		end
 	end 
 
 	if Layout.UseStatusRings then 

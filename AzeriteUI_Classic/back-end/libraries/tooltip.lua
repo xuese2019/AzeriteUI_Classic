@@ -1,4 +1,4 @@
-local LibTooltip = CogWheel:Set("LibTooltip", 56)
+local LibTooltip = CogWheel:Set("LibTooltip", 57)
 if (not LibTooltip) then	
 	return
 end
@@ -1686,6 +1686,34 @@ Tooltip.SetUnitDebuff = function(self, unit, debuffID, filter)
 			ShowAuraTooltip(self, data)
 		end 
 	end 
+end
+
+Tooltip.SetTrackingSpell = function(self)
+	if (not self.owner) then
+		self:Hide()
+		return
+	end
+
+	local data = self:GetTooltipDataForTrackingSpell(self.data)
+	if (data and data.name) then 
+
+		-- Because a millionth of a second matters.
+		local colors = self.colors
+
+		-- Shouldn't be any bars here, but if for some reason 
+		-- the tooltip wasn't properly hidden before this, 
+		-- we make sure the bars are reset!
+		self:ClearStatusBars(true) -- suppress layout updates
+
+		if data.name then 
+			self:AddLine(data.name, colors.title[1], colors.title[2], colors.title[3], true)
+		end
+		if data.description then 
+			self:AddLine(data.description, colors.quest.green[1], colors.quest.green[2], colors.quest.green[3], true)
+		end 
+
+		self:Show()
+	end
 end
 
 -- The same as the old Blizz call is doing. Bad. 

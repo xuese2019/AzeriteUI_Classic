@@ -1419,13 +1419,16 @@ local Minimap = {
 		MBBPlace = { "BOTTOMRIGHT", -(31 + 213), 35 },
 		MBBTexture = GetMedia("plus"),
 
-	UseGroupFinderEye = true, 
-		GroupFinderEyePlace = { "CENTER", math_cos(45*math_pi/180) * (213/2 + 10), math_sin(45*math_pi/180) * (213/2 + 10) }, 
-		GroupFinderEyeSize = { 64, 64 }, 
-		GroupFinderEyeTexture = GetMedia("group-finder-eye-green"),
-		GroupFinderEyeColor = { .90, .95, 1 }, 
-		GroupFinderQueueStatusPlace = { "BOTTOMRIGHT", _G.QueueStatusMinimapButton, "TOPLEFT", 0, 0 }
-
+	UseTrackingButton = true, 
+		TrackingButtonPlace = { "CENTER", math_cos(45*math_pi/180) * (213/2 + 10), math_sin(45*math_pi/180) * (213/2 + 10) }, 
+		TrackingButtonSize = { 56, 56 }, 
+		TrackingButtonBackdropSize = { 100, 100 },
+		TrackingButtonBackdropTexture = GetMedia("point_plate"), 
+		TrackingButtonBackdropColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
+		TrackingButtonIconSize = { 28, 28 },
+		TrackingButtonIconMask = GetMedia("hp_critter_case_glow"), -- actionbutton_circular_mask
+		TrackingButtonIconBgSize = { 32, 32 },
+		TrackingButtonIconBgTexture = GetMedia("hp_critter_case_glow"),
 }
 
 -- NamePlates

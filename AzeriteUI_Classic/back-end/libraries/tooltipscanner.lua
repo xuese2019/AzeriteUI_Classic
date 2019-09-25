@@ -1,4 +1,4 @@
-local LibTooltipScanner = CogWheel:Set("LibTooltipScanner", 31)
+local LibTooltipScanner = CogWheel:Set("LibTooltipScanner", 32)
 if (not LibTooltipScanner) then	
 	return
 end
@@ -39,6 +39,7 @@ local GetSpecialization = _G.GetSpecialization
 local GetSpecializationInfo = _G.GetSpecializationInfo
 local GetSpecializationRole = _G.GetSpecializationRole
 local GetSpellInfo = _G.GetSpellInfo
+local GetTrackingTexture = _G.GetTrackingTexture
 local HasAction = _G.HasAction
 local IsActionInRange = _G.IsActionInRange
 local UnitBattlePetLevel = _G.UnitBattlePetLevel
@@ -2073,6 +2074,53 @@ LibTooltipScanner.GetTooltipDataForUnitDebuff = function(self, unit, debuffID, f
 	end
 end
 
+LibTooltipScanner.GetTooltipDataForTrackingSpell = function(self, tbl)
+	Scanner:Hide()
+	Scanner.owner = self
+	Scanner:SetOwner(self, "ANCHOR_NONE")
+
+	local trackingTexture = GetTrackingTexture()
+	if trackingTexture then 
+		Scanner:SetTrackingSpell()
+		
+		tbl = tbl or {}
+		tbl.icon = trackingTexture
+
+		local line = _G[ScannerName.."TextLeft1"]
+		if line then
+			local msg = line:GetText()
+			if msg then
+				tbl.name = msg
+			end
+		end
+
+		-- Just assume all remaining lines are description, 
+		-- and bunch them together to a single line. 
+		local numLines = Scanner:NumLines()
+		if (numLines > 1) then 
+			for lineIndex = 2, numLines do 
+				local line = _G[ScannerName.."TextLeft"..lineIndex]
+				if line then 
+					local msg = line:GetText()
+					if msg then
+						if tbl.description then 
+							if (msg == "") then 
+								tbl.description = tbl.description .. "|n|n" -- empty line/space
+							else 
+								tbl.description = tbl.description .. "|n" .. msg -- normal line break
+							end 
+						else 
+							tbl.description = msg -- first line
+						end 
+					end 
+				end 
+			end 
+		end 
+
+		return tbl
+	end
+end
+
 -- Module embedding
 local embedMethods = {
 	GetTooltipDataForAction = true,
@@ -2088,6 +2136,7 @@ local embedMethods = {
 	GetTooltipDataForInventorySlot = true, 
 	GetTooltipDataForInboxItem = true,
 	GetTooltipDataForSpellID = true,
+	GetTooltipDataForTrackingSpell = true
 }
 
 LibTooltipScanner.Embed = function(self, target)
