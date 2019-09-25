@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.51-RC] 2019-09-25
+### Added
+- Added a right-click menu to the minimap to select tracking when available.
+- Added a tracking button to the minimap. When left-clicked, it displays a menu of the available tracking types, when right-clicked, it disables the current tracking. 
+
 ## [1.0.50-RC] 2019-09-23
 ### Fixed
 - Slight bug in yesterday's update that caused all auras to sometimes be hidden in combat. Working as intended with this fix. This too is temporary, as I'm currently in the process of overhauling the aura system with parsed combat log information to make it far more functional for Classic. 
