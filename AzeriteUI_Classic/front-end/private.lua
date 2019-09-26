@@ -427,6 +427,7 @@ auraUserFlags[ 5195] = OnTarget 	-- Entangling Roots (Rank 3)
 auraUserFlags[ 5196] = OnTarget 	-- Entangling Roots (Rank 4)
 auraUserFlags[ 9852] = OnTarget 	-- Entangling Roots (Rank 5)
 auraUserFlags[ 9853] = OnTarget 	-- Entangling Roots (Rank 6)
+auraUserFlags[  770] = OnTarget 	-- Faerie Fire (Rank 1)
 auraUserFlags[18658] = OnTarget 	-- Hibernate (Rank 3)
 auraUserFlags[16689] = OnPlayer 	-- Nature's Grasp (Rank 1)
 auraUserFlags[16689] = OnPlayer 	-- Nature's Grasp (Rank 2)
@@ -435,7 +436,7 @@ auraUserFlags[16689] = OnPlayer 	-- Nature's Grasp (Rank 4)
 auraUserFlags[16689] = OnPlayer 	-- Nature's Grasp (Rank 5)
 auraUserFlags[16689] = OnPlayer 	-- Nature's Grasp (Rank 6)
 auraUserFlags[16870] = OnPlayer 	-- Omen of Clarity (Proc)
-auraUserFlags[  770] = OnTarget 	-- Faerie Fire (Rank 1)
+
 
 -- Druid (Feral)
 ------------------------------------------------------------------------
@@ -487,7 +488,9 @@ auraUserFlags[ 9863] = ByPlayer 	-- Tranquility (Rank 4)
 
 -- Warrior (Arms)
 ------------------------------------------------------------------------
-auraUserFlags[ 7922] = OnTarget 	-- Charge Stun
+auraUserFlags[ 7922] = OnTarget 	-- Charge Stun (Rank 1)
+auraUserFlags[  772] = OnTarget 	-- Rend (Rank 1)
+auraUserFlags[ 6343] = OnTarget 	-- Thunder Clap (Rank 1)
 
 -- Warrior (Fury)
 ------------------------------------------------------------------------

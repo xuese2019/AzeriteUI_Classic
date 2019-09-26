@@ -8,6 +8,7 @@
 <Script file='plugins\generic_honor.lua'/>
 <Script file='plugins\generic_latency.lua'/>
 <Script file='plugins\generic_mail.lua'/>
+<Script file='plugins\generic_reputation.lua'/>
 <Script file='plugins\generic_xp.lua'/>
 <Script file='plugins\generic_zone.lua'/>
 

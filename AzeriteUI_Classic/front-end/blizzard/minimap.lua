@@ -195,6 +195,7 @@ local Toggle_UpdateTooltip = function(toggle)
 
 	local tooltip = Module:GetMinimapTooltip()
 	local hasXP = Module.PlayerHasXP()
+	local hasRep = Module.PlayerHasRep()
 
 	local NC = "|r"
 	local colors = toggle._owner.colors 
@@ -211,7 +212,7 @@ local Toggle_UpdateTooltip = function(toggle)
 	local resting, restState, restedName, mult
 	local restedLeft, restedTimeLeft
 
-	if hasXP then 
+	if (hasXP or hasRep) then 
 		tooltip:SetDefaultAnchor(toggle)
 		tooltip:SetMaximumWidth(360)
 	end
@@ -260,6 +261,42 @@ local Toggle_UpdateTooltip = function(toggle)
 		end
 	end 
 
+	-- Rep tooltip
+	if hasRep then 
+
+		local name, reaction, min, max, current, factionID = GetWatchedFactionInfo()
+	
+		local standingID, isFriend, friendText
+		local standingLabel, standingDescription
+		for i = 1, GetNumFactions() do
+			local factionName, description, standingId, barMin, barMax, barValue, atWarWith, canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild, factionID, hasBonusRepGain, canBeLFGBonus = GetFactionInfo(i)
+			
+			if (factionName == name) then
+				standingID = standingId
+				break
+			end
+		end
+
+		if standingID then 
+			if hasXP then 
+				tooltip:AddLine(" ")
+			end 
+			standingLabel = _G["FACTION_STANDING_LABEL"..standingID]
+			tooltip:AddDoubleLine(name, standingLabel, rt, gt, bt, rt, gt, bt)
+
+			local barMax = max - min 
+			local barValue = current - min
+			if (barMax > 0) then 
+				tooltip:AddDoubleLine(L["Current Standing: "], fullXPString:format(normal..short(current-min)..NC, normal..short(max-min)..NC, highlight..math_floor((current-min)/(max-min)*100).."%"..NC), rh, gh, bh, rgg, ggg, bgg)
+			else 
+				tooltip:AddDoubleLine(L["Current Standing: "], "100%", rh, gh, bh, r, g, b)
+			end 
+		else 
+			-- Don't add additional spaces if we can't display the information
+			hasRep = nil
+		end
+	end
+	
 	-- Only adding the sticky toggle to the toggle button for now, not the frame.
 	if MouseIsOver(toggle) then 
 		tooltip:AddLine(" ")
@@ -618,34 +655,19 @@ local PostUpdate_XP = function(element, min, max, restedLeft, restedTimeLeft)
 	end 
 end
 
-local PostUpdate_Rep = function(element, current, min, max, factionName, standingID, standingLabel, isFriend)
+local PostUpdate_Rep = function(element, current, min, max, factionName, standingID, standingLabel)
 	local description = element.Value and element.Value.Description
 	if description then 
 		if (standingID == MAX_REPUTATION_REACTION) then
 			description:SetText(standingLabel)
 		else
-			if isFriend then 
-				if standingLabel then 
-					description:SetFormattedText(L["%s"], standingLabel)
-				else
-					description:SetText("")
-				end 
-			else 
-				local nextStanding = standingID and _G["FACTION_STANDING_LABEL"..(standingID + 1)]
-				if nextStanding then 
-					description:SetFormattedText(L["to %s"], nextStanding)
-				else
-					description:SetText("")
-				end 
+			local nextStanding = standingID and _G["FACTION_STANDING_LABEL"..(standingID + 1)]
+			if nextStanding then 
+				description:SetFormattedText(L["to %s"], nextStanding)
+			else
+				description:SetText("")
 			end 
 		end 
-	end 
-end
-
-local PostUpdate_AP = function(element, min, max, level)
-	local description = element.Value and element.Value.Description
-	if description then 
-		description:SetText(L["to next trait"])
 	end 
 end
 
@@ -686,7 +708,7 @@ local XP_OverrideValue = function(element, min, max, restedLeft, restedTimeLeft)
 	end 
 end 
 
-local Rep_OverrideValue = function(element, current, min, max, factionName, standingID, standingLabel, isFriend)
+local Rep_OverrideValue = function(element, current, min, max, factionName, standingID, standingLabel)
 	local value = element.Value or element:IsObjectType("FontString") and element 
 	local barMax = max - min 
 	local barValue = current - min
@@ -714,43 +736,13 @@ local Rep_OverrideValue = function(element, current, min, max, factionName, stan
 		end 
 	end 
 	if element.colorValue then 
-		local color = element._owner.colors[isFriend and "friendship" or "reaction"][standingID]
+		local color = element._owner.colors.reaction[standingID]
 		value:SetTextColor(color[1], color[2], color[3])
 		if percent then 
 			percent:SetTextColor(color[1], color[2], color[3])
 		end 
 	end 
 end
-
-local AP_OverrideValue = function(element, min, max, level)
-	local value = element.Value or element:IsObjectType("FontString") and element 
-	if value.showDeficit then 
-		value:SetFormattedText(short(max - min))
-	else 
-		value:SetFormattedText(short(min))
-	end
-	local percent = value.Percent
-	if percent then 
-		if (max > 0) then 
-			local percValue = math_floor(min/max*100)
-			if (percValue > 0) then 
-				-- removing the percentage sign
-				percent:SetFormattedText("%.0f", percValue)
-			else 
-				percent:SetText(NEW) 
-			end 
-		else 
-			percent:SetText("ap") 
-		end 
-	end 
-	if element.colorValue then 
-		local color = element._owner.colors.artifact
-		value:SetTextColor(color[1], color[2], color[3])
-		if percent then 
-			percent:SetTextColor(color[1], color[2], color[3])
-		end 
-	end 
-end 
 
 Module.SetUpMinimap = function(self)
 
@@ -1326,70 +1318,149 @@ Module.UpdateBars = function(self, event, ...)
 
 	local Handler = self:GetMinimapHandler()
 	local hasXP = Module.PlayerHasXP()
+	local hasRep = Module.PlayerHasRep()
 	local first = hasXP and "XP"
 
-	if hasXP then 
+	-- Will include choices later on
+	local first, second 
+	if (hasXP) then 
+		first = "XP"
+		second = hasRep and "Reputation"
+	elseif (hasRep) then 
+		first = "Reputation"
+	end 
+	if (first or second) then
 		if (not Handler.Toggle:IsShown()) then  
 			Handler.Toggle:Show()
 		end
 
-		-- Setup the bars and backdrops for single bar mode
-		if (self.spinnerMode ~= "Single") then 
+		-- Dual bars
+		if (first and second) then
 
-			-- Set the backdrop to the single thick bar backdrop
-			Handler.Toggle.Frame.Bg:SetTexture(Layout.RingFrameBackdropTexture)
+			-- Setup the bars and backdrops for dual bar mode
+			if self.spinnerMode ~= "Dual" then 
 
-			-- Update the look of the outer spinner to the big single bar look
-			Spinner[1]:SetStatusBarTexture(Layout.RingFrameSingleRingTexture)
-			Spinner[1]:SetSparkSize(unpack(Layout.RingFrameSingleRingSparkSize))
-			Spinner[1]:SetSparkInset(unpack(Layout.RingFrameSingleRingSparkInset))
+				-- Set the backdrop to the two bar backdrop
+				Handler.Toggle.Frame.Bg:SetTexture(Layout.RingFrameBackdropDoubleTexture)
 
-			if Layout.RingFrameSingleRingValueFunc then 
-				Layout.RingFrameSingleRingValueFunc(Spinner[1].Value, Handler)
+				-- Update the look of the outer spinner
+				Spinner[1]:SetStatusBarTexture(Layout.RingFrameOuterRingTexture)
+				Spinner[1]:SetSparkSize(unpack(Layout.RingFrameOuterRingSparkSize))
+				Spinner[1]:SetSparkInset(unpack(Layout.RingFrameOuterRingSparkInset))
+
+				if Layout.RingFrameOuterRingValueFunc then 
+					Layout.RingFrameOuterRingValueFunc(Spinner[1].Value, Handler)
+				end 
+				Spinner[1].PostUpdate = nil
+			end
+
+			-- Assign the spinners to the elements
+			if (self.spinner1 ~= first) then 
+
+				-- Disable the old element 
+				self:DisableMinimapElement(first)
+
+				-- Link the correct spinner
+				Handler[first] = Spinner[1]
+
+				-- Assign the correct post updates
+				if (first == "XP") then 
+					Handler[first].OverrideValue = XP_OverrideValue
+	
+				elseif (first == "Reputation") then 
+					Handler[first].OverrideValue = Rep_OverrideValue
+				end 
+
+				-- Enable the updated element 
+				self:EnableMinimapElement(first)
+
+				-- Run an update
+				Handler[first]:ForceUpdate()
+			end
+			if (self.spinner2 ~= second) then 
+
+				-- Disable the old element 
+				self:DisableMinimapElement(second)
+
+				-- Link the correct spinner
+				Handler[second] = Spinner[2]
+
+				-- Assign the correct post updates
+				if (second == "XP") then 
+					Handler[second].OverrideValue = XP_OverrideValue
+	
+				elseif (second == "Reputation") then 
+					Handler[second].OverrideValue = Rep_OverrideValue
+				end 
+
+				-- Enable the updated element 
+				self:EnableMinimapElement(second)
+
+				-- Run an update
+				Handler[second]:ForceUpdate()
+			end
+			-- Store the current modes
+			self.spinnerMode = "Dual"
+			self.spinner1 = first
+			self.spinner2 = second
+
+		-- Single bar
+		else
+
+			-- Setup the bars and backdrops for single bar mode
+			if (self.spinnerMode ~= "Single") then 
+
+				-- Set the backdrop to the single thick bar backdrop
+				Handler.Toggle.Frame.Bg:SetTexture(Layout.RingFrameBackdropTexture)
+
+				-- Update the look of the outer spinner to the big single bar look
+				Spinner[1]:SetStatusBarTexture(Layout.RingFrameSingleRingTexture)
+				Spinner[1]:SetSparkSize(unpack(Layout.RingFrameSingleRingSparkSize))
+				Spinner[1]:SetSparkInset(unpack(Layout.RingFrameSingleRingSparkInset))
+
+				if Layout.RingFrameSingleRingValueFunc then 
+					Layout.RingFrameSingleRingValueFunc(Spinner[1].Value, Handler)
+				end 
+
+				-- Hide 2nd spinner values
+				Spinner[2].Value:SetText("")
+				Spinner[2].Value.Percent:SetText("")
+			end 		
+
+			-- Disable any previously active secondary element
+			if self.spinner2 and Handler[self.spinner2] then 
+				self:DisableMinimapElement(self.spinner2)
+				Handler[self.spinner2] = nil
 			end 
 
-			-- Hide 2nd spinner values
-			Spinner[2].Value:SetText("")
-			Spinner[2].Value.Percent:SetText("")
-		end 		
+			-- Update the element if needed
+			if (self.spinner1 ~= first) then 
 
-		-- Disable any previously active secondary element
-		if self.spinner2 and Handler[self.spinner2] then 
-			self:DisableMinimapElement(self.spinner2)
-			Handler[self.spinner2] = nil
+				-- Update pointers and callbacks to the active element
+				Handler[first] = Spinner[1]
+				Handler[first].OverrideValue = hasXP and XP_OverrideValue or hasRep and Rep_OverrideValue
+				Handler[first].PostUpdate = hasXP and PostUpdate_XP or hasRep and PostUpdate_Rep
+
+				-- Enable the active element
+				self:EnableMinimapElement(first)
+
+				-- Make sure descriptions are updated
+				Handler[first].Value.Description:Show()
+
+				-- Update the visible element
+				Handler[first]:ForceUpdate()
+			end 
+			-- If the second spinner is still shown, hide it!
+			if (Spinner[2]:IsShown()) then 
+				Spinner[2]:Hide()
+			end 
+			-- Store the current modes
+			self.spinnerMode = "Single"
+			self.spinner1 = first
+			self.spinner2 = nil
 		end 
-
-		-- Update the element if needed
-		if (self.spinner1 ~= first) then 
-
-			-- Update pointers and callbacks to the active element
-			Handler[first] = Spinner[1]
-			Handler[first].OverrideValue = hasXP and XP_OverrideValue
-			Handler[first].PostUpdate = hasXP and PostUpdate_XP
-
-			-- Enable the active element
-			self:EnableMinimapElement(first)
-
-			-- Make sure descriptions are updated
-			Handler[first].Value.Description:Show()
-
-			-- Update the visible element
-			Handler[first]:ForceUpdate()
-		end 
-
-		-- If the second spinner is still shown, hide it!
-		if (Spinner[2]:IsShown()) then 
-			Spinner[2]:Hide()
-		end 
-
-		-- Store the current modes
-		self.spinnerMode = "Single"
-		self.spinner1 = first
-		self.spinner2 = nil
-
 		-- Post update the frame, could be sticky
 		Toggle_UpdateFrame(Handler.Toggle)
-
 	else 
 		Handler.Toggle:Hide()
 		Handler.Toggle.Frame:Hide()
