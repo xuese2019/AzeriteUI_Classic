@@ -1,4 +1,4 @@
-local LibTooltip = CogWheel:Set("LibTooltip", 57)
+local LibTooltip = CogWheel:Set("LibTooltip", 58)
 if (not LibTooltip) then	
 	return
 end
@@ -1623,9 +1623,13 @@ local ShowAuraTooltip = function(self, data)
 	-- we make sure the bars are reset!
 	self:ClearStatusBars(true) -- suppress layout updates
 
-	self:AddLine(data.name, colors.title[1], colors.title[2], colors.title[3], true)
+	if (data.debuffTypeLabel) then 
+		self:AddDoubleLine(data.name, data.debuffTypeLabel, colors.title[1], colors.title[2], colors.title[3], colors.quest.gray[1], colors.quest.gray[2], colors.quest.gray[3], true, true)
+	else
+		self:AddLine(data.name, colors.title[1], colors.title[2], colors.title[3], true)
+	end 
 
-	if data.spellId then 
+	if (data.spellId and (not self.hideSpellID)) then 
 		-- How to NOT localize. This is just baaaaad!
 		local spellIDText = STAT_CATEGORY_SPELL .. " " .. ID
 		self:AddLine(spellIDText .. ": " .. data.spellId, colors.offwhite[1], colors.offwhite[2], colors.offwhite[3])

@@ -1,4 +1,4 @@
-local LibTooltipScanner = CogWheel:Set("LibTooltipScanner", 32)
+local LibTooltipScanner = CogWheel:Set("LibTooltipScanner", 33)
 if (not LibTooltipScanner) then	
 	return
 end
@@ -1841,9 +1841,17 @@ LibTooltipScanner.GetTooltipDataForUnitAura = function(self, unit, auraID, filte
 		tbl.value2 = value2
 		tbl.value3 = value3
 
+		local line = _G[ScannerName.."TextRight1"]
+		if line then 
+			local msg = line:GetText()
+			if msg then
+				tbl.debuffTypeLabel = msg
+			end
+		end
+
 		local foundTimeRemaining
 		local numLines = Scanner:NumLines()
-		
+
 		for lineIndex = 2,numLines do
 			local line = _G[ScannerName.."TextLeft"..lineIndex]
 			if line then
@@ -1911,6 +1919,7 @@ LibTooltipScanner.GetTooltipDataForUnitBuff = function(self, unit, buffID, filte
 			tbl[i] = nil
 		end 
 
+		tbl.isBuff = true
 		tbl.name = name
 		tbl.icon = icon
 		tbl.count = count
@@ -1930,6 +1939,14 @@ LibTooltipScanner.GetTooltipDataForUnitBuff = function(self, unit, buffID, filte
 		tbl.value2 = value2
 		tbl.value3 = value3
 
+		local line = _G[ScannerName.."TextRight1"]
+		if line then 
+			local msg = line:GetText()
+			if msg then
+				tbl.debuffTypeLabel = msg
+			end
+		end
+		
 		local foundTimeRemaining
 		local numLines = Scanner:NumLines()
 		
@@ -1955,7 +1972,6 @@ LibTooltipScanner.GetTooltipDataForUnitBuff = function(self, unit, buffID, filte
 				end
 			end
 		end
-
 
 		-- Just assume all remaining lines are description, 
 		-- and bunch them together to a single line. 
@@ -2020,6 +2036,14 @@ LibTooltipScanner.GetTooltipDataForUnitDebuff = function(self, unit, debuffID, f
 		tbl.value2 = value2
 		tbl.value3 = value3
 
+		local line = _G[ScannerName.."TextRight1"]
+		if line then 
+			local msg = line:GetText()
+			if msg then
+				tbl.debuffTypeLabel = msg
+			end
+		end
+		
 		local foundTimeRemaining
 		local numLines = Scanner:NumLines()
 		
