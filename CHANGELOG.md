@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.52-RC] 2019-09-27
+### Added
+- Added reputation tracking to the minimap ring bars! 
+- Aura tooltips now show the magic school of the aura.
+
+### Changed
+- Aura tooltips no longer show the spellID. You don't need to see that. 
+- Various aura filter tweaks, and the beginning of the Druid aura overhaul in preparation of that. All classes will eventually be covered, and I'm starting with Druid since that is my main and something I currently have direct access to. 
+
 ## [1.0.51-RC] 2019-09-25
 ### Added
 - Added a right-click menu to the minimap to select tracking when available.
