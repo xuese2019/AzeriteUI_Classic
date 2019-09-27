@@ -1,4 +1,4 @@
-local LibAura = CogWheel:Set("LibAura", 10)
+local LibAura = CogWheel:Set("LibAura", 12)
 if (not LibAura) then	
 	return
 end
@@ -693,8 +693,8 @@ LibAura.GetSpellRank = function(self, spellID)
 			if (e) then
   				rank = string_sub(spellID, s+1, e-1)
 				return rank
-			 end
-		 end
+			end
+		end
 	end
 end
 
@@ -753,46 +753,37 @@ Frame:SetScript("OnEvent", Frame.OnEvent)
 -- of the auras like type of spell, what class it belongs to, etc. 
 --------------------------------------------------------------------------
 
-local IsPlayerSpell 	= tonumber("0000000000000000000000000000000000000000000000000000000000000001", 2) 
-local IsRacialSpell 	= tonumber("0000000000000000000000000000000000000000000000000000000000000010", 2) 
+local PlayerSpell 		= 2^0
+local RacialSpell 		= 2^1
 
 -- 2nd return value from UnitClass(unit)
-local DRUID 			= tonumber("0000000000000000000000000000000000000000000000000000000000000100", 2) 
-local HUNTER 			= tonumber("0000000000000000000000000000000000000000000000000000000000001000", 2) 
-local MAGE 				= tonumber("0000000000000000000000000000000000000000000000000000000000010000", 2) 
-local PALADIN 			= tonumber("0000000000000000000000000000000000000000000000000000000000100000", 2) 
-local PRIEST 			= tonumber("0000000000000000000000000000000000000000000000000000000001000000", 2) 
-local ROGUE 			= tonumber("0000000000000000000000000000000000000000000000000000000010000000", 2) 
-local SHAMAN 			= tonumber("0000000000000000000000000000000000000000000000000000000100000000", 2) 
-local WARLOCK 			= tonumber("0000000000000000000000000000000000000000000000000000001000000000", 2) 
-local WARRIOR 			= tonumber("0000000000000000000000000000000000000000000000000000010000000000", 2) 
+local DRUID 			= 2^2
+local HUNTER 			= 2^3
+local MAGE 				= 2^4
+local PALADIN 			= 2^5
+local PRIEST 			= 2^6
+local ROGUE 			= 2^7
+local SHAMAN 			= 2^8
+local WARLOCK 			= 2^9
+local WARRIOR 			= 2^10
 
--- 2nd return value from UnitRace(unit)
-local Dwarf 			= tonumber("0000000000000000000000000000000000000000000000000000100000000000", 2) 
-local Gnome 			= tonumber("0000000000000000000000000000000000000000000000000001000000000000", 2) 
-local Human 			= tonumber("0000000000000000000000000000000000000000000000000010000000000000", 2) 
-local NightElf 			= tonumber("0000000000000000000000000000000000000000000000000100000000000000", 2) 
-local Orc 				= tonumber("0000000000000000000000000000000000000000000000001000000000000000", 2) 
-local Scourge 			= tonumber("0000000000000000000000000000000000000000000000010000000000000000", 2) 
-local Tauren 			= tonumber("0000000000000000000000000000000000000000000000100000000000000000", 2) 
-local Troll 			= tonumber("0000000000000000000000000000000000000000000001000000000000000000", 2) 
-local Worgen 			= tonumber("0000000000000000000000000000000000000000000010000000000000000000", 2) 
+local CrowdControl 		= 2^11
+local Incapacitate 		= 2^12
+local Root 				= 2^13
+local Snare 			= 2^14
+local Silence 			= 2^15
+local Stun 				= 2^16
+local Taunt 			= 2^17
+local Immune			= 2^18
+local ImmuneSpell 		= 2^19
+local ImmunePhysical 	= 2^20
+local Disarm 			= 2^21
 
-local IsCrowdControl 	= tonumber("0000000000000000000000000000000000000000000100000000000000000000", 2) 
-local IsRoot 			= tonumber("0000000000000000000000000000000000000000001000000000000000000000", 2) 
-local IsSnare 			= tonumber("0000000000000000000000000000000000000000010000000000000000000000", 2) 
-local IsSilence 		= tonumber("0000000000000000000000000000000000000000100000000000000000000000", 2) 
-local IsStun 			= tonumber("0000000000000000000000000000000000000001000000000000000000000000", 2) 
-local IsImmune			= tonumber("0000000000000000000000000000000000000010000000000000000000000000", 2) 
-local IsImmuneSpell 	= tonumber("0000000000000000000000000000000000000100000000000000000000000000", 2) 
-local IsImmunePhysical 	= tonumber("0000000000000000000000000000000000001000000000000000000000000000", 2) 
-local IsDisarm 			= tonumber("0000000000000000000000000000000000010000000000000000000000000000", 2) 
+local Food 				= 2^22
+local Flask 			= 2^23
 
-local IsFood 			= tonumber("0000000000000000000000000000001000000000000000000000000000000000", 2)
-local IsFlask 			= tonumber("0000000000000000000000000000010000000000000000000000000000000000", 2) 
-
-InfoFlags.IsPlayerSpell = IsPlayerSpell
-InfoFlags.IsRacialSpell = IsRacialSpell
+InfoFlags.IsPlayerSpell = PlayerSpell
+InfoFlags.IsRacialSpell = RacialSpell
 
 InfoFlags.DRUID = DRUID
 InfoFlags.HUNTER = HUNTER
@@ -804,47 +795,36 @@ InfoFlags.SHAMAN = SHAMAN
 InfoFlags.WARLOCK = WARLOCK
 InfoFlags.WARRIOR = WARRIOR
 
-InfoFlags.Dwarf = Dwarf
-InfoFlags.Gnome = Gnome
-InfoFlags.Human = Human
-InfoFlags.NightElf = NightElf
-InfoFlags.Orc = Orc
-InfoFlags.Scourge = Scourge
-InfoFlags.Tauren = Tauren
-InfoFlags.Troll = Troll
-
-InfoFlags.IsCrowdControl = IsCrowdControl
-InfoFlags.IsRoot = IsRoot
-InfoFlags.IsSnare = IsSnare
-InfoFlags.IsSilence = IsSilence
-InfoFlags.IsStun = IsStun
-InfoFlags.IsImmune = IsImmune
-InfoFlags.IsImmuneSpell = IsImmuneSpell
-InfoFlags.IsImmunePhysical = IsImmunePhysical
-InfoFlags.IsDisarm = IsDisarm
-InfoFlags.IsFood = IsFood
-InfoFlags.IsFlask = IsFlask
+InfoFlags.IsCrowdControl = CrowdControl
+InfoFlags.IsIncapacitate = Incapacitate
+InfoFlags.IsRoot = Root
+InfoFlags.IsSnare = Snare
+InfoFlags.IsSilence = Silence
+InfoFlags.IsStun = Stun
+InfoFlags.IsImmune = Immune
+InfoFlags.IsImmuneSpell = ImmuneSpell
+InfoFlags.IsImmunePhysical = ImmunePhysical
+InfoFlags.IsDisarm = Disarm
+InfoFlags.IsFood = Food
+InfoFlags.IsFlask = Flask
 
 -- For convenience farther down the list here
-local IsDruid = IsPlayerSpell + DRUID
-local IsHunter = IsPlayerSpell + HUNTER
-local IsMage = IsPlayerSpell + MAGE
-local IsPaladin = IsPlayerSpell + PALADIN
-local IsPriest = IsPlayerSpell + PRIEST
-local IsRogue = IsPlayerSpell + ROGUE
-local IsShaman = IsPlayerSpell + SHAMAN
-local IsWarlock = IsPlayerSpell + WARLOCK
-local IsWarrior = IsPlayerSpell + WARRIOR
+local IsDruid = PlayerSpell + DRUID
+local IsHunter = PlayerSpell + HUNTER
+local IsMage = PlayerSpell + MAGE
+local IsPaladin = PlayerSpell + PALADIN
+local IsPriest = PlayerSpell + PRIEST
+local IsRogue = PlayerSpell + ROGUE
+local IsShaman = PlayerSpell + SHAMAN
+local IsWarlock = PlayerSpell + WARLOCK
+local IsWarrior = PlayerSpell + WARRIOR
 
-local IsDwarf = IsRacialSpell + Dwarf
-local IsGnome = IsRacialSpell + Gnome
-local IsHuman = IsRacialSpell + Human
-local IsNightElf = IsRacialSpell + NightElf
-local IsOrc = IsRacialSpell + Orc
-local IsScourge = IsRacialSpell + Scourge
-local IsTauren = IsRacialSpell + Tauren
-local IsTroll = IsRacialSpell + Troll
-local IsWorgen = IsRacialSpell + Worgen
+local IsIncapacitate = CrowdControl + Incapacitate
+local IsRoot = CrowdControl + Root
+local IsSnare = CrowdControl + Snare
+local IsSilence = CrowdControl + Silence
+local IsStun = CrowdControl + Stun
+local IsTaunt = Taunt
 
 -- Add flags to or create the cache entry
 -- This is to avoid duplicate entries removing flags
@@ -856,799 +836,81 @@ local AddFlags = function(spellID, flags)
 	Auras[spellID] = bit_bor(Auras[spellID], flags)
 end
 
+-- Druid (Balance)
 ------------------------------------------------------------------------
+AddFlags(22812, IsDruid) 					-- Barkskin
+AddFlags(  339, IsDruid + IsRoot) 			-- Entangling Roots (Rank 1)
+AddFlags( 1062, IsDruid + IsRoot) 			-- Entangling Roots (Rank 2)
+AddFlags( 5195, IsDruid + IsRoot) 			-- Entangling Roots (Rank 3)
+AddFlags( 5196, IsDruid + IsRoot) 			-- Entangling Roots (Rank 4)
+AddFlags( 9852, IsDruid + IsRoot) 			-- Entangling Roots (Rank 5)
+AddFlags( 9853, IsDruid + IsRoot) 			-- Entangling Roots (Rank 6)
+AddFlags(  770, IsDruid) 					-- Faerie Fire (Rank 1)
+AddFlags( 2637, IsDruid + IsStun) 			-- Hibernate (Rank 1)
+AddFlags(18657, IsDruid + IsStun) 			-- Hibernate (Rank 2)
+AddFlags(18658, IsDruid + IsStun) 			-- Hibernate (Rank 3)
+AddFlags(16689, IsDruid + IsRoot) 			-- Nature's Grasp (Rank 1)
+AddFlags(16689, IsDruid + IsRoot) 			-- Nature's Grasp (Rank 2)
+AddFlags(16689, IsDruid + IsRoot) 			-- Nature's Grasp (Rank 3)
+AddFlags(16689, IsDruid + IsRoot) 			-- Nature's Grasp (Rank 4)
+AddFlags(16689, IsDruid + IsRoot) 			-- Nature's Grasp (Rank 5)
+AddFlags(16689, IsDruid + IsRoot) 			-- Nature's Grasp (Rank 6)
+AddFlags(16870, IsDruid) 					-- Omen of Clarity (Proc)
+
+-- Druid (Feral)
 ------------------------------------------------------------------------
----- 					CROWD CONTROL: CLASSES
+AddFlags( 1066, IsDruid) 					-- Aquatic Form
+AddFlags( 8983, IsDruid + IsStun) 			-- Bash
+AddFlags(  768, IsDruid) 					-- Cat Form
+AddFlags( 5209, IsDruid + IsTaunt) 			-- Challenging Roar (Taunt)
+AddFlags( 9821, IsDruid) 					-- Dash
+AddFlags( 9634, IsDruid) 					-- Dire Bear Form
+AddFlags( 5229, IsDruid) 					-- Enrage
+AddFlags(16857, IsDruid) 					-- Faerie Fire (Feral)
+AddFlags(22896, IsDruid) 					-- Frenzied Regeneration
+AddFlags( 6795, IsDruid + IsTaunt) 			-- Growl (Taunt)
+AddFlags(24932, IsDruid) 					-- Leader of the Pack
+AddFlags( 9826, IsDruid + IsStun) 			-- Pounce
+AddFlags( 6783, IsDruid) 					-- Prowl
+AddFlags( 9904, IsDruid) 					-- Rake
+AddFlags( 9894, IsDruid) 					-- Rip
+AddFlags( 9845, IsDruid) 					-- Tiger's Fury
+AddFlags(  783, IsDruid) 					-- Travel Form
+
+-- Druid (Restoration)
 ------------------------------------------------------------------------
+AddFlags( 2893, IsDruid) 					-- Abolish Poison
+AddFlags(29166, IsDruid) 					-- Innervate
+AddFlags( 8936, IsDruid) 					-- Regrowth (Rank 1)
+AddFlags( 8938, IsDruid) 					-- Regrowth (Rank 2)
+AddFlags( 8939, IsDruid) 					-- Regrowth (Rank 3)
+AddFlags( 8940, IsDruid) 					-- Regrowth (Rank 4)
+AddFlags( 8941, IsDruid) 					-- Regrowth (Rank 5)
+AddFlags( 9750, IsDruid) 					-- Regrowth (Rank 6)
+AddFlags( 9856, IsDruid) 					-- Regrowth (Rank 7)
+AddFlags( 9857, IsDruid) 					-- Regrowth (Rank 8)
+AddFlags( 9858, IsDruid) 					-- Regrowth (Rank 9)
+AddFlags(  774, IsDruid) 					-- Rejuvenation (Rank 1)
+AddFlags( 1058, IsDruid) 					-- Rejuvenation (Rank 2)
+AddFlags( 1430, IsDruid) 					-- Rejuvenation (Rank 3)
+AddFlags( 2090, IsDruid) 					-- Rejuvenation (Rank 4)
+AddFlags( 2091, IsDruid) 					-- Rejuvenation (Rank 5)
+AddFlags( 3627, IsDruid) 					-- Rejuvenation (Rank 6)
+AddFlags( 8910, IsDruid) 					-- Rejuvenation (Rank 7)
+AddFlags( 9839, IsDruid) 					-- Rejuvenation (Rank 8)
+AddFlags( 9840, IsDruid) 					-- Rejuvenation (Rank 9)
+AddFlags( 9841, IsDruid) 					-- Rejuvenation (Rank 10)
+AddFlags(  740, IsDruid) 					-- Tranquility (Rank 1)
+AddFlags( 8918, IsDruid) 					-- Tranquility (Rank 2)
+AddFlags( 9862, IsDruid) 					-- Tranquility (Rank 3)
+AddFlags( 9863, IsDruid) 					-- Tranquility (Rank 4)
+
+-- Warrior (Arms)
 ------------------------------------------------------------------------
+AddFlags( 7922, IsWarrior + IsStun) 		-- Charge Stun (Rank 1)
+AddFlags(  772, IsWarrior) 					-- Rend (Rank 1)
+AddFlags( 6343, IsWarrior) 					-- Thunder Clap (Rank 1)
 
--- Druid
-do 
-	AddFlags( 33786, IsDruid + IsCrowdControl) -- Cyclone
-	AddFlags(209753, IsDruid + IsCrowdControl) -- Cyclone
-	AddFlags(    99, IsDruid + IsCrowdControl) -- Incapacitating Roar
-	AddFlags(236748, IsDruid + IsCrowdControl) -- Intimidating Roar
-	AddFlags(163505, IsDruid + IsCrowdControl) -- Rake
-	AddFlags( 22570, IsDruid + IsCrowdControl + IsStun) -- Maim
-	AddFlags(203123, IsDruid + IsCrowdControl + IsStun) -- Maim
-	AddFlags(203126, IsDruid + IsCrowdControl + IsStun) -- Maim (pvp honor talent)
-	AddFlags(236025, IsDruid + IsCrowdControl + IsStun) -- Enraged Maim (pvp honor talent)
-	AddFlags(  5211, IsDruid + IsCrowdControl + IsStun) -- Mighty Bash
-	AddFlags( 81261, IsDruid + IsCrowdControl + IsSilence) -- Solar Beam
-	AddFlags(   339, IsDruid + IsCrowdControl + IsRoot) -- Entangling Roots
-	AddFlags(235963, IsDruid + IsCrowdControl + IsRoot) -- Entangling Roots (Earthen Grasp - feral pvp talent, -80% hit chance)
-	AddFlags( 45334, IsDruid + IsCrowdControl + IsRoot) -- Immobilized (Wild Charge - Bear)
-	AddFlags(102359, IsDruid + IsCrowdControl + IsRoot) -- Mass Entanglement
-	AddFlags( 50259, IsDruid + IsCrowdControl + IsSnare) -- Dazed (Wild Charge - Cat)
-	AddFlags( 58180, IsDruid + IsCrowdControl + IsSnare) -- Infected Wounds
-	AddFlags( 61391, IsDruid + IsCrowdControl + IsSnare) -- Typhoon
-	AddFlags(127797, IsDruid + IsCrowdControl + IsSnare) -- Ursol's Vortex
-	AddFlags( 50259, IsDruid + IsCrowdControl + IsSnare) -- Wild Charge (Dazed)
-	AddFlags(102543, IsDruid + IsCrowdControl) -- Incarnation: King of the Jungle
-	AddFlags(106951, IsDruid + IsCrowdControl) -- Berserk
-	AddFlags(102558, IsDruid + IsCrowdControl) -- Incarnation: Guardian of Ursoc
-	AddFlags(102560, IsDruid + IsCrowdControl) -- Incarnation: Chosen of Elune
-	AddFlags(202244, IsDruid + IsCrowdControl) -- Overrun (pvp honor talent)
-	AddFlags(209749, IsDruid + IsCrowdControl + IsDisarm) -- Faerie Swarm (pvp honor talent)
-end 
-
--- Hunter
-do 
-	AddFlags(117526, IsHunter + IsCrowdControl + IsRoot) -- Binding Shot
-	AddFlags(  3355, IsHunter + IsCrowdControl) -- Freezing Trap
-	AddFlags( 13809, IsHunter + IsCrowdControl) -- Ice Trap 1
-	AddFlags(195645, IsHunter + IsCrowdControl + IsSnare) -- Wing Clip
-	AddFlags( 19386, IsHunter + IsCrowdControl) -- Wyvern Sting
-	AddFlags(128405, IsHunter + IsCrowdControl + IsRoot) -- Narrow Escape
-	AddFlags(201158, IsHunter + IsCrowdControl + IsRoot) -- Super Sticky Tar (root)
-	AddFlags(111735, IsHunter + IsCrowdControl + IsSnare) -- Tar
-	AddFlags(135299, IsHunter + IsCrowdControl + IsSnare) -- Tar Trap
-	AddFlags(  5116, IsHunter + IsCrowdControl + IsSnare) -- Concussive Shot
-	AddFlags(194279, IsHunter + IsCrowdControl + IsSnare) -- Caltrops
-	AddFlags(206755, IsHunter + IsCrowdControl + IsSnare) -- Ranger's Net (snare)
-	AddFlags(236699, IsHunter + IsCrowdControl + IsSnare) -- Super Sticky Tar (slow)
-	AddFlags(213691, IsHunter + IsCrowdControl) -- Scatter Shot (pvp honor talent)
-	AddFlags(186265, IsHunter + IsCrowdControl + IsImmune) -- Deterrence (aspect of the turtle)
-	AddFlags( 19574, IsHunter + IsCrowdControl + IsImmuneSpell) -- Bestial Wrath (only if The Beast Within (212704) is active)
-	AddFlags(190927, IsHunter + IsCrowdControl + IsRoot) -- Harpoon
-	AddFlags(212331, IsHunter + IsCrowdControl + IsRoot) -- Harpoon
-	AddFlags(212353, IsHunter + IsCrowdControl + IsRoot) -- Harpoon
-	AddFlags(162480, IsHunter + IsCrowdControl + IsRoot) -- Steel Trap
-	AddFlags(200108, IsHunter + IsCrowdControl + IsRoot) -- Ranger's Net
-	AddFlags(212638, IsHunter + IsCrowdControl + IsRoot) -- Tracker's Net 
-	AddFlags(224729, IsHunter + IsCrowdControl + IsSnare) -- Bursting Shot
-	AddFlags(238559, IsHunter + IsCrowdControl + IsSnare) -- Bursting Shot
-	AddFlags(203337, IsHunter + IsCrowdControl) -- Freezing Trap (Diamond Ice - pvp honor talent)
-	AddFlags(202748, IsHunter + IsCrowdControl + IsImmune) -- Survival Tactics (pvp honor talent) (not immune, 99% damage reduction)
-	AddFlags(248519, IsHunter + IsCrowdControl + IsImmuneSpell) -- Interlope (pvp honor talent)
-	AddFlags(202933, IsHunter + IsCrowdControl + IsSilence) -- Spider Sting	(pvp honor talent) --this its the silence effect
-	AddFlags(  5384, IsHunter + IsCrowdControl) -- Feign Death
-end 
-
--- Hunter Pets
-do 
-	AddFlags( 24394, IsHunter + IsCrowdControl) -- Intimidation
-	AddFlags( 50433, IsHunter + IsCrowdControl + IsSnare) -- Ankle Crack (Crocolisk)
-	AddFlags( 54644, IsHunter + IsCrowdControl + IsSnare) -- Frost Breath (Chimaera)
-	AddFlags( 35346, IsHunter + IsCrowdControl + IsSnare) -- Warp Time (Warp Stalker)
-	AddFlags(160067, IsHunter + IsCrowdControl + IsSnare) -- Web Spray (Spider)
-	AddFlags(160065, IsHunter + IsCrowdControl + IsSnare) -- Tendon Rip (Silithid)
-	AddFlags( 54216, IsHunter + IsCrowdControl) -- Master's Call (root and snare immune only)
-	AddFlags( 53148, IsHunter + IsCrowdControl + IsRoot) -- Charge (tenacity ability)
-	AddFlags(137798, IsHunter + IsCrowdControl + IsImmuneSpell) -- Reflective Armor Plating (Direhorn)
-end 
-
--- Mage
-do 
-	AddFlags( 44572, IsMage + IsCrowdControl) -- Deep Freeze
-	AddFlags( 31661, IsMage + IsCrowdControl) -- Dragon's Breath
-	AddFlags(   118, IsMage + IsCrowdControl) -- Polymorph
-	AddFlags( 61305, IsMage + IsCrowdControl) -- Polymorph: Black Cat
-	AddFlags( 61308, IsMage + IsCrowdControl) -- Polymorph: Black Cat
-	AddFlags(277792, IsMage + IsCrowdControl) -- Polymorph: Bumblebee
-	AddFlags(277787, IsMage + IsCrowdControl) -- Polymorph: Direhorn
-	AddFlags(161354, IsMage + IsCrowdControl) -- Polymorph: Monkey
-	AddFlags(161372, IsMage + IsCrowdControl) -- Polymorph: Peacock
-	AddFlags(161355, IsMage + IsCrowdControl) -- Polymorph: Penguin
-	AddFlags( 28272, IsMage + IsCrowdControl) -- Polymorph: Pig
-	AddFlags(161353, IsMage + IsCrowdControl) -- Polymorph: Polar bear cub
-	AddFlags(126819, IsMage + IsCrowdControl) -- Polymorph: Porcupine
-	AddFlags( 61721, IsMage + IsCrowdControl) -- Polymorph: Rabbit
-	AddFlags( 61025, IsMage + IsCrowdControl) -- Polymorph: Serpent
-	AddFlags( 61780, IsMage + IsCrowdControl) -- Polymorph: Turkey
-	AddFlags( 28271, IsMage + IsCrowdControl) -- Polymorph: Turtle
-	AddFlags( 82691, IsMage + IsCrowdControl) -- Ring of Frost
-	AddFlags(140376, IsMage + IsCrowdControl) -- Ring of Frost
-	AddFlags(   122, IsMage + IsCrowdControl + IsRoot) -- Frost Nova
-	AddFlags(111340, IsMage + IsCrowdControl + IsRoot) -- Ice Ward
-	AddFlags(   120, IsMage + IsCrowdControl + IsSnare) -- Cone of Cold
-	AddFlags(   116, IsMage + IsCrowdControl + IsSnare) -- Frostbolt
-	AddFlags( 44614, IsMage + IsCrowdControl + IsSnare) -- Frostfire Bolt
-	AddFlags( 31589, IsMage + IsCrowdControl + IsSnare) -- Slow
-	AddFlags(    10, IsMage + IsCrowdControl + IsSnare) -- Blizzard
-	AddFlags(205708, IsMage + IsCrowdControl + IsSnare) -- Chilled
-	AddFlags(212792, IsMage + IsCrowdControl + IsSnare) -- Cone of Cold
-	AddFlags(205021, IsMage + IsCrowdControl + IsSnare) -- Ray of Frost
-	AddFlags(135029, IsMage + IsCrowdControl + IsSnare) -- Water Jet
-	AddFlags( 59638, IsMage + IsCrowdControl + IsSnare) -- Frostbolt (Mirror Images)
-	AddFlags(228354, IsMage + IsCrowdControl + IsSnare) -- Flurry
-	AddFlags(157981, IsMage + IsCrowdControl + IsSnare) -- Blast Wave
-	AddFlags(  2120, IsMage + IsCrowdControl + IsSnare) -- Flamestrike
-	AddFlags(236299, IsMage + IsCrowdControl + IsSnare) -- Chrono Shift
-	AddFlags( 45438, IsMage + IsCrowdControl + IsImmune) -- Ice Block
-	AddFlags(198121, IsMage + IsCrowdControl + IsRoot) -- Frostbite (pvp talent)
-	AddFlags(220107, IsMage + IsCrowdControl + IsRoot) -- Frostbite
-	AddFlags(157997, IsMage + IsCrowdControl + IsRoot) -- Ice Nova
-	AddFlags(228600, IsMage + IsCrowdControl + IsRoot) -- Glacial Spike
-	AddFlags(110959, IsMage + IsCrowdControl) -- Greater Invisibility
-	AddFlags(198144, IsMage + IsCrowdControl) -- Ice form (stun/knockback immune)
-	AddFlags( 12042, IsMage + IsCrowdControl) -- Arcane Power
-	AddFlags(198111, IsMage + IsCrowdControl + IsImmune) -- Temporal Shield (heals all damage taken after 4 sec)
-end 
-
--- Mage Water Elemental
-do 
-	AddFlags( 33395, IsMage + IsCrowdControl + IsRoot) -- Freeze
-end 
-
--- Paladin
-do 
-	AddFlags(105421, IsPaladin + IsCrowdControl) -- Blinding Light
-	AddFlags(105593, IsPaladin + IsCrowdControl) -- Fist of Justice
-	AddFlags(   853, IsPaladin + IsCrowdControl + IsStun) -- Hammer of Justice
-	AddFlags( 20066, IsPaladin + IsCrowdControl) -- Repentance
-	AddFlags( 31935, IsPaladin + IsCrowdControl + IsSilence) -- Avenger's Shield
-	AddFlags(187219, IsPaladin + IsCrowdControl + IsSilence) -- Avenger's Shield (pvp talent)
-	AddFlags(199512, IsPaladin + IsCrowdControl + IsSilence) -- Avenger's Shield (unknow use)
-	AddFlags(217824, IsPaladin + IsCrowdControl + IsSilence) -- Shield of Virtue (pvp honor talent)
-	AddFlags(204242, IsPaladin + IsCrowdControl + IsSnare) -- Consecration (talent Consecrated Ground)
-	AddFlags(183218, IsPaladin + IsCrowdControl + IsSnare) -- Hand of Hindrance
-	AddFlags(   642, IsPaladin + IsCrowdControl + IsImmune) -- Divine Shield
-	AddFlags(184662, IsPaladin + IsCrowdControl) -- Shield of Vengeance
-	AddFlags( 31821, IsPaladin + IsCrowdControl) -- Aura Mastery
-	AddFlags(  1022, IsPaladin + IsCrowdControl + IsImmunePhysical) -- Hand of Protection
-	AddFlags(204018, IsPaladin + IsCrowdControl + IsImmuneSpell) -- Blessing of Spellwarding
-	AddFlags(228050, IsPaladin + IsCrowdControl + IsImmune) -- Divine Shield (Guardian of the Forgotten Queen)
-	AddFlags(205273, IsPaladin + IsCrowdControl + IsSnare) -- Wake of Ashes (artifact trait) (snare)
-	AddFlags(205290, IsPaladin + IsCrowdControl + IsStun) -- Wake of Ashes (artifact trait) (stun)
-	AddFlags(199448, IsPaladin + IsCrowdControl + IsImmune) -- Blessing of Sacrifice (pvp talent, 100% damage transfered to paladin)
-end 
-
--- Priest
-do 
-	AddFlags(   605, IsPriest + IsCrowdControl) -- Dominate Mind
-	AddFlags( 64044, IsPriest + IsCrowdControl) -- Psychic Horror
-	AddFlags(  8122, IsPriest + IsCrowdControl) -- Psychic Scream
-	AddFlags(  9484, IsPriest + IsCrowdControl) -- Shackle Undead
-	AddFlags( 87204, IsPriest + IsCrowdControl) -- Sin and Punishment
-	AddFlags( 15487, IsPriest + IsCrowdControl + IsSilence) -- Silence
-	AddFlags( 64058, IsPriest + IsCrowdControl + IsDisarm) -- Psychic Horror
-	AddFlags( 87194, IsPriest + IsCrowdControl + IsRoot) -- Glyph of Mind Blast
-	AddFlags(114404, IsPriest + IsCrowdControl + IsRoot) -- Void Tendril's Grasp
-	AddFlags( 15407, IsPriest + IsCrowdControl + IsSnare) -- Mind Flay
-	AddFlags( 47585, IsPriest + IsCrowdControl + IsImmune) -- Dispersion
-	AddFlags( 47788, IsPriest + IsCrowdControl) -- Guardian Spirit (prevent the target from dying)
-	AddFlags(213602, IsPriest + IsCrowdControl + IsImmune) -- Greater Fade (pvp honor talent - protects vs spells. melee, ranged attacks + 50% speed)
-	AddFlags(232707, IsPriest + IsCrowdControl + IsImmune) -- Ray of Hope (pvp honor talent - not immune, only delay damage and heal)
-	AddFlags(213610, IsPriest + IsCrowdControl) -- Holy Ward (pvp honor talent - wards against the next loss of control effect)
-	AddFlags(226943, IsPriest + IsCrowdControl) -- Mind Bomb
-	AddFlags(200196, IsPriest + IsCrowdControl) -- Holy Word: Chastise
-	AddFlags(200200, IsPriest + IsCrowdControl) -- Holy Word: Chastise (talent)
-	AddFlags(204263, IsPriest + IsCrowdControl + IsSnare) -- Shining Force
-	AddFlags(199845, IsPriest + IsCrowdControl + IsSnare) -- Psyflay (pvp honor talent - Psyfiend)
-	AddFlags(210979, IsPriest + IsCrowdControl + IsSnare) -- Focus in the Light (artifact trait)
-end 
-
--- Rogue
-do 
-	AddFlags(  2094, IsRogue + IsCrowdControl) -- Blind
-	AddFlags(  1833, IsRogue + IsCrowdControl) -- Cheap Shot
-	AddFlags(  1776, IsRogue + IsCrowdControl) -- Gouge
-	AddFlags(   408, IsRogue + IsCrowdControl + IsStun) -- Kidney Shot
-	AddFlags(  6770, IsRogue + IsCrowdControl) -- Sap
-	AddFlags(196958, IsRogue + IsCrowdControl) -- Strike from the Shadows (stun effect)
-	AddFlags(  1330, IsRogue + IsCrowdControl + IsSilence) -- Garrote - Silence
-	AddFlags(  3409, IsRogue + IsCrowdControl + IsSnare) -- Crippling Poison
-	AddFlags( 26679, IsRogue + IsCrowdControl + IsSnare) -- Deadly Throw
-	AddFlags(185763, IsRogue + IsCrowdControl + IsSnare) -- Pistol Shot
-	AddFlags(185778, IsRogue + IsCrowdControl + IsSnare) -- Shellshocked
-	AddFlags(206760, IsRogue + IsCrowdControl + IsSnare) -- Night Terrors
-	AddFlags(222775, IsRogue + IsCrowdControl + IsSnare) -- Strike from the Shadows (daze effect)
-	AddFlags(152150, IsRogue + IsCrowdControl + IsImmune) -- Death from Above (in the air you are immune to CC)
-	AddFlags( 31224, IsRogue + IsCrowdControl + IsImmuneSpell) -- Cloak of Shadows
-	AddFlags( 51690, IsRogue + IsCrowdControl) -- Killing Spree
-	AddFlags( 13750, IsRogue + IsCrowdControl) -- Adrenaline Rush
-	AddFlags(199754, IsRogue + IsCrowdControl) -- Riposte
-	AddFlags(  1966, IsRogue + IsCrowdControl) -- Feint
-	AddFlags( 45182, IsRogue + IsCrowdControl) -- Cheating Death
-	AddFlags(  5277, IsRogue + IsCrowdControl) -- Evasion
-	AddFlags(212183, IsRogue + IsCrowdControl) -- Smoke Bomb
-	AddFlags(199804, IsRogue + IsCrowdControl) -- Between the eyes
-	AddFlags(199740, IsRogue + IsCrowdControl) -- Bribe
-	AddFlags(207777, IsRogue + IsCrowdControl + IsDisarm) -- Dismantle
-	AddFlags(185767, IsRogue + IsCrowdControl + IsSnare) -- Cannonball Barrage
-	AddFlags(207736, IsRogue + IsCrowdControl) -- Shadowy Duel
-	AddFlags(212150, IsRogue + IsCrowdControl) -- Cheap Tricks (pvp honor talent) (-75%  melee & range physical hit chance)
-	AddFlags(199743, IsRogue + IsCrowdControl) -- Parley
-	AddFlags(198222, IsRogue + IsCrowdControl + IsSnare) -- System Shock (pvp honor talent) (90% slow)
-	AddFlags(226364, IsRogue + IsCrowdControl) -- Evasion (Shadow Swiftness, artifact trait)
-	AddFlags(209786, IsRogue + IsCrowdControl + IsSnare) -- Goremaw's Bite (artifact trait)
-end
-
--- Shaman
-do 
-	AddFlags( 77505, IsShaman + IsCrowdControl) -- Earthquake
-	AddFlags( 51514, IsShaman + IsCrowdControl) -- Hex
-	AddFlags(210873, IsShaman + IsCrowdControl) -- Hex (compy)
-	AddFlags(211010, IsShaman + IsCrowdControl) -- Hex (snake)
-	AddFlags(211015, IsShaman + IsCrowdControl) -- Hex (cockroach)
-	AddFlags(211004, IsShaman + IsCrowdControl) -- Hex (spider)
-	AddFlags(196942, IsShaman + IsCrowdControl) -- Hex (Voodoo Totem)
-	AddFlags(269352, IsShaman + IsCrowdControl) -- Hex (skeletal hatchling)
-	AddFlags(277778, IsShaman + IsCrowdControl) -- Hex (zandalari Tendonripper)
-	AddFlags(277784, IsShaman + IsCrowdControl) -- Hex (wicker mongrel)
-	AddFlags(118905, IsShaman + IsCrowdControl) -- Static Charge (Capacitor Totem)
-	AddFlags( 64695, IsShaman + IsCrowdControl + IsRoot) -- Earthgrab (Earthgrab Totem)
-	AddFlags(  3600, IsShaman + IsCrowdControl + IsSnare) -- Earthbind (Earthbind Totem)
-	AddFlags(116947, IsShaman + IsCrowdControl + IsSnare) -- Earthbind (Earthgrab Totem)
-	AddFlags( 77478, IsShaman + IsCrowdControl + IsSnare) -- Earthquake (Glyph of Unstable Earth)
-	AddFlags(  8056, IsShaman + IsCrowdControl + IsSnare) -- Frost Shock
-	AddFlags(196840, IsShaman + IsCrowdControl + IsSnare) -- Frost Shock
-	AddFlags( 51490, IsShaman + IsCrowdControl + IsSnare) -- Thunderstorm
-	AddFlags(147732, IsShaman + IsCrowdControl + IsSnare) -- Frostbrand Attack
-	AddFlags(197385, IsShaman + IsCrowdControl + IsSnare) -- Fury of Air
-	AddFlags(207498, IsShaman + IsCrowdControl) -- Ancestral Protection (prevent the target from dying)
-	AddFlags(  8178, IsShaman + IsCrowdControl + IsImmuneSpell) -- Grounding Totem Effect (Grounding Totem)
-	AddFlags(204399, IsShaman + IsCrowdControl) -- Earthfury (PvP Talent)
-	AddFlags(192058, IsShaman + IsCrowdControl) -- Lightning Surge totem (capacitor totem)
-	AddFlags(210918, IsShaman + IsCrowdControl + IsImmunePhysical) -- Ethereal Form
-	AddFlags(204437, IsShaman + IsCrowdControl) -- Lightning Lasso
-	AddFlags(197214, IsShaman + IsCrowdControl + IsRoot) -- Sundering
-	AddFlags(224126, IsShaman + IsCrowdControl + IsSnare) -- Frozen Bite (Doom Wolves, artifact trait)
-	AddFlags(207654, IsShaman + IsCrowdControl + IsImmune) -- Servant of the Queen (not immune, 80% damage reduction - artifact trait)
-end 
-
--- Shaman Pets
-do 
-	AddFlags(118345, IsShaman + IsCrowdControl) -- Pulverize (Shaman Primal Earth Elemental)
-	AddFlags(157375, IsShaman + IsCrowdControl) -- Gale Force (Primal Storm Elemental)
-end 
-
--- Warlock
-do 
-	AddFlags(   710, IsWarlock + IsCrowdControl) -- Banish
-	AddFlags(  5782, IsWarlock + IsCrowdControl) -- Fear
-	AddFlags(118699, IsWarlock + IsCrowdControl) -- Fear
-	AddFlags(130616, IsWarlock + IsCrowdControl) -- Fear (Glyph of Fear)
-	AddFlags(  5484, IsWarlock + IsCrowdControl) -- Howl of Terror
-	AddFlags( 22703, IsWarlock + IsCrowdControl) -- Infernal Awakening
-	AddFlags(  6789, IsWarlock + IsCrowdControl) -- Mortal Coil
-	AddFlags( 30283, IsWarlock + IsCrowdControl) -- Shadowfury
-	AddFlags( 31117, IsWarlock + IsCrowdControl + IsSilence) -- Unstable Affliction
-	AddFlags(196364, IsWarlock + IsCrowdControl + IsSilence) -- Unstable Affliction
-	AddFlags(110913, IsWarlock + IsCrowdControl) -- Dark Bargain
-	AddFlags(104773, IsWarlock + IsCrowdControl) -- Unending Resolve
-	AddFlags(212295, IsWarlock + IsCrowdControl + IsImmuneSpell) -- Netherward (reflects spells)
-	AddFlags(233582, IsWarlock + IsCrowdControl + IsRoot) -- Entrenched in Flame (pvp honor talent)
-end 
-
--- Warlock Pets
-do 
-	AddFlags( 32752, IsWarlock + IsCrowdControl) -- Summoning Disorientation
-	AddFlags( 89766, IsWarlock + IsCrowdControl) -- Axe Toss (Felguard/Wrathguard)
-	AddFlags(115268, IsWarlock + IsCrowdControl) -- Mesmerize (Shivarra)
-	AddFlags(  6358, IsWarlock + IsCrowdControl) -- Seduction (Succubus)
-	AddFlags(171017, IsWarlock + IsCrowdControl) -- Meteor Strike (infernal)
-	AddFlags(171018, IsWarlock + IsCrowdControl) -- Meteor Strike (abisal)
-	AddFlags(213688, IsWarlock + IsCrowdControl) -- Fel Cleave (Fel Lord - PvP Talent)
-	AddFlags(170996, IsWarlock + IsCrowdControl + IsSnare) -- Debilitate (Terrorguard)
-	AddFlags(170995, IsWarlock + IsCrowdControl + IsSnare) -- Cripple (Doomguard)
-end 
-
--- Warrior
-do 
-	AddFlags(118895, IsWarrior + IsCrowdControl) -- Dragon Roar
-	AddFlags(  5246, IsWarrior + IsCrowdControl) -- Intimidating Shout (aoe)
-	AddFlags(132168, IsWarrior + IsCrowdControl) -- Shockwave
-	AddFlags(107570, IsWarrior + IsCrowdControl) -- Storm Bolt
-	AddFlags(132169, IsWarrior + IsCrowdControl) -- Storm Bolt
-	AddFlags( 46968, IsWarrior + IsCrowdControl) -- Shockwave
-	AddFlags(213427, IsWarrior + IsCrowdControl) -- Charge Stun Talent (Warbringer)
-	AddFlags(  7922, IsWarrior + IsCrowdControl) -- Charge Stun Talent (Warbringer)
-	AddFlags(237744, IsWarrior + IsCrowdControl) -- Charge Stun Talent (Warbringer)
-	AddFlags(107566, IsWarrior + IsCrowdControl + IsRoot) -- Staggering Shout
-	AddFlags(105771, IsWarrior + IsCrowdControl + IsRoot) -- Charge (root)
-	AddFlags(236027, IsWarrior + IsCrowdControl + IsSnare) -- Charge (snare)
-	AddFlags(147531, IsWarrior + IsCrowdControl + IsSnare) -- Bloodbath
-	AddFlags(  1715, IsWarrior + IsCrowdControl + IsSnare) -- Hamstring
-	AddFlags( 12323, IsWarrior + IsCrowdControl + IsSnare) -- Piercing Howl
-	AddFlags(  6343, IsWarrior + IsCrowdControl + IsSnare) -- Thunder Clap
-	AddFlags( 46924, IsWarrior + IsCrowdControl + IsImmune) -- Bladestorm (not immune to dmg, only to LoC)
-	AddFlags(227847, IsWarrior + IsCrowdControl + IsImmune) -- Bladestorm (not immune to dmg, only to LoC)
-	AddFlags(199038, IsWarrior + IsCrowdControl + IsImmune) -- Leave No Man Behind (not immune, 90% damage reduction)
-	AddFlags(218826, IsWarrior + IsCrowdControl + IsImmune) -- Trial by Combat (warr fury artifact hidden trait) (only immune to death)
-	AddFlags( 23920, IsWarrior + IsCrowdControl + IsImmuneSpell) -- Spell Reflection
-	AddFlags(216890, IsWarrior + IsCrowdControl + IsImmuneSpell) -- Spell Reflection
-	AddFlags(213915, IsWarrior + IsCrowdControl + IsImmuneSpell) -- Mass Spell Reflection
-	AddFlags(114028, IsWarrior + IsCrowdControl + IsImmuneSpell) -- Mass Spell Reflection
-	AddFlags( 18499, IsWarrior + IsCrowdControl) -- Berserker Rage
-	AddFlags(118038, IsWarrior + IsCrowdControl) -- Die by the Sword
-	AddFlags(198819, IsWarrior + IsCrowdControl) -- Sharpen Blade (70% heal reduction)
-	AddFlags(198760, IsWarrior + IsCrowdControl + IsImmunePhysical) -- Intercept (pvp honor talent) (intercept the next ranged or melee hit)
-	AddFlags(176289, IsWarrior + IsCrowdControl) -- Siegebreaker
-	AddFlags(199085, IsWarrior + IsCrowdControl) -- Warpath
-	AddFlags(199042, IsWarrior + IsCrowdControl + IsRoot) -- Thunderstruck
-	AddFlags(236236, IsWarrior + IsCrowdControl + IsDisarm) -- Disarm (pvp honor talent - protection)
-	AddFlags(236077, IsWarrior + IsCrowdControl + IsDisarm) -- Disarm (pvp honor talent)
-end 
-
+-- Warrior (Fury)
 ------------------------------------------------------------------------
-------------------------------------------------------------------------
--- 							CLASSES
-------------------------------------------------------------------------
-------------------------------------------------------------------------
-
--- Druid
-------------------------------------------------------------------------
-do 
-	-- Buffs
-	AddFlags( 29166, IsDruid) -- Innervate
-	AddFlags(102342, IsDruid) -- Ironbark
-	AddFlags(106898, IsDruid) -- Stampeding Roar
-
-	-- Abilities
-	AddFlags(  1850, IsDruid) -- Dash
-	AddFlags( 22812, IsDruid) -- Barkskin
-	AddFlags(106951, IsDruid) -- Berserk
-	AddFlags(202739, IsDruid) -- Blessing of An'she (Blessing of the Ancients)
-	AddFlags(202737, IsDruid) -- Blessing of Elune (Blessing of the Ancients)
-	AddFlags(145152, IsDruid) -- Bloodtalons
-	AddFlags(155835, IsDruid) -- Bristling Fur
-	AddFlags(135700, IsDruid) -- Clearcasting (Omen of Clarity) (Feral)
-	AddFlags( 16870, IsDruid) -- Clearcasting (Omen of Clarity) (Restoration)
-	AddFlags(202060, IsDruid) -- Elune's Guidance
-	AddFlags( 22842, IsDruid) -- Frenzied Regeneration
-	AddFlags(202770, IsDruid) -- Fury of Elune
-	AddFlags(213709, IsDruid) -- Galactic Guardian
-	AddFlags(213680, IsDruid) -- Guardian of Elune
-	AddFlags(    99, IsDruid) -- Incapacitating Roar
-	AddFlags(102560, IsDruid) -- Incarnation: Chosen of Elune
-	AddFlags(102558, IsDruid) -- Incarnation: Guardian of Ursoc
-	AddFlags(102543, IsDruid) -- Incarnation: King of the Jungle
-	AddFlags(192081, IsDruid) -- Ironfur
-	AddFlags(164547, IsDruid) -- Lunar Empowerment
-	AddFlags(203123, IsDruid) -- Maim
-	AddFlags(192083, IsDruid) -- Mark of Ursol
-	AddFlags( 33763, IsDruid) -- Lifebloom
-	AddFlags(164812, IsDruid) -- Moonfire -- NEEDS CHECK, 8921
-	AddFlags(155625, IsDruid) -- Moonfire (Cat Form)
-	AddFlags( 69369, IsDruid) -- Predatory Swiftness
-	AddFlags(158792, IsDruid) -- Pulverize
-	AddFlags(155722, IsDruid) -- Rake
-	AddFlags(  8936, IsDruid) -- Regrowth
-	AddFlags(   774, IsDruid) -- Rejuvenation
-	AddFlags(  1079, IsDruid) -- Rip
-	AddFlags( 52610, IsDruid) -- Savage Roar
-	AddFlags( 78675, IsDruid) -- Solar Beam
-	AddFlags(164545, IsDruid) -- Solar Empowerment
-	AddFlags(191034, IsDruid) -- Starfire
-	AddFlags(202347, IsDruid) -- Stellar Flare
-	AddFlags(164815, IsDruid) -- Sunfire -- NEEDS CHECK, 93402
-	AddFlags( 61336, IsDruid) -- Survival Instincts
-	AddFlags(192090, IsDruid) -- Thrash (Bear) -- NEEDS CHECK
-	AddFlags(106830, IsDruid) -- Thrash (Cat)
-	AddFlags(  5217, IsDruid) -- Tiger's Fury
-	AddFlags(102793, IsDruid) -- Ursol's Vortex
-	AddFlags(202425, IsDruid) -- Warrior of Elune
-	AddFlags( 48438, IsDruid) -- Wild Growth
-
-	-- Talents
-end 
-
--- Hunter
-------------------------------------------------------------------------
-do 
-	-- Abilities
-	AddFlags(131894, IsHunter) -- A Murder of Crows (Beast Mastery, Marksmanship)
-	AddFlags(206505, IsHunter) -- A Murder of Crows (Survival)
-	AddFlags(186257, IsHunter) -- Aspect of the Cheetah
-	AddFlags(186289, IsHunter) -- Aspect of the Eagle
-	AddFlags(186265, IsHunter) -- Aspect of the Turtle
-	AddFlags(193530, IsHunter) -- Aspect of the Wild
-	AddFlags(217200, IsHunter) -- Barbed Shot (8.0.1, previously Dire Frenzy)
-	AddFlags( 19574, IsHunter) -- Bestial Wrath
-	AddFlags(117526, IsHunter) -- Binding Shot (stun)
-	AddFlags(117405, IsHunter) -- Binding Shot (tether)
-	AddFlags(194279, IsHunter) -- Caltrops
-	AddFlags(199483, IsHunter) -- Camouflage
-	AddFlags(  5116, IsHunter) -- Concussive Shot
-	AddFlags( 13812, IsHunter) -- Explosive Trap -- NEEDS CHECK
-	AddFlags(  5384, IsHunter) -- Feign Death
-	AddFlags(  3355, IsHunter) -- Freezing Trap
-	AddFlags(194594, IsHunter) -- Lock and Load
-	AddFlags( 34477, IsHunter) -- Misdirection
-	AddFlags(201081, IsHunter) -- Mok'Nathal Tactics
-	AddFlags(190931, IsHunter) -- Mongoose Fury
-	AddFlags(118922, IsHunter) -- Posthaste
-	AddFlags(200108, IsHunter) -- Ranger's Net
-	AddFlags(118253, IsHunter) -- Serpent Sting
-	AddFlags(259491, IsHunter) -- Serpent Sting (8.0.1 version) 
-	AddFlags(135299, IsHunter) -- Tar Trap
-	AddFlags(193526, IsHunter) -- Trueshot
-	AddFlags(187131, IsHunter) -- Vulnerable
-	AddFlags(269747, IsHunter) -- Wildfire Bomb (8.0.1)
-
-	-- Talents
-end 
-
--- Mage
-------------------------------------------------------------------------
-do
-	-- Abilities
-	AddFlags( 12042, IsMage) -- Arcane Power
-	AddFlags(157981, IsMage) -- Blast Wave
-	AddFlags(108843, IsMage) -- Blazing Speed
-	AddFlags(205766, IsMage) -- Bone Chilling
-	AddFlags(263725, IsMage) -- Clearcasting
-	AddFlags(190319, IsMage) -- Combustion
-	AddFlags(   120, IsMage) -- Cone of Cold
-	AddFlags( 31661, IsMage) -- Dragon's Breath
-	AddFlags(210134, IsMage) -- Erosion
-	AddFlags(126084, IsMage) -- Fingers of Frost -- NEEDS CHECK 44544
-	AddFlags(  2120, IsMage) -- Flamestrike
-	AddFlags(112948, IsMage) -- Frost Bomb
-	AddFlags(   122, IsMage) -- Frost Nova
-	AddFlags(228600, IsMage) -- Glacial Spike
-	AddFlags(110960, IsMage) -- Greater Invisibility
-	AddFlags(195283, IsMage) -- Hot Streak
-	AddFlags( 11426, IsMage) -- Ice Barrier
-	AddFlags( 45438, IsMage) -- Ice Block
-	AddFlags(108839, IsMage) -- Ice Floes
-	AddFlags( 12472, IsMage) -- Icy Veins
-	AddFlags( 12654, IsMage) -- Ignite
-	AddFlags(    66, IsMage) -- Invisibility
-	AddFlags( 44457, IsMage) -- Living Bomb
-	AddFlags(114923, IsMage) -- Nether Tempest
-	AddFlags(205025, IsMage) -- Presence of Mind
-	AddFlags(198924, IsMage) -- Quickening
-	AddFlags( 82691, IsMage) -- Ring of Frost
-	AddFlags( 31589, IsMage) -- Slow
-	AddFlags(   130, IsMage) -- Slow Fall
-
-	-- Talents
-end 
-
--- Paladin
-------------------------------------------------------------------------
-do
-	-- Buffs
-	AddFlags(257771, IsPaladin) -- Forbearance
-	AddFlags( 53563, IsPaladin) -- Beacon of Light
-	AddFlags(  1044, IsPaladin) -- Blessing of Freedom
-	AddFlags(  1022, IsPaladin) -- Blessing of Protection
-	AddFlags(  6940, IsPaladin) -- Blessing of Sacrifice
-	AddFlags(204013, IsPaladin) -- Blessing of Salvation
-	AddFlags(204018, IsPaladin) -- Blessing of Spellwarding
-
-	-- Abilities
-	AddFlags(204150, IsPaladin) -- Aegis of Light
-	AddFlags( 31850, IsPaladin) -- Ardent Defender
-	AddFlags( 31842, IsPaladin) -- Avenging Wrath (Holy)
-	AddFlags( 31884, IsPaladin) -- Avenging Wrath (Protection, Retribution)
-	AddFlags(105421, IsPaladin) -- Blinding Light
-	AddFlags(224668, IsPaladin) -- Crusade
-	AddFlags(216411, IsPaladin) -- Divine Purpose (Holy - Holy Shock)
-	AddFlags(216413, IsPaladin) -- Divine Purpose (Holy - Light of Dawn)
-	AddFlags(223819, IsPaladin) -- Divine Purpose (Retribution)
-	AddFlags(   642, IsPaladin) -- Divine Shield
-	AddFlags(220509, IsPaladin) -- Divine Steed
-	AddFlags(221883, IsPaladin) -- Divine Steed
-	AddFlags(221886, IsPaladin) -- Divine Steed (Blood Elf)
-	AddFlags(221887, IsPaladin) -- Divine Steed (Draenei)
-	AddFlags(221885, IsPaladin) -- Divine Steed (Tauren)
-	AddFlags(205191, IsPaladin) -- Eye for an Eye
-	AddFlags(223316, IsPaladin) -- Fervent Light
-	AddFlags( 86659, IsPaladin) -- Guardian of Ancient Kings
-	AddFlags(   853, IsPaladin) -- Hammer of Justice
-	AddFlags(183218, IsPaladin) -- Hand of Hindrance
-	AddFlags(105809, IsPaladin) -- Holy Avenger
-	AddFlags( 54149, IsPaladin) -- Infusion of Light
-	AddFlags(183436, IsPaladin) -- Retribution
-	AddFlags(214202, IsPaladin) -- Rule of Law
-	AddFlags(202273, IsPaladin) -- Seal of Light
-	AddFlags(152262, IsPaladin) -- Seraphim
-	AddFlags(132403, IsPaladin) -- Shield of the Righteous
-	AddFlags(184662, IsPaladin) -- Shield of Vengeance
-	AddFlags(209785, IsPaladin) -- The Fires of Justice
-
-	-- Talents
-end 
-
--- Priest
-------------------------------------------------------------------------
-do
-	-- Abilities
-	AddFlags(194384, IsPriest) -- Atonement
-	AddFlags( 47585, IsPriest) -- Disperson
-	AddFlags(   586, IsPriest) -- Fade
-	AddFlags( 47788, IsPriest) -- Guardian Spirit
-	AddFlags( 14914, IsPriest) -- Holy Fire
-	AddFlags(200196, IsPriest) -- Holy Word: Chastise
-	AddFlags(  1706, IsPriest) -- Levitate
-	AddFlags(   605, IsPriest) -- Mind Control
-	AddFlags( 33206, IsPriest) -- Pain Suppression
-	AddFlags( 81782, IsPriest) -- Power Word: Barrier
-	AddFlags(    17, IsPriest) -- Power Word: Shield
-	AddFlags( 41635, IsPriest) -- Prayer of Mending
-	AddFlags(  8122, IsPriest) -- Psychic Scream
-	AddFlags( 47536, IsPriest) -- Rapture
-	AddFlags(   139, IsPriest) -- Renew
-	AddFlags(187464, IsPriest) -- Shadow Mend
-	AddFlags(   589, IsPriest) -- Shadow Word: Pain
-	AddFlags( 15487, IsPriest) -- Silence
-	AddFlags(208772, IsPriest) -- Smite
-	AddFlags( 15286, IsPriest) -- Vampiric Embrace
-	AddFlags( 34914, IsPriest) -- Vampiric Touch
-	AddFlags(227386, IsPriest) -- Voidform -- NEEDS CHECK
-
-	-- Talents
-	AddFlags(200183, IsPriest) -- Apotheosis
-	AddFlags(214121, IsPriest) -- Body and Mind
-	AddFlags(152118, IsPriest) -- Clarity of Will
-	AddFlags( 19236, IsPriest) -- Desperate Prayer
-	AddFlags(197030, IsPriest) -- Divinity
-	AddFlags(205369, IsPriest) -- Mind Bomb
-	AddFlags(226943, IsPriest) -- Mind Bomb (stun)
-	AddFlags(204213, IsPriest) -- Purge the Wicked
-	AddFlags(214621, IsPriest) -- Schism
-	AddFlags(219521, IsPriest) -- Shadow Covenant
-	AddFlags(124430, IsPriest) -- Shadowy Insight
-	AddFlags(204263, IsPriest) -- Shining Force
-	AddFlags(114255, IsPriest) -- Surge of Light -- NEEDS CHECK, 128654
-	AddFlags(123254, IsPriest) -- Twist of Fate
-end 
-
--- Rogue
-------------------------------------------------------------------------
-do 
-	-- Abilities
-	AddFlags( 13750, IsRogue) -- Adrenaline Rush
-	AddFlags( 13877, IsRogue) -- Blade Flurry
-	AddFlags(199740, IsRogue) -- Bribe
-	AddFlags(  1833, IsRogue) -- Cheap Shot
-	AddFlags( 31224, IsRogue) -- Cloak of Shadows
-	AddFlags(  3409, IsRogue) -- Crippling Poison (debuff)
-	AddFlags(  2818, IsRogue) -- Deadly Poison (debuff)
-	AddFlags(  5277, IsRogue) -- Evasion
-	AddFlags(  1966, IsRogue) -- Feint
-	AddFlags(   703, IsRogue) -- Garrote
-	AddFlags(  1776, IsRogue) -- Gouge
-	AddFlags(   408, IsRogue) -- Kidney Shot
-	AddFlags(195452, IsRogue) -- Nightblade
-	AddFlags(185763, IsRogue) -- Pistol Shot
-	AddFlags(199754, IsRogue) -- Riposte
-	AddFlags(193356, IsRogue) -- Roll the Bones - Broadsides
-	AddFlags(199600, IsRogue) -- Roll the Bones - Buried Treasure
-	AddFlags(193358, IsRogue) -- Roll the Bones - Grand Melee
-	AddFlags(199603, IsRogue) -- Roll the Bones - Jolly Roger
-	AddFlags(193357, IsRogue) -- Roll the Bones - Shark Infested Waters
-	AddFlags(193359, IsRogue) -- Roll the Bones - True Bearing
-	AddFlags(  1943, IsRogue) -- Rupture
-	AddFlags(121471, IsRogue) -- Shadow Blades
-	AddFlags(185422, IsRogue) -- Shadow Dance
-	AddFlags( 36554, IsRogue) -- Shadowstep
-	AddFlags(  2983, IsRogue) -- Sprint
-	AddFlags(  1784, IsRogue) -- Stealth
-	AddFlags(212283, IsRogue) -- Symbols of Death
-	AddFlags( 57934, IsRogue) -- Tricks of the Trade
-	AddFlags(  1856, IsRogue) -- Vanish
-	AddFlags( 79140, IsRogue) -- Vendetta
-	--AddFlags(  8680, IsRogue) -- Wound Poison -- who cares?
-
-	-- Talents
-	AddFlags(200803, IsRogue) -- Agonizing Poison
-	AddFlags(196937, IsRogue) -- Ghostly Strike
-	AddFlags( 16511, IsRogue) -- Hemorrhage
-	AddFlags(135345, IsRogue) -- Internal Bleeding
-	AddFlags( 51690, IsRogue) -- Killing Spree
-	AddFlags(137619, IsRogue) -- Marked for Death
-	AddFlags(  5171, IsRogue) -- Slice and Dice
-end 
-
--- Shaman
-------------------------------------------------------------------------
-do 
-	-- Abilities
-	AddFlags(108281, IsShaman) -- Ancestral Guidance
-	AddFlags(108271, IsShaman) -- Astral Shift
-	AddFlags(187878, IsShaman) -- Crash Lightning
-	AddFlags(188089, IsShaman) -- Earthen Spike -- 10s duration on a 20s cooldown
-	--AddFlags(118522, IsShaman) -- Elemental Blast: Critical Strike -- 10s duration on a 12s cooldown
-	--AddFlags(173183, IsShaman) -- Elemental Blast: Haste -- 10s duration on a 12s cooldown
-	--AddFlags(173184, IsShaman) -- Elemental Blast: Mastery -- 10s duration on a 12s cooldown
-	AddFlags( 16246, IsShaman) -- Elemental Focus
-	AddFlags(188838, IsShaman) -- Flame Shock (restoration)
-	AddFlags(188389, IsShaman) -- Flame Shock
-	AddFlags(194084, IsShaman) -- Flametongue
-	AddFlags(196840, IsShaman) -- Frost Shock
-	AddFlags(196834, IsShaman) -- Frostbrand
-	AddFlags( 73920, IsShaman) -- Healing Rain
-	AddFlags(215785, IsShaman) -- Hot Hand
-	AddFlags(210714, IsShaman) -- Icefury
-	AddFlags(202004, IsShaman) -- Landslide
-	AddFlags( 77756, IsShaman) -- Lava Surge
-	AddFlags(197209, IsShaman) -- Lightning Rod -- NEEDS CHECK
-	AddFlags( 61295, IsShaman) -- Riptide
-	AddFlags(268429, IsShaman) -- Searing Assault
-	AddFlags( 98007, IsShaman) -- Spirit Link Totem
-	AddFlags( 58875, IsShaman) -- Spirit Walk
-	AddFlags( 79206, IsShaman) -- Spiritwalker's Grace
-	--AddFlags(201846, IsShaman) -- Stormbringer -- see spell alert overlay, action button proc glow
-	AddFlags( 51490, IsShaman) -- Thunderstorm
-	AddFlags( 53390, IsShaman) -- Tidal Waves
-	--AddFlags(   546, IsShaman) -- Water Walking -- TODO: show only OOC
-	--AddFlags(201898, IsShaman) -- Windsong -- 20s duration on a 45s cooldown
-
-	-- Talents
-	AddFlags(114050, IsShaman) -- Ascendance (Elemental)
-	AddFlags(114051, IsShaman) -- Ascendance (Enhancement)
-	AddFlags(114052, IsShaman) -- Ascendance (Restoration)
-	AddFlags(218825, IsShaman) -- Boulderfist
-	AddFlags( 64695, IsShaman) -- Earthgrab (Totem) -- NEEDS CHECK
-	AddFlags(135621, IsShaman) -- Static Charge (Lightning Surge Totem) -- NEEDS CHECK
-	AddFlags(192082, IsShaman) -- Wind Rush (Totem)
-end 
-
--- Warlock
-------------------------------------------------------------------------
-do
-	-- Abilities
-	AddFlags(   980, IsWarlock) -- Agony
-	AddFlags(117828, IsWarlock) -- Backdraft
-	AddFlags(111400, IsWarlock) -- Burning Rush
-	AddFlags(146739, IsWarlock) -- Corruption
-	AddFlags(108416, IsWarlock) -- Dark Pact
-	AddFlags(205146, IsWarlock) -- Demonic Calling
-	AddFlags( 48018, IsWarlock) -- Demonic Circle -- TODO show on the side as a separate thingy
-	AddFlags(193396, IsWarlock) -- Demonic Empowerment
-	AddFlags(171982, IsWarlock) -- Demonic Synergy -- too passive?
-	AddFlags(   603, IsWarlock) -- Doom
-	AddFlags(  1098, IsWarlock) -- Enslave Demon
-	AddFlags(196414, IsWarlock) -- Eradication
-	AddFlags( 48181, IsWarlock) -- Haunt -- NEEDS CHECK, 171788, 183357
-	AddFlags( 80240, IsWarlock) -- Havoc
-	AddFlags(228312, IsWarlock) -- Immolate -- NEEDS CHECK
-	AddFlags(  6789, IsWarlock) -- Mortal Coil
-	AddFlags(205179, IsWarlock) -- Phantom Singularity
-	AddFlags(196674, IsWarlock) -- Planeswalker
-	AddFlags(  5740, IsWarlock) -- Rain of Fire
-	AddFlags( 27243, IsWarlock) -- Seed of Corruption
-	AddFlags(205181, IsWarlock) -- Shadowflame
-	AddFlags( 30283, IsWarlock) -- Shadowfury
-	AddFlags( 63106, IsWarlock) -- Siphon Life
-	AddFlags(205178, IsWarlock) -- Soul Effigy
-	AddFlags(196098, IsWarlock) -- Soul Harvest
-	--AddFlags( 20707, IsWarlock) -- Soulstone -- OOC
-	--AddFlags(  5697, IsWarlock) -- Unending Breath -- OOC
-	AddFlags(104773, IsWarlock) -- Unending Resolve
-	AddFlags( 30108, IsWarlock) -- Unstable Affliction
-
-	-- Talents
-end
-
--- Warrior
-------------------------------------------------------------------------
-do 
-	-- Abilities
-	AddFlags(  1719, IsWarrior) -- Battle Cry
-	AddFlags( 18499, IsWarrior) -- Berserker Rage
-	AddFlags(227847, IsWarrior) -- Bladestorm
-	AddFlags(105771, IsWarrior) -- Charge
-	AddFlags( 97463, IsWarrior) -- Commanding Shout
-	AddFlags(115767, IsWarrior) -- Deep Wounds
-	AddFlags(  1160, IsWarrior) -- Demoralizing Shout
-	AddFlags(118038, IsWarrior) -- Die by the Sword
-	AddFlags(184362, IsWarrior) -- Enrage
-	AddFlags(184364, IsWarrior) -- Enraged Regeneration
-	AddFlags(204488, IsWarrior) -- Focused Rage
-	AddFlags(  1715, IsWarrior) -- Hamstring
-	AddFlags(190456, IsWarrior) -- Ignore Pain
-	AddFlags(  5246, IsWarrior) -- Intimidating Shout
-	AddFlags( 12975, IsWarrior) -- Last Stand
-	AddFlags( 85739, IsWarrior) -- Meat Cleaver
-	AddFlags( 12323, IsWarrior) -- Piercing Howl
-	AddFlags(132404, IsWarrior) -- Shield Block
-	AddFlags(   871, IsWarrior) -- Shield Wall
-	AddFlags( 23920, IsWarrior) -- Spell Reflection
-	AddFlags(206333, IsWarrior) -- Taste for Blood
-	AddFlags(  6343, IsWarrior) -- Thunder Clap
-
-	-- Talents
-	AddFlags(107574, IsWarrior) -- Avatar
-	AddFlags( 46924, IsWarrior) -- Bladestorm
-	AddFlags( 12292, IsWarrior) -- Bloodbath
-	AddFlags(197690, IsWarrior) -- Defensive Stance
-	AddFlags(118000, IsWarrior) -- Dragon Roar
-	AddFlags(207982, IsWarrior) -- Focused Rage
-	AddFlags(215572, IsWarrior) -- Frothing Berserker
-	AddFlags(   772, IsWarrior) -- Rend
-	AddFlags( 46968, IsWarrior) -- Shockwave
-	AddFlags(107570, IsWarrior) -- Storm Bolt
-	AddFlags(215537, IsWarrior) -- Trauma
-	--AddFlags(122510, IsWarrior) -- Ultimatum -- action button glow + spell alert overlay
-	AddFlags(202573, IsWarrior) -- Vengeance: Focused Rage
-	AddFlags(202547, IsWarrior) -- Vengeance: Ignore Pain
-	AddFlags(215562, IsWarrior) -- War Machine
-	AddFlags(215570, IsWarrior) -- Wrecking Ball
-end 
-
-------------------------------------------------------------------------
--- Taunts (tanks only)
-------------------------------------------------------------------------
-do 
-	AddFlags( 36213, IsPlayerSpell) -- Angered Earth (SH Earth Elemental)
-	AddFlags( 56222, IsPlayerSpell) -- Dark Command (DK)
-	AddFlags( 57604, IsPlayerSpell) -- Death Grip (DK) -- NEEDS CHECK 49560 51399 57603
-	AddFlags( 20736, IsPlayerSpell) -- Distracting Shot (HU)
-	AddFlags(  6795, IsPlayerSpell) -- Growl (DR)
-	AddFlags( 62124, IsPlayerSpell) -- Hand of Reckoning (Paladin)
-	AddFlags(118585, IsPlayerSpell) -- Leer of the Ox (MO)
-	AddFlags(114198, IsPlayerSpell) -- Mocking Banner (WR)
-	AddFlags(116189, IsPlayerSpell) -- Provoke (MO)
-	AddFlags(118635, IsPlayerSpell) -- Provoke (MO Black Ox Statue) -- NEEDS CHECK
-	AddFlags( 62124, IsPlayerSpell) -- Reckoning (PA)
-	AddFlags( 17735, IsPlayerSpell) -- Suffering (WL Voidwalker)
-	AddFlags(   355, IsPlayerSpell) -- Taunt (WR)
-	AddFlags(185245, IsPlayerSpell) -- Torment (Demon Hunter)
-end 
-
-------------------------------------------------------------------------
-------------------------------------------------------------------------
--- 							RACIALS
-------------------------------------------------------------------------
-------------------------------------------------------------------------
-do 
-	-- Dwarf
-	AddFlags( 20594, IsDwarf) -- Stoneform
-
-	-- NightElf
-	AddFlags( 58984, IsNightElf) -- Shadowmeld
-
-	-- Orc
-	AddFlags( 20572, IsOrc) -- Blood Fury (attack power)
-	AddFlags( 33702, IsOrc) -- Blood Fury (spell power)
-	AddFlags( 33697, IsOrc) -- Blood Fury (attack power and spell damage)
-
-	-- Pandaren
-	AddFlags(107079, IsPandaren) -- Quaking Palm
-
-	-- Scourge
-	AddFlags(  7744, IsScourge) -- Will of the Forsaken
-
-	-- Tauren 
-	AddFlags( 20549, IsTauren) -- War Stomp
-
-	-- Troll
-	AddFlags( 26297, IsTroll) -- Berserking
-
-	-- Worgen 
-	AddFlags( 68992, IsWorgen) -- Darkflight
-end 
-
--- Sorting (don't comment out this, as it currently grabs all keys)
---[[
-local frame = CreateFrame("EditBox", nil, UIParent)
-frame:SetSize(400,300)
-frame:SetFontObject(_G.GameFontNormal)
-frame:SetPoint("CENTER")
-frame:HighlightText(true)
-
-local msg = ""
-for id = 1,300000 do
-	if Cache[id] then 
-		msg = msg .. string.format("Cache[%6d] = IsFood|n",id)
-	end  
-end 
-
-frame:SetText(msg)
-]]-- 
+AddFlags( 6673, IsWarrior) 					-- Battle Shout (Rank 1)
