@@ -356,23 +356,19 @@ auraFilters.player = function(element, isBuff, unit, isOwnedByPlayer, name, icon
 		end
 		if (isBuff) then 
 			if (timeLeft and (timeLeft > 0) and (timeLeft < 30)) then
-				if (duration and (duration > 0) and (duration < 30)) then 
-					return true, nil, showUnfilteredSpellID
-				else 
-					return nil, nil, showUnfilteredSpellID
-				end
-			else
-				return
+				return true, nil, not showUnfilteredSpellID
+			else 
+				return nil, nil, not showUnfilteredSpellID
 			end
 		else 
 			if (timeLeft and (timeLeft > 0) and (timeLeft < 601)) then 
-				return true, nil, showUnfilteredSpellID
+				return true, nil, not showUnfilteredSpellID
 			else
-				return nil, nil, showUnfilteredSpellID
+				return nil, nil, not showUnfilteredSpellID
 			end
 		end 
 	else 
-		return true, nil, showUnfilteredSpellID
+		return true, nil, not showUnfilteredSpellID
 	end 
 end 
 
@@ -383,19 +379,20 @@ auraFilters.target = function(element, isBuff, unit, isOwnedByPlayer, name, icon
 		if (HasUserFlags(Private, spellID, Never)) then 
 			return nil, nil, true
 		elseif (UnitAffectingCombat("player") and HasUserFlags(Private, spellID, NoCombat)) then 
-			if (isBuff) then 
-				return true, nil, true
-			end
+			return nil, nil, true
 		elseif (HasUserFlags(Private, spellID, OnTarget)) then 
 			return true, nil, true
 		end
 	end 
-	return true, nil, showUnfilteredSpellID
+	return true, nil, not showUnfilteredSpellID
 end
 
 auraFilters.nameplate = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
 
-	return true
+	local hasFlags = not not GetUserFlags(Private)[spellID]
+	if (hasFlags) then 
+	end
+	return true, nil, not showUnfilteredSpellID
 end 
 
 auraFilters.targettarget = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
@@ -450,6 +447,12 @@ AddFlags(Private, 16689, OnPlayer) 	-- Nature's Grasp (Rank 5)
 AddFlags(Private, 16689, OnPlayer) 	-- Nature's Grasp (Rank 6)
 AddFlags(Private, 16864, OnPlayer + NoCombat + Warn) 	-- Omen of Clarity (Proc)
 AddFlags(Private, 16870, OnPlayer + NoCombat + Warn) 	-- Omen of Clarity (Proc)  -- where did this come from?
+AddFlags(Private,   467, ByPlayer + NoCombat + Warn) 	-- Thorns (Rank 1)
+AddFlags(Private,   782, ByPlayer + NoCombat + Warn) 	-- Thorns (Rank 2)
+AddFlags(Private,  1075, ByPlayer + NoCombat + Warn) 	-- Thorns (Rank 3)
+AddFlags(Private,  8914, ByPlayer + NoCombat + Warn) 	-- Thorns (Rank 4)
+AddFlags(Private,  9756, ByPlayer + NoCombat + Warn) 	-- Thorns (Rank 5)
+AddFlags(Private,  9910, ByPlayer + NoCombat + Warn) 	-- Thorns (Rank 6)
 
 AddFlags(Private, 00000, OnTarget) 	-- Faerie Fire (Rank 2)
 AddFlags(Private, 00000, OnTarget) 	-- Faerie Fire (Rank 3)
