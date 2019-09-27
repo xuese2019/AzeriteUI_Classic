@@ -56,9 +56,6 @@ end
 
 -- Aura Button Template
 -----------------------------------------------------
-local Aura = LibFrame:CreateFrame("Button")
-local Aura_MT = { __index = Aura }
-
 local Aura_OnClick = function(button, buttonPressed, down)
 	if button.OnClick then 
 		return button:OnClick(buttonPressed, down)
@@ -89,6 +86,7 @@ local Aura_UpdateTooltip = function(button)
 	local tooltip = button:GetTooltip()
 	tooltip:Hide()
 	tooltip:SetMinimumWidth(160)
+	tooltip.hideSpellID = button.isFiltered
 	local element = button._owner
 	if element.tooltipDefaultPosition then 
 		tooltip:SetDefaultAnchor(button)
@@ -200,7 +198,7 @@ end
 
 local CreateAuraButton = function(element)
 
-	local button = setmetatable(element:CreateFrame("Button"), Aura_MT)
+	local button = element:CreateFrame("Button")
 	button:EnableMouse(not element.disableMouse)
 	button:RegisterForClicks("RightButtonUp")
 	button:SetSize(element.auraSize, element.auraSize)
@@ -220,7 +218,7 @@ local CreateAuraButton = function(element)
 	button.Overlay = overlay
 
 	-- Cooldown frame
-	local cooldown = button:CreateFrame("Cooldown", nil, button, "CooldownFrameTemplate")
+	local cooldown = button:CreateFrame("Cooldown", nil, "CooldownFrameTemplate")
 	cooldown:Hide()
 	cooldown:SetAllPoints(button)
 	cooldown:SetFrameLevel(button:GetFrameLevel() + 1)
@@ -342,15 +340,16 @@ local IterateBuffs = function(element, unit, filter, customFilter, visible)
 		local isOwnedByPlayer = (unitCaster and (unitCaster == "player" or unitCaster == "pet" or (UnitHasVehicleUI and UnitHasVehicleUI("player") and unitCaster == "vehicle")))
 
 		-- Run the custom filter method, if it exists
-		local auraPriority
+		local auraPriority, isFiltered
 		if customFilter then 
-			local displayAura, displayPriority = customFilter(element, true, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
+			local displayAura, displayPriority, filtered = customFilter(element, true, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
 
 			if displayAura then 
 				auraPriority = displayPriority
 			else 
 				name = nil
 			end 
+			isFiltered = filtered
 		end 
 		
 		if name then 
@@ -392,6 +391,7 @@ local IterateBuffs = function(element, unit, filter, customFilter, visible)
 			button.isCastByPlayer = isCastByPlayer
 			button.isOwnedByPlayer = isOwnedByPlayer
 			button.auraPriority = auraPriority
+			button.isFiltered = isFiltered
 
 			-- Update the icon texture
 			button.Icon:SetTexture(icon)
@@ -429,6 +429,8 @@ local IterateDebuffs = function(element, unit, filter, customFilter, visible)
 	local visibleDebuffs = 0
 	local visible = visible or 0
 
+	local debuffCache = LibAura:GetUnitDebuffCacheByFilter(unit, filter)
+
 	-- Iterate harmful auras
 	for i = 1, DEBUFF_MAX_DISPLAY do
 		
@@ -444,15 +446,16 @@ local IterateDebuffs = function(element, unit, filter, customFilter, visible)
 		local isOwnedByPlayer = (unitCaster and (unitCaster == "player" or unitCaster == "pet" or (UnitHasVehicleUI and UnitHasVehicleUI("player") and unitCaster == "vehicle")))
 
 		-- Run the custom filter method, if it exists
-		local auraPriority
+		local auraPriority, isFiltered
 		if customFilter then 
-			local displayAura, displayPriority = customFilter(element, false, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3) 
+			local displayAura, displayPriority, filtered = customFilter(element, false, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3) 
 			
 			if displayAura then 
 				auraPriority = displayPriority
 			else 
 				name = nil
 			end 
+			isFiltered = filtered
 		end 
 
 		if name then 
@@ -495,6 +498,7 @@ local IterateDebuffs = function(element, unit, filter, customFilter, visible)
 			button.isCastByPlayer = isCastByPlayer
 			button.isOwnedByPlayer = isOwnedByPlayer
 			button.auraPriority = auraPriority
+			button.isFiltered = isFiltered
 
 			-- Update the icon texture
 			button.Icon:SetTexture(icon)
@@ -777,5 +781,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (CogWheel("LibUnitFrame", true)), (CogWheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Auras", Enable, Disable, Proxy, 46)
+	Lib:RegisterElement("Auras", Enable, Disable, Proxy, 48)
 end 
