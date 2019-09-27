@@ -1,4 +1,4 @@
-local LibPlayerData = CogWheel:Set("LibPlayerData", 8)
+local LibPlayerData = CogWheel:Set("LibPlayerData", 9)
 if (not LibPlayerData) then	
 	return
 end
@@ -21,6 +21,7 @@ local GetAccountExpansionLevel = _G.GetAccountExpansionLevel
 local GetExpansionLevel = _G.GetExpansionLevel
 local GetSpecialization = _G.GetSpecialization
 local GetSpecializationInfo = _G.GetSpecializationInfo
+local GetWatchedFactionInfo = _G.GetWatchedFactionInfo
 local IsXPUserDisabled = _G.IsXPUserDisabled
 local UnitClass = _G.UnitClass
 local UnitLevel = _G.UnitLevel
@@ -121,7 +122,7 @@ LibPlayerData.PlayerHasXP = function() return (UnitLevel("player") < 60) end
 ---------------------------------------------------------------------	
 -- Returns whether the player is  tracking a reputation
 LibPlayerData.PlayerHasRep = function()
-	return false 
+	return GetWatchedFactionInfo() and true or false 
 end
 
 LibPlayerData.PlayerCanTank = function()
