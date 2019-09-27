@@ -22,7 +22,10 @@ local UnitPlayerControlled = UnitPlayerControlled
 
 -- Addon API
 local GetPlayerRole = CogWheel("LibPlayerData").GetPlayerRole
-local HasAuraInfoFlags = CogWheel("LibAura").HasAuraInfoFlags
+local HasInfoFlags = CogWheel("LibAura").HasAuraInfoFlags
+local AddFlags = CogWheel("LibAura").AddAuraUserFlags
+local HasUserFlags = CogWheel("LibAura").HasAuraUserFlags
+local GetUserFlags = CogWheel("LibAura").GetAllAuraUserFlags
 
 -- Databases
 local infoFilter = CogWheel("LibAura"):GetAllAuraInfoBitFilters() -- Aura flags by keywords
@@ -33,7 +36,7 @@ local colorDB = {} -- Addon color schemes
 local fontsDB = { normal = {}, outline = {} } -- Addon fonts
 
 -- List of units we all count as the player
-local unitIsPlayer = { player = true, 	pet = true, vehicle = true }
+local unitIsPlayer = { player = true, 	pet = true }
 
 -- Utility Functions
 -----------------------------------------------------------------
@@ -285,38 +288,37 @@ colorDB.worldquestquality[LE_WORLD_QUEST_QUALITY_EPIC] = colorDB.quality[ITEM_QU
 -----------------------------------------------------------------
 -- These are front-end filters and describe display preference, 
 -- they are unrelated to the factual, purely descriptive back-end filters. 
-local ByPlayer 			= tonumber("000000000000000000000000000000001", 2) -- Show when cast by player
+local ByPlayer 			= 2^0 -- Show when cast by player
 
 -- Unit visibility
-local OnPlayer 			= tonumber("000000000000000000000000000000010", 2) -- Show on player frame
-local OnTarget 			= tonumber("000000000000000000000000000000100", 2) -- Show on target frame 
-local OnPet 			= tonumber("000000000000000000000000000001000", 2) -- Show on pet frame
-local OnToT 			= tonumber("000000000000000000000000000010000", 2) -- Shown on tot frame
-local OnFocus 			= tonumber("000000000000000000000000000100000", 2) -- Show on focus frame 
-local OnParty 			= tonumber("000000000000000000000000001000000", 2) -- Show on party members
-local OnBoss 			= tonumber("000000000000000000000000010000000", 2) -- Show on boss frames
-local OnArena			= tonumber("000000000000000000000000100000000", 2) -- Show on arena enemy frames
-local OnFriend 			= tonumber("000000000000000000000001000000000", 2) -- Show on friendly units, regardless of frame
-local OnEnemy 			= tonumber("000000000000000000000010000000000", 2) -- Show on enemy units, regardless of frame
+local OnPlayer 			= 2^1 -- Show on player frame
+local OnTarget 			= 2^2 -- Show on target frame 
+local OnPet 			= 2^3 -- Show on pet frame
+local OnToT 			= 2^4 -- Shown on tot frame
+local OnParty 			= 2^5 -- Show on party members
+local OnBoss 			= 2^6 -- Show on boss frames
+local OnFriend 			= 2^7 -- Show on friendly units, regardless of frame
+local OnEnemy 			= 2^8 -- Show on enemy units, regardless of frame
 
 -- Player role visibility
-local PlayerIsDPS 		= tonumber("000000000000000000000100000000000", 2) -- Show when player is a damager
-local PlayerIsHealer 	= tonumber("000000000000000000001000000000000", 2) -- Show when player is a healer
-local PlayerIsTank 		= tonumber("000000000000000000010000000000000", 2) -- Show when player is a tank 
+local PlayerIsDPS 		= 2^9 -- Show when player is a damager
+local PlayerIsHealer 	= 2^10 -- Show when player is a healer
+local PlayerIsTank 		= 2^11 -- Show when player is a tank 
 
 -- Aura visibility priority
-local Never 			= tonumber("000000100000000000000000000000000", 2) -- Never show (Blacklist)
-local PrioLow 			= tonumber("000001000000000000000000000000000", 2) -- Low priority, will only be displayed if room
-local PrioMedium 		= tonumber("000010000000000000000000000000000", 2) -- Normal priority, same as not setting any
-local PrioHigh 			= tonumber("000100000000000000000000000000000", 2) -- High priority, shown first after boss
-local PrioBoss 			= tonumber("001000000000000000000000000000000", 2) -- Same priority as boss debuffs
-local Always 			= tonumber("010000000000000000000000000000000", 2) -- Always show (Whitelist)
+local Never 			= 2^12 -- Never show (Blacklist)
+local PrioLow 			= 2^13 -- Low priority, will only be displayed if room
+local PrioMedium 		= 2^14 -- Normal priority, same as not setting any
+local PrioHigh 			= 2^15 -- High priority, shown first after boss
+local PrioBoss 			= 2^16 -- Same priority as boss debuffs
+local Always 			= 2^17 -- Always show (Whitelist)
 
-local NeverOnPlate 		= tonumber("100000000000000000000000000000000", 2) -- Never show on plates (Blacklist)
+local NeverOnPlate 		= 2^18 -- Never show on plates 
 
-local hasFilter = function(flags, filter)
-	return flags and filter and (bit_band(flags, filter) ~= 0)
-end
+local NoCombat 			= 2^19 -- Never show in combat 
+local Warn 				= 2^20 -- Show when there is 30 secs left or less
+
+local showUnfilteredSpellID = (UnitName("player") == "Goldpaw") and (GetRealmName() == "Dragonfang") and (GetCurrentRegion() == 3)
 
 -- Aura Filter Functions
 -----------------------------------------------------------------
@@ -329,55 +331,66 @@ auraFilters.player = function(element, isBuff, unit, isOwnedByPlayer, name, icon
 
 	local all = element.all
 
-	local flags = auraUserFlags[spellID]
-	if flags then 
-		if hasFilter(flags, OnPlayer) then 
-			return true
-		elseif hasFilter(flags, Never) then 
-			return 
+	local hasFlags = not not GetUserFlags(Private)[spellID]
+	if (hasFlags) then 
+		if (HasUserFlags(Private, spellID, Never)) then 
+			return nil, nil, true
+		elseif (UnitAffectingCombat("player") and HasUserFlags(Private, spellID, NoCombat)) then 
+			if (isBuff and HasUserFlags(Private, spellID, Warn)) then 
+				if (timeLeft and (timeLeft > 0) and (timeLeft < 30)) then
+					return true, nil, true
+				else 
+					return nil, nil, true
+				end
+			else
+				return nil, nil, true
+			end
+		elseif (HasUserFlags(Private, spellID, OnPlayer)) then 
+			return true, nil, true
 		end
-	end
-
-	local timeLeft 
-	if (expirationTime and expirationTime > 0) then 
-		timeLeft = expirationTime - GetTime()
-	end
-
-	if UnitAffectingCombat(unit) then 
-		if isBuff then 
+	end 
+	if (UnitAffectingCombat("player")) then 
+		local timeLeft 
+		if (expirationTime and expirationTime > 0) then 
+			timeLeft = expirationTime - GetTime()
+		end
+		if (isBuff) then 
 			if (timeLeft and (timeLeft > 0) and (timeLeft < 30)) then
 				if (duration and (duration > 0) and (duration < 30)) then 
-					return true
+					return true, nil, showUnfilteredSpellID
 				else 
-					return
+					return nil, nil, showUnfilteredSpellID
 				end
 			else
 				return
 			end
 		else 
 			if (timeLeft and (timeLeft > 0) and (timeLeft < 601)) then 
-				return true
+				return true, nil, showUnfilteredSpellID
 			else
-				return
+				return nil, nil, showUnfilteredSpellID
 			end
 		end 
 	else 
-		return true
+		return true, nil, showUnfilteredSpellID
 	end 
 end 
 
 auraFilters.target = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
 
-	local flags = auraUserFlags[spellID]
-	if flags then 
-		if hasFilter(flags, OnTarget) then 
-			return true
-		elseif hasFilter(flags, Never) then 
-			return 
+	local hasFlags = not not GetUserFlags(Private)[spellID]
+	if (hasFlags) then 
+		if (HasUserFlags(Private, spellID, Never)) then 
+			return nil, nil, true
+		elseif (UnitAffectingCombat("player") and HasUserFlags(Private, spellID, NoCombat)) then 
+			if (isBuff) then 
+				return true, nil, true
+			end
+		elseif (HasUserFlags(Private, spellID, OnTarget)) then 
+			return true, nil, true
 		end
-	end
-
-	return true
+	end 
+	return true, nil, showUnfilteredSpellID
 end
 
 auraFilters.nameplate = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
@@ -416,82 +429,102 @@ local ByPlayer = OnPlayer + OnTarget
 
 -- General Blacklist
 ------------------------------------------------------------------------
-auraUserFlags[17670] = Never 		-- Argent Dawn Commission
+AddFlags(Private, 17670, Never) 	-- Argent Dawn Commission
 
 -- Druid (Balance)
 ------------------------------------------------------------------------
-auraUserFlags[22812] = OnPlayer 	-- Barkskin
-auraUserFlags[  339] = OnTarget 	-- Entangling Roots (Rank 1)
-auraUserFlags[ 1062] = OnTarget 	-- Entangling Roots (Rank 2)
-auraUserFlags[ 5195] = OnTarget 	-- Entangling Roots (Rank 3)
-auraUserFlags[ 5196] = OnTarget 	-- Entangling Roots (Rank 4)
-auraUserFlags[ 9852] = OnTarget 	-- Entangling Roots (Rank 5)
-auraUserFlags[ 9853] = OnTarget 	-- Entangling Roots (Rank 6)
-auraUserFlags[  770] = OnTarget 	-- Faerie Fire (Rank 1)
-auraUserFlags[18658] = OnTarget 	-- Hibernate (Rank 3)
-auraUserFlags[16689] = OnPlayer 	-- Nature's Grasp (Rank 1)
-auraUserFlags[16689] = OnPlayer 	-- Nature's Grasp (Rank 2)
-auraUserFlags[16689] = OnPlayer 	-- Nature's Grasp (Rank 3)
-auraUserFlags[16689] = OnPlayer 	-- Nature's Grasp (Rank 4)
-auraUserFlags[16689] = OnPlayer 	-- Nature's Grasp (Rank 5)
-auraUserFlags[16689] = OnPlayer 	-- Nature's Grasp (Rank 6)
-auraUserFlags[16870] = OnPlayer 	-- Omen of Clarity (Proc)
+AddFlags(Private, 22812, OnPlayer) 	-- Barkskin
+AddFlags(Private,   339, OnTarget) 	-- Entangling Roots (Rank 1)
+AddFlags(Private,  1062, OnTarget) 	-- Entangling Roots (Rank 2)
+AddFlags(Private,  5195, OnTarget) 	-- Entangling Roots (Rank 3)
+AddFlags(Private,  5196, OnTarget) 	-- Entangling Roots (Rank 4)
+AddFlags(Private,  9852, OnTarget) 	-- Entangling Roots (Rank 5)
+AddFlags(Private,  9853, OnTarget) 	-- Entangling Roots (Rank 6)
+AddFlags(Private,   770, OnTarget) 	-- Faerie Fire (Rank 1)
+AddFlags(Private, 18658, OnTarget) 	-- Hibernate (Rank 3)
+AddFlags(Private, 16689, OnPlayer) 	-- Nature's Grasp (Rank 1)
+AddFlags(Private, 16689, OnPlayer) 	-- Nature's Grasp (Rank 2)
+AddFlags(Private, 16689, OnPlayer) 	-- Nature's Grasp (Rank 3)
+AddFlags(Private, 16689, OnPlayer) 	-- Nature's Grasp (Rank 4)
+AddFlags(Private, 16689, OnPlayer) 	-- Nature's Grasp (Rank 5)
+AddFlags(Private, 16689, OnPlayer) 	-- Nature's Grasp (Rank 6)
+AddFlags(Private, 16864, OnPlayer + NoCombat + Warn) 	-- Omen of Clarity (Proc)
+AddFlags(Private, 16870, OnPlayer + NoCombat + Warn) 	-- Omen of Clarity (Proc)  -- where did this come from?
 
+AddFlags(Private, 00000, OnTarget) 	-- Faerie Fire (Rank 2)
+AddFlags(Private, 00000, OnTarget) 	-- Faerie Fire (Rank 3)
+AddFlags(Private, 00000, OnTarget) 	-- Faerie Fire (Rank 4)
+
+AddFlags(Private, 00000, OnTarget) 	-- Moonfire (Rank 1)
+AddFlags(Private, 00000, OnTarget) 	-- Moonfire (Rank 1)
+AddFlags(Private, 00000, OnTarget) 	-- Moonfire (Rank 3)
+AddFlags(Private, 00000, OnTarget) 	-- Moonfire (Rank 4)
+AddFlags(Private, 00000, OnTarget) 	-- Moonfire (Rank 5)
+AddFlags(Private, 00000, OnTarget) 	-- Moonfire (Rank 6)
+
+AddFlags(Private, 00000, OnTarget) 	-- Hurricane (Rank 1)
 
 -- Druid (Feral)
 ------------------------------------------------------------------------
-auraUserFlags[ 1066] = Never 		-- Aquatic Form
-auraUserFlags[ 8983] = OnTarget 	-- Bash
-auraUserFlags[  768] = Never 		-- Cat Form
-auraUserFlags[ 5209] = OnTarget 	-- Challenging Roar (Taunt)
-auraUserFlags[ 9821] = OnPlayer 	-- Dash
-auraUserFlags[ 9634] = Never 		-- Dire Bear Form
-auraUserFlags[ 5229] = OnPlayer 	-- Enrage
-auraUserFlags[16857] = ByPlayer 	-- Faerie Fire (Feral)
-auraUserFlags[22896] = OnPlayer 	-- Frenzied Regeneration
-auraUserFlags[ 6795] = OnTarget 	-- Growl (Taunt)
-auraUserFlags[24932] = Never 		-- Leader of the Pack
-auraUserFlags[ 9826] = ByPlayer 	-- Pounce
-auraUserFlags[ 6783] = OnPlayer 	-- Prowl
-auraUserFlags[ 9904] = ByPlayer 	-- Rake
-auraUserFlags[ 9894] = ByPlayer 	-- Rip
-auraUserFlags[ 9845] = OnPlayer 	-- Tiger's Fury
-auraUserFlags[  783] = Never 		-- Travel Form
+AddFlags(Private,  1066, Never) 	-- Aquatic Form
+AddFlags(Private,  8983, OnTarget) 	-- Bash
+AddFlags(Private,   768, Never) 	-- Cat Form
+AddFlags(Private,  5209, OnTarget) 	-- Challenging Roar (Taunt)
+AddFlags(Private,  9821, OnPlayer) 	-- Dash
+AddFlags(Private,  9634, Never) 	-- Dire Bear Form
+AddFlags(Private,  5229, OnPlayer) 	-- Enrage
+AddFlags(Private, 16857, ByPlayer) 	-- Faerie Fire (Feral)
+AddFlags(Private, 22896, OnPlayer) 	-- Frenzied Regeneration
+AddFlags(Private,  6795, OnTarget) 	-- Growl (Taunt)
+AddFlags(Private, 24932, Never) 	-- Leader of the Pack
+AddFlags(Private,  9826, ByPlayer) 	-- Pounce
+AddFlags(Private,  6783, OnPlayer) 	-- Prowl
+AddFlags(Private,  9904, ByPlayer) 	-- Rake
+AddFlags(Private,  9894, ByPlayer) 	-- Rip
+AddFlags(Private,  9845, OnPlayer) 	-- Tiger's Fury
+AddFlags(Private,   783, Never) 	-- Travel Form
 
 -- Druid (Restoration)
 ------------------------------------------------------------------------
-auraUserFlags[ 2893] = ByPlayer 	-- Abolish Poison
-auraUserFlags[29166] = ByPlayer 	-- Innervate
-auraUserFlags[ 8936] = ByPlayer 	-- Regrowth (Rank 1)
-auraUserFlags[ 8938] = ByPlayer 	-- Regrowth (Rank 2)
-auraUserFlags[ 8939] = ByPlayer 	-- Regrowth (Rank 3)
-auraUserFlags[ 8940] = ByPlayer 	-- Regrowth (Rank 4)
-auraUserFlags[ 8941] = ByPlayer 	-- Regrowth (Rank 5)
-auraUserFlags[ 9750] = ByPlayer 	-- Regrowth (Rank 6)
-auraUserFlags[ 9856] = ByPlayer 	-- Regrowth (Rank 7)
-auraUserFlags[ 9857] = ByPlayer 	-- Regrowth (Rank 8)
-auraUserFlags[ 9858] = ByPlayer 	-- Regrowth (Rank 9)
-auraUserFlags[  774] = ByPlayer 	-- Rejuvenation (Rank 1)
-auraUserFlags[ 1058] = ByPlayer 	-- Rejuvenation (Rank 2)
-auraUserFlags[ 1430] = ByPlayer 	-- Rejuvenation (Rank 3)
-auraUserFlags[ 2090] = ByPlayer 	-- Rejuvenation (Rank 4)
-auraUserFlags[ 2091] = ByPlayer 	-- Rejuvenation (Rank 5)
-auraUserFlags[ 3627] = ByPlayer 	-- Rejuvenation (Rank 6)
-auraUserFlags[ 8910] = ByPlayer 	-- Rejuvenation (Rank 7)
-auraUserFlags[ 9839] = ByPlayer 	-- Rejuvenation (Rank 8)
-auraUserFlags[ 9840] = ByPlayer 	-- Rejuvenation (Rank 9)
-auraUserFlags[ 9841] = ByPlayer 	-- Rejuvenation (Rank 10)
-auraUserFlags[  740] = ByPlayer 	-- Tranquility (Rank 1)
-auraUserFlags[ 8918] = ByPlayer 	-- Tranquility (Rank 2)
-auraUserFlags[ 9862] = ByPlayer 	-- Tranquility (Rank 3)
-auraUserFlags[ 9863] = ByPlayer 	-- Tranquility (Rank 4)
+AddFlags(Private,  2893, ByPlayer) 			-- Abolish Poison
+AddFlags(Private, 29166, ByPlayer) 			-- Innervate
+AddFlags(Private,  1126, ByPlayer + NoCombat + Warn) 	-- Mark of the Wild (Rank 1)
+AddFlags(Private,  5232, ByPlayer + NoCombat + Warn) 	-- Mark of the Wild (Rank 2)
+AddFlags(Private,  6756, ByPlayer + NoCombat + Warn) 	-- Mark of the Wild (Rank 3)
+AddFlags(Private,  5234, ByPlayer + NoCombat + Warn) 	-- Mark of the Wild (Rank 4)
+AddFlags(Private,  8907, ByPlayer + NoCombat + Warn) 	-- Mark of the Wild (Rank 5)
+AddFlags(Private,  9884, ByPlayer + NoCombat + Warn) 	-- Mark of the Wild (Rank 6)
+AddFlags(Private,  9885, ByPlayer + NoCombat + Warn) 	-- Mark of the Wild (Rank 7)
+AddFlags(Private,  8936, ByPlayer) 	-- Regrowth (Rank 1)
+AddFlags(Private,  8938, ByPlayer) 	-- Regrowth (Rank 2)
+AddFlags(Private,  8939, ByPlayer) 	-- Regrowth (Rank 3)
+AddFlags(Private,  8940, ByPlayer) 	-- Regrowth (Rank 4)
+AddFlags(Private,  8941, ByPlayer) 	-- Regrowth (Rank 5)
+AddFlags(Private,  9750, ByPlayer) 	-- Regrowth (Rank 6)
+AddFlags(Private,  9856, ByPlayer) 	-- Regrowth (Rank 7)
+AddFlags(Private,  9857, ByPlayer) 	-- Regrowth (Rank 8)
+AddFlags(Private,  9858, ByPlayer) 	-- Regrowth (Rank 9)
+AddFlags(Private,   774, ByPlayer) 	-- Rejuvenation (Rank 1)
+AddFlags(Private,  1058, ByPlayer) 	-- Rejuvenation (Rank 2)
+AddFlags(Private,  1430, ByPlayer) 	-- Rejuvenation (Rank 3)
+AddFlags(Private,  2090, ByPlayer) 	-- Rejuvenation (Rank 4)
+AddFlags(Private,  2091, ByPlayer) 	-- Rejuvenation (Rank 5)
+AddFlags(Private,  3627, ByPlayer) 	-- Rejuvenation (Rank 6)
+AddFlags(Private,  8910, ByPlayer) 	-- Rejuvenation (Rank 7)
+AddFlags(Private,  9839, ByPlayer) 	-- Rejuvenation (Rank 8)
+AddFlags(Private,  9840, ByPlayer) 	-- Rejuvenation (Rank 9)
+AddFlags(Private,  9841, ByPlayer) 	-- Rejuvenation (Rank 10)
+AddFlags(Private,   740, ByPlayer) 	-- Tranquility (Rank 1)
+AddFlags(Private,  8918, ByPlayer) 	-- Tranquility (Rank 2)
+AddFlags(Private,  9862, ByPlayer) 	-- Tranquility (Rank 3)
+AddFlags(Private,  9863, ByPlayer) 	-- Tranquility (Rank 4)
 
 -- Warrior (Arms)
 ------------------------------------------------------------------------
-auraUserFlags[ 7922] = OnTarget 	-- Charge Stun (Rank 1)
-auraUserFlags[  772] = OnTarget 	-- Rend (Rank 1)
-auraUserFlags[ 6343] = OnTarget 	-- Thunder Clap (Rank 1)
+AddFlags(Private,  7922, OnTarget) 	-- Charge Stun (Rank 1)
+AddFlags(Private,   772, OnTarget) 	-- Rend (Rank 1)
+AddFlags(Private,  6343, OnTarget) 	-- Thunder Clap (Rank 1)
 
 -- Warrior (Fury)
 ------------------------------------------------------------------------
-auraUserFlags[ 6673] = OnPlayer 	-- Battle Shout (Rank 1)
+AddFlags(Private,  6673, OnPlayer) 	-- Battle Shout (Rank 1)
