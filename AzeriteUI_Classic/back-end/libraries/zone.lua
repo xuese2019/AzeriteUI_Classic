@@ -64,7 +64,7 @@ do
 	frame:RegisterUnitEvent("UNIT_FACTION", "player") 
 end 
 
--- Currently this only returns sanctuare, friendly, hostile and contested. 
+-- Currently this only returns sanctuary, friendly, hostile and contested. 
 -- We have not included arena or combat. 
 LibZone.GetPvPType = function(self, uiMapID)
 	local mapName, mapPvPType, mapPvPLabel
