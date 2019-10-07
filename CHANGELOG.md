@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.53-RC] 2019-10-07
+### Changed
+- Removed the immovable object also known as the Blizzard durability frame, and replaced it with our own that looks exactly the same but has the benefit of actually working without stupid bug messages about mafia anchor connections. Fuck you secure anchoring system.  
+
 ## [1.0.52-RC] 2019-09-27
 ### Added
 - Added reputation tracking to the minimap ring bars! 
