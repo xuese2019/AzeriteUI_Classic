@@ -1,4 +1,4 @@
-local LibSecureButton = CogWheel:Set("LibSecureButton", 63)
+local LibSecureButton = CogWheel:Set("LibSecureButton", 64)
 if (not LibSecureButton) then	
 	return
 end
@@ -333,7 +333,7 @@ local Update = function(self, event, ...)
 	elseif (event == "ACTIONBAR_UPDATE_USABLE") then
 		self:UpdateUsable()
 
-	elseif 	(event == "ACTIONBAR_UPDATE_STATE") then
+	elseif (event == "ACTIONBAR_UPDATE_STATE") then
 		self:UpdateFlash()
 		--self:UpdateCheckedState()
 
@@ -357,6 +357,9 @@ local Update = function(self, event, ...)
 	elseif (event == "SPELL_UPDATE_CHARGES") then
 		self:UpdateCount()
 
+	elseif (event == "SPELLS_CHANGED") then 
+		-- Needed for macros. 
+		self:Update() 
 	elseif (event == "SPELL_UPDATE_ICON") then
 		self:Update() -- really? how often is this called?
 
@@ -865,6 +868,7 @@ ActionButton.OnEnable = function(self)
 	self:RegisterEvent("PLAYER_TARGET_CHANGED", Update)
 	self:RegisterEvent("SPELL_UPDATE_CHARGES", Update)
 	self:RegisterEvent("SPELL_UPDATE_ICON", Update)
+	self:RegisterEvent("SPELLS_CHANGED", Update)
 	self:RegisterEvent("TRADE_SKILL_CLOSE", Update)
 	self:RegisterEvent("TRADE_SKILL_SHOW", Update)
 	self:RegisterEvent("UPDATE_BINDINGS", Update)
