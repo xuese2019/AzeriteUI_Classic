@@ -1678,7 +1678,7 @@ Layouts.BlizzardWorldMap = {
 }
 
 Layouts.FloaterHUD = {
-	
+	Place = { "CENTER", "UICenter", "CENTER", 190, 0 }
 }
 
 ------------------------------------------------------------------
