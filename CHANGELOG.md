@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.56-RC] 2019-10-08
+### Changed
+- Now compatible with Plater Nameplates. 
+
 ## [1.0.55-RC] 2019-10-08
 ### Added
 - Added in party frames. Might have undiscovered bugs. Frames can be toggled through our menu. 

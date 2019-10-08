@@ -1,14 +1,13 @@
 local ADDON = ...
-
 local Core = CogWheel("LibModule"):GetModule(ADDON)
 if (not Core) then 
 	return 
 end
 
 local Module = Core:NewModule("NamePlates", "LibEvent", "LibNamePlate", "LibDB", "LibMenu", "LibFrame")
-
 Module:SetIncompatible("Kui_Nameplates")
 Module:SetIncompatible("NeatPlates")
+Module:SetIncompatible("Plater")
 Module:SetIncompatible("SimplePlates")
 Module:SetIncompatible("TidyPlates")
 Module:SetIncompatible("TidyPlates_ThreatPlates")
