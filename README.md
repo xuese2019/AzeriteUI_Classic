@@ -3,9 +3,18 @@
 This is a Classic port of our custom user interface originally made for World of Warcraft: Battle For Azeroth! 
 Looking for AzeriteUI for WoW Retail? Get it [here](https://www.curseforge.com/wow/addons/azeriteui)!
 
-## **Other downloads:**
-* AzeriteUI for WoW Retail: [www.curseforge.com/wow/addons/azeriteui](https://www.curseforge.com/wow/addons/azeriteui)
-* AzeriteUI Masque Theme: [www.curseforge.com/wow/addons/masque-azerite](https://www.curseforge.com/wow/addons/masque-azerite) _(compatible with Classic)_
+## **Pledge to my work:**  
+* Patreon: [www.patreon.com/goldpawsstuff](https://www.patreon.com/goldpawsstuff)  
+* PayPal: [www.paypal.me/goldpawsstuff](https://www.paypal.me/goldpawsstuff)  
+* Liberapay: [liberapay.com/goldpawsstuff/donate](https://liberapay.com/goldpawsstuff/donate)
+
+## **Join me on social media:**  
+* Discord: [discord.gg/MUSfWXd](https://discord.gg/MUSfWXd)  
+* Twitter: [@GoldpawsStuff](https://twitter.com/goldpawsstuff)  
+
+## **Recommended addons:**  
+* Enhanced World Map for WoW Classic: [www.curseforge.com/wow/addons/enhanced-world-map-for-wow-classic](https://www.curseforge.com/wow/addons/enhanced-world-map-for-wow-classic)
+* Immersion for WoW Classic: [www.curseforge.com/wow/addons/immersion](https://www.curseforge.com/wow/addons/immersion/files/all?filter-game-version=1738749986%3a67408)
 
 ## **Frequently Asked Questions:**  
 ### **It's so big, how can I scale it down?**  
@@ -20,12 +29,3 @@ Looking for AzeriteUI for WoW Retail? Get it [here](https://www.curseforge.com/w
 
 ### **How can I disable the actionbars?**
 * This is not a feature we intend to implement. We do realize that some of you would like this feature for it to look better with ConsolePort, or just completely replace our bars with Bartender, but dismantling our user interface to make it fit a completely different project slightly better just isn't something we're going to do. We do plan to release a project better suited for ConsolePort, though. So those looking for that, follow our twitter!
-
-## **Pledge to my work:**  
-* Patreon: [www.patreon.com/goldpawsstuff](https://www.patreon.com/goldpawsstuff)  
-* PayPal: [www.paypal.me/goldpawsstuff](https://www.paypal.me/goldpawsstuff)  
-* Liberapay: [liberapay.com/goldpawsstuff/donate](https://liberapay.com/goldpawsstuff/donate)
-
-## **Join me on social media:**  
-* Discord: [discord.gg/MUSfWXd](https://discord.gg/MUSfWXd)  
-* Twitter: [@GoldpawsStuff](https://twitter.com/goldpawsstuff)  
