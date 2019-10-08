@@ -3786,29 +3786,11 @@ UnitFrameToT.OnInit = function(self)
 	self.frame:HookScript("OnHide", function(self) self:SendMessage("CG_UNITFRAME_TOT_HIDDEN") end)
 end 
 
--- Don't load the rest until we can fix it
-do return end 
-
------------------------------------------------------------
--- Boss
------------------------------------------------------------
-UnitFrameBoss.OnInit = function(self)
-	self.layout = CogWheel("LibDB"):GetDatabase(Core:GetPrefix()..":[UnitFrameBoss]", true)
-	self.frame = {}
-
-	local style = function(frame, unit, id, _, ...)
-		return UnitStyles.StyleBossFrames(frame, unit, id, self.layout, ...)
-	end
-	for i = 1,5 do 
-		self.frame[tostring(i)] = self:SpawnUnitFrame("boss"..i, "UICenter", style)
-	end 
-end 
-
 -----------------------------------------------------------
 -- Party
 -----------------------------------------------------------
 UnitFrameParty.OnInit = function(self)
-	local dev --= true
+	local dev -- = true
 
 	-- Default settings
 	local defaults = {
@@ -3816,8 +3798,8 @@ UnitFrameParty.OnInit = function(self)
 	}
 
 	self.db = self:NewConfig("UnitFrameParty", defaults, "global")
-	self.layout = CogWheel("LibDB"):GetDatabase(Core:GetPrefix()..":[UnitFrameParty]")
-
+	self.layout = CogWheel("LibDB"):GetDatabase(Core:GetPrefix()..":[UnitFrameParty]", true)
+	
 	self.frame = self:CreateFrame("Frame", nil, "UICenter", "SecureHandlerAttributeTemplate")
 	self.frame:SetSize(unpack(self.layout.Size))
 	self.frame:Place(unpack(self.layout.Place))
@@ -3870,6 +3852,24 @@ UnitFrameParty.OnInit = function(self)
 
 	-- Reference the group header with the sorting method
 	--self:GetSecureUpdater():SetFrameRef("GroupHeader", self.frame)
+end 
+
+-- Don't load the rest until we can fix it
+do return end 
+
+-----------------------------------------------------------
+-- Boss
+-----------------------------------------------------------
+UnitFrameBoss.OnInit = function(self)
+	self.layout = CogWheel("LibDB"):GetDatabase(Core:GetPrefix()..":[UnitFrameBoss]", true)
+	self.frame = {}
+
+	local style = function(frame, unit, id, _, ...)
+		return UnitStyles.StyleBossFrames(frame, unit, id, self.layout, ...)
+	end
+	for i = 1,5 do 
+		self.frame[tostring(i)] = self:SpawnUnitFrame("boss"..i, "UICenter", style)
+	end 
 end 
 
 -----------------------------------------------------------

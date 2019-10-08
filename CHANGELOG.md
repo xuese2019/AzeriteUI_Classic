@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.55-RC] 2019-10-08
+### Added
+- Added in party frames. Might have undiscovered bugs. Frames can be toggled through our menu. 
+- Added the Healer Layout (previously known as Healer Mode) back in, now that we have party frames. This layout switches the positions of the group frames and chat frames, resulting in all friendly unit frames being grouped in the bottom left corner of the screen above the actionbars, making it easier for healers. 
+
 ## [1.0.54-RC] 2019-10-08
 - ToC updates. 
 

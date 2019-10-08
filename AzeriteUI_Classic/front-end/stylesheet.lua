@@ -3550,7 +3550,8 @@ local UnitFrameParty = setmetatable({
 			end 
 		end, 
 
-	UseGroupRole = true, 
+	-- Currently this is DAMAGER for all, so let's just disable it for now. 
+	UseGroupRole = false, 
 		GroupRolePlace = { "TOP", 0, 0 }, 
 		GroupRoleSize = { 40, 40 }, 
 

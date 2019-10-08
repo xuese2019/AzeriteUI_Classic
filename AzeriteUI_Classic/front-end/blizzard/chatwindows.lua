@@ -625,16 +625,15 @@ end
 Module.UpdateChatDockPosition = function(self)
 	local frame = self.frame 
 	if frame then 
-		--local coreDB = self:GetConfig("Core")
-		--if (coreDB and coreDB.enableHealerMode) then 
-		--	frame:ClearAllPoints()
-		--	frame:SetPoint(unpack(Layout.AlternateChatFramePlace))
-		--else 
+		local coreDB = self:GetConfig("Core")
+		if (coreDB and coreDB.enableHealerMode) then 
+			frame:ClearAllPoints()
+			frame:SetPoint(unpack(Layout.AlternateChatFramePlace))
+		else 
 			frame:ClearAllPoints()
 			frame:SetPoint(unpack(Layout.DefaultChatFramePlace))
-		--end
+		end
 	end
-
 end
 
 Module.OnModeToggle = function(self, modeName)

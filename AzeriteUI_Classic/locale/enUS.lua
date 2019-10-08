@@ -128,7 +128,7 @@ L["Friends"] = true
 L["Explorer Mode"] = true
 L["Player Fading"] = true
 L["Tracker Fading"] = true
-L["Healer Mode"] = true 
+L["Healer Mode"] = "Healer Layout" -- it's a layout change, so let's reflect this!
 
 -- Menu button tooltips, not actually used at the moment. 
 L["Click to enable the Stance Bar."] = true

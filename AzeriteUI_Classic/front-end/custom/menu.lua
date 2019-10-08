@@ -851,6 +851,7 @@ Module.CreateMenuTable = function(self)
 		})
 	end
 
+	--[[
 	local UnitFrameRaid = Core:GetModule("UnitFrameRaid", true)
 	if UnitFrameRaid and not (UnitFrameRaid:IsIncompatible() or UnitFrameRaid:DependencyFailed()) then 
 		table_insert(UnitFrameMenu.buttons, {
@@ -861,6 +862,9 @@ Module.CreateMenuTable = function(self)
 			proxyModule = "UnitFrameRaid"
 		})
 	end
+	]]--
+
+	table_insert(MenuTable, UnitFrameMenu)
 
 	-- Nameplates
 	local NamePlates = Core:GetModule("NamePlates", true)
@@ -933,7 +937,6 @@ Module.CreateMenuTable = function(self)
 	end 
 
 	-- Healer Mode
-	--[[
 	table_insert(MenuTable, {
 		enabledTitle = L_ENABLED:format(L["Healer Mode"]),
 		disabledTitle = L_DISABLED:format(L["Healer Mode"]),
@@ -941,7 +944,6 @@ Module.CreateMenuTable = function(self)
 		configDB = "Core", configKey = "enableHealerMode", 
 		proxyModule = nil, useCore = true, modeName = "healerMode"
 	})
-	]]--
 
 end
 

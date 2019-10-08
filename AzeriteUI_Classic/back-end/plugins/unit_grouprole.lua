@@ -1,9 +1,8 @@
-
--- Lua API
-local _G = _G
-
--- WoW API
-local UnitGroupRolesAssigned = _G.UnitGroupRolesAssigned
+-- WoW Dummy API for now.
+-- We will find a way to figure this out better later on. Maybe. 
+local UnitGroupRolesAssigned = function(unit)
+	return "DAMAGER"
+end
 
 local roleToObject = { TANK = "Tank", HEALER = "Healer", DAMAGER = "Damager" }
 
@@ -73,14 +72,10 @@ local Enable = function(self)
 			element:Hide()
 		end 
 
-		if (self.unit == "player") then
-			self:RegisterEvent("PLAYER_ROLES_ASSIGNED", Proxy, true)
-		else
-			-- Avoid duplicate events, library fires this for all elements on raid/party
-			if (not self.unit:match("^party(%d+)")) and (not self.unit:match("^raid(%d+)")) then 
-				self:RegisterEvent("GROUP_ROSTER_UPDATE", Proxy, true)
-			end 
-		end
+		-- Avoid duplicate events, library fires this for all elements on raid/party
+		if (not self.unit:match("^party(%d+)")) and (not self.unit:match("^raid(%d+)")) then 
+			self:RegisterEvent("GROUP_ROSTER_UPDATE", Proxy, true)
+		end 
 
 		return true 
 	end
@@ -89,7 +84,6 @@ end
 local Disable = function(self)
 	local element = self.GroupRole
 	if element then
-
 		for role, objectName in pairs(roleToObject) do 
 			local object = element[objectName]
 			if object then 
@@ -99,13 +93,11 @@ local Disable = function(self)
 		if element.Hide then 
 			element:Hide()
 		end 
-
-		self:UnregisterEvent("PLAYER_ROLES_ASSIGNED", Proxy)
 		self:UnregisterEvent("GROUP_ROSTER_UPDATE", Proxy)
 	end
 end 
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (CogWheel("LibUnitFrame", true)), (CogWheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("GroupRole", Enable, Disable, Proxy, 13)
+	Lib:RegisterElement("GroupRole", Enable, Disable, Proxy, 14)
 end 
