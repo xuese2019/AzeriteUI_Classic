@@ -1,4 +1,4 @@
-local LibTooltip = CogWheel:Set("LibTooltip", 58)
+local LibTooltip = CogWheel:Set("LibTooltip", 59)
 if (not LibTooltip) then	
 	return
 end
@@ -17,6 +17,9 @@ assert(LibTooltipScanner, "LibTooltip requires LibTooltipScanner to be loaded.")
 
 local LibStatusBar = CogWheel("LibStatusBar")
 assert(LibStatusBar, "LibTooltip requires LibStatusBar to be loaded.")
+
+local LibPlayerData = CogWheel("LibPlayerData")
+assert(LibPlayerData, "LibTooltip requires LibPlayerData to be loaded.")
 
 -- Embed functionality into the library
 LibFrame:Embed(LibTooltip)
@@ -2075,9 +2078,16 @@ Tooltip.UpdateBarValues = function(self, unit, noUpdate)
 				local updateNeeded = self:ClearStatusBar(i,true)
 				needUpdate = needUpdate or updateNeeded
 			else 
-				local min = UnitHealth(unit) or 0
-				local max = UnitHealthMax(unit) or 0
-
+				local min,max
+				if not(UnitIsUnit(unit, "player") or UnitIsUnit(unit, "pet") or UnitInParty(unit) or UnitInRaid(unit)) then 
+					min = LibPlayerData:UnitHealth(unit)
+					max = LibPlayerData:UnitHealthMax(unit)
+				end 
+				if (not min) or (not max) then 
+					min = UnitHealth(unit) or 0
+					max = UnitHealthMax(unit) or 0
+				end 
+			
 				-- Only show units with health, hide the bar otherwise
 				if ((min > 0) and (max > 0)) then 
 					if (not isShown) then 

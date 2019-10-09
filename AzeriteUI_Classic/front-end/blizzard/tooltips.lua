@@ -5,7 +5,7 @@ if (not Core) then
 	return 
 end
 
-local Module = Core:NewModule("BlizzardTooltipStyling", "LibEvent", "LibDB", "LibTooltip")
+local Module = Core:NewModule("BlizzardTooltipStyling", "LibEvent", "LibDB", "LibTooltip", "LibPlayerData")
 local Layout
 
 Module:SetIncompatible("TipTac")
@@ -38,6 +38,20 @@ local NAME_STRING = {}
 -- Show health values for tooltip health bars, and hide others.
 -- Will expand on this later to tailer all tooltips to our needs.  
 local StatusBar_UpdateValue = function(bar, value, max)
+
+	local unit = bar:GetParent().unit
+	if (unit) then 
+		if not(UnitIsUnit(unit, "player") or UnitIsUnit(unit, "pet") or UnitInParty(unit) or UnitInRaid(unit)) then 
+			local healthCur = Module:UnitHealth(unit)
+			local healthMax = Module:UnitHealthMax(unit)
+			if (healthCur and healthMax) then 
+				value, max = healthCur, healthMax
+			else
+				value, max = nil, nil
+			end 
+		end
+	end
+
 	if value then 
 		if (value >= 1e8) then 			bar.value:SetFormattedText("%.0fm", value/1e6) 		-- 100m, 1000m, 2300m, etc
 		elseif (value >= 1e6) then 		bar.value:SetFormattedText("%.1fm", value/1e6) 		-- 1.0m - 99.9m 

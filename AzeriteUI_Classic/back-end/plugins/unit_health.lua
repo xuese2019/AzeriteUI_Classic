@@ -386,5 +386,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (CogWheel("LibUnitFrame", true)), (CogWheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Health", Enable, Disable, Proxy, 38)
+	Lib:RegisterElement("Health", Enable, Disable, Proxy, 39)
 end 
