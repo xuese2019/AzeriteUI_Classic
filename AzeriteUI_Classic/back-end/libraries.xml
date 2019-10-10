@@ -13,6 +13,7 @@
 <Script file='libraries\frame.lua'/>
 <Script file='libraries\switcher.lua'/>
 <Script file='libraries\playerdata.lua'/>
+<Script file='libraries\aura.lua'/>
 <Script file='libraries\orb.lua'/>
 <Script file='libraries\statusbar.lua'/>
 <Script file='libraries\spinbar.lua'/>
@@ -29,7 +30,6 @@
 <Script file='libraries\widgetcontainer.lua'/>
 <Script file='libraries\unitframe.lua'/>
 <Script file='libraries\blizzard.lua'/>
-<Script file='libraries\aura.lua'/>
 <Script file='libraries\menu.lua'/>
 <Script file='libraries\quest.lua'/>
 <Script file='libraries\bonusquest.lua'/>

@@ -1,4 +1,4 @@
-local LibFader = CogWheel:Set("LibFader", 21)
+local LibFader = CogWheel:Set("LibFader", 22)
 if (not LibFader) then	
 	return
 end
@@ -9,8 +9,16 @@ assert(LibFrame, "LibFader requires LibFrame to be loaded.")
 local LibEvent = CogWheel("LibEvent")
 assert(LibEvent, "LibFader requires LibEvent to be loaded.")
 
+local LibMessage = CogWheel("LibMessage")
+assert(LibMessage, "LibFader requires LibMessage to be loaded.")
+
+local LibAura = CogWheel("LibAura")
+assert(LibAura, "LibFader requires LibAura to be loaded.")
+
 LibFrame:Embed(LibFader)
 LibEvent:Embed(LibFader)
+LibMessage:Embed(LibFader)
+LibAura:Embed(LibFader)
 
 -- Lua API
 local assert = assert
@@ -35,8 +43,6 @@ local IsInGroup = IsInGroup
 local IsInInstance = IsInInstance
 local RegisterAttributeDriver = RegisterAttributeDriver
 local SpellFlyout = SpellFlyout
-local UnitBuff = UnitBuff
-local UnitDebuff = UnitDebuff
 local UnitExists = UnitExists
 local UnitHealth = UnitHealth
 local UnitHealthMax = UnitHealthMax
@@ -66,23 +72,21 @@ LibFader.FORCED = nil -- we want this disabled from the start
 local Data = LibFader.data
 local Objects = LibFader.objects
 
+-- These are debuffs which are ignored, 
+-- allowing the interface to fade out even though they are present. 
 local safeDebuffs = {
 	-- deserters
 	[ 26013] = true, -- PvP Deserter 
 	[ 71041] = true, -- Dungeon Deserter 
 	[144075] = true, -- Dungeon Deserter
 	[ 99413] = true, -- Deserter (no idea what type)
-	[158263] = true, -- Craven "You left an Arena without entering combat and must wait before entering another one." -- added 6.0.1
-	[194958] = true, -- Ashran Deserter
 
 	-- heal cooldowns
-	[178857] = true, -- Contender (Gladiator's Sanctum buff)
 	[ 11196] = true, -- Recently Bandaged
 	[  6788] = true, -- Weakened Soul
 	
 	-- burst cooldowns
 	[ 57723] = true, -- Exhaustion from Heroism
-	[264689] = true, -- Fatigued (cannot benefit from Primal Rage or similar) -- added 8.0.1 (?)
 	[ 95809] = true, -- Insanity from Ancient Hysteria
 	[ 57724] = true, -- Sated from Bloodlust
 	[ 80354] = true, -- Temporal Displacement from Time Warp
@@ -96,46 +100,26 @@ local safeDebuffs = {
 	[ 26898] = true, -- Heartbroken "You have been rejected and can no longer give Love Tokens!"
 	[ 71909] = true, -- Heartbroken "Suffering from a broken heart."
 	[ 43052] = true, -- Ram Fatigue "Your racing ram is fatigued."
-	[ 69438] = true, -- Sample Satisfaction (some love crap)
-	
-	-- WoD weird debuffs 
-	[174958] = true, -- Acid Trail "Riding on the slippery back of a Goren!"  -- added 6.0.1
-	[160510] = true, -- Encroaching Darkness "Something is watching you..." -- some zone in WoD
-	[156154] = true, -- Might of Ango'rosh -- WoD, Talador zone buff
-
-	-- WoD fish debuffs
-	[174524] = true, -- Awesomefish
-	[174528] = true, -- Grieferfish
-	
-	-- WoD Follower deaths 
-	[173660] = true, -- Aeda Brightdawn
-	[173657] = true, -- Defender Illona 
-	[173658] = true, -- Delvar Ironfist
-	[173976] = true, -- Leorajh 
-	[173659] = true, -- Talonpriest Ishaal
-	[173649] = true, -- Tormmok 
-	[173661] = true, -- Vivianne 
-
-	-- BfA
-	[271571] = true, -- Ready! (when doing the "Shell Game" world quests) -- added 8.0.1
+	[ 69438] = true  -- Sample Satisfaction (some love crap)
 }
 
+-- These are buffs that will keep the interface visible while active. 
 local unsafeBuffs = {
-	[  430] = true, -- Drink
-	[  431] = true, -- Drink
-	[  432] = true, -- Drink
-	[ 1133] = true, -- Drink
-	[ 1135] = true, -- Drink
-	[ 1137] = true, -- Drink
-	[10250] = true, -- Drink
-	[22734] = true, -- Drink
-	[24355] = true, -- Drink
-	[25696] = true, -- Drink
-	[26261] = true, -- Drink
-	[26402] = true, -- Drink
-	[26473] = true, -- Drink
-	[26475] = true, -- Drink
-	[29007] = true  -- Drink
+	[   430] = true, -- Drink
+	[   431] = true, -- Drink
+	[   432] = true, -- Drink
+	[  1133] = true, -- Drink
+	[  1135] = true, -- Drink
+	[  1137] = true, -- Drink
+	[ 10250] = true, -- Drink
+	[ 22734] = true, -- Drink
+	[ 24355] = true, -- Drink
+	[ 25696] = true, -- Drink
+	[ 26261] = true, -- Drink
+	[ 26402] = true, -- Drink
+	[ 26473] = true, -- Drink
+	[ 26475] = true, -- Drink
+	[ 29007] = true  -- Drink
 }
 
 -- Syntax check 
@@ -216,6 +200,15 @@ LibFader.DisableInstanceFading = function(self, fade)
 	end
 end
 
+-- Prevent objects from fading out while grouped
+LibFader.DisableGroupFading = function(self, fade)
+	if (fade) then 
+		Data.disableGroupFade = true 
+	else 
+		Data.disableGroupFade = false 
+	end
+end
+
 -- Set the default alpha of an opaque object
 LibFader.SetObjectAlpha = function(self, object, alpha)
 	check(alpha, 2, "number")
@@ -259,8 +252,7 @@ LibFader.CheckCursor = function(self)
 	or (cursor == "spell") 
 	or (cursor == "macro") 
 	or (cursor == "mount") 
-	or (cursor == "item") 
-	or (cursor == "battlepet") then 
+	or (cursor == "item") then 
 		Data.busyCursor = true 
 		return 
 	end 
@@ -270,7 +262,7 @@ end
 -- TODO: Integration with LibAura
 LibFader.CheckAuras = function(self)
 	for i = 1, BUFF_MAX_DISPLAY do
-		local name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = UnitBuff("player", i)
+		local name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = LibFader:GetUnitBuff("player", i)
 
 		-- No name means no more debuffs matching the filter
 		if (not name) then
@@ -284,7 +276,7 @@ LibFader.CheckAuras = function(self)
 		end
 	end
 	for i = 1, DEBUFF_MAX_DISPLAY do
-		local name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = UnitDebuff("player", i)
+		local name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = LibFader:GetUnitDebuff("player", i)
 
 		-- No name means no more debuffs matching the filter
 		if (not name) then
@@ -346,14 +338,6 @@ LibFader.CheckTarget = function(self)
 	Data.hasTarget = nil
 end 
 
-LibFader.CheckFocus	 = function(self)
-	if UnitExists("focus") then 
-		Data.hasFocus = true
-		return 
-	end 
-	Data.hasFocus = nil
-end 
-
 LibFader.CheckGroup = function(self)
 	if IsInGroup() then 
 		Data.inGroup = true
@@ -378,7 +362,6 @@ LibFader.OnEvent = function(self, event, ...)
 		self:CheckInstance()
 		self:CheckGroup()
 		self:CheckTarget()
-		self:CheckFocus()
 		self:CheckHealth()
 		self:CheckPower()
 		self:CheckAuras()
@@ -420,7 +403,7 @@ LibFader.OnEvent = function(self, event, ...)
 	elseif (event == "UNIT_HEALTH_FREQUENT") then 
 		self:CheckHealth()
 
-	elseif (event == "UNIT_AURA") then 
+	elseif (event == "CG_UNIT_AURA") then 
 		self:CheckAuras()
 
 	elseif (event == "ZONE_CHANGED_NEW_AREA") then 
@@ -459,8 +442,7 @@ LibFader.OnUpdate = function(self, elapsed)
 	if self.FORCED
 	or Data.inCombat 
 	or Data.hasTarget 
-	or Data.hasFocus 
-	or Data.inGroup 
+	or (Data.inGroup and Data.disableGroupFade)
 	or (Data.inInstance and Data.disableInstanceFade)
 	or Data.lowHealth 
 	or Data.lowPower 
@@ -533,7 +515,7 @@ LibFader:RegisterEvent("PLAYER_REGEN_DISABLED", "OnEvent")
 LibFader:RegisterEvent("PLAYER_REGEN_ENABLED", "OnEvent") 
 LibFader:RegisterEvent("PLAYER_TARGET_CHANGED", "OnEvent") 
 LibFader:RegisterEvent("GROUP_ROSTER_UPDATE", "OnEvent") 
-LibFader:RegisterUnitEvent("UNIT_AURA", "OnEvent", "player")
 LibFader:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", "OnEvent", "player") 
 LibFader:RegisterUnitEvent("UNIT_POWER_FREQUENT", "OnEvent", "player") 
 LibFader:RegisterUnitEvent("UNIT_DISPLAYPOWER", "OnEvent", "player") 
+LibFader:RegisterMessage("CG_UNIT_AURA", "OnEvent")
