@@ -4,7 +4,7 @@ if (not Core) then
 	return 
 end
 
-local Module = Core:NewModule("NamePlates", "LibEvent", "LibNamePlate", "LibDB", "LibMenu", "LibFrame")
+local Module = Core:NewModule("NamePlates", "LibEvent", "LibNamePlate", "LibDB", "LibFrame")
 Module:SetIncompatible("Kui_Nameplates")
 Module:SetIncompatible("NeatPlates")
 Module:SetIncompatible("Plater")
