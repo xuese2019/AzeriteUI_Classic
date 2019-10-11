@@ -1,5 +1,5 @@
 local LibZone = CogWheel:Set("LibZone", 1)
-if (not LibZone) then	
+if (not LibZone) then
 	return
 end
 
