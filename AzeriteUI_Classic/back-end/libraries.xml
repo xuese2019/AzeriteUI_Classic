@@ -26,11 +26,11 @@
 <Script file='libraries\switcher.lua'/>
 <Script file='libraries\widgetcontainer.lua'/>
 
-<!-- core libs III, require core libs II -->
+<!-- data libs, require core libs I-II -->
 <Script file='libraries\aura.lua'/>
 <Script file='libraries\cast.lua'/>
 
-<!-- utility libs, require core libs I-III -->
+<!-- utility libs, require core libs and data libs -->
 <Script file='libraries\chatbubble.lua'/>
 <Script file='libraries\chatframe.lua'/>
 <Script file='libraries\fader.lua'/>
@@ -43,12 +43,14 @@
 <!-- tooltip lib, requires widget libs -->
 <Script file='libraries\tooltip.lua'/>
 
+<!-- advanced utility libs, requires core libs and tooltip lib -->
+<Script file='libraries\minimap.lua'/>
+<Script file='libraries\mover.lua'/>
+<Script file='libraries\unitframe.lua'/>
+
 <!-- advanced media widget libs, require tooltip lib -->
 <Script file='libraries\actionbutton.lua'/>
 <Script file='libraries\bagbutton.lua'/>
-<Script file='libraries\minimap.lua'/>
-<Script file='libraries\mover.lua'/>
 <Script file='libraries\nameplates.lua'/>
-<Script file='libraries\unitframe.lua'/>
 
 </Ui>
