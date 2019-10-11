@@ -1,4 +1,4 @@
-local LibCast = CogWheel:Set("LibAura", 1)
+local LibCast = CogWheel:Set("LibAura", -1)
 if (not LibCast) then
 	return
 end
@@ -46,11 +46,6 @@ local check = function(value, num, ...)
 end
 
 local embedMethods = {
-	GetTime = true, 
-	GetLocalTime = true, 
-	GetServerTime = true, 
-	ComputeMilitaryHours = true, 
-	ComputeStandardHours = true
 }
 
 LibCast.Embed = function(self, target)
