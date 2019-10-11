@@ -1,20 +1,36 @@
-local LibBonusQuest = CogWheel:Set("LibBonusQuest", 3)
-if (not LibBonusQuest) then	
+local LibCast = CogWheel:Set("LibAura", 1)
+if (not LibCast) then
 	return
 end
+
+local LibMessage = CogWheel("LibMessage")
+assert(LibMessage, "LibCast requires LibMessage to be loaded.")
+
+local LibEvent = CogWheel("LibEvent")
+assert(LibEvent, "LibCast requires LibEvent to be loaded.")
+
+local LibFrame = CogWheel("LibFrame")
+assert(LibFrame, "LibCast requires LibFrame to be loaded.")
+
+LibMessage:Embed(LibCast)
+LibEvent:Embed(LibCast)
+LibFrame:Embed(LibCast)
 
 -- Lua API
 local _G = _G
 local assert = assert
+local date = date
 local debugstack = debugstack
 local error = error
 local pairs = pairs
 local select = select
 local string_join = string.join
 local string_match = string.match
+local tonumber = tonumber
 local type = type
 
-LibBonusQuest.embeds = LibBonusQuest.embeds or {}
+-- Library registries
+LibCast.embeds = LibCast.embeds or {}
 
 -- Syntax check 
 local check = function(value, num, ...)
@@ -29,13 +45,15 @@ local check = function(value, num, ...)
 	error(("Bad argument #%.0f to '%s': %s expected, got %s"):format(num, name, types, type(value)), 3)
 end
 
-
-
--- Module embedding
 local embedMethods = {
+	GetTime = true, 
+	GetLocalTime = true, 
+	GetServerTime = true, 
+	ComputeMilitaryHours = true, 
+	ComputeStandardHours = true
 }
 
-LibBonusQuest.Embed = function(self, target)
+LibCast.Embed = function(self, target)
 	for method in pairs(embedMethods) do
 		target[method] = self[method]
 	end
@@ -44,6 +62,6 @@ LibBonusQuest.Embed = function(self, target)
 end
 
 -- Upgrade existing embeds, if any
-for target in pairs(LibBonusQuest.embeds) do
-	LibBonusQuest:Embed(target)
+for target in pairs(LibCast.embeds) do
+	LibCast:Embed(target)
 end
