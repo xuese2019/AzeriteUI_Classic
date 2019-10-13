@@ -1617,31 +1617,10 @@ local StylePartyFrame = function(self, unit, id, Layout, ...)
 	if Layout.UseAuras then 
 		local auras = content:CreateFrame("Frame")
 		auras:Place(unpack(Layout.AuraFramePlace))
-		auras:SetSize(unpack(Layout.AuraFrameSize)) -- auras will be aligned in the available space, this size gives us 8x1 auras
-		auras.auraSize = Layout.AuraSize -- size of the aura. assuming squares. 
-		auras.spacingH = Layout.AuraSpaceH -- horizontal/column spacing between buttons
-		auras.spacingV = Layout.AuraSpaceV -- vertical/row spacing between aura buttons
-		auras.growthX = Layout.AuraGrowthX -- auras grow to the left
-		auras.growthY = Layout.AuraGrowthY -- rows grow downwards (we just have a single row, though)
-		auras.maxVisible = Layout.AuraMax -- when set will limit the number of buttons regardless of space available
-		auras.maxBuffs = Layout.AuraMaxBuffs -- maximum number of visible buffs
-		auras.maxDebuffs = Layout.AuraMaxDebuffs -- maximum number of visible debuffs
-		auras.debuffsFirst = Layout.AuraDebuffsFirst -- show debuffs before buffs
-		auras.showCooldownSpiral = Layout.ShowAuraCooldownSpirals -- don't show the spiral as a timer
-		auras.showCooldownTime = Layout.ShowAuraCooldownTime -- show timer numbers
-		auras.auraFilterString = Layout.auraFilterFunc -- general aura filter, only used if the below aren't here
-		auras.buffFilterString = Layout.AuraBuffFilter -- buff specific filter passed to blizzard API calls
-		auras.debuffFilterString = Layout.AuraDebuffFilter -- debuff specific filter passed to blizzard API calls
-		auras.auraFilterFunc = Layout.auraFilterFuncFunc -- general aura filter function, called when the below aren't there
-		auras.buffFilterFunc = Layout.buffFilterFuncFunc -- buff specific filter function
-		auras.debuffFilterFunc = Layout.debuffFilterFuncFunc -- debuff specific filter function
-		auras.tooltipDefaultPosition = Layout.AuraTooltipDefaultPosition
-		auras.tooltipPoint = Layout.AuraTooltipPoint
-		auras.tooltipAnchor = Layout.AuraTooltipAnchor
-		auras.tooltipRelPoint = Layout.AuraTooltipRelPoint
-		auras.tooltipOffsetX = Layout.AuraTooltipOffsetX
-		auras.tooltipOffsetY = Layout.AuraTooltipOffsetY
-			
+		auras:SetSize(unpack(Layout.AuraFrameSize))
+		for property,value in pairs(Layout.AuraProperties) do 
+			auras[property] = value
+		end
 		self.Auras = auras
 		self.Auras.PostCreateButton = PostCreateAuraButton -- post creation styling
 		self.Auras.PostUpdateButton = PostUpdateAuraButton -- post updates when something changes (even timers)
@@ -3810,7 +3789,7 @@ UnitFrameParty.OnInit = function(self)
 	self.frame:SetFrameRef("HealerModeAnchor", self.frame.healerAnchor)
 
 	self.frame:Execute(SECURE.FrameTable_Create)
-	--self.frame:SetAttribute("inHealerMode", self:GetConfig("Core").enableHealerMode)
+	self.frame:SetAttribute("inHealerMode", self:GetConfig("Core").enableHealerMode)
 	self.frame:SetAttribute("sortFrames", SECURE.Party_SortFrames:format(
 		self.layout.GroupAnchor, 
 		self.layout.GrowthX, 
