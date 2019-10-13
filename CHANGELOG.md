@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.58-RC] 2019-10-13
+- Files have been added, remember to restart the game client! 
+
+### Changed
+- Added some slight filtering to party frame auras to make it easier for healers to heal. 
+
+### Fixed
+- Group frames should now spawn in the correct place after a reload when healer layout was enabled previously. 
+
 ## [1.0.57-RC] 2019-10-09
 ### Added
 - Now compatible with RealMobHealth. 
