@@ -401,6 +401,24 @@ end
 
 auraFilters.party = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
 
+	local timeLeft 
+	if (expirationTime and expirationTime > 0) then 
+		timeLeft = expirationTime - GetTime()
+	end
+	if (isBuff) then 
+		if (timeLeft and (timeLeft > 0) and (timeLeft < 30)) then
+			return true, nil, not showUnfilteredSpellID
+		else 
+			return nil, nil, not showUnfilteredSpellID
+		end
+	else 
+		if (timeLeft and (timeLeft > 0) and (timeLeft < 601)) then 
+			return true, nil, not showUnfilteredSpellID
+		else
+			return nil, nil, not showUnfilteredSpellID
+		end
+	end 
+
 end
 
 auraFilters.boss = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
