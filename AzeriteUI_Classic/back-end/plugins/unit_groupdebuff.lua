@@ -162,7 +162,7 @@ local Aura_UpdateTimer = function(element, elapsed)
 				Aura_SetCooldownTimer(element, 0,0)
 				
 				element.Time:SetText("")
-				element:ForceUpdate()				
+				element:ForceUpdate()
 
 				if (element:IsShown() and element.PostUpdateTimer) then
 					element:PostUpdateTimer()
