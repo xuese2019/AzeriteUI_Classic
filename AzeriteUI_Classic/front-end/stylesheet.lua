@@ -51,6 +51,19 @@ local MenuButtonFontSize, MenuButtonW, MenuButtonH = 14, 300, 50
 -- Generic single colored texture
 local BLANK_TEXTURE = [[Interface\ChatFrame\ChatFrameBackground]]
 
+-- Use a metatable to dynamically create the colors
+local spellTypeColor = setmetatable({
+	["Custom"] = { 1, .9294, .7607 }, -- same color I used for "unknown" zone names (instances, bgs, contested zones on pve realms)
+--	["none"] = { 0, 0, 0 }
+}, { __index = function(tbl,key)
+		local v = DebuffTypeColor[key]
+		if v then
+			tbl[key] = { v.r, v.g, v.b }
+			return tbl[key]
+		end
+	end
+})
+
 ------------------------------------------------
 -- Utility Functions
 ------------------------------------------------
@@ -3527,6 +3540,19 @@ local UnitFrameParty = setmetatable({
 				rz:Hide()
 				us:Hide()
 				hv:Hide()
+
+				-- Colorize the border
+				if (element.filter == "HARMFUL") then 
+					local color = element.debuffType and spellTypeColor[element.debuffType]
+					if color then 
+						element.Border:SetBackdropBorderColor(color[1], color[2], color[3])
+					else
+						element.Border:SetBackdropBorderColor(Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3)
+					end
+				else
+					element.Border:SetBackdropBorderColor(Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3)
+				end
+
 			else 
 				-- Display lower priority elements as needed 
 				if rc.status then 
@@ -3613,33 +3639,31 @@ local UnitFrameParty = setmetatable({
 			PortraitForegroundColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
 
 	UseAuras = true, 
-		AuraFrameSize = { 30*3 + 2*5, 30  }, 
-		AuraFramePlace = { "BOTTOM", 0, -(30 + 16) },
-		AuraSize = 30, 
-		AuraSpaceH = 4, 
-		AuraSpaceV = 4, 
-		AuraGrowthX = "RIGHT", 
-		AuraGrowthY = "DOWN", 
-		AuraMax = 3, 
-		AuraMaxBuffs = nil, 
-		AuraMaxDebuffs = nil, 
-		AuraDebuffsFirst = false, 
-		ShowAuraCooldownSpirals = false, 
-		ShowAuraCooldownTime = true, 
-		AuraFilter = nil, 
-		AuraBuffFilter = "PLAYER HELPFUL", 
-		AuraDebuffFilter = "PLAYER HARMFUL", 
-		AuraFilterFunc = GetAuraFilterFunc("nameplate"), 
-		BuffFilterFunc = GetAuraFilterFunc("nameplate"), 
-		DebuffFilterFunc = nil, 
-		AuraDisableMouse = true, -- don't allow mouse input here
-		AuraTooltipDefaultPosition = nil, 
-		--AuraTooltipPoint = "BOTTOMLEFT", 
-		--AuraTooltipAnchor = nil, 
-		--AuraTooltipRelPoint = "TOPLEFT", 
-		--AuraTooltipOffsetX = -8, 
-		--AuraTooltipOffsetY = -16,
 
+		AuraProperties = {
+			growthX = "RIGHT", 
+			growthY = "DOWN", 
+			spacingH = 4, 
+			spacingV = 4, 
+			auraSize = 30, auraWidth = nil, auraHeight = nil, 
+			maxVisible = 6, maxBuffs = nil, maxDebuffs = nil, 
+			filter = nil, filterBuffs = "PLAYER HELPFUL", filterDebuffs = "PLAYER HARMFUL", 
+			func = nil, funcBuffs = GetAuraFilterFunc("party"), funcDebuffs = GetAuraFilterFunc("party"), 
+			debuffsFirst = false, 
+			disableMouse = false, 
+			showSpirals = false, 
+			showDurations = true, 
+			showLongDurations = true,
+			tooltipDefaultPosition = false, 
+			tooltipPoint = "TOPRIGHT",
+			tooltipAnchor = nil,
+			tooltipRelPoint = "BOTTOMRIGHT",
+			tooltipOffsetX = -8,
+			tooltipOffsetY = -16
+		},
+
+		AuraFrameSize = { 30*3 + 2*5, 30*2 + 5  }, 
+		AuraFramePlace = { "BOTTOM", 0, -(30*2 + 5 + 16) },
 		AuraIconPlace = { "CENTER", 0, 0 },
 		AuraIconSize = { 30 - 6, 30 - 6 },
 		AuraIconTexCoord = { 5/64, 59/64, 5/64, 59/64 }, -- aura icon tex coords
@@ -3655,19 +3679,6 @@ local UnitFrameParty = setmetatable({
 		AuraBorderBackdropBorderColor = { Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3 },
 	
 }, { __index = Template_TinyFrame })
-
--- Use a metatable to dynamically create the colors
-local spellTypeColor = setmetatable({
-	["Custom"] = { 1, .9294, .7607 }, -- same color I used for "unknown" zone names (instances, bgs, contested zones on pve realms)
---	["none"] = { 0, 0, 0 }
-}, { __index = function(tbl,key)
-		local v = DebuffTypeColor[key]
-		if v then
-			tbl[key] = { v.r, v.g, v.b }
-			return tbl[key]
-		end
-	end
-})
 
 -- Raid
 local UnitFrameRaid = setmetatable({
