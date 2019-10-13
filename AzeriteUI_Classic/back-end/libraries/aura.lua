@@ -1,4 +1,4 @@
-local LibAura = CogWheel:Set("LibAura", 12)
+local LibAura = CogWheel:Set("LibAura", 16)
 if (not LibAura) then	
 	return
 end
@@ -37,8 +37,14 @@ local tonumber = tonumber
 local type = type
 
 -- WoW API
+local CombatLogGetCurrentEventInfo = _G.CombatLogGetCurrentEventInfo
+local GetComboPoints = _G.GetComboPoints
 local GetSpellInfo = _G.GetSpellInfo
+local GetTime = _G.GetTime
+local IsPlayerSpell = _G.IsPlayerSpell
 local UnitAura = _G.UnitAura
+local UnitClass = _G.UnitClass
+local UnitGUID = _G.UnitGUID
 local UnitIsUnit = _G.UnitIsUnit
 
 -- WoW Constants
@@ -47,19 +53,34 @@ local DEBUFF_MAX_DISPLAY = _G.DEBUFF_MAX_DISPLAY
 
 -- Library registries
 LibAura.embeds = LibAura.embeds or {}
-LibAura.auraWatches = LibAura.auraWatches or {} -- currently tracked units
-LibAura.auras = LibAura.auras or {} -- static aura flag cache
-LibAura.cache = LibAura.cache or {} -- current unit aura cache
-LibAura.infoFlags = LibAura.infoFlags or {} -- static info flags about the auras
-LibAura.userFlags = LibAura.userFlags or {} -- added user flags about the auras
-LibAura.frame = LibAura.frame or LibAura:CreateFrame("Frame") -- frame tracking events and updates
+LibAura.infoFlags = LibAura.infoFlags or {} -- static library info flags about the auras
+LibAura.auraFlags = LibAura.auraFlags or {} -- static library aura flag cache
+LibAura.userFlags = LibAura.userFlags or {} -- static user/module flag cache
+LibAura.auraCache = LibAura.auraCache or {} -- dynamic unit aura cache
+LibAura.auraCacheByGUID = LibAura.auraCacheByGUID or {} -- dynamic aura info from the combat log
+LibAura.auraWatches = LibAura.auraWatches or {} -- dynamic list of tracked units
+
+-- Frame tracking events and updates
+LibAura.frame = LibAura.frame or LibAura:CreateFrame("Frame") 
 
 -- Shortcuts
-local Units = LibAura.auraWatches
-local Auras = LibAura.auras
-local Cache = LibAura.cache
-local InfoFlags = LibAura.infoFlags
-local UserFlags = LibAura.userFlags
+local InfoFlags = LibAura.infoFlags -- static library info flags about the auras
+local AuraFlags = LibAura.auraFlags -- static library aura flag cache
+local UserFlags = LibAura.userFlags --- static user/module flag cache
+local AuraCache = LibAura.auraCache -- dynamic unit aura cache
+local AuraCacheByGUID = LibAura.auraCacheByGUID -- dynamic aura info from the combat log
+local UnitHasAuraWatch = LibAura.auraWatches -- dynamic list of tracked units
+
+-- WoW Constants
+local COMBATLOG_OBJECT_TYPE_PLAYER = _G.COMBATLOG_OBJECT_TYPE_PLAYER
+local COMBATLOG_OBJECT_REACTION_FRIENDLY = _G.COMBATLOG_OBJECT_REACTION_FRIENDLY
+
+-- Library Constants
+local DRResetTime = 18.4
+local DRMultipliers = { .5, .25, 0 }
+local playerGUID = UnitGUID("player")
+local _, playerClass = UnitClass("player")
+local sunderArmorName = GetSpellInfo(11597)
 
 -- Utility Functions
 --------------------------------------------------------------------------
@@ -114,6 +135,15 @@ local parseFilter = function(filter)
 						.. (not_cancelable and " NOT_CANCELABLE" or "") 
 end 
 
+local comboCache, comboCacheOld = 0,0
+local GetComboPointsCached = function()
+	if (comboCache) then 
+		return (comboCacheOld > comboCache) and comboCacheOld or comboCache
+	else 
+		return GetComboPoints("player", "target") 
+	end
+end
+
 -- Aura tracking frame and event handling
 --------------------------------------------------------------------------
 local Frame = LibAura.frame
@@ -127,25 +157,91 @@ local UnregisterEvent = Frame_MT.__index.UnregisterEvent
 local UnregisterAllEvents = Frame_MT.__index.UnregisterAllEvents
 
 Frame.OnEvent = function(self, event, unit, ...)
+	if (event == "PLAYER_TARGET_CHANGED") then 
+		return Frame:OnEvent("UNIT_POWER_UPDATE", "player", "COMBO_POINTS")
 
-	-- don't bother caching up anything we haven't got a registered aurawatch or cache for
-	if (not Units[unit]) then 
-		return 
+	elseif (event == "UNIT_POWER_UPDATE") then 
+		local powerType = ... 
+		if (powerType == "COMBO_POINTS") then 
+			comboCacheOld = comboCache
+			comboCache = GetComboPoints(unit, "target")
+		end 
+
+	elseif (event == "UNIT_SPELLCAST_SUCCEEDED") then 
+		local castID, spellID = ...
+
+	elseif (event == "UNIT_AURA") then 
+		-- don't bother caching up anything we haven't got a registered aurawatch or cache for
+		if (not UnitHasAuraWatch[unit]) then 
+			return 
+		end 
+
+		-- retrieve the unit's aura cache, bail out if none has been queried before
+		local cache = AuraCache[unit]
+		if (not cache) then 
+			return 
+		end 
+
+		-- refresh all the registered filters
+		for filter in pairs(cache) do 
+			LibAura:CacheUnitAurasByFilter(unit, filter)
+		end 
+
+		-- Send a message to anybody listening
+		LibAura:SendMessage("CG_UNIT_AURA", unit)
+
+	elseif (event == "COMBAT_LOG_EVENT_UNFILTERED") then 
+		return Frame:OnEvent("CLEU", CombatLogGetCurrentEventInfo())
+
+	elseif (event == "CLEU") then 
+
+		local timestamp, eventType, hideCaster, 
+			sourceGUID, sourceName, sourceFlags, sourceRaidFlags, 
+			destGUID, destName, destFlags, destRaidFlags,
+			spellID, arg2, arg3, arg4, arg5 = ...
+
+		-- We're only interested in who the aura is applied to.
+		local cacheByGUID
+		local cacheGUID = destGUID or sourceGUID
+		if (cacheGUID) then 
+			if (not AuraCacheByGUID[cacheGUID]) then 
+				AuraCacheByGUID[cacheGUID] = {}
+			end
+			cacheByGUID = AuraCacheByGUID[cacheGUID]
+			for i in pairs(cacheByGUID) do 
+				cacheByGUID[i] = nil
+			end
+		end 
+
+		if (cacheByGUID) then 
+			cacheByGUID.timestamp = timestamp
+			cacheByGUID.eventType = eventType
+			cacheByGUID.sourceFlags = sourceFlags
+			cacheByGUID.sourceRaidFlags = sourceRaidFlags
+			cacheByGUID.destFlags = destFlags
+			cacheByGUID.destRaidFlags = destRaidFlags
+			cacheByGUID.isCastByPlayer = sourceGUID == playerGUID
+			cacheByGUID.unitCaster = sourceName
+		end
+
+		if (spellName == sunderArmorName) then
+			if (eventType == "SPELL_CAST_SUCCESS") then
+				eventType = "SPELL_AURA_REFRESH"
+				auraType = "DEBUFF"
+			end
+		end
+	
+		if ((auraType == "BUFF") or (auraType == "DEBUFF")) then
+		end
+
+		if (eventType == "SPELL_INTERRUPT") then
+		end
+
+		if (eventType == "UNIT_DIED") then
+			-- clear cache
+		end
+
 	end 
-
-	-- retrieve the unit's aura cache, bail out if none has been queried before
-	local cache = Cache[unit]
-	if (not cache) then 
-		return 
-	end 
-
-	-- refresh all the registered filters
-	for filter in pairs(cache) do 
-		LibAura:CacheUnitAurasByFilter(unit, filter)
-	end 
-
-	-- Send a message to anybody listening
-	LibAura:SendMessage("CG_UNIT_AURA", unit)
 end
 
 LibAura.CacheUnitBuffsByFilter = function(self, unit, filter)
@@ -154,6 +250,16 @@ end
 
 LibAura.CacheUnitDebuffsByFilter = function(self, unit, filter)
 	return self:CacheUnitAurasByFilter(unit, "HARMFUL" .. (filter or ""))
+end 
+
+local localUnits = { player = true, pet = true }
+for i = 1,4 do 
+	localUnits["party"..i] = true 
+	localUnits["party"..i.."pet"] = true 
+end 
+for i = 2,40 do 
+	localUnits["raid"..i] = true 
+	localUnits["raid"..i.."pet"] = true 
 end 
 
 LibAura.CacheUnitAurasByFilter = function(self, unit, filter)
@@ -165,20 +271,25 @@ LibAura.CacheUnitAurasByFilter = function(self, unit, filter)
 
 	-- Enable the aura watch for this unit and filter if it hasn't been already
 	-- This also creates the relevant tables for us. 
-	if (not Units[unit]) or (not Cache[unit][filter]) then 
+	if (not UnitHasAuraWatch[unit]) or (not AuraCache[unit][filter]) then 
 		LibAura:RegisterAuraWatch(unit, filter)
 	end 
 
 	-- Retrieve the aura cache for this unit and filter
-	local cache = Cache[unit][filter]
+	local cache = AuraCache[unit][filter]
 
 	-- Figure out if this is a unit we can get more info about
 	local queryUnit
-	if (UnitIsUnit(unit, "player")) then 
-		queryUnit = "player"
-	elseif (UnitIsUnit(unit, "pet")) then 
-		queryUnit = "pet"
+	if (UnitInParty(unit) or UnitInRaid(unit)) then 
+		for localUnit in pairs(localUnits) do 
+			if ((unit ~= localUnit) and (UnitIsUnit(unit, localUnit))) then 
+				queryUnit = localUnit
+			end
+		end
 	end
+
+	local unitGUID = UnitGUID(queryUnit or unit)
+	local auraCacheByGUID = AuraCacheByGUID[unitGUID]
 
 	local counter, limit = 0, string_match(filter, "HARMFUL") and DEBUFF_MAX_DISPLAY or BUFF_MAX_DISPLAY
 	for i = 1,limit do 
@@ -218,6 +329,11 @@ LibAura.CacheUnitAurasByFilter = function(self, unit, filter)
 			cache[i] = { name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 }
 		end 
 
+		-- Anything retrieved from the combat log?
+		if (auraCacheByGUID and auraCacheByGUID[spellId]) then 
+
+		end
+
 		counter = counter + 1
 	end 
 
@@ -237,17 +353,17 @@ end
 
 -- retrieve a cached filtered aura list for the given unit
 LibAura.GetUnitAuraCacheByFilter = function(self, unit, filter)
-	return Cache[unit] and Cache[unit][filter] or LibAura:CacheUnitAurasByFilter(unit, filter)
+	return AuraCache[unit] and AuraCache[unit][filter] or LibAura:CacheUnitAurasByFilter(unit, filter)
 end
 
 LibAura.GetUnitBuffCacheByFilter = function(self, unit, filter)
 	local realFilter = "HELPFUL" .. (filter or "")
-	return Cache[unit] and Cache[unit][realFilter] or LibAura:CacheUnitAurasByFilter(unit, realFilter)
+	return AuraCache[unit] and AuraCache[unit][realFilter] or LibAura:CacheUnitAurasByFilter(unit, realFilter)
 end
 
 LibAura.GetUnitDebuffCacheByFilter = function(self, unit, filter)
 	local realFilter = "HARMFUL" .. (filter or "")
-	return Cache[unit] and Cache[unit][realFilter] or LibAura:CacheUnitAurasByFilter(unit, realFilter)
+	return AuraCache[unit] and AuraCache[unit][realFilter] or LibAura:CacheUnitAurasByFilter(unit, realFilter)
 end
 
 LibAura.GetUnitAura = function(self, unit, auraID, filter)
@@ -278,29 +394,38 @@ LibAura.RegisterAuraWatch = function(self, unit, filter)
 	check(unit, 1, "string")
 
 	-- set the tracking flag for this unit
-	Units[unit] = true
+	UnitHasAuraWatch[unit] = true
 
 	-- create the relevant tables
 	-- this is needed for the event handler to respond 
 	-- to blizz events and cache up the relevant auras.
-	if (not Cache[unit]) then 
-		Cache[unit] = {}
+	if (not AuraCache[unit]) then 
+		AuraCache[unit] = {}
 	end 
-	if (not Cache[unit][filter]) then 
-		Cache[unit][filter] = {}
+	if (not AuraCache[unit][filter]) then 
+		AuraCache[unit][filter] = {}
 	end 
 
-	-- register the main event with our event frame, if it hasn't been already
+	-- register the main events with our event frame, if they haven't been already
 	if (not IsEventRegistered(Frame, "UNIT_AURA")) then
 		RegisterEvent(Frame, "UNIT_AURA")
 	end
+	if (not LibAura.isTracking) then 
+		RegisterEvent(Frame, "UNIT_SPELLCAST_SUCCEEDED")
+		RegisterEvent(Frame, "COMBAT_LOG_EVENT_UNFILTERED")
+		if (playerClass == "ROGUE") then
+			RegisterEvent(Frame, "PLAYER_TARGET_CHANGED")
+			RegisterUnitEvent(Frame, "UNIT_POWER_UPDATE", "player")
+		end
+		LibAura.isTracking = true
+	end 
 end
 
 LibAura.UnregisterAuraWatch = function(self, unit, filter)
 	check(unit, 1, "string")
 
 	-- clear the tracking flag for this unit
-	Units[unit] = false
+	UnitHasAuraWatch[unit] = false
 
 	-- check if anything is still tracked
 	for unit,tracked in pairs(Units) do 
@@ -310,7 +435,16 @@ LibAura.UnregisterAuraWatch = function(self, unit, filter)
 	end 
 
 	-- if we made it this far, we're not tracking anything
-	UnregisterEvent(Frame, "UNIT_AURA")
+	if (LibAura.isTracking) then 
+		UnregisterEvent(Frame, "UNIT_AURA")
+		UnregisterEvent(Frame, "UNIT_SPELLCAST_SUCCEEDED")
+		UnregisterEvent(Frame, "COMBAT_LOG_EVENT_UNFILTERED")
+		if (playerClass == "ROGUE") then
+			UnregisterEvent(Frame, "PLAYER_TARGET_CHANGED")
+			UnregisterEvent(Frame, "UNIT_POWER_UPDATE")
+		end
+		LibAura.isTracking = nil
+	end 
 end
 
 --------------------------------------------------------------------------
@@ -334,14 +468,14 @@ end
 LibAura.HasAuraInfoFlags = function(self, spellID, flags)
 	-- Not verifying input types as we don't want the extra function calls on 
 	-- something that might be called multiple times each second. 
-	return Auras[spellID] and (bit_band(Auras[spellID], flags) ~= 0)
+	return AuraFlags[spellID] and (bit_band(AuraFlags[spellID], flags) ~= 0)
 end
 
 -- Retrieve the current info flags for the aura, or nil if none are set
 LibAura.GetAuraInfoFlags = function(self, spellID)
 	-- Not verifying input types as we don't want the extra function calls on 
 	-- something that might be called multiple times each second. 
-	return Auras[spellID]
+	return AuraFlags[spellID]
 end
 
 --------------------------------------------------------------------------
@@ -416,7 +550,6 @@ LibAura.RemoveAuraUserFlags = function(self, spellID, removalFlags)
 		UserFlags[self][spellID] = nil
 	end 
 end 
-
 
 local spellRanks = table_concat(
 {
@@ -829,11 +962,11 @@ local IsTaunt = Taunt
 -- Add flags to or create the cache entry
 -- This is to avoid duplicate entries removing flags
 local AddFlags = function(spellID, flags)
-	if (not Auras[spellID]) then 
-		Auras[spellID] = flags
+	if (not AuraFlags[spellID]) then 
+		AuraFlags[spellID] = flags
 		return 
 	end 
-	Auras[spellID] = bit_bor(Auras[spellID], flags)
+	AuraFlags[spellID] = bit_bor(AuraFlags[spellID], flags)
 end
 
 -- Druid (Balance)

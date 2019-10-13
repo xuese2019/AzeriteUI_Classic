@@ -87,7 +87,8 @@ end
 
 -- Cast Databases
 --------------------------------------------------------------------------
--- Spell casts. Storing spellID to retrieve spell icon later on. 
+-- Spell casts
+-- Storing spellID to retrieve spell icon later on. 
 do 
 	Set(Casts, 25262, 25262) -- Abomination Spit
 	Set(Casts,  3979,  3979) -- Accurate Scope
@@ -2598,7 +2599,7 @@ do
 	Set(Casts, 24422, 24422) -- Zandalar Signet of Might
 	Set(Casts, 24421, 24421) -- Zandalar Signet of Mojo
 	Set(Casts, 24420, 24420) -- Zandalar Signet of Serenity
-end 
+end
 
 -- Channeled spells
 -- CLEU doesn't return cast time for these, nor icon, 
@@ -2626,7 +2627,7 @@ do
 	Set(Channeled, 10797, {  6.0, 10797 }) -- Starshards
 	Set(Channeled,   740, {  9.5,   740 }) -- Tranquility (Druid)
 	Set(Channeled,  1510, {  6.0,  1510 }) -- Volley (Hunter)
-end 
+end
 
 -- Spells that increases the cast time of other spells
 do
@@ -2649,7 +2650,8 @@ do
 	Set(CastIncrease, 22247, 80) -- Suppression Aura (NPC)
 	Set(CastIncrease,  7127, 20) -- Wavering Will (NPC)
 	Set(CastIncrease, 28732, 25) -- Widow's Embrace (NPC)
-end 
+end
+
 -- Spells that have talents to reduce their cast time
 -- Values here indicate the reduction
 do
@@ -2674,7 +2676,7 @@ do
 	Set(CastDecrease,   712, 4  ) -- Summon Succubus
 	Set(CastDecrease,   697, 4  ) -- Summon Voidwalker
 	Set(CastDecrease,  5176, 0.5) -- Wrath
-end 
+end
 
 -- Crowd control that causes casts to be canceled
 -- (no CLEU event fires for this)
@@ -2722,7 +2724,7 @@ do
 	Set(CrowdControl, 24259, 1) -- Spell Lock
 	Set(CrowdControl, 20549, 1) -- War Stomp
 	Set(CrowdControl, 19386, 1) -- Wyvern Sting
-end 
+end
 
 -- Items that causes casts to be canceled
 -- (no CLEU event fires for this)
