@@ -87,7 +87,7 @@ LibTooltip.numTooltips = LibTooltip.numTooltips or 0 -- current number of toolti
 LibTooltip.blizzardBackdrops = LibTooltip.blizzardBackdrops or {}
 
 -- Inherit the template too, we override the older methods farther down anyway
-LibTooltip.tooltipTemplate = LibTooltip.tooltipTemplate or LibTooltip:CreateFrame("GameTooltip", "CG_TooltipTemplate", "UICenter")
+LibTooltip.tooltipTemplate = LibTooltip.tooltipTemplate or LibTooltip:CreateFrame("GameTooltip", "GP_TooltipTemplate", "UICenter")
 
 -- Shortcuts
 local Defaults = LibTooltip.defaults
@@ -2361,7 +2361,7 @@ LibTooltip.CreateTooltip = function(self, name)
 	LibTooltip.numTooltips = LibTooltip.numTooltips + 1
 
 	-- Note that the global frame name is unrelated to the tooltip name requested by the modules.
-	local tooltipName = "CG_GameTooltip_"..LibTooltip.numTooltips
+	local tooltipName = "GP_GameTooltip_"..LibTooltip.numTooltips
 
 	local tooltip = setmetatable(LibTooltip:CreateFrame("Frame", tooltipName, "UICenter"), Tooltip_MT)
 	tooltip:Hide() -- keep it hidden while setting it up

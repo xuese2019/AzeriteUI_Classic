@@ -738,7 +738,7 @@ end
 -- This is where a name plate is first created, 
 -- but it hasn't been assigned a unit (Legion) or shown yet.
 LibNamePlate.CreateNamePlate = function(self, baseFrame, name)
-	local plate = setmetatable(self:CreateFrame("Frame", "CG_" .. (name or baseFrame:GetName()), WorldFrame), NamePlate_MT)
+	local plate = setmetatable(self:CreateFrame("Frame", "GP_" .. (name or baseFrame:GetName()), WorldFrame), NamePlate_MT)
 	plate.frameLevel = FRAMELEVEL_CURRENT -- storing the framelevel
 	plate.targetAlpha = 0
 	plate.currentAlpha = 0
@@ -964,7 +964,7 @@ LibNamePlate.OnEvent = function(self, event, ...)
 	elseif (event == "UI_SCALE_CHANGED") then
 		self:UpdateAllScales()
 
-	elseif (event == "CG_CVAR_UPDATED") then 
+	elseif (event == "GP_CVAR_UPDATED") then 
 		if (name and ENFORCED_CVARS[name]) then 
 			self:EnforceConsoleVars()
 		end 
@@ -1130,7 +1130,7 @@ LibNamePlate.Enable = function(self)
 
 	-- These we will enforce 
 	self:EnforceConsoleVars()
-	self:SetSecureHook("SetCVar", "OnEvent", "CG_CVAR_UPDATED")
+	self:SetSecureHook("SetCVar", "OnEvent", "GP_CVAR_UPDATED")
 
 	self.enabled = true
 end 

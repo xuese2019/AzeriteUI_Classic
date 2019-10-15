@@ -64,7 +64,7 @@ local DoesSpellExist = _G.C_Spell.DoesSpellExist
 LibTooltipScanner.embeds = LibTooltipScanner.embeds or {}
 
 -- Tooltip used for scanning
-LibTooltipScanner.scannerName = LibTooltipScanner.scannerName or "CG_TooltipScanner"
+LibTooltipScanner.scannerName = LibTooltipScanner.scannerName or "GP_TooltipScanner"
 LibTooltipScanner.scannerTooltip = LibTooltipScanner.scannerTooltip 
 								or CreateFrame("GameTooltip", LibTooltipScanner.scannerName, WorldFrame, "GameTooltipTemplate")
 

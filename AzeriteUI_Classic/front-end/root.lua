@@ -131,7 +131,7 @@ Core.IsModeEnabled = function(self, modeName)
 	-- We do however use our standard mode API so for other modules 
 	-- to be able to easily query if this fake mode is enabled. 
 	if (modeName == "healerMode") then 
-		return -- self.db.enableHealerMode 
+		return self.db.enableHealerMode 
 
 	-- This one IS a mode. 
 	elseif (modeName == "enableDebugConsole") then
@@ -413,7 +413,7 @@ Core.OnEnable = function(self)
 
 	-- Listen for when the user closes the debugframe directly
 	------------------------------------------------------------------------------------
-	self:RegisterMessage("CG_DEBUG_FRAME_CLOSED", "OnEvent")
+	self:RegisterMessage("GP_DEBUG_FRAME_CLOSED", "OnEvent")
 end 
 
 Core.OnEvent = function(self, event, ...)
@@ -468,7 +468,7 @@ Core.OnEvent = function(self, event, ...)
 			end
 			self:GetFrame("UICenter"):SetAlpha(0)
 		end
-	elseif (event == "CG_DEBUG_FRAME_CLOSED") then 
+	elseif (event == "GP_DEBUG_FRAME_CLOSED") then 
 		-- This fires from the module back-end when 
 		-- the debug console was manually closed by the user.
 		-- We need to update our saved setting here.

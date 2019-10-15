@@ -244,12 +244,12 @@ OnShow = function(self)
 	self:SetSize(targetWidth*relativeScale, targetHeight*relativeScale)
 	self:Place(data.point, "UICenter", data.point, data.offsetX, data.offsetY)
 	
-	LibMover:SendMessage("CG_MOVER_UNLOCKED", self, TargetByMover[self])
+	LibMover:SendMessage("GP_MOVER_UNLOCKED", self, TargetByMover[self])
 end 
 
 -- Called when the mover is hidden
 OnHide = function(self)
-	LibMover:SendMessage("CG_MOVER_LOCKED", self, TargetByMover[self])
+	LibMover:SendMessage("GP_MOVER_LOCKED", self, TargetByMover[self])
 end 
 
 -- Called when the mouse enters the mover
@@ -393,7 +393,7 @@ UpdateScale = function(self)
 	self:Place(data.point, "UICenter", data.point, data.offsetX, data.offsetY)
 
 	-- Fire a message for module callbacks
-	LibMover:SendMessage("CG_MOVER_SCALE_UPDATED", self, TargetByMover[self], data.scale)
+	LibMover:SendMessage("GP_MOVER_SCALE_UPDATED", self, TargetByMover[self], data.scale)
 
 	if self:IsMouseOver() then 
 		OnEnter(self)
@@ -421,7 +421,7 @@ UpdatePosition = function(self)
 	target:Place(targetPoint, "UICenter", targetPoint, targetOffsetX, targetOffsetY)
 
 	-- Fire a message for module callbacks
-	LibMover:SendMessage("CG_MOVER_UPDATED", self, TargetByMover[self], point, offsetX, offsetY)
+	LibMover:SendMessage("GP_MOVER_UPDATED", self, TargetByMover[self], point, offsetX, offsetY)
 
 	if self:IsMouseOver() then 
 		OnEnter(self)
@@ -645,7 +645,7 @@ LibMover.CreateMover = function(self, target)
 	-- Put all mover related data in here
 	MoverData[mover] = {
 		id = numMovers, 
-		name = "CG_Mover_"..numMovers, 
+		name = "GP_Mover_"..numMovers, 
 		enableDragging = true, 
 		enableScaling = true,
 		point = targetPoint, 
@@ -661,7 +661,7 @@ LibMover.CreateMover = function(self, target)
 		defaultOffsetY = targetOffsetY
 	}
 
-	LibMover:SendMessage("CG_MOVER_CREATED", mover, target)
+	LibMover:SendMessage("GP_MOVER_CREATED", mover, target)
 
 	return mover
 end
@@ -712,7 +712,7 @@ LibMover.LockAllMovers = function(self)
 		end 
 	end 
 	if (changed) then 
-		LibMover:SendMessage("CG_MOVERS_LOCKED")
+		LibMover:SendMessage("GP_MOVERS_LOCKED")
 	end 
 end 
 
@@ -731,7 +731,7 @@ LibMover.UnlockAllMovers = function(self)
 		end 
 	end 
 	if (changed) then 
-		LibMover:SendMessage("CG_MOVERS_UNLOCKED")
+		LibMover:SendMessage("GP_MOVERS_UNLOCKED")
 	end
 end 
 
@@ -758,7 +758,7 @@ LibMover.ToggleAllMovers = function(self)
 end 
 
 LibMover.GetMoverTooltip = function(self)
-	return LibMover:GetTooltip("CG_MoverTooltip") or LibMover:CreateTooltip("CG_MoverTooltip")
+	return LibMover:GetTooltip("GP_MoverTooltip") or LibMover:CreateTooltip("GP_MoverTooltip")
 end
 
 LibMover.GetPositionHelper = function(self)

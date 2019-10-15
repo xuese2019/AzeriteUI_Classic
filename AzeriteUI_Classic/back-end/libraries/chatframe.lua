@@ -398,8 +398,8 @@ LibChatWindow.OnEvent = function(self, event, ...)
 	or (event == "UPDATE_FLOATING_CHAT_WINDOWS") 
 	or (event == "UI_SCALE_CHANGED") 
 	or (event == "DISPLAY_SIZE_CHANGED") 
-	or (event == "CG_VIDEO_OPTIONS_APPLY") 
-	or (event == "CG_VIDEO_OPTIONS_OKAY") 
+	or (event == "GP_VIDEO_OPTIONS_APPLY") 
+	or (event == "GP_VIDEO_OPTIONS_OKAY") 
 	or (event == "PLAYER_ENTERING_WORLD") then 
 		self:UpdateChatWindowPositions(true)
 	end 
@@ -408,8 +408,8 @@ LibChatWindow.OnEvent = function(self, event, ...)
 	or (event == "UPDATE_FLOATING_CHAT_WINDOWS") 
 	or (event == "UI_SCALE_CHANGED") 
 	or (event == "DISPLAY_SIZE_CHANGED") 
-	or (event == "CG_VIDEO_OPTIONS_APPLY") 
-	or (event == "CG_VIDEO_OPTIONS_OKAY") 
+	or (event == "GP_VIDEO_OPTIONS_APPLY") 
+	or (event == "GP_VIDEO_OPTIONS_OKAY") 
 	or (event == "PLAYER_ENTERING_WORLD") then 
 		self:UpdateChatWindowSizes(true)
 	end 
@@ -419,7 +419,7 @@ LibChatWindow.OnEvent = function(self, event, ...)
 		self:UpdateChatWindowColors(true)
 	end 
 
-	if (event == "CG_OPEN_TEMPORARY_CHAT_WINDOW") then 
+	if (event == "GP_OPEN_TEMPORARY_CHAT_WINDOW") then 
 		local currentFrame = ...
 		self:HandleWindow(currentFrame, currentFrame.isTemporary, select(2, ...))
 	end 
@@ -439,20 +439,20 @@ LibChatWindow.Enable = function(self)
 	-- fired on client scale, resolution or window size changes
 	self:RegisterEvent("UI_SCALE_CHANGED", "OnEvent")
 	self:RegisterEvent("DISPLAY_SIZE_CHANGED", "OnEvent")
-	self:RegisterMessage("CG_VIDEO_OPTIONS_APPLY", "OnEvent")
-	self:RegisterMessage("CG_VIDEO_OPTIONS_OKAY", "OnEvent")
+	self:RegisterMessage("GP_VIDEO_OPTIONS_APPLY", "OnEvent")
+	self:RegisterMessage("GP_VIDEO_OPTIONS_OKAY", "OnEvent")
 
 	-- forcefully fired upon temporary window creation
-	self:RegisterMessage("CG_OPEN_TEMPORARY_CHAT_WINDOW", "OnEvent")
+	self:RegisterMessage("GP_OPEN_TEMPORARY_CHAT_WINDOW", "OnEvent")
 
 	-- proxy temporary windows creation through our event system
 	-- @return currentFrame, chatType, chatTarget, sourceChatFrame, selectWindow 
 	self:SetSecureHook("FCF_OpenTemporaryWindow", function(...) 
 		local frame = FCF_GetCurrentChatFrame()
 		if frame then 
-			self:SendMessage("CG_OPEN_TEMPORARY_CHAT_WINDOW", frame, ...) 
+			self:SendMessage("GP_OPEN_TEMPORARY_CHAT_WINDOW", frame, ...) 
 		end 
-	end, "CG_OPEN_TEMPORARY_CHAT_WINDOW")
+	end, "GP_OPEN_TEMPORARY_CHAT_WINDOW")
 
 	-- initial positioning
 	self:UpdateChatWindowPositions(true)

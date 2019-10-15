@@ -722,7 +722,7 @@ local Enable = function(self)
 		if frequent then
 			self:EnableFrequentUpdates("Auras", frequent)
 		else
-			self:RegisterMessage("CG_UNIT_AURA", Proxy)
+			self:RegisterMessage("GP_UNIT_AURA", Proxy)
 			self:RegisterEvent("PLAYER_ENTERING_WORLD", Proxy, true)
 			self:RegisterEvent("PLAYER_REGEN_DISABLED", Proxy, true)
 			self:RegisterEvent("PLAYER_REGEN_ENABLED", Proxy, true)
@@ -767,7 +767,7 @@ local Disable = function(self)
 		end
 	
 		if not ((Auras and Auras.frequent) or (Buffs and Buffs.frequent) or (Debuffs and Debuffs.frequent)) then
-			self:UnregisterMessage("CG_UNIT_AURA", Proxy)
+			self:UnregisterMessage("GP_UNIT_AURA", Proxy)
 			self:UnregisterEvent("PLAYER_ENTERING_WORLD", Proxy)
 			self:UnregisterEvent("PLAYER_REGEN_DISABLED", Proxy)
 			self:UnregisterEvent("PLAYER_REGEN_ENABLED", Proxy)

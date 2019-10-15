@@ -420,8 +420,8 @@ LibFrame.Enable = function(self)
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
 
 	-- Register for changes to the parent frames
-	self:RegisterMessage("CG_WORLD_SCALE_UPDATE", "OnEvent")
-	self:RegisterMessage("CG_INTERFACE_SCALE_UPDATE", "OnEvent")
+	self:RegisterMessage("GP_WORLD_SCALE_UPDATE", "OnEvent")
+	self:RegisterMessage("GP_INTERFACE_SCALE_UPDATE", "OnEvent")
 	
 	-- Could it be enough to just track frame changes and not events?
 	self:SetHook(UIParent, "OnSizeChanged", "UpdateDisplaySize", "LibFrame_UIParent_OnSizeChanged")

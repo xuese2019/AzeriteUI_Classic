@@ -337,7 +337,7 @@ Module.EnableBindMode = function(self)
 
 	self:GetBindingFrame():Show()
 	self:UpdateButtons()
-	self:SendMessage("CG_BIND_MODE_ENABLED")
+	self:SendMessage("GP_BIND_MODE_ENABLED")
 end 
 
 Module.DisableBindMode = function(self)
@@ -351,7 +351,7 @@ Module.DisableBindMode = function(self)
 
 	self.bindingsChanged = nil
 	self:GetBindingFrame():Hide()
-	self:SendMessage("CG_BIND_MODE_DISABLED")
+	self:SendMessage("GP_BIND_MODE_DISABLED")
 end
 
 Module.ApplyBindings = function(self)
@@ -670,7 +670,7 @@ Module.OnEvent = function(self, event, ...)
 		-- Binds aren't fully loaded directly after login, 
 		-- so we need to track the event for updated bindings as well.
 		self:UpdateBindings()
-	elseif (event == "CG_UPDATE_ACTIONBUTTON_COUNT") then 
+	elseif (event == "GP_UPDATE_ACTIONBUTTON_COUNT") then 
 		self:UpdateButtons()
 	end
 end
@@ -697,5 +697,5 @@ Module.OnEnable = function(self)
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
 	self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
 	self:RegisterEvent("PLAYER_REGEN_DISABLED", "OnEvent")
-	self:RegisterMessage("CG_UPDATE_ACTIONBUTTON_COUNT", "OnEvent")
+	self:RegisterMessage("GP_UPDATE_ACTIONBUTTON_COUNT", "OnEvent")
 end

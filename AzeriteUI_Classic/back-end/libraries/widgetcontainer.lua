@@ -564,7 +564,7 @@ LibWidgetContainer.CreateWidgetContainer = function(self, frameType, parent, tem
 		for frame in pairs(frames) do 
 			counter = counter + 1
 		end 
-		name = "CG_UnitFrame_"..(counter + 1)
+		name = "GP_UnitFrame_"..(counter + 1)
 	end 
 
 	local frame = setmetatable(LibWidgetContainer:CreateFrame(frameType or "Frame", name, parent, template or "SecureHandlerAttributeTemplate"), WidgetFrame_MT)

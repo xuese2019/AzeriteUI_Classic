@@ -342,7 +342,7 @@ end
 --------------------------------------------------------------------------
 -- Return or create the library default tooltip
 LibUnitFrame.GetUnitFrameTooltip = function(self)
-	return LibUnitFrame:GetTooltip("CG_UnitFrameTooltip") or LibUnitFrame:CreateTooltip("CG_UnitFrameTooltip")
+	return LibUnitFrame:GetTooltip("GP_UnitFrameTooltip") or LibUnitFrame:CreateTooltip("GP_UnitFrameTooltip")
 end
 
 LibUnitFrame.SetScript = function(self, scriptHandler, script)

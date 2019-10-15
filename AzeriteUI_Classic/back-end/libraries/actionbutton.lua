@@ -1446,7 +1446,7 @@ LibSecureButton.GetAllActionButtonsByType = function(self, buttonType)
 end 
 
 LibSecureButton.GetActionButtonTooltip = function(self)
-	return LibSecureButton:GetTooltip("CG_ActionButtonTooltip") or LibSecureButton:CreateTooltip("CG_ActionButtonTooltip")
+	return LibSecureButton:GetTooltip("GP_ActionButtonTooltip") or LibSecureButton:CreateTooltip("GP_ActionButtonTooltip")
 end
 
 -- Modules should call this at UPDATE_BINDINGS and the first PLAYER_ENTERING_WORLD

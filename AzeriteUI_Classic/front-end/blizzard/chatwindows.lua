@@ -646,7 +646,7 @@ Module.OnEvent = function(self, event, ...)
 	self:UpdateMainWindowButtonDisplay()
 
 	-- Do this cause taint? Shouldn't, but you never know. 
-	if ((event == "CG_INTERFACE_SCALE_UPDATE") or (event == "CG_WORLD_SCALE_UPDATE")) then 
+	if ((event == "GP_INTERFACE_SCALE_UPDATE") or (event == "GP_WORLD_SCALE_UPDATE")) then 
 		self:UpdateChatWindowScales()
 	end 
 end 
@@ -676,6 +676,6 @@ Module.OnEnable = function(self)
 	self:RegisterEvent("VOICE_CHAT_CHANNEL_MEMBER_MUTE_FOR_ME_CHANGED", "OnEvent")
 	self:RegisterEvent("VOICE_CHAT_CHANNEL_MEMBER_MUTE_FOR_ALL_CHANGED", "OnEvent")
 	self:RegisterEvent("VOICE_CHAT_CHANNEL_MEMBER_SILENCED_CHANGED", "OnEvent")
-	self:RegisterMessage("CG_INTERFACE_SCALE_UPDATE", "OnEvent")
-	self:RegisterMessage("CG_WORLD_SCALE_UPDATE", "OnEvent")
+	self:RegisterMessage("GP_INTERFACE_SCALE_UPDATE", "OnEvent")
+	self:RegisterMessage("GP_WORLD_SCALE_UPDATE", "OnEvent")
 end 

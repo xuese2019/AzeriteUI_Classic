@@ -159,7 +159,7 @@ Module.StyleQuestTimerFrame = function(self)
 end
 
 Module.GetFloaterTooltip = function(self)
-	return self:GetTooltip("CG_FloaterTooltip") or self:CreateTooltip("CG_FloaterTooltip")
+	return self:GetTooltip("GP_FloaterTooltip") or self:CreateTooltip("GP_FloaterTooltip")
 end
 
 Module.OnEvent = function(self, event, ...)

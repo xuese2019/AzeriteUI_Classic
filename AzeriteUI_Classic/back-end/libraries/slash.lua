@@ -80,7 +80,7 @@ LibSlash.RegisterChatCommand = function(self, command, func, forced)
 	end 
 	
 	-- Create a unique name for the command
-	local name = "CG_CHATCOMMAND_"..string_upper(command) 
+	local name = "GP_CHATCOMMAND_"..string_upper(command) 
 
 	-- Register the chat command, keep it lowercase
 	_G["SLASH_"..name.."1"] = "/"..string_lower(command)
@@ -120,7 +120,7 @@ LibSlash.UnregisterChatCommand = function(self, command)
 	-- Generate the name as it was stored
 	-- *Future library versions must either follow this format,
 	--  or take this older version into account when upgrading. 
-	local name = "CG_CHATCOMMAND_"..string_upper(command) 
+	local name = "GP_CHATCOMMAND_"..string_upper(command) 
 
 	-- Kill the slash command
 	_G["SLASH_"..name.."1"] = nil
@@ -158,7 +158,7 @@ for command,func in pairs(Commands) do
 	-- Re-generate the name
 	-- *if we change the format of the name, 
 	--  we must take older formats into account.
-	local name = "CG_CHATCOMMAND_"..string_upper(command) 
+	local name = "GP_CHATCOMMAND_"..string_upper(command) 
 
 	-- Update registered functions to use our current argument parsing.
 	if (type(func) == "function") then 

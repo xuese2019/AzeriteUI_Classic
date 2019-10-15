@@ -377,7 +377,7 @@ end
 
 -- Return or create the library default tooltip
 ElementHandler.GetTooltip = function(proxy)
-	return LibMinimap:GetTooltip("CG_MinimapTooltip") or LibMinimap:CreateTooltip("CG_MinimapTooltip")
+	return LibMinimap:GetTooltip("GP_MinimapTooltip") or LibMinimap:CreateTooltip("GP_MinimapTooltip")
 end
 
 ElementHandler.EnableAllElements = function(proxy)
@@ -428,8 +428,8 @@ LibMinimap.SyncMinimap = function(self, onlyQuery)
 	Private.MapVisibility = Private.MapVisibility or Private.MapParent:CreateFrame("Frame")
 	Private.MapVisibility:SetFrameStrata("LOW")
 	Private.MapVisibility:SetFrameLevel(0)
-	Private.MapVisibility:SetScript("OnHide", function() LibMinimap:SendMessage("CG_MINIMAP_VISIBILITY_CHANGED", false) end)
-	Private.MapVisibility:SetScript("OnShow", function() LibMinimap:SendMessage("CG_MINIMAP_VISIBILITY_CHANGED", true) end)
+	Private.MapVisibility:SetScript("OnHide", function() LibMinimap:SendMessage("GP_MINIMAP_VISIBILITY_CHANGED", false) end)
+	Private.MapVisibility:SetScript("OnShow", function() LibMinimap:SendMessage("GP_MINIMAP_VISIBILITY_CHANGED", true) end)
 
 	-- Holder frame deciding the position and size of the minimap. 
 	Private.MapHolder = Private.MapHolder or Private.MapVisibility:CreateFrame("Frame")
@@ -500,8 +500,8 @@ LibMinimap.SyncMinimap = function(self, onlyQuery)
 	-- Hook minimap visibility changes
 	-- Use a unique hook identifier to prevent multiple library instances 
 	-- from registering multiple hooks. We only need one. 
-	LibMinimap:SetHook(Private.OldMinimap, "OnHide", function() Private.MapVisibility:Hide() end, "CG_MINIMAP_HIDE")
-	LibMinimap:SetHook(Private.OldMinimap, "OnShow", function() Private.MapVisibility:Show() end, "CG_MINIMAP_SHOW")
+	LibMinimap:SetHook(Private.OldMinimap, "OnHide", function() Private.MapVisibility:Hide() end, "GP_MINIMAP_HIDE")
+	LibMinimap:SetHook(Private.OldMinimap, "OnShow", function() Private.MapVisibility:Show() end, "GP_MINIMAP_SHOW")
 
 	-- keep these two disabled
 	-- or the map will change position 
@@ -704,7 +704,7 @@ end
 
 -- Return or create the library default tooltip
 LibMinimap.GetMinimapTooltip = function(self)
-	return self:GetTooltip("CG_MinimapTooltip") or self:CreateTooltip("CG_MinimapTooltip")
+	return self:GetTooltip("GP_MinimapTooltip") or self:CreateTooltip("GP_MinimapTooltip")
 end
 
 LibMinimap.RemoveButton = function(self, button)

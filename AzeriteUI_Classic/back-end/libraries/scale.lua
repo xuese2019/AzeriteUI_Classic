@@ -112,10 +112,10 @@ end
 
 LibScale.OnEvent = function(self, event, ...)
 	if self:UpdateWorldScales() then 
-		self:SendMessage("CG_WORLD_SCALE_UPDATE")
+		self:SendMessage("GP_WORLD_SCALE_UPDATE")
 	end 
 	if self:UpdateInterfaceScales() then 
-		self:SendMessage("CG_INTERFACE_SCALE_UPDATE")
+		self:SendMessage("GP_INTERFACE_SCALE_UPDATE")
 	end 
 end
 

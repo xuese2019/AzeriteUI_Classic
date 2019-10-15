@@ -1019,7 +1019,7 @@ end
 
 Module.UpdateButtonCount = function(self)
 	-- Announce the updated button count to the world
-	self:SendMessage("CG_UPDATE_ACTIONBUTTON_COUNT")
+	self:SendMessage("GP_UPDATE_ACTIONBUTTON_COUNT")
 end
 
 Module.UpdateCastOnDown = function(self)

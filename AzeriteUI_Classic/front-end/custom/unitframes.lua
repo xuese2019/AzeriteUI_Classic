@@ -765,13 +765,13 @@ local Target_PostUpdateTextures = function(self)
 end 
 
 local Target_PostUpdateName = function(self, event, ...)
-	if (event == "CG_UNITFRAME_TOT_VISIBLE") then 
+	if (event == "GP_UNITFRAME_TOT_VISIBLE") then 
 		self.totVisible = true
-	elseif (event == "CG_UNITFRAME_TOT_INVISIBLE") then 
+	elseif (event == "GP_UNITFRAME_TOT_INVISIBLE") then 
 		self.totVisible = nil
-	elseif (event == "CG_UNITFRAME_TOT_SHOWN") then 
+	elseif (event == "GP_UNITFRAME_TOT_SHOWN") then 
 		self.totShown = true
-	elseif (event == "CG_UNITFRAME_TOT_HIDDEN") then
+	elseif (event == "GP_UNITFRAME_TOT_HIDDEN") then
 		self.totShown = nil
 	end
 	if (self.totShown and self.totVisible and (not self.Name.usingSmallWidth)) then 
@@ -822,10 +822,10 @@ local ToTFrame_PostUpdateAlpha = function(self)
 	-- Apply the new style
 	if (targetStyle == "Shown") then 
 		self:SetAlpha(1)
-		self:SendMessage("CG_UNITFRAME_TOT_VISIBLE")
+		self:SendMessage("GP_UNITFRAME_TOT_VISIBLE")
 	elseif (targetStyle == "Hidden") then 
 		self:SetAlpha(0)
-		self:SendMessage("CG_UNITFRAME_TOT_INVISIBLE")
+		self:SendMessage("GP_UNITFRAME_TOT_INVISIBLE")
 	end
 
 	if self.TargetHighlight then 
@@ -3530,10 +3530,10 @@ UnitStyles.StyleTargetFrame = function(self, unit, id, Layout, ...)
 		self:PostUpdateTextures()
 	end 
 
-	self:RegisterMessage("CG_UNITFRAME_TOT_VISIBLE", Target_PostUpdateName)
-	self:RegisterMessage("CG_UNITFRAME_TOT_INVISIBLE", Target_PostUpdateName)
-	self:RegisterMessage("CG_UNITFRAME_TOT_SHOWN", Target_PostUpdateName)
-	self:RegisterMessage("CG_UNITFRAME_TOT_HIDDEN", Target_PostUpdateName)
+	self:RegisterMessage("GP_UNITFRAME_TOT_VISIBLE", Target_PostUpdateName)
+	self:RegisterMessage("GP_UNITFRAME_TOT_INVISIBLE", Target_PostUpdateName)
+	self:RegisterMessage("GP_UNITFRAME_TOT_SHOWN", Target_PostUpdateName)
+	self:RegisterMessage("GP_UNITFRAME_TOT_HIDDEN", Target_PostUpdateName)
 end
 
 UnitStyles.StyleToTFrame = function(self, unit, id, Layout, ...)
@@ -3761,8 +3761,8 @@ UnitFrameToT.OnInit = function(self)
 	self.frame = self:SpawnUnitFrame("targettarget", "UICenter", function(frame, unit, id, _, ...)
 		return UnitStyles.StyleToTFrame(frame, unit, id, self.layout, ...)
 	end)
-	self.frame:HookScript("OnShow", function(self) self:SendMessage("CG_UNITFRAME_TOT_SHOWN") end)
-	self.frame:HookScript("OnHide", function(self) self:SendMessage("CG_UNITFRAME_TOT_HIDDEN") end)
+	self.frame:HookScript("OnShow", function(self) self:SendMessage("GP_UNITFRAME_TOT_SHOWN") end)
+	self.frame:HookScript("OnHide", function(self) self:SendMessage("GP_UNITFRAME_TOT_HIDDEN") end)
 end 
 
 -----------------------------------------------------------

@@ -1,4 +1,4 @@
-local LibMessage = CogWheel:Set("LibMessage", 9)
+local LibMessage = CogWheel:Set("LibMessage", 11)
 if (not LibMessage) then	
 	return
 end
@@ -300,11 +300,15 @@ LibMessage.UnregisterMessage = function(self, message, func)
 
 	func = func or message
 
+	local found
 	for i = #messages, 1, -1 do
 		if (messages[i] == func) then 
+			found = true
 			table_remove(messages, i)
-			--messages[i] = nil
 		end
+	end
+	if (found) then 
+		return 
 	end
 
 	-- If we reach this point it means nothing to unregister was found
@@ -333,7 +337,6 @@ LibMessage.UnregisterAllMessages = function(self, message, ...)
 
 	for i = #messages, 1, -1 do
 		table_remove(messages, i)
-		--messages[i] = nil
 	end
 end
 

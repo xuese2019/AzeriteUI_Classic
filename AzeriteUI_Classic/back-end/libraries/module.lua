@@ -175,7 +175,7 @@ do
 
 		elseif (button == "RightButton") then 
 			debugFrame:Hide()
-			LibModule:SendMessage("CG_DEBUG_FRAME_CLOSED")
+			LibModule:SendMessage("GP_DEBUG_FRAME_CLOSED")
 		end	
 	end)
 

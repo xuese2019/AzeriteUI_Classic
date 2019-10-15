@@ -403,7 +403,7 @@ LibFader.OnEvent = function(self, event, ...)
 	elseif (event == "UNIT_HEALTH_FREQUENT") then 
 		self:CheckHealth()
 
-	elseif (event == "CG_UNIT_AURA") then 
+	elseif (event == "GP_UNIT_AURA") then 
 		self:CheckAuras()
 
 	elseif (event == "ZONE_CHANGED_NEW_AREA") then 
@@ -518,4 +518,4 @@ LibFader:RegisterEvent("GROUP_ROSTER_UPDATE", "OnEvent")
 LibFader:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", "OnEvent", "player") 
 LibFader:RegisterUnitEvent("UNIT_POWER_FREQUENT", "OnEvent", "player") 
 LibFader:RegisterUnitEvent("UNIT_DISPLAYPOWER", "OnEvent", "player") 
-LibFader:RegisterMessage("CG_UNIT_AURA", "OnEvent")
+LibFader:RegisterMessage("GP_UNIT_AURA", "OnEvent")
