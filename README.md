@@ -13,6 +13,7 @@ Looking for AzeriteUI for WoW Retail? Get it [here](https://www.curseforge.com/w
 * Twitter: [@GoldpawsStuff](https://twitter.com/goldpawsstuff)  
 
 ## **Recommended addons:**  
+* Real Mob Health for WoW Classic: [www.curseforge.com/wow/addons/real-mob-health](https://www.curseforge.com/wow/addons/real-mob-health) 
 * Enhanced World Map for WoW Classic: [www.curseforge.com/wow/addons/enhanced-world-map-for-wow-classic](https://www.curseforge.com/wow/addons/enhanced-world-map-for-wow-classic)
 * Immersion for WoW Classic: [www.curseforge.com/wow/addons/immersion](https://www.curseforge.com/wow/addons/immersion/files/all?filter-game-version=1738749986%3a67408)
 
