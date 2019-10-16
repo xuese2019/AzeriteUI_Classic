@@ -95,7 +95,7 @@ L["%s to toggle your Bags."] = "%s to toggle your bags."
 -- Remember that these shall fit on a button, 
 -- so they can't be that long. 
 -- You don't need a full description here. 
-L["Debug Mode"] = true 
+L["Debug Mode"] = "Debug Tools" -- it's not really a mode, just tools. 
 L["Debug Console"] = true 
 L["Load Console"] = true
 L["Unload Console"] = true
