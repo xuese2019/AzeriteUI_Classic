@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.59-RC] 2019-10-16
+### Added
+- Added in raid frames. Frames can be toggled through the menu, just like the party frames. 
+- Added the first draft of castbars to other units than the player. 
+
 ## [1.0.58-RC] 2019-10-13
 - Files have been added, remember to restart the game client! 
 
