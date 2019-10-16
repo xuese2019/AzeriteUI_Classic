@@ -836,7 +836,7 @@ end
 -----------------------------------------------------------
 -- Templates
 -----------------------------------------------------------
--- Boss, Arena
+-- Boss
 local positionHeaderFrame = function(self, unit, id, Layout)
 	-- Todo: iterate on this for a grid layout
 	local id = tonumber(id)
@@ -3833,24 +3833,6 @@ UnitFrameParty.OnInit = function(self)
 	--self:GetSecureUpdater():SetFrameRef("GroupHeader", self.frame)
 end 
 
--- Don't load the rest until we can fix it
-do return end 
-
------------------------------------------------------------
--- Boss
------------------------------------------------------------
-UnitFrameBoss.OnInit = function(self)
-	self.layout = CogWheel("LibDB"):GetDatabase(Core:GetPrefix()..":[UnitFrameBoss]", true)
-	self.frame = {}
-
-	local style = function(frame, unit, id, _, ...)
-		return UnitStyles.StyleBossFrames(frame, unit, id, self.layout, ...)
-	end
-	for i = 1,5 do 
-		self.frame[tostring(i)] = self:SpawnUnitFrame("boss"..i, "UICenter", style)
-	end 
-end 
-
 -----------------------------------------------------------
 -- Raid
 -----------------------------------------------------------
@@ -3871,7 +3853,7 @@ UnitFrameRaid.OnInit = function(self)
 	self.frame.healerAnchor:Place(unpack(self.layout.AlternatePlace)) 
 	self.frame:SetFrameRef("HealerModeAnchor", self.frame.healerAnchor)
 	self.frame:Execute(SECURE.FrameTable_Create)
-	--self.frame:SetAttribute("inHealerMode", self:GetConfig("Core").enableHealerMode)
+	self.frame:SetAttribute("inHealerMode", self:GetConfig("Core").enableHealerMode)
 	self.frame:SetAttribute("sortFrames", SECURE.Raid_SortFrames:format(
 		self.layout.GroupSizeNormal, 
 		self.layout.GrowthXNormal,
@@ -3925,3 +3907,18 @@ UnitFrameRaid.OnInit = function(self)
 	CreateSecureCallbackFrame(self, self.frame, self.db, SECURE.Raid_SecureCallback:format(visDriver))
 end 
 
+-----------------------------------------------------------
+-- Boss
+-----------------------------------------------------------
+-- These don't really exist in classic, right?
+UnitFrameBoss.OnInit = function(self)
+	self.layout = CogWheel("LibDB"):GetDatabase(Core:GetPrefix()..":[UnitFrameBoss]", true)
+	self.frame = {}
+
+	local style = function(frame, unit, id, _, ...)
+		return UnitStyles.StyleBossFrames(frame, unit, id, self.layout, ...)
+	end
+	for i = 1,5 do 
+		self.frame[tostring(i)] = self:SpawnUnitFrame("boss"..i, "UICenter", style)
+	end 
+end 

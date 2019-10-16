@@ -723,13 +723,14 @@ Module.CreateMenuTable = function(self)
 			configDB = "Core", modeName = "enableDebugConsole", 
 			proxyModule = nil, useCore = true
 		})
-		table_insert(DebugMenu.buttons, {
-			enabledTitle = L_ENABLED:format(L["Unload Console"]),
-			disabledTitle = L_DISABLED:format(L["Unload Console"]),
-			type = "TOGGLE_MODE", hasWindow = false, 
-			configDB = "Core", modeName = "unloadConsole", 
-			proxyModule = nil, useCore = true
-		})
+		-- Don't give this option. Make this a one way street. 
+		--table_insert(DebugMenu.buttons, {
+		--	enabledTitle = L_ENABLED:format(L["Unload Console"]),
+		--	disabledTitle = L_DISABLED:format(L["Unload Console"]),
+		--	type = "TOGGLE_MODE", hasWindow = false, 
+		--	configDB = "Core", modeName = "unloadConsole", 
+		--	proxyModule = nil, useCore = true
+		--})
 	else
 		table_insert(DebugMenu.buttons, {
 			enabledTitle = L_ENABLED:format(L["Load Console"]),
@@ -832,40 +833,6 @@ Module.CreateMenuTable = function(self)
 		table_insert(MenuTable, ActionBarMenu)
 	end
 
-	-- Unitframes
-	local UnitFrameMenu = {
-		title = L["UnitFrames"], type = nil, hasWindow = true, 
-		buttons = {
-			-- Player options
-		}
-	}
-
-	local UnitFrameParty = Core:GetModule("UnitFrameParty", true)
-	if UnitFrameParty and not (UnitFrameParty:IsIncompatible() or UnitFrameParty:DependencyFailed()) then 
-		table_insert(UnitFrameMenu.buttons, {
-			enabledTitle = L_ENABLED:format(L["Party Frames"]),
-			disabledTitle = L_DISABLED:format(L["Party Frames"]),
-			type = "TOGGLE_VALUE", 
-			configDB = "UnitFrameParty", configKey = "enablePartyFrames", 
-			proxyModule = "UnitFrameParty"
-		})
-	end
-
-	--[[
-	local UnitFrameRaid = Core:GetModule("UnitFrameRaid", true)
-	if UnitFrameRaid and not (UnitFrameRaid:IsIncompatible() or UnitFrameRaid:DependencyFailed()) then 
-		table_insert(UnitFrameMenu.buttons, {
-			enabledTitle = L_ENABLED:format(L["Raid Frames"]),
-			disabledTitle = L_DISABLED:format(L["Raid Frames"]),
-			type = "TOGGLE_VALUE", 
-			configDB = "UnitFrameRaid", configKey = "enableRaidFrames", 
-			proxyModule = "UnitFrameRaid"
-		})
-	end
-	]]--
-
-	table_insert(MenuTable, UnitFrameMenu)
-
 	-- Nameplates
 	local NamePlates = Core:GetModule("NamePlates", true)
 	if NamePlates and not (NamePlates:IsIncompatible() or NamePlates:DependencyFailed()) then 
@@ -911,6 +878,37 @@ Module.CreateMenuTable = function(self)
 		})
 	end 
 
+	-- Unitframes
+	local UnitFrameMenu = {
+		title = L["UnitFrames"], type = nil, hasWindow = true, 
+		buttons = {
+			-- Player options
+		}
+	}
+
+	local UnitFrameParty = Core:GetModule("UnitFrameParty", true)
+	if UnitFrameParty and not (UnitFrameParty:IsIncompatible() or UnitFrameParty:DependencyFailed()) then 
+		table_insert(UnitFrameMenu.buttons, {
+			enabledTitle = L_ENABLED:format(L["Party Frames"]),
+			disabledTitle = L_DISABLED:format(L["Party Frames"]),
+			type = "TOGGLE_VALUE", 
+			configDB = "UnitFrameParty", configKey = "enablePartyFrames", 
+			proxyModule = "UnitFrameParty"
+		})
+	end
+
+	local UnitFrameRaid = Core:GetModule("UnitFrameRaid", true)
+	if UnitFrameRaid and not (UnitFrameRaid:IsIncompatible() or UnitFrameRaid:DependencyFailed()) then 
+		table_insert(UnitFrameMenu.buttons, {
+			enabledTitle = L_ENABLED:format(L["Raid Frames"]),
+			disabledTitle = L_DISABLED:format(L["Raid Frames"]),
+			type = "TOGGLE_VALUE", 
+			configDB = "UnitFrameRaid", configKey = "enableRaidFrames", 
+			proxyModule = "UnitFrameRaid"
+		})
+	end
+	table_insert(MenuTable, UnitFrameMenu)
+
 	-- Explorer Mode
 	local ExplorerMode = Core:GetModule("ExplorerMode", true)
 	if ExplorerMode and not (ExplorerMode:IsIncompatible() or ExplorerMode:DependencyFailed()) then 
@@ -936,7 +934,7 @@ Module.CreateMenuTable = function(self)
 		})
 	end 
 
-	-- Healer Mode
+	-- Healer Layout
 	table_insert(MenuTable, {
 		enabledTitle = L_ENABLED:format(L["Healer Mode"]),
 		disabledTitle = L_DISABLED:format(L["Healer Mode"]),
