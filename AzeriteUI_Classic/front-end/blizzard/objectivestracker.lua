@@ -82,7 +82,7 @@ local QuestLog_Update = function(self)
 			local questLogTitleText, level, questTag, isHeader, isCollapsed, isComplete, frequency, questID, startEvent, displayQuestID, isOnMap, hasLocalPOI, isTask, isBounty, isStory, isHidden, isScaling = GetQuestLogTitle(questIndex)
 
 			if (not isHeader) then 
-				local msg = "  "..questLogTitleText
+				local msg = " "..questLogTitleText
 				if (level) then 
 					msg = "[" .. level .. "]" .. msg
 				end 
