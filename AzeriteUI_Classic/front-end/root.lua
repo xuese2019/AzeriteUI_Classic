@@ -228,13 +228,11 @@ Core.UpdateDebugConsole = function(self)
 end
 
 Core.LoadDebugConsole = function(self)
-	--EnableAddOn(ADDON .. "_Debug", true)
 	self.db.loadDebugConsole = true
 	ReloadUI()
 end
 
 Core.UnloadDebugConsole = function(self)
-	--DisableAddOn(ADDON .. "_Debug", true)
 	self.db.loadDebugConsole = false
 	ReloadUI()
 end
@@ -303,7 +301,6 @@ Core.ApplyExperimentalFeatures = function(self)
 end
 
 -- We could add this into the back-end, leaving it here for now, though. 
--- It's not like this addon actually serves any other purpose. 
 Core.OnChatCommand = function(self, editBox, msg)
 	if (msg == "enable") or (msg == "on") then 
 		self.db.enableDebugConsole = true
@@ -335,8 +332,12 @@ Core.OnInit = function(self)
 	-- Force-initialize the secure callback system for the menu
 	self:GetSecureUpdater()
 
-	-- Fire a startup message into the console, if the debug addon is enabled.
-	if self.db.loadDebugConsole then 
+	-- Let's just enforce this from now on.
+	-- I need it to be there, it doesn't affect performance.
+	self.db.loadDebugConsole = true 
+
+	-- Fire a startup message into the console.
+	if (self.db.loadDebugConsole) then 
 
 		-- Set the flag to tell the back-end we're in debug mode
 		self:EnableDebugMode()
