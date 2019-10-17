@@ -1,4 +1,4 @@
-local LibCast = CogWheel:Set("LibCast", -1)
+local LibCast = CogWheel:Set("LibCast", 1)
 if (not LibCast) then
 	return
 end
