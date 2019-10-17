@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.60-RC] 2019-10-17
+### Fixed
+- Fixed wrong field name causing a nil bug when channeled player spells were pushed back. 
+
 ## [1.0.59-RC] 2019-10-16
 ### Added
 - Added in raid frames. Frames can be toggled through the menu, just like the party frames. 
