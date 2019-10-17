@@ -183,13 +183,17 @@ LibCast.SetCastPushback = function(self, unitGUID)
 	end
 	local castData = UnitCasts[unitGUID]
 	if (castData.isChanneled) then
+		if (not castData.castDuration) then 
+			return 
+		end
+
 		-- Channeled spells are reduced by 25% per hit.
 		-- *CHECK: Is it 25% of the remaining or full duration?
-		local reduction = castData.castTime * .25
+		local reduction = castData.castDuration * .25
 		local now = GetTime()
 
 		-- Cast time cannot be less than zero. 
-		castData.castTime = math_max(castData.castTime - reduction, 0)
+		castData.castDuration = math_max(castData.castDuration - reduction, 0)
 
 		-- Cast end cannot suddenly be in the past.
 		castData.castEnd = math_max(castData.castEnd - reduction, now)
