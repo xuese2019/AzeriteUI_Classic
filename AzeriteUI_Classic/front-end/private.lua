@@ -498,8 +498,12 @@ AddFlags(Private, 16857, ByPlayer) 	-- Faerie Fire (Feral)
 AddFlags(Private, 22896, OnPlayer) 	-- Frenzied Regeneration
 AddFlags(Private,  6795, OnTarget) 	-- Growl (Taunt)
 AddFlags(Private, 24932, Never) 	-- Leader of the Pack
-AddFlags(Private,  9826, ByPlayer) 	-- Pounce
-AddFlags(Private,  6783, OnPlayer) 	-- Prowl
+AddFlags(Private,  9007, ByPlayer) 	-- Pounce Bleed (Rank 1)
+AddFlags(Private,  9824, ByPlayer) 	-- Pounce Bleed (Rank 2)
+AddFlags(Private,  9826, ByPlayer) 	-- Pounce Bleed (Rank 3)
+AddFlags(Private,  5215, OnPlayer) 	-- Prowl (Rank 1)
+AddFlags(Private,  6783, OnPlayer) 	-- Prowl (Rank 2)
+AddFlags(Private,  9913, OnPlayer) 	-- Prowl (Rank 3)
 AddFlags(Private,  9904, ByPlayer) 	-- Rake
 AddFlags(Private,  9894, ByPlayer) 	-- Rip
 AddFlags(Private,  9845, OnPlayer) 	-- Tiger's Fury

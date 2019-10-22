@@ -708,9 +708,11 @@ AddFlags(16689, IsDruid + IsRoot) 			-- Nature's Grasp (Rank 6)
 AddFlags(16870, IsDruid) 					-- Omen of Clarity (Proc)
 
 -- Druid (Feral)
+-- https://classic.wowhead.com/druid-abilities/feral-combat
 ------------------------------------------------------------------------
 AddFlags( 1066, IsDruid) 					-- Aquatic Form
 AddFlags( 8983, IsDruid + IsStun) 			-- Bash
+AddFlags( 5487, IsDruid) 					-- Bear Form
 AddFlags(  768, IsDruid) 					-- Cat Form
 AddFlags( 5209, IsDruid + IsTaunt) 			-- Challenging Roar (Taunt)
 AddFlags( 9821, IsDruid) 					-- Dash
@@ -720,8 +722,12 @@ AddFlags(16857, IsDruid) 					-- Faerie Fire (Feral)
 AddFlags(22896, IsDruid) 					-- Frenzied Regeneration
 AddFlags( 6795, IsDruid + IsTaunt) 			-- Growl (Taunt)
 AddFlags(24932, IsDruid) 					-- Leader of the Pack
-AddFlags( 9826, IsDruid + IsStun) 			-- Pounce
-AddFlags( 6783, IsDruid) 					-- Prowl
+AddFlags( 9007, IsDruid + IsStun) 			-- Pounce Bleed (Rank 1)
+AddFlags( 9824, IsDruid + IsStun) 			-- Pounce Bleed (Rank 2)
+AddFlags( 9826, IsDruid + IsStun) 			-- Pounce Bleed (Rank 3)
+AddFlags( 5215, IsDruid) 					-- Prowl (Rank 1)
+AddFlags( 6783, IsDruid) 					-- Prowl (Rank 2)
+AddFlags( 9913, IsDruid) 					-- Prowl (Rank 3)
 AddFlags( 9904, IsDruid) 					-- Rake
 AddFlags( 9894, IsDruid) 					-- Rip
 AddFlags( 9845, IsDruid) 					-- Tiger's Fury

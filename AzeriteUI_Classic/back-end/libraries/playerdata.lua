@@ -3219,6 +3219,7 @@ do
 	Set(CrowdControl, 18469, true) -- Counterspell (Silence)
 	Set(CrowdControl,  6789, true) -- Death Coil
 	Set(CrowdControl,  5782, true) -- Fear
+	Set(CrowdControl, 19675, true) -- Feral Charge Effect
 	Set(CrowdControl,  3355, true) -- Freezing Trap
 	Set(CrowdControl,  1776, true) -- Gouge
 	Set(CrowdControl,   853, true) -- Hammer of Justice
