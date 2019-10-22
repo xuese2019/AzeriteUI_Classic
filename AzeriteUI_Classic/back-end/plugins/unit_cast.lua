@@ -377,7 +377,7 @@ Update = function(self, event, unit, ...)
 			end
 		end 
 		
-	elseif (event == "UNIT_SPELLCAST_STOP") or (event == "GP_SPELL_CAST_SUCCESS") then
+	elseif (event == "UNIT_SPELLCAST_STOP") or (event == "GP_SPELL_CAST_SUCCESS") or (event == "GP_SPELL_CAST_STOP") then
 
 		clear(element)
 		element.casting = nil

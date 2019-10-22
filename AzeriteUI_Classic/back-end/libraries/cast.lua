@@ -1,4 +1,4 @@
-local LibCast = CogWheel:Set("LibCast", 1)
+local LibCast = CogWheel:Set("LibCast", 2)
 if (not LibCast) then
 	return
 end
@@ -316,7 +316,7 @@ LibCast.OnEvent = function(self, event, ...)
 				self:StoreCast(sourceGUID, spellID, spellName, spellIcon, castTime, true)
 
 				-- Tell listeners about the event
-				self:SendMessage("GP_UNIT_SPELLCAST_CHANNEL_START", sourceGUID)
+				self:SendMessage("GP_SPELL_CAST_CHANNEL_START", sourceGUID)
 				return 
 			end
 
@@ -324,7 +324,7 @@ LibCast.OnEvent = function(self, event, ...)
 			self:DeleteCast(sourceGUID)
 
 			-- Tell listeners about the event
-			self:SendMessage("GP_UNIT_SPELLCAST_STOP", sourceGUID)
+			self:SendMessage("GP_SPELL_CAST_STOP", sourceGUID)
 			return
 
 		elseif (eventType == "SPELL_AURA_APPLIED") then 
@@ -341,7 +341,7 @@ LibCast.OnEvent = function(self, event, ...)
 				self:DeleteCast(destGUID)
 				
 				-- Tell listeners about the event
-				self:SendMessage("GP_UNIT_SPELLCAST_INTERRUPTED", destGUID)
+				self:SendMessage("GP_SPELL_CAST_INTERRUPTED", destGUID)
 				return 
 			end
 
@@ -355,7 +355,7 @@ LibCast.OnEvent = function(self, event, ...)
 				self:DeleteCast(sourceGUID)
 
 				-- Tell listeners about the event
-				self:SendMessage("GP_UNIT_SPELLCAST_CHANNEL_STOP", sourceGUID)
+				self:SendMessage("GP_SPELL_CAST_CHANNEL_STOP", sourceGUID)
 				return
 
 			else
@@ -389,7 +389,7 @@ LibCast.OnEvent = function(self, event, ...)
 			self:DeleteCast(sourceGUID)
 			
 			-- Tell listeners about the event
-			self:SendMessage("GP_UNIT_SPELLCAST_INTERRUPTED", sourceGUID)
+			self:SendMessage("GP_SPELL_CAST_INTERRUPTED", sourceGUID)
 			return
 			
 		elseif (eventType == "PARTY_KILL") or (eventType == "UNIT_DIED") then 
@@ -403,9 +403,9 @@ LibCast.OnEvent = function(self, event, ...)
 			
 			-- Tell listeners about the event
 			if (isChanneled) then 
-				self:SendMessage("GP_UNIT_SPELLCAST_CHANNEL_STOP", sourceGUID)
+				self:SendMessage("GP_SPELL_CAST_CHANNEL_STOP", sourceGUID)
 			else
-				self:SendMessage("GP_UNIT_SPELLCAST_STOP", sourceGUID)
+				self:SendMessage("GP_SPELL_CAST_STOP", sourceGUID)
 			end 
 			return
 		
@@ -422,7 +422,7 @@ LibCast.OnEvent = function(self, event, ...)
 				self:SetCastPushback(destGUID)
 
 				-- Tell listeners about the event
-				self:SendMessage("GP_UNIT_SPELLCAST_DELAYED", destGUID)
+				self:SendMessage("GP_SPELL_CAST_DELAYED", destGUID)
 				return
 			end
 		end
