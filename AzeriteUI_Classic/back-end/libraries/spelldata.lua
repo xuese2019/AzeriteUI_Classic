@@ -21,7 +21,7 @@ local type = type
 
 -- Library registries
 ---------------------------------------------------------------------	
-LibPlayerData.embeds = LibPlayerData.embeds or {}
+LibSpellData.embeds = LibSpellData.embeds or {}
 
 -- Quality of Life
 ---------------------------------------------------------------------	

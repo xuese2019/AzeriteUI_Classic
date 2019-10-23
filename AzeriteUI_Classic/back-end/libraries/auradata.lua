@@ -21,7 +21,7 @@ local type = type
 
 -- Library registries
 ---------------------------------------------------------------------	
-LibPlayerData.embeds = LibPlayerData.embeds or {}
+LibAuraData.embeds = LibAuraData.embeds or {}
 
 -- Quality of Life
 ---------------------------------------------------------------------	
