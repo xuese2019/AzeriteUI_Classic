@@ -5,6 +5,7 @@
 <Script file='libraries\event.lua'/> 
 
 <!-- core libs, require callbacks libs or none -->
+<Script file='libraries\auradata.lua'/>
 <Script file='libraries\blizzard.lua'/>
 <Script file='libraries\clientbuild.lua'/>
 <Script file='libraries\db.lua'/>
@@ -16,6 +17,7 @@
 <Script file='libraries\shine.lua'/>
 <Script file='libraries\slash.lua'/>
 <Script file='libraries\sound.lua'/>
+<Script file='libraries\spelldata.lua'/>
 <Script file='libraries\time.lua'/>
 <Script file='libraries\tooltipscanner.lua'/>
 <Script file='libraries\zone.lua'/>
