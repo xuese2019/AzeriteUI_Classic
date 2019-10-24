@@ -852,13 +852,6 @@ Module.CreateMenuTable = function(self)
 					title = MAKE_UNINTERACTABLE, type = nil, hasWindow = true, 
 					buttons = {
 						{
-							enabledTitle = L_ENABLED:format(L["Player"]),
-							disabledTitle = L_DISABLED:format(L["Player"]),
-							type = "TOGGLE_VALUE", 
-							configDB = "NamePlates", configKey = "clickThroughSelf", 
-							proxyModule = "NamePlates"
-						},
-						{
 							enabledTitle = L_ENABLED:format(L["Enemies"]),
 							disabledTitle = L_DISABLED:format(L["Enemies"]),
 							type = "TOGGLE_VALUE", 
