@@ -643,14 +643,21 @@ local Tooltip_StatusBar_PostUpdate = function(tooltip, bar, value, min, max)
 end 
 
 local Tooltip_LinePair_PostCreate = function(tooltip, lineIndex, left, right)
-	local fontObject = (lineIndex == 1) and GetFont(15, true) or GetFont(13, true)
-	left:SetFontObject(fontObject)
-	right:SetFontObject(fontObject)
+	local oldLeftObject = left:GetFontObject()
+	local oldRightObject = right:GetFontObject()
+	local leftObject = (lineIndex == 1) and GetFont(15, true) or GetFont(13, true)
+	local rightObject = (lineIndex == 1) and GetFont(15, true) or GetFont(13, true)
+	if (leftObject ~= oldLeftObject) then 
+		left:SetFontObject(leftObject)
+	end
+	if (rightObject ~= oldRightObject) then 
+		right:SetFontObject(rightObject)
+	end
 end
 
 local Tooltip_Bar_PostCreate = function(tooltip, bar)
 	if bar.Value then 
-		bar.Value:SetFontObject(GetFont(15, true))
+		bar.Value:SetFontObject(GetFont(13, true))
 	end
 end
 
@@ -673,6 +680,7 @@ local Tooltip_PostCreate = function(tooltip)
 	tooltip.colorHealthTapped = true -- color health bars if unit is tap denied
 	tooltip.colorPower = true -- color power bars by power type
 	tooltip.colorPowerTapped = true -- color power bars if unit is tap denied
+	tooltip.showLevelWithName = true
 
 	-- Force our colors into all tooltips created so far
 	tooltip.colors = Colors

@@ -1,11 +1,11 @@
-local ADDON = ...
+local ADDON, Private = ...
 
 local Core = CogWheel("LibModule"):GetModule(ADDON)
 if (not Core) then 
 	return 
 end
 
-local Module = Core:NewModule("BlizzardTooltipStyling", "LibEvent", "LibDB", "LibTooltip", "LibPlayerData")
+local Module = Core:NewModule("BlizzardTooltipStyling", "LibEvent", "LibDB", "LibFrame", "LibTooltip", "LibTooltipScanner", "LibPlayerData")
 local Layout
 
 Module:SetIncompatible("TipTac")
@@ -15,24 +15,111 @@ Module:SetIncompatible("TinyTooltip")
 -- Lua API
 local _G = _G
 local math_floor = math.floor
+local string_find = string.find
 local table_concat = table.concat
 local table_wipe = table.wipe
 local type = type
 local unpack = unpack
 
 -- WoW API
-local UnitExists = _G.UnitExists
-local UnitIsUnit = _G.UnitIsUnit
+local GetQuestGreenRange = GetQuestGreenRange
+local UnitExists = UnitExists
+local UnitIsUnit = UnitIsUnit
+local UnitLevel = UnitLevel
+
+-- Private API
+local Colors = Private.Colors
+local GetFont = Private.GetFont
 
 -- Blizzard textures we use 
-local BOSS_TEXTURE = "|TInterface\\TargetingFrame\\UI-TargetingFrame-Skull:16:16:-2:1|t"
-local FFA_TEXTURE = "|TInterface\\TargetingFrame\\UI-PVP-FFA:16:12:-2:1:64:64:6:34:0:40|t"
-local FACTION_ALLIANCE_TEXTURE = "|TInterface\\TargetingFrame\\UI-PVP-Alliance:16:12:-2:1:64:64:6:34:0:40|t"
-local FACTION_NEUTRAL_TEXTURE = "|TInterface\\TargetingFrame\\UI-PVP-Neutral:16:12:-2:1:64:64:6:34:0:40|t"
-local FACTION_HORDE_TEXTURE = "|TInterface\\TargetingFrame\\UI-PVP-Horde:16:16:-4:0:64:64:0:40:0:40|t"
+local BOSS_TEXTURE = "|TInterface\\TargetingFrame\\UI-TargetingFrame-Skull:14:14:-2:1|t" -- 1:1
+local FFA_TEXTURE = "|TInterface\\TargetingFrame\\UI-PVP-FFA:14:10:-2:1:64:64:6:34:0:40|t" -- 4:3
+local FACTION_ALLIANCE_TEXTURE = "|TInterface\\TargetingFrame\\UI-PVP-Alliance:14:10:-2:1:64:64:6:34:0:40|t" -- 4:3
+local FACTION_NEUTRAL_TEXTURE = "|TInterface\\TargetingFrame\\UI-PVP-Neutral:14:10:-2:1:64:64:6:34:0:40|t" -- 4:3
+local FACTION_HORDE_TEXTURE = "|TInterface\\TargetingFrame\\UI-PVP-Horde:14:14:-4:0:64:64:0:40:0:40|t" -- 1:1
 
--- String storing current name data for the unit tooltips
-local NAME_STRING = {} 
+-- Lockdowns
+local LOCKDOWNS = {}
+
+-- Returns the correct difficulty color compared to the player.
+-- Using this as a tooltip method to access our custom colors.
+local GetDifficultyColorByLevel = function(level)
+	local colors = Colors.quest
+
+	level = level - UnitLevel("player") -- LEVEL
+	if (level > 4) then
+		return colors.red[1], colors.red[2], colors.red[3], colors.red.colorCode
+	elseif (level > 2) then
+		return colors.orange[1], colors.orange[2], colors.orange[3], colors.orange.colorCode
+	elseif (level >= -2) then
+		return colors.yellow[1], colors.yellow[2], colors.yellow[3], colors.yellow.colorCode
+	elseif (level >= -GetQuestGreenRange()) then
+		return colors.green[1], colors.green[2], colors.green[3], colors.green.colorCode
+	else
+		return colors.gray[1], colors.gray[2], colors.gray[3], colors.gray.colorCode
+	end
+end
+
+-- Update the color of the tooltip's current unit
+-- Returns the r, g, b value
+local GetUnitHealthColor = function(unit, data)
+	local r, g, b
+	if data then 
+		if (data.isPet and data.petRarity) then 
+			r, g, b = unpack(Colors.quality[data.petRarity - 1])
+		else
+			if ((not UnitPlayerControlled(unit)) and UnitIsTapDenied(unit)) then
+				r, g, b = unpack(Colors.tapped)
+			elseif (not UnitIsConnected(unit)) then
+				r, g, b = unpack(Colors.disconnected)
+			elseif (UnitIsDeadOrGhost(unit)) then
+				r, g, b = unpack(Colors.dead)
+			elseif (UnitIsPlayer(unit)) then
+				local _, class = UnitClass(unit)
+				if class then 
+					r, g, b = unpack(Colors.class[class])
+				else 
+					r, g, b = unpack(Colors.disconnected)
+				end 
+			elseif (UnitReaction(unit, "player")) then
+				r, g, b = unpack(Colors.reaction[UnitReaction(unit, "player")])
+			else
+				r, g, b = 1, 1, 1
+			end
+		end 
+	else 
+		if ((not UnitPlayerControlled(unit)) and UnitIsTapDenied(unit)) then
+			r, g, b = unpack(Colors.tapped)
+		elseif (not UnitIsConnected(unit)) then
+			r, g, b = unpack(Colors.disconnected)
+		elseif (UnitIsDeadOrGhost(unit)) then
+			r, g, b = unpack(Colors.dead)
+		elseif (UnitIsPlayer(unit)) then
+			local _, class = UnitClass(unit)
+			if class then 
+				r, g, b = unpack(Colors.class[class])
+			else 
+				r, g, b = unpack(Colors.disconnected)
+			end 
+		elseif (UnitReaction(unit, "player")) then
+			r, g, b = unpack(Colors.reaction[UnitReaction(unit, "player")])
+		else
+			r, g, b = 1, 1, 1
+		end
+	end 
+	return r,g,b
+end 
+
+local GetTooltipUnit = function(tooltip)
+	local _, unit = tooltip:GetUnit()
+	if (not unit) and UnitExists("mouseover") then
+		unit = "mouseover"
+	end
+	if unit and UnitIsUnit(unit, "mouseover") then
+		unit = "mouseover"
+	end
+	return UnitExists(unit) and unit
+end
 
 -- Bar post updates
 -- Show health values for tooltip health bars, and hide others.
@@ -70,172 +157,6 @@ local StatusBar_UpdateValue = function(bar, value, max)
 		end
 	end 
 end 
-
-local GetTooltipUnit = function(tooltip)
-	local _, unit = tooltip:GetUnit()
-	if (not unit) and UnitExists("mouseover") then
-		unit = "mouseover"
-	end
-	if unit and UnitIsUnit(unit, "mouseover") then
-		unit = "mouseover"
-	end
-	return UnitExists(unit) and unit	
-end
-
-local OnTooltipHide = function(tooltip)
-	tooltip.unit = nil
-end
-
-local OnTooltipSetUnit = function(tooltip)
-	if (tooltip:IsForbidden()) then 
-		return
-	end
-
-	local unit = GetTooltipUnit(tooltip)
-	if (not unit) then
-		tooltip:Hide()
-		tooltip.unit = nil
-		return
-	end
-
-	tooltip.unit = unit
-
-	local isplayer = UnitIsPlayer(unit)
-	local level = UnitLevel(unit)
-	local name, realm = UnitName(unit)
-	local faction = UnitFactionGroup(unit)
-	local isdead = UnitIsDead(unit) or UnitIsGhost(unit)
-	local colors = tooltip.colors or Layout.Colors
-
-	local disconnected, pvp, ffa, pvpname, afk, dnd, class, classname
-	local classification, creaturetype, iswildpet, isbattlepet
-	local isboss, reaction, istapped
-	local color
-
-	if isplayer then
-		disconnected = not UnitIsConnected(unit)
-		pvp = UnitIsPVP(unit)
-		ffa = UnitIsPVPFreeForAll(unit)
-		pvpname = UnitPVPName(unit)
-		afk = UnitIsAFK(unit)
-		dnd = UnitIsDND(unit)
-		classname, class = UnitClass(unit)
-	else
-		classification = UnitClassification(unit)
-		creaturetype = UnitCreatureFamily(unit) or UnitCreatureType(unit)
-		isboss = classification == "worldboss"
-		reaction = UnitReaction(unit, "player")
-		istapped = UnitIsTapDenied(unit)
-		iswildpet = UnitIsWildBattlePet and UnitIsWildBattlePet(unit)
-		isbattlepet = UnitIsBattlePetCompanion and UnitIsBattlePetCompanion(unit)
-
-		if isbattlepet or iswildpet then
-			level = UnitBattlePetLevel(unit)
-		end
-		if (level == -1) then
-			classification = "worldboss"
-			isboss = true
-		end
-	end
-
-	-- figure out name coloring based on collected data
-	if isdead then 
-		color = colors.dead
-	elseif isplayer then
-		if disconnected then
-			color = colors.disconnected
-		elseif class then
-			color = colors.class[class]
-		else
-			color = colors.normal
-		end
-	elseif reaction then
-		if istapped then
-			color = colors.tapped
-		else
-			color = colors.reaction[reaction]
-		end
-	else
-		color = colors.normal
-	end
-
-	-- this can sometimes happen when hovering over battlepets
-	if (not name) or (not color) then
-		tooltip:Hide()
-		return
-	end
-
-	-- clean up the tip
-	for i = 2, tooltip:NumLines() do
-		local line = _G[tooltip:GetName().."TextLeft"..i]
-		if line then
-			--line:SetTextColor(unpack(colors.quest.gray)) -- for the time being this will just be confusing
-			local text = line:GetText()
-			if text then
-				if (text == PVP_ENABLED) then
-					line:SetText("") -- kill pvp line, we're adding icons instead!
-				end
-				if (text == FACTION_ALLIANCE) or (text == FACTION_HORDE) then
-					line:SetText("") -- kill faction name, the pvp icons will describe this well enough!
-				end
-				if text == " " then
-					local nextLine = _G[tooltip:GetName().."TextLeft"..(i + 1)]
-					if nextLine then
-						local nextText = nextLine:GetText()
-						if (COALESCED_REALM_TOOLTIP and INTERACTIVE_REALM_TOOLTIP) then -- super simple check for connected realms
-							if (nextText == COALESCED_REALM_TOOLTIP) or (nextText == INTERACTIVE_REALM_TOOLTIP) then
-								line:SetText("")
-								nextLine:SetText(nil)
-							end
-						end
-					end
-				end
-			end
-		end
-	end
-
-	for i in ipairs(NAME_STRING) do 
-		NAME_STRING[i] = nil
-	end
-
-	if isplayer then
-		if ffa then
-			NAME_STRING[#NAME_STRING + 1] = FFA_TEXTURE
-		elseif (pvp and faction) then
-			if (faction == "Horde") then
-				NAME_STRING[#NAME_STRING + 1] = FACTION_HORDE_TEXTURE
-			elseif (faction == "Alliance") then
-				NAME_STRING[#NAME_STRING + 1] = FACTION_ALLIANCE_TEXTURE
-			elseif (faction == "Neutral") then
-				-- They changed this to their new atlas garbage in Legion, 
-				-- so for the sake of simplicty we'll just use the FFA PvP icon instead. Works.
-				NAME_STRING[#NAME_STRING + 1] = FFA_TEXTURE
-			end
-		end
-		NAME_STRING[#NAME_STRING + 1] = name
-	else
-		if isboss then
-			NAME_STRING[#NAME_STRING + 1] = BOSS_TEXTURE
-		end
-		NAME_STRING[#NAME_STRING + 1] = name
-	end
-
-	-- Need color codes for the text to always be correctly colored,
-	-- or blizzard will from time to time overwrite it with their own.
-	local title = _G[tooltip:GetName().."TextLeft1"]
-	local r, g, b = color[1], color[2], color[3]
-	title:SetFormattedText("|cff%02X%02X%02X%s|r", math_floor(r*255), math_floor(g*255), math_floor(b*255), table_concat(NAME_STRING, " ")) 
-
-	-- Color the statusbar in the same color as the unit name.
-	local statusbar = _G[tooltip:GetName().."StatusBar"]
-	if (statusbar and statusbar:IsShown()) then
-		if (color == colors.normal) then
-			color = colors.quest.green
-		end 
-		statusbar:SetStatusBarColor(color[1], color[2], color[3], 1)
-		statusbar.color = color
-	end	
-end
 
 local StatusBar_OnValueChanged = function(statusbar)
 	local value = statusbar:GetValue()
@@ -275,6 +196,10 @@ local StatusBar_OnValueChanged = function(statusbar)
 end
 
 local StatusBar_OnShow = function(statusbar)
+	if (not statusbar._owner) or (not GetTooltipUnit(statusbar._owner)) then 
+		statusbar:Hide()
+		return
+	end
 	Module:SetBlizzardTooltipBackdropOffsets(statusbar._owner, 10, 10, 10, 18)
 	StatusBar_OnValueChanged(statusbar)
 end
@@ -290,9 +215,236 @@ local StatusBar_OnHide = function(statusbar)
 	Module:SetBlizzardTooltipBackdropOffsets(statusbar._owner, 10, 10, 10, 12)
 end
 
-Module.PreInit = function(self)
-	local PREFIX = Core:GetPrefix()
-	Layout = CogWheel("LibDB"):GetDatabase(PREFIX..":[TooltipStyling]")
+local OnTooltipShow = function(tooltip)
+
+	-- Set the tooltip to the same scale as our own. 
+	local targetScale = Module:GetFrame("UICenter"):GetEffectiveScale()
+	local tooltipParentScale = (tooltip:GetParent() or WorldFrame):GetEffectiveScale()
+	tooltip:SetScale(targetScale/tooltipParentScale)
+
+	local lineIndex = 1
+	repeat 
+		local left = _G[tooltip:GetName().."TextLeft"..lineIndex]
+		local right = _G[tooltip:GetName().."TextRight"..lineIndex]
+		if (left) then 
+			local oldLeftObject = left:GetFontObject()
+			local oldRightObject = right:GetFontObject()
+			local leftObject = (lineIndex == 1) and GetFont(15, true) or GetFont(13, true)
+			local rightObject = (lineIndex == 1) and GetFont(15, true) or GetFont(13, true)
+			if (leftObject ~= oldLeftObject) then 
+				left:SetFontObject(leftObject)
+			end
+			if (rightObject ~= oldRightObject) then 
+				right:SetFontObject(rightObject)
+			end
+			--if (lineIndex > 1) then 
+			--	left:SetPoint("TOPLEFT", _G[tooltip:GetName().."TextLeft"..(lineIndex-1)], "BOTTOMLEFT", 0, -4)
+			--end 
+			lineIndex = lineIndex + 1
+		else
+			lineIndex = nil
+		end
+	until (not lineIndex)
+end
+
+local OnTooltipAddLine = function(tooltip, msg)
+	if not(LOCKDOWNS[tooltip]) then
+		return OnTooltipShow(tooltip)
+	end 
+	for i = 2, tooltip:NumLines() do
+		local line = _G[tooltip:GetName().."TextLeft"..i]
+		if line then
+			local text = line:GetText()
+			if (text == msg) then
+				line:SetText("")
+				return
+			end 
+		end
+	end
+end
+
+local OnTooltipAddDoubleLine = function(tooltip, leftText, rightText)
+	if not(LOCKDOWNS[tooltip]) then
+		return OnTooltipShow(tooltip)
+	end 
+	for i = 2, tooltip:NumLines() do
+		local left = _G[tooltip:GetName().."TextLeft"..i]
+		local right = _G[tooltip:GetName().."TextRight"..i]
+		if (left) then
+			local leftMsg = left:GetText()
+			local rightMsg = right:GetText()
+			if (leftMsg == leftText) or (rightMsg == rightText) then
+				left:SetText("")
+				right:SetText("")
+				return
+			end 
+		end
+	end
+end
+
+local AddLine = function(tooltip, lineIndex, msg, r, g, b)
+	r = r or Colors.offwhite[1]
+	g = g or Colors.offwhite[2]
+	b = b or Colors.offwhite[3]
+	local numLines = tooltip:NumLines()
+	if (lineIndex > numLines) then 
+		tooltip:AddLine(msg, r, g, b)
+	else
+		local left = _G[tooltip:GetName().."TextLeft"..lineIndex]
+		left:SetText(msg)
+		if (r and g and b) then 
+			left:SetTextColor(r, g, b)
+		end
+	end
+	return lineIndex + 1
+end
+
+local OnTooltipHide = function(tooltip)
+	tooltip.unit = nil
+	LOCKDOWNS[tooltip] = nil
+	if (tooltip:IsForbidden()) then 
+		return
+	end
+end
+
+local OnTooltipSetUnit = function(tooltip)
+	if (tooltip:IsForbidden()) then 
+		return
+	end
+
+	local unit = GetTooltipUnit(tooltip)
+	if (not unit) then
+		tooltip:Hide()
+		OnTooltipHide(tooltip)
+		return
+	end
+
+	local data = Module:GetTooltipDataForUnit(unit)
+	if (not data) then
+		tooltip:Hide()
+		OnTooltipHide(tooltip)
+		return
+	end
+
+	LOCKDOWNS[tooltip] = nil
+	tooltip.unit = unit
+	local numLines = tooltip:NumLines()
+	local lineIndex = 1
+	for i = numLines,1,-1 do 
+		local left = _G[tooltip:GetName().."TextLeft"..i]
+		local right = _G[tooltip:GetName().."TextRight"..i]
+		if (left) then
+			left:SetText("")
+		end
+		if (right) then
+			right:SetText("")
+		end
+	end
+
+	-- name 
+	local displayName = data.name
+	if data.isPlayer then 
+		if (data.showPvPFactionWithName) then 
+			if data.isFFA then
+				displayName = FFA_TEXTURE .. " " .. displayName
+			elseif (data.isPVP and data.englishFaction) then
+				if (data.englishFaction == "Horde") then
+					displayName = FACTION_HORDE_TEXTURE .. " " .. displayName
+				elseif (data.englishFaction == "Alliance") then
+					displayName = FACTION_ALLIANCE_TEXTURE .. " " .. displayName
+				elseif (data.englishFaction == "Neutral") then
+					-- They changed this to their new atlas garbage in Legion, 
+					-- so for the sake of simplicty we'll just use the FFA PvP icon instead. Works.
+					displayName = FFA_TEXTURE .. " " .. displayName
+				end
+			end
+		end
+	else 
+		if data.isBoss then
+			displayName = BOSS_TEXTURE .. " " .. displayName
+		end
+	end
+
+	local levelText
+	if (data.effectiveLevel and (data.effectiveLevel > 0)) then 
+		local r, g, b, colorCode = GetDifficultyColorByLevel(data.effectiveLevel)
+		levelText = colorCode .. data.effectiveLevel .. "|r"
+	end 
+
+	local r, g, b = GetUnitHealthColor(unit,data)
+	if levelText then 
+		lineIndex = AddLine(tooltip, lineIndex, levelText .. Colors.quest.gray.colorCode .. ": |r" .. displayName, r, g, b)
+	else
+		lineIndex = AddLine(tooltip, lineIndex, displayName, r, g, b)
+	end 
+
+	-- Players
+	if data.isPlayer then 
+		if data.guild then 
+			lineIndex = AddLine(tooltip, lineIndex, "<"..data.guild..">", Colors.title[1], Colors.title[2], Colors.title[3])
+		end 
+
+		local levelLine
+
+		if data.raceDisplayName then 
+			levelLine = (levelLine and levelLine.." " or "") .. data.raceDisplayName
+		end 
+
+		if (data.classDisplayName and data.class) then 
+			levelLine = (levelLine and levelLine.." " or "") .. data.classDisplayName
+		end 
+
+		if levelLine then 
+			lineIndex = AddLine(tooltip, lineIndex, levelLine, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
+		end 
+
+		-- player faction (Horde/Alliance/Neutral)
+		if data.localizedFaction then 
+			lineIndex = AddLine(tooltip, lineIndex, data.localizedFaction)
+		end 
+
+	-- Battle Pets
+	elseif data.isPet then 
+
+	-- All other NPCs
+	else  
+	-- titles
+		if data.title then 
+			lineIndex = AddLine(tooltip, lineIndex, "<"..data.title..">", Colors.normal[1], Colors.normal[2], Colors.normal[3])
+		end 
+
+		if data.city then 
+			lineIndex = AddLine(tooltip, lineIndex, data.city, Colors.title[1], Colors.title[2], Colors.title[3])
+		end 
+
+		-- Beast etc 
+		if data.creatureFamily then 
+			lineIndex = AddLine(tooltip, lineIndex, data.creatureFamily, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
+
+		-- Humanoid, Crab, etc 
+		elseif data.creatureType then 
+			lineIndex = AddLine(tooltip, lineIndex, data.creatureType, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
+		end 
+
+		-- player faction (Horde/Alliance/Neutral)
+		if data.localizedFaction then 
+			lineIndex = AddLine(tooltip, lineIndex, data.localizedFaction)
+		end 
+	end 
+
+	tooltip:Show()
+	LOCKDOWNS[tooltip] = true
+
+	local bar = _G[tooltip:GetName().."StatusBar"]
+	bar.color = { r, g, b }
+	bar:ClearAllPoints()
+	bar:SetPoint("TOPLEFT", tooltip, "BOTTOMLEFT", 3, -1)
+	bar:SetPoint("TOPRIGHT", tooltip, "BOTTOMRIGHT", -3, -1)
+	bar:SetStatusBarColor(r, g, b)
+end
+
+Module.OnInit = function(self)
+	Layout = CogWheel("LibDB"):GetDatabase(Core:GetPrefix()..":[TooltipStyling]")
 end 
 
 Module.OnEnable = function(self)
@@ -304,6 +456,18 @@ Module.OnEnable = function(self)
 		self:SetBlizzardTooltipBackdropBorderColor(tooltip, unpack(Layout.TooltipBackdropBorderColor))
 		self:SetBlizzardTooltipBackdropOffsets(tooltip, 10, 10, 10, 12)
 
+		if tooltip.SetText then 
+			hooksecurefunc(tooltip, "SetText", OnTooltipAddLine)
+		end
+
+		if tooltip.AddLine then 
+			hooksecurefunc(tooltip, "AddLine", OnTooltipAddLine)
+		end 
+
+		if tooltip.AddDoubleLine then 
+			hooksecurefunc(tooltip, "AddDoubleLine", OnTooltipAddDoubleLine)
+		end 
+
 		if tooltip:HasScript("OnTooltipSetUnit") then 
 			tooltip:HookScript("OnTooltipSetUnit", OnTooltipSetUnit)
 		end
@@ -311,25 +475,28 @@ Module.OnEnable = function(self)
 		if tooltip:HasScript("OnHide") then 
 			tooltip:HookScript("OnHide", OnTooltipHide)
 		end
+		
+		if tooltip:HasScript("OnShow") then 
+			tooltip:HookScript("OnShow", OnTooltipShow)
+		end
 
 		local bar = _G[tooltip:GetName().."StatusBar"]
 		if bar then 
 			bar:ClearAllPoints()
-			bar:SetPoint("TOPLEFT", tooltip, "BOTTOMLEFT", 3, 1  -2)
-			bar:SetPoint("TOPRIGHT", tooltip, "BOTTOMRIGHT", -3, 1  -2)
+			bar:SetPoint("TOPLEFT", tooltip, "BOTTOMLEFT", 3, -1)
+			bar:SetPoint("TOPRIGHT", tooltip, "BOTTOMRIGHT", -3, -1)
 			bar:SetHeight(3)
 			bar._owner = tooltip
 
 			bar.value = bar:CreateFontString()
 			bar.value:SetDrawLayer("OVERLAY")
-			bar.value:SetFontObject(Game12Font_o1)
+			bar.value:SetFontObject(Game13Font_o1)
 			bar.value:SetPoint("CENTER", 0, 0)
-			bar.value:SetTextColor(235/250, 235/250, 235/250, .75)
+			bar.value:SetTextColor(235/255, 235/255, 235/255, .75)
 
 			bar:HookScript("OnShow", StatusBar_OnShow)
 			bar:HookScript("OnHide", StatusBar_OnHide)
 			bar:HookScript("OnValueChanged", StatusBar_OnValueChanged)
-
 		end 
 	end 
 end 

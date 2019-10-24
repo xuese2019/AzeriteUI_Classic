@@ -1,4 +1,4 @@
-local LibTooltipScanner = CogWheel:Set("LibTooltipScanner", 33)
+local LibTooltipScanner = CogWheel:Set("LibTooltipScanner", 34)
 if (not LibTooltipScanner) then	
 	return
 end
@@ -1506,8 +1506,8 @@ end
 
 LibTooltipScanner.GetTooltipDataForUnit = function(self, unit, tbl)
 	Scanner:Hide()
-	Scanner.owner = self
-	Scanner:SetOwner(self, "ANCHOR_NONE")
+	Scanner.owner = UIParent
+	Scanner:SetOwner(UIParent, "ANCHOR_NONE")
 
 	if UnitExists(unit) then 
 		Scanner:SetUnit(unit)
@@ -1533,8 +1533,6 @@ LibTooltipScanner.GetTooltipDataForUnit = function(self, unit, tbl)
 
 		-- Players
 		if isPlayer then 
-
-
 			local classDisplayName, class, classID = UnitClass(unit)
 			local englishFaction, localizedFaction = UnitFactionGroup(unit)
 			local guildName, guildRankName, guildRankIndex, realm = GetGuildInfo(unit)
@@ -1600,12 +1598,15 @@ LibTooltipScanner.GetTooltipDataForUnit = function(self, unit, tbl)
 		-- NPCs
 		else 
 
+			local englishFaction, localizedFaction = UnitFactionGroup(unit)
 			local reaction = UnitReaction(unit, "player")
 			local classification = UnitClassification(unit)
 			if (unitLevel < 0) or (unitEffectiveLevel < 0) then
 				classification = "worldboss"
 			end
 	
+			tbl.englishFaction = englishFaction
+			tbl.localizedFaction = localizedFaction
 			tbl.level = unitLevel
 			tbl.effectiveLevel = unitEffectiveLevel or unitLevel
 			tbl.classification = classification
@@ -1624,7 +1625,7 @@ LibTooltipScanner.GetTooltipDataForUnit = function(self, unit, tbl)
 				if line then 
 					local msg = line:GetText()
 					if msg then 
-						if (string_find(msg, Patterns.Level) and (not string_find(msg, Patterns.ItemLevel))) then 
+						if (string_find(msg, Patterns.Level)) then 
 
 							foundLevel = lineIndex
 

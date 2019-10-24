@@ -1,4 +1,4 @@
-local LibTooltip = CogWheel:Set("LibTooltip", 59)
+local LibTooltip = CogWheel:Set("LibTooltip", 60)
 if (not LibTooltip) then	
 	return
 end
@@ -102,7 +102,7 @@ local Backdrops = LibTooltip.blizzardBackdrops
 -- Constants we might change or make variable later on
 local TEXT_INSET = 10 -- text insets from tooltip edges
 local RIGHT_PADDING= 40 -- padding between left and right messages
-local LINE_PADDING = 4 -- padding between lines of text
+local LINE_PADDING = 2 -- padding between lines of text
 
 -- Fonts
 local FONT_TITLE = Game15Font_o1 
@@ -110,11 +110,11 @@ local FONT_NORMAL = Game13Font_o1 -- Game12Font_o1
 local FONT_VALUE = Game13Font_o1
 
 -- Blizzard textures we use 
-local BOSS_TEXTURE = "|TInterface\\TargetingFrame\\UI-TargetingFrame-Skull:16:16:-2:1|t"
-local FFA_TEXTURE = "|TInterface\\TargetingFrame\\UI-PVP-FFA:16:12:-2:1:64:64:6:34:0:40|t"
-local FACTION_ALLIANCE_TEXTURE = "|TInterface\\TargetingFrame\\UI-PVP-Alliance:16:12:-2:1:64:64:6:34:0:40|t"
-local FACTION_NEUTRAL_TEXTURE = "|TInterface\\TargetingFrame\\UI-PVP-Neutral:16:12:-2:1:64:64:6:34:0:40|t"
-local FACTION_HORDE_TEXTURE = "|TInterface\\TargetingFrame\\UI-PVP-Horde:16:16:-4:0:64:64:0:40:0:40|t"
+local BOSS_TEXTURE = "|TInterface\\TargetingFrame\\UI-TargetingFrame-Skull:14:14:-2:1|t" -- 1:1
+local FFA_TEXTURE = "|TInterface\\TargetingFrame\\UI-PVP-FFA:14:10:-2:1:64:64:6:34:0:40|t" -- 4:3
+local FACTION_ALLIANCE_TEXTURE = "|TInterface\\TargetingFrame\\UI-PVP-Alliance:14:10:-2:1:64:64:6:34:0:40|t" -- 4:3
+local FACTION_NEUTRAL_TEXTURE = "|TInterface\\TargetingFrame\\UI-PVP-Neutral:14:10:-2:1:64:64:6:34:0:40|t" -- 4:3
+local FACTION_HORDE_TEXTURE = "|TInterface\\TargetingFrame\\UI-PVP-Horde:14:14:-4:0:64:64:0:40:0:40|t" -- 1:1
 
 -- Blizzard tooltips
 local blizzardTips = {
@@ -1050,7 +1050,6 @@ Tooltip.SetSmartAnchor = function(self, parent, offsetX, offsetY)
 	self:Place(point, parent, rPoint, offsetX, offsetY)
 end 
 
-
 -- Returns the correct difficulty color compared to the player.
 -- Using this as a tooltip method to access our custom colors.
 Tooltip.GetDifficultyColorByLevel = function(self, level)
@@ -1442,17 +1441,19 @@ Tooltip.SetUnit = function(self, unit)
 			-- name 
 			local displayName = data.name
 			if data.isPlayer then 
-				if data.isFFA then
-					displayName = FFA_TEXTURE .. " " .. displayName
-				elseif (data.isPVP and data.englishFaction) then
-					if (data.englishFaction == "Horde") then
-						displayName = FACTION_HORDE_TEXTURE .. " " .. displayName
-					elseif (data.englishFaction == "Alliance") then
-						displayName = FACTION_ALLIANCE_TEXTURE .. " " .. displayName
-					elseif (data.englishFaction == "Neutral") then
-						-- They changed this to their new atlas garbage in Legion, 
-						-- so for the sake of simplicty we'll just use the FFA PvP icon instead. Works.
+				if (data.showPvPFactionWithName) then 
+					if data.isFFA then
 						displayName = FFA_TEXTURE .. " " .. displayName
+					elseif (data.isPVP and data.englishFaction) then
+						if (data.englishFaction == "Horde") then
+							displayName = FACTION_HORDE_TEXTURE .. " " .. displayName
+						elseif (data.englishFaction == "Alliance") then
+							displayName = FACTION_ALLIANCE_TEXTURE .. " " .. displayName
+						elseif (data.englishFaction == "Neutral") then
+							-- They changed this to their new atlas garbage in Legion, 
+							-- so for the sake of simplicty we'll just use the FFA PvP icon instead. Works.
+							displayName = FFA_TEXTURE .. " " .. displayName
+						end
 					end
 				end
 			else 
@@ -1478,16 +1479,10 @@ Tooltip.SetUnit = function(self, unit)
 				self:AddLine(displayName, r, g, b, true)
 			end 
 
-			-- titles
-			-- *add player title to a separate line, same as with npc titles?
-			if data.title then 
-				self:AddLine(data.title, colors.normal[1], colors.normal[2], colors.normal[3], true)
-			end 
-
 			-- Players
 			if data.isPlayer then 
 				if data.guild then 
-					self:AddLine(data.guild, colors.title[1], colors.title[2], colors.title[3])
+					self:AddLine("<"..data.guild..">", colors.title[1], colors.title[2], colors.title[3])
 				end  
 
 				local levelLine
@@ -1513,20 +1508,23 @@ Tooltip.SetUnit = function(self, unit)
 					self:AddLine(data.localizedFaction)
 				end 
 
-
 			-- Battle Pets
 			elseif data.isPet then 
 
-
 			-- All other NPCs
 			else  
+				-- titles
+				if data.title then 
+					self:AddLine("<"..data.title..">", colors.normal[1], colors.normal[2], colors.normal[3], true)
+				end 
+
 				if data.city then 
 					self:AddLine(data.city, colors.title[1], colors.title[2], colors.title[3])
 				end 
 
 				-- Beast etc 
 				if data.creatureFamily then 
-					self:AddLine(data.creatureType, colors.offwhite[1], colors.offwhite[2], colors.offwhite[3])
+					self:AddLine(data.creatureFamily, colors.offwhite[1], colors.offwhite[2], colors.offwhite[3])
 
 				-- Humanoid, Crab, etc 
 				elseif data.creatureType then 
