@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.62-RC] 2019-10-25
+### Added
+- Added vendor sell prices to items when not at a vendor. 
+
+### Changed
+- Mouseover unit tooltips should now be much more similar to our unitframe tooltips.
+- Mouseover tooltips shouldn't have a different scale before and after hovering over a unit anymore. 
+
+### Fixed
+- Fixed some tooltip parsing issues that would use the spell description as the spell cost in some cases where spells had a cost but not a range. 
+
 ## [1.0.61-RC] 2019-10-22
 ### Fixed
 - Fixed an issue with wrongly named custom events which caused interrupted spellcasts to appear to still be casting. 
