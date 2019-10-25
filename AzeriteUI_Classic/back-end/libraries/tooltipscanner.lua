@@ -1643,26 +1643,8 @@ LibTooltipScanner.GetTooltipDataForItemLink = function(self, itemLink, tbl)
 		tbl.itemName = itemName
 		tbl.itemRarity = itemRarity
 		tbl.isBattlePet = isBattlePet
-		tbl.xxxx = xxxx
-		tbl.xxxx = xxxx
-		tbl.xxxx = xxxx
-		tbl.xxxx = xxxx
-		tbl.xxxx = xxxx
-		tbl.xxxx = xxxx
-		tbl.xxxx = xxxx
-		tbl.xxxx = xxxx
-		tbl.xxxx = xxxx
-		tbl.xxxx = xxxx
-		tbl.xxxx = xxxx
-		tbl.xxxx = xxxx
-		tbl.xxxx = xxxx
-		tbl.xxxx = xxxx
-		tbl.xxxx = xxxx
-		tbl.xxxx = xxxx
-		tbl.xxxx = xxxx
-		tbl.xxxx = xxxx
-		tbl.xxxx = xxxx
-		tbl.xxxx = xxxx
+		tbl.itemSellPrice = itemSellPrice
+		tbl.itemStackCount = itemStackCount
 
 		return tbl
 	end 
