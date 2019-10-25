@@ -1,4 +1,4 @@
-local LibTooltipScanner = CogWheel:Set("LibTooltipScanner", 34)
+local LibTooltipScanner = CogWheel:Set("LibTooltipScanner", 36)
 if (not LibTooltipScanner) then	
 	return
 end
@@ -650,6 +650,11 @@ LibTooltipScanner.GetTooltipDataForAction = function(self, actionSlot, tbl)
 							id = id + 1
 						end 
 					end
+				end
+				-- Need to break here, or it will keep on parsing 
+				-- and use faulty lines as the spell cost. (e.g. Omen of Clarity, this bugged out)
+				if (foundCost) then 
+					break
 				end
 			end
 		end 
