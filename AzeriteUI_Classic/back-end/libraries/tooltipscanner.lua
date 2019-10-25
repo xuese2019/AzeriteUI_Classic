@@ -208,10 +208,10 @@ local Patterns = {
 	Range4 = 					"^" .. string_gsub(Constants.RangeSpell, "%%s", "(%.+)"),
 
 	-- Power Types for Spell Cost 
-	PowerType1 = 				Constants.PowerType1,
-	PowerType2 = 				Constants.PowerType2,
-	PowerType3 = 				Constants.PowerType3,
-	PowerType4 = 				Constants.PowerType4,
+	PowerType1 = 				"^(.+)" .. Constants.PowerType1,
+	PowerType2 = 				"^(.+)" .. Constants.PowerType2,
+	PowerType3 = 				"^(.+)" .. Constants.PowerType3,
+	PowerType4 = 				"^(.+)" .. Constants.PowerType4,
 
 	-- Spell Requirements
 	SpellRequiresForm = 			   "(" .. (string_gsub(Constants.SpellRequiresForm, "%%s", "(.+)")) .. ")", 
