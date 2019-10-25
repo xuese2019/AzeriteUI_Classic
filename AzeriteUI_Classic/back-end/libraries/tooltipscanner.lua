@@ -122,59 +122,6 @@ local Constants = {
 	SpellRequiresForm = _G.SPELL_REQUIRED_FORM, 
 }
 
--- Listing them for personal reference
---FRIENDS_LEVEL_TEMPLATE = "Level %d %s"
---UNIT_LETHAL_LEVEL_DEAD_TEMPLATE = "Level ?? Corpse"
---UNIT_LETHAL_LEVEL_TEMPLATE = "Level ??"
---UNIT_LEVEL_DEAD_TEMPLATE = "Level %d Corpse"
---UNIT_LEVEL_TEMPLATE = "Level %d"
---UNIT_PLUS_LEVEL_TEMPLATE = "Level %d Elite"
---UNIT_TYPE_LETHAL_LEVEL_TEMPLATE = "Level ?? %s"
---UNIT_TYPE_LEVEL_TEMPLATE = "Level %d %s"
---UNIT_TYPE_PLUS_LEVEL_TEMPLATE = "Level %d Elite %s"
-
-	--[[
-
-	[CastTime]
-	SPELL_RECAST_TIME_CHARGEUP_INSTANT = "Instant"
-	SPELL_CAST_TIME_INSTANT = "Instant"
-	SPELL_CAST_TIME_INSTANT_NO_MANA = "Instant"
-	SPELL_CAST_TIME_MIN = "%.3g min cast"
-	SPELL_CAST_TIME_SEC = "%.3g sec cast"
-
-	[CooldownTime]
-	SPELL_RECAST_TIME_INSTANT = "Instant cooldown"
-	SPELL_RECAST_TIME_DAYS = "%.3g day cooldown"
-	SPELL_RECAST_TIME_HOURS = "%.3g hour cooldown"
-	SPELL_RECAST_TIME_MIN = "%.3g min cooldown"
-	SPELL_RECAST_TIME_SEC = "%.3g sec cooldown"
-	SPELL_RECAST_TIME_CHARGES_DAYS = "%.3g day recharge"
-	SPELL_RECAST_TIME_CHARGES_HOURS = "%.3g hour recharge"
-	SPELL_RECAST_TIME_CHARGES_INSTANT = "Instant recharge"
-	SPELL_RECAST_TIME_CHARGES_MIN = "%.3g min recharge"
-	SPELL_RECAST_TIME_CHARGES_SEC = "%.3g sec recharge"
-
-	[Cooldown/Chargetime remaining]
-
-	SPELL_RECAST_TIME_CHARGEUP_DAYS = "%.3g |4day:days; required"
-	SPELL_RECAST_TIME_CHARGEUP_HOURS = "%.3g |4hour:hours; required"
-	SPELL_RECAST_TIME_CHARGEUP_MIN = "%.3g min required"
-	SPELL_RECAST_TIME_CHARGEUP_SEC = "%.3g sec required"
-
-	SPELL_RECHARGE_TIME = "Recharging: %s"
-	SPELL_RECHARGE_TIME_DAYS = "Recharging: %d |4day:days;"
-	SPELL_RECHARGE_TIME_HOURS = "Recharging: %d |4hour:hours;"
-	SPELL_RECHARGE_TIME_MIN = "Recharging: %d min"
-	SPELL_RECHARGE_TIME_SEC = "Recharging: %d sec"
-
-	COOLDOWN_REMAINING = "Cooldown remaining:"
-	ITEM_COOLDOWN_TIME = "Cooldown remaining: %s"
-	ITEM_COOLDOWN_TIME_DAYS = "Cooldown remaining: %d |4day:days;"
-	ITEM_COOLDOWN_TIME_HOURS = "Cooldown remaining: %d |4hour:hours;"
-	ITEM_COOLDOWN_TIME_MIN = "Cooldown remaining: %d min"
-	ITEM_COOLDOWN_TIME_SEC = "Cooldown remaining: %d sec"
-	]]
-
 local singlePattern = function(msg, plain)
 	msg = msg:gsub("%%%d?$?c", ".+")
 	msg = msg:gsub("%%%d?$?d", "%%d+")
