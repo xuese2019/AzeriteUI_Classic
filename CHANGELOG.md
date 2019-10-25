@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.63-RC] 2019-10-25
+### Fixed
+- Item tooltips now show the correct vendor sell price for partially full item stacks. 
+
 ## [1.0.62-RC] 2019-10-25
 ### Added
 - Added vendor sell prices to items when not at a vendor. 
