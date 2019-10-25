@@ -20,6 +20,7 @@ local string_find = string.find
 local string_format = string.format
 local table_concat = table.concat
 local table_wipe = table.wipe
+local tonumber = tonumber
 local type = type
 local unpack = unpack
 
@@ -355,8 +356,13 @@ local OnTooltipSetItem = function(tooltip)
 				if (itemSellPrice and (itemSellPrice > 0)) then
 					LOCKDOWNS[tooltip] = nil
 
+					local itemCount = frame.count or (frame.Count and frame.Count.GetText and tonumber(frame.Count:GetText()))
+					local label = string_format("%s:", SELL_PRICE)
+					local price = formatMoney((itemCount or 1) * itemSellPrice)
+					local color = Colors.offwhite
+
 					tooltip:AddLine(" ")
-					tooltip:AddDoubleLine(string_format("%s:", SELL_PRICE), formatMoney((itemStackCount or 1) * itemSellPrice), Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
+					tooltip:AddDoubleLine(label, price, color[1], color[2], color[3], color[1], color[2], color[3])
 
 					-- Not doing this yet. But we will. Oh yes we will. 
 					--LOCKDOWNS[tooltip] = true
