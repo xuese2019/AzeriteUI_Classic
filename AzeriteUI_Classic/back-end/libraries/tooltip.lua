@@ -1,5 +1,5 @@
-local LibTooltip = CogWheel:Set("LibTooltip", 60)
-if (not LibTooltip) then	
+local LibTooltip = CogWheel:Set("LibTooltip", 61)
+if (not LibTooltip) then
 	return
 end
 
@@ -116,6 +116,9 @@ local FACTION_ALLIANCE_TEXTURE = "|TInterface\\TargetingFrame\\UI-PVP-Alliance:1
 local FACTION_NEUTRAL_TEXTURE = "|TInterface\\TargetingFrame\\UI-PVP-Neutral:14:10:-2:1:64:64:6:34:0:40|t" -- 4:3
 local FACTION_HORDE_TEXTURE = "|TInterface\\TargetingFrame\\UI-PVP-Horde:14:14:-4:0:64:64:0:40:0:40|t" -- 1:1
 
+-- Player constants
+local englishPlayerFaction, localizedPlayerFaction = UnitFactionGroup("player")
+
 -- Blizzard tooltips
 local blizzardTips = {
 	"GameTooltip",
@@ -165,7 +168,6 @@ local fakeBackdrop = {
 }
 local fakeBackdropColor = { 0, 0, 0, .95 }
 local fakeBackdropBorderColor = { .3, .3, .3, 1 }
-
 
 -- Utility Functions
 ---------------------------------------------------------
@@ -1123,7 +1125,7 @@ Tooltip.SetAction = function(self, slot)
 				self:AddLine(data.spellRange, colors.offwhite[1], colors.offwhite[2], colors.offwhite[3], true)
 
 			elseif data.spellCost then 
-				self:AddLine(data.spellCost, colors.offwhite[1], colors.offwhite[2], colors.offwhite[3], true, true)
+				self:AddLine(data.spellCost, colors.offwhite[1], colors.offwhite[2], colors.offwhite[3], true)
 			end 
 		end 
 
@@ -1505,7 +1507,7 @@ Tooltip.SetUnit = function(self, unit)
 
 				-- player faction (Horde/Alliance/Neutral)
 				if data.localizedFaction then 
-					self:AddLine(data.localizedFaction)
+					self:AddLine(data.localizedFaction, colors.offwhite[1], colors.offwhite[2], colors.offwhite[3])
 				end 
 
 			-- Battle Pets
@@ -1529,7 +1531,12 @@ Tooltip.SetUnit = function(self, unit)
 				-- Humanoid, Crab, etc 
 				elseif data.creatureType then 
 					self:AddLine(data.creatureType, colors.offwhite[1], colors.offwhite[2], colors.offwhite[3])
-				end  
+				end 
+
+				-- player faction (Horde/Alliance/Neutral)
+				if data.localizedFaction then 
+					self:AddLine(data.localizedFaction, colors.offwhite[1], colors.offwhite[2], colors.offwhite[3])
+				end 
 			end 
 
 			if self:UpdateBarValues(unit, true) then 
