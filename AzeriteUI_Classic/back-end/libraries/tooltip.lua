@@ -1,4 +1,4 @@
-local LibTooltip = CogWheel:Set("LibTooltip", 61)
+local LibTooltip = CogWheel:Set("LibTooltip", 62)
 if (not LibTooltip) then
 	return
 end
@@ -2485,7 +2485,7 @@ LibTooltip.SetBlizzardTooltipBackdropOffsets = function(self, tooltip, left, rig
 end 
 
 LibTooltip.SetBlizzardTooltipBackdrop = function(self, tooltip, backdrop)
-	if (not Backdrops[tooltip]) then 
+	if (not Backdrops[tooltip]) then
 		local backdrop = CreateFrame("Frame", nil, tooltip)
 		backdrop:SetFrameStrata(tooltip:GetFrameStrata())
 		backdrop:SetFrameLevel(tooltip:GetFrameLevel())
@@ -2493,9 +2493,9 @@ LibTooltip.SetBlizzardTooltipBackdrop = function(self, tooltip, backdrop)
 		backdrop:SetPoint("RIGHT", 0, 0)
 		backdrop:SetPoint("TOP", 0, 0)
 		backdrop:SetPoint("BOTTOM", 0, 0)
-		hooksecurefunc(tooltip, "SetFrameStrata", function(self) backdrop:SetFrameLevel(self:GetFrameLevel()) end)
-		hooksecurefunc(tooltip, "SetFrameLevel", function(self) backdrop:SetFrameLevel(self:GetFrameLevel()) end)
-		hooksecurefunc(tooltip, "SetParent", function(self) backdrop:SetFrameLevel(self:GetFrameLevel()) end)
+		hooksecurefunc(tooltip, "SetFrameStrata", function() backdrop:SetFrameLevel(tooltip:GetFrameLevel()) end)
+		hooksecurefunc(tooltip, "SetFrameLevel", function() backdrop:SetFrameLevel(tooltip:GetFrameLevel()) end)
+		hooksecurefunc(tooltip, "SetParent", function() backdrop:SetFrameLevel(tooltip:GetFrameLevel()) end)
 		Backdrops[tooltip] = backdrop
 	end 
 	Backdrops[tooltip]:SetBackdrop(nil)
