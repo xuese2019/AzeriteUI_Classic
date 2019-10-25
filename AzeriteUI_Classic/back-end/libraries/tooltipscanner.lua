@@ -1665,7 +1665,6 @@ LibTooltipScanner.GetTooltipDataForContainerSlot = function(self, bagID, slotID,
 			tbl[i] = nil
 		end 
 
-
 		return tbl
 	end 
 
