@@ -438,9 +438,9 @@ LibTooltipScanner.GetTooltipDataForAction = function(self, actionSlot, tbl)
 		local lastInfoLine = 1 -- The last line where information exists
 
 		-- Iterate available lines for action information
-		for lineIndex = 2, (numLines < 4) and numLines or 4  do 
+		for lineIndex = 2, (numLines < 4) and numLines or 4 do 
 
-			left, right = _G[ScannerName.."TextLeft"..lineIndex],  _G[ScannerName.."TextRight"..lineIndex]
+			left, right = _G[ScannerName.."TextLeft"..lineIndex], _G[ScannerName.."TextRight"..lineIndex]
 			if (left and right) then 
 
 				local leftMsg, rightMsg = left:GetText(), right:GetText()
@@ -616,7 +616,7 @@ LibTooltipScanner.GetTooltipDataForAction = function(self, actionSlot, tbl)
 									if (leftMsg and (leftMsg ~= "")) then 
 										foundCost = lineIndex
 										tbl.spellCost = leftMsg
-									end  
+									end 
 								end 
 
 								break
@@ -635,10 +635,7 @@ LibTooltipScanner.GetTooltipDataForAction = function(self, actionSlot, tbl)
 			for lineIndex = 2, (numLines < 4) and numLines or 4  do
 				left = _G[ScannerName.."TextLeft"..lineIndex]
 				if (left) then 
-	
 					local leftMsg = left:GetText()
-	
-					-- Left side iterations
 					if (leftMsg and (leftMsg ~= "")) then 
 						local id = 1
 						while Patterns["PowerType"..id] do 
