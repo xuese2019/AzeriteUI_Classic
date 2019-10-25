@@ -43,6 +43,16 @@ local FACTION_ALLIANCE_TEXTURE = "|TInterface\\TargetingFrame\\UI-PVP-Alliance:1
 local FACTION_NEUTRAL_TEXTURE = "|TInterface\\TargetingFrame\\UI-PVP-Neutral:14:10:-2:1:64:64:6:34:0:40|t" -- 4:3
 local FACTION_HORDE_TEXTURE = "|TInterface\\TargetingFrame\\UI-PVP-Horde:14:14:-4:0:64:64:0:40:0:40|t" -- 1:1
 
+-- Flag set to true if any other known 
+-- addon with vendor sell prices is enabled 
+local DISABLE_VENDOR_PRICES = (function(...) 
+	for i = 1,select("#", ...) do
+		if Module:IsAddOnEnabled((select(i, ...))) then 
+			return true
+		end
+	end
+end)("Auctionator", "TradeSkillMaster")
+
 -- Lockdowns
 local LOCKDOWNS = {}
 
@@ -342,6 +352,10 @@ end
 local OnTooltipSetItem = function(tooltip)
 	if (tooltip:IsForbidden()) then 
 		return
+	end
+
+	if (DISABLE_VENDOR_PRICES) then 
+		return 
 	end
 
 	local frame = GetMouseFocus()
