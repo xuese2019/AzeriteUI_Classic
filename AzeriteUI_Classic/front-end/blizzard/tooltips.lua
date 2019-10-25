@@ -15,13 +15,16 @@ Module:SetIncompatible("TinyTooltip")
 -- Lua API
 local _G = _G
 local math_floor = math.floor
+local math_mod = math.fmod
 local string_find = string.find
+local string_format = string.format
 local table_concat = table.concat
 local table_wipe = table.wipe
 local type = type
 local unpack = unpack
 
 -- WoW API
+local GetItemInfo = GetItemInfo
 local GetQuestGreenRange = GetQuestGreenRange
 local UnitExists = UnitExists
 local UnitIsUnit = UnitIsUnit
@@ -30,6 +33,7 @@ local UnitLevel = UnitLevel
 -- Private API
 local Colors = Private.Colors
 local GetFont = Private.GetFont
+local GetMedia = Private.GetMedia
 
 -- Blizzard textures we use 
 local BOSS_TEXTURE = "|TInterface\\TargetingFrame\\UI-TargetingFrame-Skull:14:14:-2:1|t" -- 1:1
@@ -307,6 +311,61 @@ local OnTooltipHide = function(tooltip)
 	end
 end
 
+local formatMoney = function(money)
+	local gold = math_floor(money / (COPPER_PER_SILVER * SILVER_PER_GOLD))
+	local silver = math_floor((money - (gold * COPPER_PER_SILVER * SILVER_PER_GOLD)) / COPPER_PER_SILVER)
+	local copper = math_mod(money, COPPER_PER_SILVER)
+	
+	--local goldIcon = [[|TInterface\MoneyFrame\UI-GoldIcon:16:16:0:0|t]]
+	--local silverIcon = [[|TInterface\MoneyFrame\UI-SilverIcon:16:16:0:0|t]]
+	--local copperIcon = [[|TInterface\MoneyFrame\UI-CopperIcon:16:16:0:0|t]]
+
+	local goldIcon = string_format([[|T%s:16:16:0:0:64:64:%d:%d:%d:%d|t]], GetMedia("coins"), 0,32,0,32)
+	local silverIcon = string_format([[|T%s:16:16:0:0:64:64:%d:%d:%d:%d|t]], GetMedia("coins"), 32,64,0,32)
+	local copperIcon = string_format([[|T%s:16:16:0:0:64:64:%d:%d:%d:%d|t]], GetMedia("coins"), 0,32,32,64)
+
+	local moneyString
+	if (gold > 0) then 
+		moneyString = string_format("%d%s", gold, goldIcon)
+	end
+	if (silver > 0) then 
+		moneyString = (moneyString and moneyString.." " or "") .. string_format("%d%s", silver, silverIcon)
+	end
+	if (copper > 0) then 
+		moneyString = (moneyString and moneyString.." " or "") .. string_format("%d%s", copper, copperIcon)
+	end 
+
+	return moneyString
+end
+
+local OnTooltipSetItem = function(tooltip)
+	if (tooltip:IsForbidden()) then 
+		return
+	end
+
+	local frame = GetMouseFocus()
+	if (frame and frame.GetName and not frame:IsForbidden()) then
+		local name = frame:GetName()
+		if (not MerchantFrame:IsShown()) or (name and (string_find(name, "Character") or string_find(name, "TradeSkill"))) then
+			local _,link = tooltip:GetItem()
+			if (link) then
+				local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount,
+				itemEquipLoc, itemIcon, itemSellPrice, itemClassID, itemSubClassID, bindType, expacID, itemSetID, 
+				isCraftingReagent = GetItemInfo(link)
+				if (itemSellPrice and (itemSellPrice > 0)) then
+					LOCKDOWNS[tooltip] = nil
+
+					tooltip:AddLine(" ")
+					tooltip:AddDoubleLine(string_format("%s:", SELL_PRICE), formatMoney((itemStackCount or 1) * itemSellPrice), Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
+
+					-- Not doing this yet. But we will. Oh yes we will. 
+					--LOCKDOWNS[tooltip] = true
+				end
+			end
+		end
+	end
+end
+
 local OnTooltipSetUnit = function(tooltip)
 	if (tooltip:IsForbidden()) then 
 		return
@@ -470,6 +529,10 @@ Module.OnEnable = function(self)
 
 		if tooltip:HasScript("OnTooltipSetUnit") then 
 			tooltip:HookScript("OnTooltipSetUnit", OnTooltipSetUnit)
+		end
+
+		if tooltip:HasScript("OnTooltipSetItem") then 
+			tooltip:HookScript("OnTooltipSetItem", OnTooltipSetItem)
 		end
 
 		if tooltip:HasScript("OnHide") then 
