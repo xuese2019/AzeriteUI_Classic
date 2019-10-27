@@ -1,4 +1,4 @@
-local LibMessage = CogWheel:Set("LibMessage", 11)
+local LibMessage = Wheel:Set("LibMessage", 11)
 if (not LibMessage) then	
 	return
 end

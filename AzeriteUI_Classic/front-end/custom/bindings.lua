@@ -1,6 +1,6 @@
 local ADDON, Private = ...
 
-local Core = CogWheel("LibModule"):GetModule(ADDON)
+local Core = Wheel("LibModule"):GetModule(ADDON)
 if (not Core) then 
 	return 
 end
@@ -677,8 +677,8 @@ end
 
 Module.PreInit = function(self)
 	local PREFIX = Core:GetPrefix()
-	L = CogWheel("LibLocale"):GetLocale(PREFIX)
-	Layout = CogWheel("LibDB"):GetDatabase(PREFIX..":[Bindings]")
+	L = Wheel("LibLocale"):GetLocale(PREFIX)
+	Layout = Wheel("LibDB"):GetDatabase(PREFIX..":[Bindings]")
 end
 
 Module.OnInit = function(self)

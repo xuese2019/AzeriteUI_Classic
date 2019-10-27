@@ -1,18 +1,18 @@
-local LibMover = CogWheel:Set("LibMover", 34)
+local LibMover = Wheel:Set("LibMover", 34)
 if (not LibMover) then	
 	return
 end
 
-local LibFrame = CogWheel("LibFrame")
+local LibFrame = Wheel("LibFrame")
 assert(LibFrame, "LibMover requires LibFrame to be loaded.")
 
-local LibMessage = CogWheel("LibMessage")
+local LibMessage = Wheel("LibMessage")
 assert(LibMessage, "LibMover requires LibMessage to be loaded.")
 
-local LibEvent = CogWheel("LibEvent")
+local LibEvent = Wheel("LibEvent")
 assert(LibEvent, "LibMover requires LibEvent to be loaded.")
 
-local LibTooltip = CogWheel("LibTooltip")
+local LibTooltip = Wheel("LibTooltip")
 assert(LibTooltip, "LibMover requires LibTooltip to be loaded.")
 
 LibFrame:Embed(LibMover)

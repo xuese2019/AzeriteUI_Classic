@@ -1,5 +1,5 @@
 
-local LibDB = CogWheel("LibDB")
+local LibDB = Wheel("LibDB")
 assert(LibDB, "UnitRange requires LibDB to be loaded.")
 
 -- Really do this?
@@ -111,7 +111,7 @@ local Disable = function(self)
 end 
 
 -- Register it with compatible libraries
-for _,Lib in ipairs({ (CogWheel("LibUnitFrame", true)), (CogWheel("LibNamePlate", true)) }) do 
+for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
 	Lib:RegisterElement("Range", Enable, Disable, Proxy, 2)
 end 
 

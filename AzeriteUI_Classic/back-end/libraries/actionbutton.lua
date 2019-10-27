@@ -1,18 +1,18 @@
-local LibSecureButton = CogWheel:Set("LibSecureButton", 64)
+local LibSecureButton = Wheel:Set("LibSecureButton", 64)
 if (not LibSecureButton) then	
 	return
 end
 
-local LibEvent = CogWheel("LibEvent")
+local LibEvent = Wheel("LibEvent")
 assert(LibEvent, "LibSecureButton requires LibEvent to be loaded.")
 
-local LibFrame = CogWheel("LibFrame")
+local LibFrame = Wheel("LibFrame")
 assert(LibFrame, "LibSecureButton requires LibFrame to be loaded.")
 
-local LibSound = CogWheel("LibSound")
+local LibSound = Wheel("LibSound")
 assert(LibSound, "LibSecureButton requires LibSound to be loaded.")
 
-local LibTooltip = CogWheel("LibTooltip")
+local LibTooltip = Wheel("LibTooltip")
 assert(LibTooltip, "LibSecureButton requires LibTooltip to be loaded.")
 
 -- Embed functionality into this
@@ -1193,7 +1193,7 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 			if self:GetOwner():IsDebugModeEnabled() then 
 				DEBUG_ENABLED = true 
 			end
-			--if CogWheel("LibModule"):IsAddOnEnabled((addon or "").."_Debug") then 
+			--if Wheel("LibModule"):IsAddOnEnabled((addon or "").."_Debug") then 
 			--	DEBUG_ENABLED = true 
 			--end
 		end

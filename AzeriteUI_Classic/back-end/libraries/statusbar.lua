@@ -1,9 +1,9 @@
-local LibStatusBar = CogWheel:Set("LibStatusBar", 52)
+local LibStatusBar = Wheel:Set("LibStatusBar", 52)
 if (not LibStatusBar) then
 	return
 end
 
-local LibFrame = CogWheel("LibFrame")
+local LibFrame = Wheel("LibFrame")
 assert(LibFrame, "LibStatusBar requires LibFrame to be loaded.")
 
 LibFrame:Embed(LibStatusBar)

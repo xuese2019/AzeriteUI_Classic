@@ -1,4 +1,4 @@
-local LibShine = CogWheel:Set("LibShine", -1)
+local LibShine = Wheel:Set("LibShine", -1)
 if (not LibShine) then	
 	return
 end

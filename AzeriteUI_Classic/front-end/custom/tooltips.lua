@@ -1,6 +1,6 @@
 local ADDON = ...
 
-local Core = CogWheel("LibModule"):GetModule(ADDON)
+local Core = Wheel("LibModule"):GetModule(ADDON)
 if (not Core) then 
 	return 
 end
@@ -85,7 +85,7 @@ end
 
 Module.PreInit = function(self)
 	local PREFIX = Core:GetPrefix()
-	Layout = CogWheel("LibDB"):GetDatabase(PREFIX..":[TooltipStyling]")
+	Layout = Wheel("LibDB"):GetDatabase(PREFIX..":[TooltipStyling]")
 
 	-- This will be called by the library upon creating new tooltips.
 	self.PostCreateTooltip = function(self, tooltip)

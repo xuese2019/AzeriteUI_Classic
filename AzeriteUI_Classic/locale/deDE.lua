@@ -1,6 +1,6 @@
 -- deDE locale written by Maoe#5728@ our Discord!
 local ADDON = ...
-local L = CogWheel("LibLocale"):NewLocale(ADDON, "deDE")
+local L = Wheel("LibLocale"):NewLocale(ADDON, "deDE")
 if (not L) then 
 	return 
 end 

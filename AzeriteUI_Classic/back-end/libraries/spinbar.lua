@@ -4,12 +4,12 @@
 -- The thread that started it: 
 -- http://www.wowinterface.com/forums/showthread.php?t=45918
 
-local LibSpinBar = CogWheel:Set("LibSpinBar", 14)
+local LibSpinBar = Wheel:Set("LibSpinBar", 14)
 if (not LibSpinBar) then	
 	return
 end
 
-local LibFrame = CogWheel("LibFrame")
+local LibFrame = Wheel("LibFrame")
 assert(LibFrame, "LibSpinBar requires LibFrame to be loaded.")
 
 LibFrame:Embed(LibSpinBar)

@@ -1,18 +1,18 @@
-local LibChatWindow, version = CogWheel:Set("LibChatWindow", 28)
+local LibChatWindow, version = Wheel:Set("LibChatWindow", 28)
 if (not LibChatWindow) then	
 	return
 end
 
-local LibMessage = CogWheel("LibMessage")
+local LibMessage = Wheel("LibMessage")
 assert(LibMessage, "LibChatWindow requires LibMessage to be loaded.")
 
-local LibEvent = CogWheel("LibEvent")
+local LibEvent = Wheel("LibEvent")
 assert(LibEvent, "LibChatWindow requires LibEvent to be loaded.")
 
-local LibFrame = CogWheel("LibFrame")
+local LibFrame = Wheel("LibFrame")
 assert(LibFrame, "LibChatWindow requires LibFrame to be loaded.")
 
-local LibSecureHook = CogWheel("LibSecureHook")
+local LibSecureHook = Wheel("LibSecureHook")
 assert(LibSecureHook, "LibChatWindow requires LibSecureHook to be loaded.")
 
 -- Embed event functionality into this

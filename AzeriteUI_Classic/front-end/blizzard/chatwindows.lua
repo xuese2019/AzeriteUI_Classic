@@ -1,6 +1,6 @@
 local ADDON = ...
 
-local Core = CogWheel("LibModule"):GetModule(ADDON)
+local Core = Wheel("LibModule"):GetModule(ADDON)
 if (not Core) then 
 	return 
 end
@@ -653,7 +653,7 @@ end
 
 Module.PreInit = function(self)
 	local PREFIX = Core:GetPrefix()
-	Layout = CogWheel("LibDB"):GetDatabase(PREFIX..":[BlizzardChatFrames]")
+	Layout = Wheel("LibDB"):GetDatabase(PREFIX..":[BlizzardChatFrames]")
 end
 
 Module.OnInit = function(self)

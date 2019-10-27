@@ -1,18 +1,18 @@
-local LibFrame = CogWheel:Set("LibFrame", 56)
+local LibFrame = Wheel:Set("LibFrame", 56)
 if (not LibFrame) then	
 	return
 end
 
-local LibMessage = CogWheel("LibMessage")
+local LibMessage = Wheel("LibMessage")
 assert(LibMessage, "LibFrame requires LibMessage to be loaded.")
 
-local LibEvent = CogWheel("LibEvent")
+local LibEvent = Wheel("LibEvent")
 assert(LibEvent, "LibFrame requires LibEvent to be loaded.")
 
-local LibHook = CogWheel("LibHook")
+local LibHook = Wheel("LibHook")
 assert(LibHook, "LibFrame requires LibHook to be loaded.")
 
-local LibSecureHook = CogWheel("LibSecureHook")
+local LibSecureHook = Wheel("LibSecureHook")
 assert(LibSecureHook, "LibFrame requires LibSecureHook to be loaded.")
 
 -- Embed event functionality into this

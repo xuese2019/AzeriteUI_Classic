@@ -1,4 +1,4 @@
-local LibPlayerData = CogWheel:Set("LibPlayerData", 13)
+local LibPlayerData = Wheel:Set("LibPlayerData", 13)
 if (not LibPlayerData) then	
 	return
 end

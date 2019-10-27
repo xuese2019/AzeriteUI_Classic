@@ -1,6 +1,6 @@
 local ADDON = ...
 
-local Core = CogWheel("LibModule"):GetModule(ADDON)
+local Core = Wheel("LibModule"):GetModule(ADDON)
 if (not Core) then 
 	return 
 end
@@ -210,8 +210,8 @@ end
 
 Module.PreInit = function(self)
 	local PREFIX = Core:GetPrefix()
-	L = CogWheel("LibLocale"):GetLocale(PREFIX)
-	Layout = CogWheel("LibDB"):GetDatabase(PREFIX..":[BlizzardGameMenu]")
+	L = Wheel("LibLocale"):GetLocale(PREFIX)
+	Layout = Wheel("LibDB"):GetDatabase(PREFIX..":[BlizzardGameMenu]")
 end
 
 Module.OnInit = function(self)

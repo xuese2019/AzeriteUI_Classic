@@ -1,6 +1,6 @@
 -- esES locale written by Sonshine#3640@ our Discord!
 local ADDON = ...
-local L = CogWheel("LibLocale"):NewLocale(ADDON, "esES")
+local L = Wheel("LibLocale"):NewLocale(ADDON, "esES")
 if (not L) then 
 	return 
 end 

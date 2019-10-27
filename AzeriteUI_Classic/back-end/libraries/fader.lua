@@ -1,18 +1,18 @@
-local LibFader = CogWheel:Set("LibFader", 22)
+local LibFader = Wheel:Set("LibFader", 22)
 if (not LibFader) then	
 	return
 end
 
-local LibFrame = CogWheel("LibFrame")
+local LibFrame = Wheel("LibFrame")
 assert(LibFrame, "LibFader requires LibFrame to be loaded.")
 
-local LibEvent = CogWheel("LibEvent")
+local LibEvent = Wheel("LibEvent")
 assert(LibEvent, "LibFader requires LibEvent to be loaded.")
 
-local LibMessage = CogWheel("LibMessage")
+local LibMessage = Wheel("LibMessage")
 assert(LibMessage, "LibFader requires LibMessage to be loaded.")
 
-local LibAura = CogWheel("LibAura")
+local LibAura = Wheel("LibAura")
 assert(LibAura, "LibFader requires LibAura to be loaded.")
 
 LibFrame:Embed(LibFader)

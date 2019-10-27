@@ -1,5 +1,5 @@
 local ADDON = ...
-local Core = CogWheel("LibModule"):GetModule(ADDON)
+local Core = Wheel("LibModule"):GetModule(ADDON)
 if (not Core) then 
 	return 
 end
@@ -979,14 +979,14 @@ Module.SetUpMinimap = function(self)
 		ringFrame:SetScript("OnLeave", RingFrame_OnLeave)
 
 		ringFrame:HookScript("OnShow", function() 
-			local compassFrame = CogWheel("LibMinimap"):GetCompassFrame()
+			local compassFrame = Wheel("LibMinimap"):GetCompassFrame()
 			if compassFrame then 
 				compassFrame.supressCompass = true
 			end 
 		end)
 
 		ringFrame:HookScript("OnHide", function() 
-			local compassFrame = CogWheel("LibMinimap"):GetCompassFrame()
+			local compassFrame = Wheel("LibMinimap"):GetCompassFrame()
 			if compassFrame then 
 				compassFrame.supressCompass = nil
 			end 
@@ -1525,8 +1525,8 @@ end
 
 Module.PreInit = function(self)
 	local PREFIX = Core:GetPrefix()
-	Layout = CogWheel("LibDB"):GetDatabase(PREFIX..":[Minimap]")
-	L = CogWheel("LibLocale"):GetLocale(PREFIX)
+	Layout = Wheel("LibDB"):GetDatabase(PREFIX..":[Minimap]")
+	L = Wheel("LibLocale"):GetLocale(PREFIX)
 end 
 
 Module.OnInit = function(self)

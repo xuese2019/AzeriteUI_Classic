@@ -1,15 +1,15 @@
-local LibWidgetContainer = CogWheel:Set("LibWidgetContainer", 22)
+local LibWidgetContainer = Wheel:Set("LibWidgetContainer", 22)
 if (not LibWidgetContainer) then	
 	return
 end
 
-local LibMessage = CogWheel("LibMessage")
+local LibMessage = Wheel("LibMessage")
 assert(LibMessage, "LibWidgetContainer requires LibMessage to be loaded.")
 
-local LibEvent = CogWheel("LibEvent")
+local LibEvent = Wheel("LibEvent")
 assert(LibEvent, "LibWidgetContainer requires LibEvent to be loaded.")
 
-local LibFrame = CogWheel("LibFrame")
+local LibFrame = Wheel("LibFrame")
 assert(LibFrame, "LibWidgetContainer requires LibFrame to be loaded.")
 
 -- Embed event functionality into this

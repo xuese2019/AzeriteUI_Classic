@@ -1,12 +1,12 @@
-local LibSwitcher = CogWheel:Set("LibSwitcher", 2)
+local LibSwitcher = Wheel:Set("LibSwitcher", 2)
 if (not LibSwitcher) then
 	return
 end
 
-local LibModule = CogWheel("LibModule")
+local LibModule = Wheel("LibModule")
 assert(LibModule, "LibSwitcher requires LibModule to be loaded.")
 
-local LibSlash = CogWheel("LibSlash")
+local LibSlash = Wheel("LibSlash")
 assert(LibSlash, "LibSwitcher requires LibSlash to be loaded.")
 
 -- We want this embedded

@@ -1,4 +1,4 @@
-local LibLocale = CogWheel:Set("LibLocale", 5)
+local LibLocale = Wheel:Set("LibLocale", 5)
 if (not LibLocale) then	
 	return
 end
@@ -55,7 +55,7 @@ local read = {
 		end 
 		rawset(tbl, key, defaultValue or key)
 
-		local LibModule = CogWheel("LibModule")
+		local LibModule = Wheel("LibModule")
 		if LibModule and LibModule.AddDebugMessage then 
 
 			local name = "XXX"

@@ -1,5 +1,5 @@
 local ADDON = ...
-local Core = CogWheel("LibModule"):GetModule(ADDON)
+local Core = Wheel("LibModule"):GetModule(ADDON)
 if (not Core) then 
 	return 
 end
@@ -376,7 +376,7 @@ end
 
 Module.OnInit = function(self)
 	self.db = self:NewConfig("NamePlates", defaults, "global")
-	self.layout = CogWheel("LibDB"):GetDatabase(Core:GetPrefix()..":[NamePlates]")
+	self.layout = Wheel("LibDB"):GetDatabase(Core:GetPrefix()..":[NamePlates]")
 
 	local proxy = self:CreateFrame("Frame", nil, "UICenter", "SecureHandlerAttributeTemplate")
 	proxy.PostUpdateSettings = function() self:PostUpdateSettings() end

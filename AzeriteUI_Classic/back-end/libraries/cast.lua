@@ -1,18 +1,18 @@
-local LibCast = CogWheel:Set("LibCast", 2)
+local LibCast = Wheel:Set("LibCast", 2)
 if (not LibCast) then
 	return
 end
 
-local LibMessage = CogWheel("LibMessage")
+local LibMessage = Wheel("LibMessage")
 assert(LibMessage, "LibCast requires LibMessage to be loaded.")
 
-local LibEvent = CogWheel("LibEvent")
+local LibEvent = Wheel("LibEvent")
 assert(LibEvent, "LibCast requires LibEvent to be loaded.")
 
-local LibFrame = CogWheel("LibFrame")
+local LibFrame = Wheel("LibFrame")
 assert(LibFrame, "LibCast requires LibFrame to be loaded.")
 
-local LibPlayerData = CogWheel("LibPlayerData")
+local LibPlayerData = Wheel("LibPlayerData")
 assert(LibPlayerData, "LibCast requires LibPlayerData to be loaded.")
 
 LibMessage:Embed(LibCast)

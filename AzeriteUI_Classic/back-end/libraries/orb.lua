@@ -1,9 +1,9 @@
-local LibOrb = CogWheel:Set("LibOrb", 19)
+local LibOrb = Wheel:Set("LibOrb", 19)
 if (not LibOrb) then	
 	return
 end
 
-local LibFrame = CogWheel("LibFrame")
+local LibFrame = Wheel("LibFrame")
 assert(LibFrame, "LibOrb requires LibFrame to be loaded.")
 
 -- Lua API

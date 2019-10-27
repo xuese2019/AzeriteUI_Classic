@@ -1,4 +1,4 @@
-local LibClientBuild = CogWheel:Set("LibClientBuild", 32)
+local LibClientBuild = Wheel:Set("LibClientBuild", 32)
 if (not LibClientBuild) then
 	return
 end

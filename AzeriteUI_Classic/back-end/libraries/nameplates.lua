@@ -1,21 +1,21 @@
-local LibNamePlate = CogWheel:Set("LibNamePlate", 40)
+local LibNamePlate = Wheel:Set("LibNamePlate", 40)
 if (not LibNamePlate) then	
 	return
 end
 
-local LibMessage = CogWheel("LibMessage")
+local LibMessage = Wheel("LibMessage")
 assert(LibMessage, "LibNamePlate requires LibMessage to be loaded.")
 
-local LibEvent = CogWheel("LibEvent")
+local LibEvent = Wheel("LibEvent")
 assert(LibEvent, "LibNamePlate requires LibEvent to be loaded.")
 
-local LibFrame = CogWheel("LibFrame")
+local LibFrame = Wheel("LibFrame")
 assert(LibFrame, "LibNamePlate requires LibFrame to be loaded.")
 
-local LibSecureHook = CogWheel("LibSecureHook")
+local LibSecureHook = Wheel("LibSecureHook")
 assert(LibSecureHook, "LibNamePlate requires LibSecureHook to be loaded.")
 
-local LibStatusBar = CogWheel("LibStatusBar")
+local LibStatusBar = Wheel("LibStatusBar")
 assert(LibStatusBar, "LibNamePlate requires LibStatusBar to be loaded.")
 
 -- Embed event functionality into this

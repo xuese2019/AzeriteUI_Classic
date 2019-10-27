@@ -1,6 +1,6 @@
 -- ruRU locale written by Demorto#2597@ our Discord! 
 local ADDON = ...
-local L = CogWheel("LibLocale"):NewLocale(ADDON, "ruRU") 
+local L = Wheel("LibLocale"):NewLocale(ADDON, "ruRU") 
 if (not L) then 
 	return 
 end 

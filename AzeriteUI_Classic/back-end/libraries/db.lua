@@ -1,4 +1,4 @@
-local LibDB = CogWheel:Set("LibDB", 16)
+local LibDB = Wheel:Set("LibDB", 16)
 if (not LibDB) then	
 	return
 end

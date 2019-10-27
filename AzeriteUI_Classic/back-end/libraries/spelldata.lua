@@ -1,4 +1,4 @@
-local LibSpellData = CogWheel:Set("LibSpellData", -1)
+local LibSpellData = Wheel:Set("LibSpellData", -1)
 if (not LibSpellData) then	
 	return
 end

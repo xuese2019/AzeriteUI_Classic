@@ -1,6 +1,6 @@
 -- frFR locale written by HipNoTiK#2609 @ our Discord!
 local ADDON = ...
-local L = CogWheel("LibLocale"):NewLocale(ADDON, "frFR")
+local L = Wheel("LibLocale"):NewLocale(ADDON, "frFR")
 if (not L) then 
 	return 
 end 

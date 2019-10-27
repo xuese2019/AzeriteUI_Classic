@@ -8,8 +8,8 @@ with static layout data used during the setup phase.
 local ADDON, Private = ...
 local Layouts = {}
 
-local L = CogWheel("LibLocale"):GetLocale(ADDON)
-local LibDB = CogWheel("LibDB")
+local L = Wheel("LibLocale"):GetLocale(ADDON)
+local LibDB = Wheel("LibDB")
 
 ------------------------------------------------
 -- Addon Environment
@@ -1118,7 +1118,7 @@ local BlizzardTimers = {
 	Colors = Colors,
 
 	Size = { 111, 14 },
-		Anchor = CogWheel("LibFrame"):GetFrame(),
+		Anchor = Wheel("LibFrame"):GetFrame(),
 		AnchorPoint = "TOP",
 		AnchorOffsetX = 0,
 		AnchorOffsetY = -370, -- -220
@@ -1425,7 +1425,7 @@ local Minimap = {
 
 	UseMail = true,
 		MailPlace = 
-			CogWheel("LibModule"):IsAddOnEnabled("MBB") and 
+			Wheel("LibModule"):IsAddOnEnabled("MBB") and 
 			{ "BOTTOMRIGHT", -(31 + 213 + 40), 35 } or 
 			{ "BOTTOMRIGHT", -(31 + 213), 35 },
 		MailSize = { 43, 32 },
@@ -2397,7 +2397,7 @@ local UnitFramePlayerHUD = {
 				}
 			},
 
-	UseClassPower = not CogWheel("LibModule"):IsAddOnEnabled("SimpleClassPower"), 
+	UseClassPower = not Wheel("LibModule"):IsAddOnEnabled("SimpleClassPower"), 
 		ClassPowerPlace = { "CENTER", "UICenter", "CENTER", 0, 0 }, 
 		ClassPowerSize = { 2,2 }, 
 		ClassPowerHideWhenUnattackable = true, 

@@ -1,29 +1,29 @@
 local Version = 41 -- This library's version 
 local MapVersion = Version -- Minimap library version the minimap created by this is compatible with
-local LibMinimap, OldVersion = CogWheel:Set("LibMinimap", Version)
+local LibMinimap, OldVersion = Wheel:Set("LibMinimap", Version)
 if (not LibMinimap) then
 	return
 end
 
-local LibClientBuild = CogWheel("LibClientBuild")
+local LibClientBuild = Wheel("LibClientBuild")
 assert(LibClientBuild, "LibMinimap requires LibClientBuild to be loaded.")
 
-local LibMessage = CogWheel("LibMessage")
+local LibMessage = Wheel("LibMessage")
 assert(LibMessage, "LibMinimap requires LibMessage to be loaded.")
 
-local LibEvent = CogWheel("LibEvent")
+local LibEvent = Wheel("LibEvent")
 assert(LibEvent, "LibMinimap requires LibEvent to be loaded.")
 
-local LibFrame = CogWheel("LibFrame")
+local LibFrame = Wheel("LibFrame")
 assert(LibFrame, "LibMinimap requires LibFrame to be loaded.")
 
-local LibSound = CogWheel("LibSound")
+local LibSound = Wheel("LibSound")
 assert(LibSound, "LibMinimap requires LibSound to be loaded.")
 
-local LibTooltip = CogWheel("LibTooltip")
+local LibTooltip = Wheel("LibTooltip")
 assert(LibTooltip, "LibMinimap requires LibTooltip to be loaded.")
 
-local LibHook = CogWheel("LibHook")
+local LibHook = Wheel("LibHook")
 assert(LibHook, "LibMinimap requires LibHook to be loaded.")
 
 -- Embed library functionality into this

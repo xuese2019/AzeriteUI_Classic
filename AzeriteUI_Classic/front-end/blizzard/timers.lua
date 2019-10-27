@@ -1,5 +1,5 @@
 local ADDON = ...
-local Core = CogWheel("LibModule"):GetModule(ADDON)
+local Core = Wheel("LibModule"):GetModule(ADDON)
 if (not Core) then 
 	return 
 end
@@ -190,7 +190,7 @@ end
 
 Module.PreInit = function(self)
 	local PREFIX = Core:GetPrefix()
-	Layout = CogWheel("LibDB"):GetDatabase(PREFIX..":[BlizzardTimers]")
+	Layout = Wheel("LibDB"):GetDatabase(PREFIX..":[BlizzardTimers]")
 end 
 
 Module.OnInit = function(self)

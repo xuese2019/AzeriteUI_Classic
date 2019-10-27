@@ -1,5 +1,5 @@
 local ADDON = ...
-local L = CogWheel("LibLocale"):NewLocale(ADDON, "enUS", true) -- only enUS must have the 'true' argument!
+local L = Wheel("LibLocale"):NewLocale(ADDON, "enUS", true) -- only enUS must have the 'true' argument!
 if (not L) then 
 	return 
 end 

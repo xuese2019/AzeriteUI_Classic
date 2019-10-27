@@ -1,5 +1,5 @@
 local ADDON = ...
-local Core = CogWheel("LibModule"):GetModule(ADDON)
+local Core = Wheel("LibModule"):GetModule(ADDON)
 if (not Core) then 
 	return 
 end
@@ -54,7 +54,7 @@ Module.OnEvent = function(self, event, ...)
 end 
 
 Module.PreInit = function(self)
-	Layout = CogWheel("LibDB"):GetDatabase(Core:GetPrefix()..":[BlizzardPopupStyling]")
+	Layout = Wheel("LibDB"):GetDatabase(Core:GetPrefix()..":[BlizzardPopupStyling]")
 end 
 
 Module.OnInit = function(self)

@@ -1,4 +1,4 @@
-local LibEvent = CogWheel:Set("LibEvent", 4
+local LibEvent = Wheel:Set("LibEvent", 4
 )
 if (not LibEvent) then 
 	return
@@ -17,7 +17,7 @@ local type = type
 
 -- This library uses LibMessage as a base, 
 -- and just fires callbacks to connect to blizzard events.
-local LibMessage = CogWheel("LibMessage")
+local LibMessage = Wheel("LibMessage")
 assert(LibMessage, "LibEvent requires LibMessage to be loaded.")
 
 -- We're reusing the frame and event table in case of an upgrade, 

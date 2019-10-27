@@ -1,7 +1,7 @@
-local LibFrame = CogWheel("LibFrame")
+local LibFrame = Wheel("LibFrame")
 assert(LibFrame, "UnitAuras requires LibFrame to be loaded.")
 
-local LibAura = CogWheel("LibAura")
+local LibAura = Wheel("LibAura")
 assert(LibAura, "UnitAuras requires LibAura to be loaded.")
 
 -- Lua API
@@ -780,6 +780,6 @@ local Disable = function(self)
 end 
 
 -- Register it with compatible libraries
-for _,Lib in ipairs({ (CogWheel("LibUnitFrame", true)), (CogWheel("LibNamePlate", true)) }) do 
+for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
 	Lib:RegisterElement("Auras", Enable, Disable, Proxy, 48)
 end 

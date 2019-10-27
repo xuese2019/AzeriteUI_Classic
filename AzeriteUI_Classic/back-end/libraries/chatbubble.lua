@@ -1,12 +1,12 @@
-local LibChatBubble = CogWheel:Set("LibChatBubble", 15)
+local LibChatBubble = Wheel:Set("LibChatBubble", 15)
 if (not LibChatBubble) then	
 	return
 end
 
-local LibEvent = CogWheel("LibEvent")
+local LibEvent = Wheel("LibEvent")
 assert(LibEvent, "LibChatBubble requires LibEvent to be loaded.")
 
-local LibHook = CogWheel("LibHook")
+local LibHook = Wheel("LibHook")
 assert(LibHook, "LibChatBubble requires LibHook to be loaded.")
 
 -- Embed event functionality into this

@@ -6,17 +6,17 @@ if not InCombatLockdown() then
 	SetCVar("taintLog", 1)
 end
 
-local Global, Version = "CogWheel", 6
+local Global, Version = "Wheel", 6
 
-local CogWheel = _G[Global]
-if (CogWheel and (CogWheel.version >= Version)) then
+local Wheel = _G[Global]
+if (Wheel and (Wheel.version >= Version)) then
 	return
 end
 
-CogWheel = CogWheel or { cogs = {}, versions = {} }
-CogWheel.version = Version
+Wheel = Wheel or { cogs = {}, versions = {} }
+Wheel.version = Version
 
-CogWheel.Set = function(self, name, version)
+Wheel.Set = function(self, name, version)
 	assert(type(name) == "string", ("%s: Bad argument #1 to 'Set': Name must be a string."):format(Global))
 	assert(type(version) == "number", ("%s: Bad argument #2 to 'Set': Version must be a number."):format(Global))
 
@@ -31,7 +31,7 @@ CogWheel.Set = function(self, name, version)
 	return self.cogs[name], oldVersion
 end
 
-CogWheel.Get = function(self, name, silentFail)
+Wheel.Get = function(self, name, silentFail)
 	if (not self.cogs[name]) and (not silentFail) then
 		error(("%s: Cannot find an instance of %q."):format(Global, tostring(name)), 2)
 	end
@@ -39,10 +39,10 @@ CogWheel.Get = function(self, name, silentFail)
 	return self.cogs[name], self.versions[name]
 end
 
-CogWheel.Spin = function(self) 
+Wheel.Spin = function(self) 
 	return pairs(self.cogs) 
 end
 
-setmetatable(CogWheel, { __call = CogWheel.Get })
+setmetatable(Wheel, { __call = Wheel.Get })
 
-_G[Global] = CogWheel
+_G[Global] = Wheel

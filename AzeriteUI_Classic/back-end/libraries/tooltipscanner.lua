@@ -1,4 +1,4 @@
-local LibTooltipScanner = CogWheel:Set("LibTooltipScanner", 36)
+local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 37)
 if (not LibTooltipScanner) then	
 	return
 end
@@ -273,6 +273,13 @@ local check = function(value, num, ...)
 	error(("Bad argument #%.0f to '%s': %s expected, got %s"):format(num, name, types, type(value)), 3)
 end
 
+-- Clear the scanner tooltip
+local ClearScanner = function()
+	Scanner:Hide()
+	Scanner.owner = UIParent
+	Scanner:SetOwner(UIParent, "ANCHOR_NONE")
+end
+
 -- Check if a given itemLink is a caged battle pet
 local GetBattlePetInfo = function(itemLink)
 	if (not string_find(itemLink, "battlepet")) then
@@ -291,9 +298,7 @@ end
 --  to be populated by the retrieved data.
 
 LibTooltipScanner.GetTooltipDataForAction = function(self, actionSlot, tbl)
-	Scanner:Hide()
-	Scanner.owner = self
-	Scanner:SetOwner(self, "ANCHOR_NONE")
+	ClearScanner()
 
 	--  Blizz Action Tooltip Structure: 
 	--  *the order is consistent, bracketed elements optional
@@ -688,9 +693,7 @@ end
 
 -- Special combo variant that returns item info from an action slot
 LibTooltipScanner.GetTooltipDataForActionItem = function(self, actionSlot, tbl)
-	Scanner:Hide()
-	Scanner.owner = self
-	Scanner:SetOwner(self, "ANCHOR_NONE")
+	ClearScanner()
 
 	--  Blizz Action Tooltip Structure: 
 	--  *the order is consistent, bracketed elements optional
@@ -1004,10 +1007,7 @@ LibTooltipScanner.GetTooltipDataForActionItem = function(self, actionSlot, tbl)
 end 
 
 LibTooltipScanner.GetTooltipDataForPetAction = function(self, actionSlot, tbl)
-	Scanner:Hide()
-	Scanner.owner = self
-	Scanner:SetOwner(self, "ANCHOR_NONE")
-
+	ClearScanner()
 
 	local name, texture, isToken, isActive, autoCastAllowed, autoCastEnabled, spellID = GetPetActionInfo(actionSlot)
 	if name then 
@@ -1224,9 +1224,7 @@ LibTooltipScanner.GetTooltipDataForPetAction = function(self, actionSlot, tbl)
 end
 
 LibTooltipScanner.GetTooltipDataForSpellID = function(self, spellID, tbl)
-	Scanner:Hide()
-	Scanner.owner = self
-	Scanner:SetOwner(self, "ANCHOR_NONE")
+	ClearScanner()
 
 	if (spellID and DoesSpellExist(spellID)) then 
 		Scanner:SetSpellByID(spellID)
@@ -1454,9 +1452,7 @@ LibTooltipScanner.GetTooltipDataForSpellID = function(self, spellID, tbl)
 end
 
 LibTooltipScanner.GetTooltipDataForUnit = function(self, unit, tbl)
-	Scanner:Hide()
-	Scanner.owner = UIParent
-	Scanner:SetOwner(UIParent, "ANCHOR_NONE")
+	ClearScanner()
 
 	if UnitExists(unit) then 
 		Scanner:SetUnit(unit)
@@ -1611,9 +1607,7 @@ end
 -- Will only return generic data based on mere itemID, no special instances of the item.
 -- This is basically just a proxy for GetTooltipDataForItemLink. 
 LibTooltipScanner.GetTooltipDataForItemID = function(self, itemID, tbl)
-	Scanner:Hide()
-	Scanner.owner = self
-	Scanner:SetOwner(self, "ANCHOR_NONE")
+	ClearScanner()
 
 	local itemName, _itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, iconFileDataID, itemSellPrice, itemClassID, itemSubClassID, bindType, expacID, itemSetID, isCraftingReagent = GetItemInfo(itemID)
 
@@ -1624,10 +1618,7 @@ end
 
 -- Returns specific data for the specific itemLink
 LibTooltipScanner.GetTooltipDataForItemLink = function(self, itemLink, tbl)
-
-	Scanner:Hide()
-	Scanner.owner = self
-	Scanner:SetOwner(self, "ANCHOR_NONE")
+	ClearScanner()
 
 	local itemName, _itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, iconFileDataID, itemSellPrice, itemClassID, itemSubClassID, bindType, expacID, itemSetID, isCraftingReagent = GetItemInfo(itemLink)
 
@@ -1657,9 +1648,7 @@ end
 
 -- Returns data about the exact bag- or bank slot. Will return all current mofidications.
 LibTooltipScanner.GetTooltipDataForContainerSlot = function(self, bagID, slotID, tbl)
-	Scanner:Hide()
-	Scanner.owner = self
-	Scanner:SetOwner(self, "ANCHOR_NONE")
+	ClearScanner()
 
 	local itemID = GetContainerItemID(bagID, slotID)
 	if itemID then 
@@ -1677,9 +1666,7 @@ end
 
 -- Returns data about the exact guild bank slot. Will return all current mofidications.
 LibTooltipScanner.GetTooltipDataForGuildBankSlot = function(self, tabID, slotID, tbl)
-	Scanner:Hide()
-	Scanner.owner = self
-	Scanner:SetOwner(self, "ANCHOR_NONE")
+	ClearScanner()
 
 	local itemLink = GetGuildBankItemInfo(tabID, slotID)
 	if itemLink then 
@@ -1699,9 +1686,7 @@ end
 
 -- Returns data about equipped items
 LibTooltipScanner.GetTooltipDataForInventorySlot = function(self, unit, inventorySlotID, tbl)
-	Scanner:Hide()
-	Scanner.owner = self
-	Scanner:SetOwner(self, "ANCHOR_NONE")
+	ClearScanner()
 
 	-- https://wow.gamepedia.com/InventorySlotId
 	local hasItem, hasCooldown, repairCost = Scanner:SetInventoryItem(unit, inventorySlotID)
@@ -1719,9 +1704,7 @@ end
 
 -- Returns data about mail inbox items
 LibTooltipScanner.GetTooltipDataForInboxItem = function(self, inboxID, attachIndex, tbl)
-	Scanner:Hide()
-	Scanner.owner = self
-	Scanner:SetOwner(self, "ANCHOR_NONE")
+	ClearScanner()
 
 	-- https://wow.gamepedia.com/API_GameTooltip_SetInboxItem
 	-- attachIndex is in the range of [1,ATTACHMENTS_MAX_RECEIVE(16)]
@@ -1739,9 +1722,7 @@ end
 
 -- Returns data about unit auras 
 LibTooltipScanner.GetTooltipDataForUnitAura = function(self, unit, auraID, filter, tbl)
-	Scanner:Hide()
-	Scanner.owner = self
-	Scanner:SetOwner(self, "ANCHOR_NONE")
+	ClearScanner()
 
 	local name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = UnitAura(unit, auraID, filter)
 
@@ -1836,9 +1817,7 @@ end
 
 -- Returns data about unit buffs
 LibTooltipScanner.GetTooltipDataForUnitBuff = function(self, unit, buffID, filter, tbl)
-	Scanner:Hide()
-	Scanner.owner = self
-	Scanner:SetOwner(self, "ANCHOR_NONE")
+	ClearScanner()
 
 	local name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = UnitBuff(unit, buffID, filter)
 
@@ -1934,9 +1913,7 @@ end
 
 -- Returns data about unit buffs
 LibTooltipScanner.GetTooltipDataForUnitDebuff = function(self, unit, debuffID, filter, tbl)
-	Scanner:Hide()
-	Scanner.owner = self
-	Scanner:SetOwner(self, "ANCHOR_NONE")
+	ClearScanner()
 
 	local name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = UnitDebuff(unit, debuffID, filter)
 
@@ -2030,9 +2007,7 @@ LibTooltipScanner.GetTooltipDataForUnitDebuff = function(self, unit, debuffID, f
 end
 
 LibTooltipScanner.GetTooltipDataForTrackingSpell = function(self, tbl)
-	Scanner:Hide()
-	Scanner.owner = self
-	Scanner:SetOwner(self, "ANCHOR_NONE")
+	ClearScanner()
 
 	local trackingTexture = GetTrackingTexture()
 	if trackingTexture then 

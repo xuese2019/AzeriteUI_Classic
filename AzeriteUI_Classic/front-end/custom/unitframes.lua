@@ -12,7 +12,7 @@ but any layout data will have to be passed as function arguments.
 
 local ADDON, Private = ...
 
-local Core = CogWheel("LibModule"):GetModule(ADDON)
+local Core = Wheel("LibModule"):GetModule(ADDON)
 if (not Core) then 
 	return 
 end
@@ -68,8 +68,8 @@ local UnitIsUnit = _G.UnitIsUnit
 local UnitLevel = _G.UnitLevel
 
 -- Addon API
-local GetEffectiveExpansionMaxLevel = CogWheel("LibPlayerData").GetEffectiveExpansionMaxLevel
-local PlayerHasXP = CogWheel("LibPlayerData").PlayerHasXP
+local GetEffectiveExpansionMaxLevel = Wheel("LibPlayerData").GetEffectiveExpansionMaxLevel
+local PlayerHasXP = Wheel("LibPlayerData").PlayerHasXP
 
 -- WoW Strings
 local S_AFK = _G.AFK
@@ -2944,7 +2944,7 @@ UnitStyles.StylePlayerHUDFrame = function(self, unit, id, Layout, ...)
 		for i = 1,6 do 
 	
 			-- Main point object
-			local point = classPower:CreateStatusBar() -- the widget require CogWheel statusbars
+			local point = classPower:CreateStatusBar() -- the widget require Wheel statusbars
 			point:SetSmoothingFrequency(.25) -- keep bar transitions fairly fast
 			point:SetMinMaxValues(0, 1)
 			point:SetValue(1)
@@ -3584,7 +3584,7 @@ end
 -- Player
 -----------------------------------------------------------
 UnitFramePlayer.OnInit = function(self)
-	self.layout = CogWheel("LibDB"):GetDatabase(Core:GetPrefix()..":[UnitFramePlayer]", true)
+	self.layout = Wheel("LibDB"):GetDatabase(Core:GetPrefix()..":[UnitFramePlayer]", true)
 	self.frame = self:SpawnUnitFrame("player", "UICenter", function(frame, unit, id, _, ...)
 		return UnitStyles.StylePlayerFrame(frame, unit, id, self.layout, ...)
 	end)
@@ -3637,7 +3637,7 @@ UnitFramePlayerHUD.OnEvent = function(self, event, ...)
 end
 
 UnitFramePlayerHUD.OnInit = function(self)
-	self.layout = CogWheel("LibDB"):GetDatabase(Core:GetPrefix()..":[UnitFramePlayerHUD]", true)
+	self.layout = Wheel("LibDB"):GetDatabase(Core:GetPrefix()..":[UnitFramePlayerHUD]", true)
 	self.frame = self:SpawnUnitFrame("player", "UICenter", function(frame, unit, id, _, ...)
 		return UnitStyles.StylePlayerHUDFrame(frame, unit, id, self.layout, ...)
 	end)
@@ -3659,7 +3659,7 @@ end
 -- Target
 -----------------------------------------------------------
 UnitFrameTarget.OnInit = function(self)
-	self.layout = CogWheel("LibDB"):GetDatabase(Core:GetPrefix()..":[UnitFrameTarget]", true)
+	self.layout = Wheel("LibDB"):GetDatabase(Core:GetPrefix()..":[UnitFrameTarget]", true)
 	self.frame = self:SpawnUnitFrame("target", "UICenter", function(frame, unit, id, _, ...)
 		return UnitStyles.StyleTargetFrame(frame, unit, id, self.layout, ...)
 	end)
@@ -3692,7 +3692,7 @@ end
 -- Pet
 -----------------------------------------------------------
 UnitFramePet.OnInit = function(self)
-	self.layout = CogWheel("LibDB"):GetDatabase(Core:GetPrefix()..":[UnitFramePet]", true)
+	self.layout = Wheel("LibDB"):GetDatabase(Core:GetPrefix()..":[UnitFramePet]", true)
 	self.frame = self:SpawnUnitFrame("pet", "UICenter", function(frame, unit, id, _, ...)
 		return UnitStyles.StylePetFrame(frame, unit, id, self.layout, ...)
 	end)
@@ -3757,7 +3757,7 @@ end
 -- Target of Target
 -----------------------------------------------------------
 UnitFrameToT.OnInit = function(self)
-	self.layout = CogWheel("LibDB"):GetDatabase(Core:GetPrefix()..":[UnitFrameToT]", true)
+	self.layout = Wheel("LibDB"):GetDatabase(Core:GetPrefix()..":[UnitFrameToT]", true)
 	self.frame = self:SpawnUnitFrame("targettarget", "UICenter", function(frame, unit, id, _, ...)
 		return UnitStyles.StyleToTFrame(frame, unit, id, self.layout, ...)
 	end)
@@ -3777,7 +3777,7 @@ UnitFrameParty.OnInit = function(self)
 	}
 
 	self.db = self:NewConfig("UnitFrameParty", defaults, "global")
-	self.layout = CogWheel("LibDB"):GetDatabase(Core:GetPrefix()..":[UnitFrameParty]", true)
+	self.layout = Wheel("LibDB"):GetDatabase(Core:GetPrefix()..":[UnitFrameParty]", true)
 	
 	self.frame = self:CreateFrame("Frame", nil, "UICenter", "SecureHandlerAttributeTemplate")
 	self.frame:SetSize(unpack(self.layout.Size))
@@ -3843,7 +3843,7 @@ UnitFrameRaid.OnInit = function(self)
 	}
 
 	self.db = self:NewConfig("UnitFrameRaid", defaults, "global")
-	self.layout = CogWheel("LibDB"):GetDatabase(Core:GetPrefix()..":[UnitFrameRaid]")
+	self.layout = Wheel("LibDB"):GetDatabase(Core:GetPrefix()..":[UnitFrameRaid]")
 
 	self.frame = self:CreateFrame("Frame", nil, "UICenter", "SecureHandlerAttributeTemplate")
 	self.frame:SetSize(1,1)
@@ -3912,7 +3912,7 @@ end
 -----------------------------------------------------------
 -- These don't really exist in classic, right?
 UnitFrameBoss.OnInit = function(self)
-	self.layout = CogWheel("LibDB"):GetDatabase(Core:GetPrefix()..":[UnitFrameBoss]", true)
+	self.layout = Wheel("LibDB"):GetDatabase(Core:GetPrefix()..":[UnitFrameBoss]", true)
 	self.frame = {}
 
 	local style = function(frame, unit, id, _, ...)

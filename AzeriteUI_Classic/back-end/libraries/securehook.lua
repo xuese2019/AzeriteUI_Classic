@@ -1,4 +1,4 @@
-local LibSecureHook = CogWheel:Set("LibSecureHook", 7)
+local LibSecureHook = Wheel:Set("LibSecureHook", 7)
 if (not LibSecureHook) then	
 	return
 end

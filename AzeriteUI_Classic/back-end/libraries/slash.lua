@@ -1,4 +1,4 @@
-local LibSlash = CogWheel:Set("LibSlash", 7)
+local LibSlash = Wheel:Set("LibSlash", 7)
 if (not LibSlash) then	
 	return
 end

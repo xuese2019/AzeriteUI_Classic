@@ -1,6 +1,6 @@
 local ADDON, Private = ...
 
-local Core = CogWheel("LibModule"):GetModule(ADDON)
+local Core = Wheel("LibModule"):GetModule(ADDON)
 if (not Core) then 
 	return 
 end
@@ -523,7 +523,7 @@ local OnTooltipSetUnit = function(tooltip)
 end
 
 Module.OnInit = function(self)
-	Layout = CogWheel("LibDB"):GetDatabase(Core:GetPrefix()..":[TooltipStyling]")
+	Layout = Wheel("LibDB"):GetDatabase(Core:GetPrefix()..":[TooltipStyling]")
 end 
 
 Module.OnEnable = function(self)

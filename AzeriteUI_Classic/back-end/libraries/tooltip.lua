@@ -1,24 +1,24 @@
-local LibTooltip = CogWheel:Set("LibTooltip", 62)
+local LibTooltip = Wheel:Set("LibTooltip", 62)
 if (not LibTooltip) then
 	return
 end
 
-local LibEvent = CogWheel("LibEvent")
+local LibEvent = Wheel("LibEvent")
 assert(LibEvent, "LibTooltip requires LibEvent to be loaded.")
 
-local LibSecureHook = CogWheel("LibSecureHook")
+local LibSecureHook = Wheel("LibSecureHook")
 assert(LibSecureHook, "LibTooltip requires LibSecureHook to be loaded.")
 
-local LibFrame = CogWheel("LibFrame")
+local LibFrame = Wheel("LibFrame")
 assert(LibFrame, "LibTooltip requires LibFrame to be loaded.")
 
-local LibTooltipScanner = CogWheel("LibTooltipScanner")
+local LibTooltipScanner = Wheel("LibTooltipScanner")
 assert(LibTooltipScanner, "LibTooltip requires LibTooltipScanner to be loaded.")
 
-local LibStatusBar = CogWheel("LibStatusBar")
+local LibStatusBar = Wheel("LibStatusBar")
 assert(LibStatusBar, "LibTooltip requires LibStatusBar to be loaded.")
 
-local LibPlayerData = CogWheel("LibPlayerData")
+local LibPlayerData = Wheel("LibPlayerData")
 assert(LibPlayerData, "LibTooltip requires LibPlayerData to be loaded.")
 
 -- Embed functionality into the library

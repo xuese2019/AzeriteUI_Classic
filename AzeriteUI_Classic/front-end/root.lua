@@ -1,7 +1,7 @@
 local ADDON, Private = ...
 
 -- Wooh! 
-local Core = CogWheel("LibModule"):NewModule(ADDON, "LibDB", "LibMessage", "LibEvent", "LibBlizzard", "LibFrame", "LibSlash", "LibSwitcher", "LibAura")
+local Core = Wheel("LibModule"):NewModule(ADDON, "LibDB", "LibMessage", "LibEvent", "LibBlizzard", "LibFrame", "LibSlash", "LibSwitcher", "LibAura")
 
 -- Tell the back-end what addon to look for before 
 -- initializing this module and all its submodules. 
@@ -39,7 +39,7 @@ local GetMedia = Private.GetMedia
 local Colors = Private.Colors
 
 -- Addon localization
-local L = CogWheel("LibLocale"):GetLocale(ADDON)
+local L = Wheel("LibLocale"):GetLocale(ADDON)
 
 -- Addon defaults
 local defaults = {
@@ -314,7 +314,7 @@ end
 
 Core.OnInit = function(self)
 	self.db = self:NewConfig("Core", defaults, "global")
-	self.layout = CogWheel("LibDB"):GetDatabase(self:GetPrefix()..":[Core]")
+	self.layout = Wheel("LibDB"):GetDatabase(self:GetPrefix()..":[Core]")
 
 	-- Hide the entire UI from the start
 	if self.layout.FadeInUI then 

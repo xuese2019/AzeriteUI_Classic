@@ -1,9 +1,9 @@
-local LibBlizzard = CogWheel:Set("LibBlizzard", 37)
+local LibBlizzard = Wheel:Set("LibBlizzard", 37)
 if (not LibBlizzard) then 
 	return
 end
 
-local LibEvent = CogWheel("LibEvent")
+local LibEvent = Wheel("LibEvent")
 assert(LibEvent, "LibBlizzard requires LibEvent to be loaded.")
 
 -- Embed event functionality into this

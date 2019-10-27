@@ -1,12 +1,12 @@
 local ADDON, Private = ...
-local Core = CogWheel("LibModule"):GetModule(ADDON)
+local Core = Wheel("LibModule"):GetModule(ADDON)
 if (not Core) then 
 	return 
 end
 local Module = Core:NewModule("FloaterHUD", "LibEvent", "LibFrame")
 
 -- Addon localization
-local L = CogWheel("LibLocale"):GetLocale(ADDON)
+local L = Wheel("LibLocale"):GetLocale(ADDON)
 
 -- Lua API
 local _G = _G

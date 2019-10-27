@@ -1,4 +1,4 @@
-local LibAuraData = CogWheel:Set("LibAuraData", -1)
+local LibAuraData = Wheel:Set("LibAuraData", -1)
 if (not LibAuraData) then	
 	return
 end

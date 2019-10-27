@@ -1,4 +1,4 @@
-local LibSound = CogWheel:Set("LibSound", 2)
+local LibSound = Wheel:Set("LibSound", 2)
 if (not LibSound) then	
 	return
 end

@@ -1,4 +1,4 @@
-local LibTime = CogWheel:Set("LibTime", 3)
+local LibTime = Wheel:Set("LibTime", 3)
 if (not LibTime) then	
 	return
 end

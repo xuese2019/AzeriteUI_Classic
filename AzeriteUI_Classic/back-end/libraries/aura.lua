@@ -1,18 +1,18 @@
-local LibAura = CogWheel:Set("LibAura", 17)
+local LibAura = Wheel:Set("LibAura", 17)
 if (not LibAura) then	
 	return
 end
 
-local LibMessage = CogWheel("LibMessage")
+local LibMessage = Wheel("LibMessage")
 assert(LibMessage, "LibAura requires LibMessage to be loaded.")
 
-local LibEvent = CogWheel("LibEvent")
+local LibEvent = Wheel("LibEvent")
 assert(LibEvent, "LibAura requires LibEvent to be loaded.")
 
-local LibFrame = CogWheel("LibFrame")
+local LibFrame = Wheel("LibFrame")
 assert(LibFrame, "LibAura requires LibFrame to be loaded.")
 
-local LibPlayerData = CogWheel("LibPlayerData")
+local LibPlayerData = Wheel("LibPlayerData")
 assert(LibPlayerData, "LibAura requires LibPlayerData to be loaded.")
 
 LibMessage:Embed(LibAura)
