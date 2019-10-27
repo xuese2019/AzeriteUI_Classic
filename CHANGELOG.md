@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.64-RC] 2019-10-27
+### Changed
+- Disable tooltip vendor sell prices when Auctionator or TradeSkillMaster is loaded. More addons will be added to this list. 
+
+### Fixed
+- Fixed a tooltip issue where the wrong object type was assumed. 
+
 ## [1.0.63-RC] 2019-10-25
 ### Fixed
 - Item tooltips now show the correct vendor sell price for partially full item stacks. 
