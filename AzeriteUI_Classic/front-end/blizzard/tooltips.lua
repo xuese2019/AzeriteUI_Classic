@@ -54,7 +54,7 @@ local DISABLE_VENDOR_PRICES = (function(...)
 end)("Auctionator", "TradeSkillMaster")
 
 -- Lockdowns
-local LOCKDOWNS = {}
+local LOCKDOWNS = {} 
 
 -- Returns the correct difficulty color compared to the player.
 -- Using this as a tooltip method to access our custom colors.
@@ -370,7 +370,7 @@ local OnTooltipSetItem = function(tooltip)
 				if (itemSellPrice and (itemSellPrice > 0)) then
 					LOCKDOWNS[tooltip] = nil
 
-					local itemCount = frame.count or (frame.Count and frame.Count.GetText and tonumber(frame.Count:GetText()))
+					local itemCount = frame.count and tonumber(frame.count) or (frame.Count and frame.Count.GetText) and tonumber(frame.Count:GetText())
 					local label = string_format("%s:", SELL_PRICE)
 					local price = formatMoney((itemCount or 1) * itemSellPrice)
 					local color = Colors.offwhite
