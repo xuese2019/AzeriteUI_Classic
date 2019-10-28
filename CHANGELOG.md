@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.65-RC] 2019-10-28
+### Changed
+- Renamed the whole library system for classic, since some adventurous tinkerers kept mixing files from retail into the classic files, leading to a series of unpredictable issues. 
+- Tooltips should indicate a lot better when a unit is dead now. 
+
 ## [1.0.64-RC] 2019-10-27
 ### Changed
 - Disable tooltip vendor sell prices when Auctionator or TradeSkillMaster is loaded. More addons will be added to this list. 
