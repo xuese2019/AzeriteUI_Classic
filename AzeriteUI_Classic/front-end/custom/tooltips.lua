@@ -43,8 +43,8 @@ Module.StyleTooltips = function(self)
 
 	-- The height of the healthbar.
 	-- The bar grows from top to bottom.
-	self:SetDefaultTooltipStatusBarHeight(3) 
-	self:SetDefaultTooltipStatusBarHeight(3, "health") 
+	self:SetDefaultTooltipStatusBarHeight(2) 
+	self:SetDefaultTooltipStatusBarHeight(5, "health") 
 	self:SetDefaultTooltipStatusBarHeight(2, "power") 
 
 	-- Use our own texture for the bars
