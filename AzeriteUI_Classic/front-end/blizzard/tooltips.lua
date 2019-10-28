@@ -459,56 +459,61 @@ local OnTooltipSetUnit = function(tooltip)
 
 	-- Players
 	if data.isPlayer then 
-		if data.guild then 
-			lineIndex = AddLine(tooltip, lineIndex, "<"..data.guild..">", Colors.title[1], Colors.title[2], Colors.title[3])
-		end 
+		if data.isDead then 
+			lineIndex = AddLine(tooltip, lineIndex, CORPSE, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
+		else 
+			if data.guild then 
+				lineIndex = AddLine(tooltip, lineIndex, "<"..data.guild..">", Colors.title[1], Colors.title[2], Colors.title[3])
+			end 
 
-		local levelLine
+			local levelLine
 
-		if data.raceDisplayName then 
-			levelLine = (levelLine and levelLine.." " or "") .. data.raceDisplayName
-		end 
+			if data.raceDisplayName then 
+				levelLine = (levelLine and levelLine.." " or "") .. data.raceDisplayName
+			end 
 
-		if (data.classDisplayName and data.class) then 
-			levelLine = (levelLine and levelLine.." " or "") .. data.classDisplayName
-		end 
+			if (data.classDisplayName and data.class) then 
+				levelLine = (levelLine and levelLine.." " or "") .. data.classDisplayName
+			end 
 
-		if levelLine then 
-			lineIndex = AddLine(tooltip, lineIndex, levelLine, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
-		end 
+			if levelLine then 
+				lineIndex = AddLine(tooltip, lineIndex, levelLine, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
+			end 
 
-		-- player faction (Horde/Alliance/Neutral)
-		if data.localizedFaction then 
-			lineIndex = AddLine(tooltip, lineIndex, data.localizedFaction)
-		end 
-
-	-- Battle Pets
-	elseif data.isPet then 
+			-- player faction (Horde/Alliance/Neutral)
+			if data.localizedFaction then 
+				lineIndex = AddLine(tooltip, lineIndex, data.localizedFaction)
+			end 
+		end
 
 	-- All other NPCs
-	else  
-	-- titles
-		if data.title then 
-			lineIndex = AddLine(tooltip, lineIndex, "<"..data.title..">", Colors.normal[1], Colors.normal[2], Colors.normal[3])
-		end 
+	else 
+		if data.isDead then 
+			lineIndex = AddLine(tooltip, lineIndex, CORPSE, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
+		else 
+			-- titles
+			if data.title then 
+				lineIndex = AddLine(tooltip, lineIndex, "<"..data.title..">", Colors.normal[1], Colors.normal[2], Colors.normal[3])
+			end 
 
-		if data.city then 
-			lineIndex = AddLine(tooltip, lineIndex, data.city, Colors.title[1], Colors.title[2], Colors.title[3])
-		end 
+			if data.city then 
+				lineIndex = AddLine(tooltip, lineIndex, data.city, Colors.title[1], Colors.title[2], Colors.title[3])
+			end 
 
-		-- Beast etc 
-		if data.creatureFamily then 
-			lineIndex = AddLine(tooltip, lineIndex, data.creatureFamily, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
+			-- Beast etc 
+			if data.creatureFamily then 
+				lineIndex = AddLine(tooltip, lineIndex, data.creatureFamily, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
 
-		-- Humanoid, Crab, etc 
-		elseif data.creatureType then 
-			lineIndex = AddLine(tooltip, lineIndex, data.creatureType, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
-		end 
+			-- Humanoid, Crab, etc 
+			elseif data.creatureType then 
+				lineIndex = AddLine(tooltip, lineIndex, data.creatureType, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
+			end 
 
-		-- player faction (Horde/Alliance/Neutral)
-		if data.localizedFaction then 
-			lineIndex = AddLine(tooltip, lineIndex, data.localizedFaction)
-		end 
+			-- player faction (Horde/Alliance/Neutral)
+			if data.localizedFaction then 
+				lineIndex = AddLine(tooltip, lineIndex, data.localizedFaction)
+			end 
+		end
 	end 
 
 	tooltip:Show()

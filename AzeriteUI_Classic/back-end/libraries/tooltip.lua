@@ -1,4 +1,4 @@
-local LibTooltip = Wheel:Set("LibTooltip", 62)
+local LibTooltip = Wheel:Set("LibTooltip", 63)
 if (not LibTooltip) then
 	return
 end
@@ -1483,60 +1483,66 @@ Tooltip.SetUnit = function(self, unit)
 
 			-- Players
 			if data.isPlayer then 
-				if data.guild then 
-					self:AddLine("<"..data.guild..">", colors.title[1], colors.title[2], colors.title[3])
-				end  
+				if data.isDead then 
+					self:AddLine(CORPSE, colors.offwhite[1], colors.offwhite[2], colors.offwhite[3])
+				else 
+					if data.guild then 
+						self:AddLine("<"..data.guild..">", colors.title[1], colors.title[2], colors.title[3])
+					end  
 
-				local levelLine
+					local levelLine
 
-				if data.raceDisplayName then 
-					levelLine = (levelLine and levelLine.." " or "") .. data.raceDisplayName
-				end 
-
-				if (data.classDisplayName and data.class) then 
-					if self.colorClass then 
-						levelLine = (levelLine and levelLine.." " or "") .. colors.class[data.class].colorCode .. data.classDisplayName .. "|r"
-					else 
-						levelLine = (levelLine and levelLine.." " or "") .. data.classDisplayName
+					if data.raceDisplayName then 
+						levelLine = (levelLine and levelLine.." " or "") .. data.raceDisplayName
 					end 
-				end 
 
-				if levelLine then 
-					self:AddLine(levelLine, colors.offwhite[1], colors.offwhite[2], colors.offwhite[3])
-				end 
+					if (data.classDisplayName and data.class) then 
+						if self.colorClass then 
+							levelLine = (levelLine and levelLine.." " or "") .. colors.class[data.class].colorCode .. data.classDisplayName .. "|r"
+						else 
+							levelLine = (levelLine and levelLine.." " or "") .. data.classDisplayName
+						end 
+					end 
 
-				-- player faction (Horde/Alliance/Neutral)
-				if data.localizedFaction then 
-					self:AddLine(data.localizedFaction, colors.offwhite[1], colors.offwhite[2], colors.offwhite[3])
-				end 
+					if levelLine then 
+						self:AddLine(levelLine, colors.offwhite[1], colors.offwhite[2], colors.offwhite[3])
+					end 
 
-			-- Battle Pets
-			elseif data.isPet then 
+					-- player faction (Horde/Alliance/Neutral)
+					if data.localizedFaction then 
+						self:AddLine(data.localizedFaction, colors.offwhite[1], colors.offwhite[2], colors.offwhite[3])
+					end 
+				end
 
 			-- All other NPCs
-			else  
-				-- titles
-				if data.title then 
-					self:AddLine("<"..data.title..">", colors.normal[1], colors.normal[2], colors.normal[3], true)
-				end 
+			else 
 
-				if data.city then 
-					self:AddLine(data.city, colors.title[1], colors.title[2], colors.title[3])
-				end 
+				if data.isDead then 
+					self:AddLine(CORPSE, colors.offwhite[1], colors.offwhite[2], colors.offwhite[3])
+				else 
+					-- titles
+					if data.title then 
+						self:AddLine("<"..data.title..">", colors.normal[1], colors.normal[2], colors.normal[3], true)
+					end 
 
-				-- Beast etc 
-				if data.creatureFamily then 
-					self:AddLine(data.creatureFamily, colors.offwhite[1], colors.offwhite[2], colors.offwhite[3])
+					if data.city then 
+						self:AddLine(data.city, colors.title[1], colors.title[2], colors.title[3])
+					end 
 
-				-- Humanoid, Crab, etc 
-				elseif data.creatureType then 
-					self:AddLine(data.creatureType, colors.offwhite[1], colors.offwhite[2], colors.offwhite[3])
-				end 
+					-- Beast etc 
+					if data.creatureFamily then 
+						self:AddLine(data.creatureFamily, colors.offwhite[1], colors.offwhite[2], colors.offwhite[3])
 
-				-- player faction (Horde/Alliance/Neutral)
-				if data.localizedFaction then 
-					self:AddLine(data.localizedFaction, colors.offwhite[1], colors.offwhite[2], colors.offwhite[3])
-				end 
+					-- Humanoid, Crab, etc 
+					elseif data.creatureType then 
+						self:AddLine(data.creatureType, colors.offwhite[1], colors.offwhite[2], colors.offwhite[3])
+					end 
+
+					-- player faction (Horde/Alliance/Neutral)
+					if data.localizedFaction then 
+						self:AddLine(data.localizedFaction, colors.offwhite[1], colors.offwhite[2], colors.offwhite[3])
+					end 
+				end
 			end 
 
 			if self:UpdateBarValues(unit, true) then 
