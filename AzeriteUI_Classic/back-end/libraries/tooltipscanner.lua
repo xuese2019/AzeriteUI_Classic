@@ -1,4 +1,4 @@
-local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 37)
+local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 38)
 if (not LibTooltipScanner) then	
 	return
 end
@@ -1473,6 +1473,8 @@ LibTooltipScanner.GetTooltipDataForUnit = function(self, unit, tbl)
 
 		-- Generic stuff
 		tbl.name = unitName
+		tbl.isDead = isDead
+		tbl.isPlayer = isPlayer
 
 		-- Retrieve special data from the tooltip
 
@@ -1489,7 +1491,6 @@ LibTooltipScanner.GetTooltipDataForUnit = function(self, unit, tbl)
 			local isFFA = UnitIsPVPFreeForAll(unit)
 			local pvpName = UnitPVPName(unit)
 
-			tbl.isPlayer = isPlayer
 			tbl.playerFaction = englishFaction
 			tbl.englishFaction = englishFaction
 			tbl.localizedFaction = localizedFaction
