@@ -1,4 +1,4 @@
-local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 38)
+local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 39)
 if (not LibTooltipScanner) then	
 	return
 end
@@ -1469,11 +1469,13 @@ LibTooltipScanner.GetTooltipDataForUnit = function(self, unit, tbl)
 		local unitLevel = UnitLevel(unit)
 		local unitEffectiveLevel = UnitEffectiveLevel and UnitEffectiveLevel(unit) or unitLevel
 		local unitName, unitRealm = UnitName(unit)
-		local isDead = UnitIsDead(unit) or UnitIsGhost(unit)
+		local isDead = UnitIsDead(unit)
+		local isGhost = UnitIsGhost(unit)
 
 		-- Generic stuff
 		tbl.name = unitName
-		tbl.isDead = isDead
+		tbl.isDead = isDead or isGhost
+		tbl.isGhost = isGhost
 		tbl.isPlayer = isPlayer
 
 		-- Retrieve special data from the tooltip

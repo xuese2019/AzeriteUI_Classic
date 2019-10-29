@@ -1,4 +1,4 @@
-local LibTooltip = Wheel:Set("LibTooltip", 63)
+local LibTooltip = Wheel:Set("LibTooltip", 64)
 if (not LibTooltip) then
 	return
 end
@@ -1461,6 +1461,10 @@ Tooltip.SetUnit = function(self, unit)
 			else 
 				if data.isBoss then
 					displayName = BOSS_TEXTURE .. " " .. displayName
+				elseif (data.classification == "rare") or (data.classification == "rareelite") then
+					displayName = displayName .. colors.quality[3].colorCode .. " (" .. ITEM_QUALITY3_DESC .. ")|r"
+				elseif (data.classification == "elite") then 
+					displayName = displayName .. colors.title.colorCode .. " (" .. ELITE .. ")|r"
 				end
 			end
 
@@ -1484,7 +1488,7 @@ Tooltip.SetUnit = function(self, unit)
 			-- Players
 			if data.isPlayer then 
 				if data.isDead then 
-					self:AddLine(CORPSE, colors.offwhite[1], colors.offwhite[2], colors.offwhite[3])
+					self:AddLine(data.isGhost and DEAD or CORPSE, colors.offwhite[1], colors.offwhite[2], colors.offwhite[3])
 				else 
 					if data.guild then 
 						self:AddLine("<"..data.guild..">", colors.title[1], colors.title[2], colors.title[3])
@@ -1518,7 +1522,7 @@ Tooltip.SetUnit = function(self, unit)
 			else 
 
 				if data.isDead then 
-					self:AddLine(CORPSE, colors.offwhite[1], colors.offwhite[2], colors.offwhite[3])
+					self:AddLine(data.isGhost and DEAD or CORPSE, colors.offwhite[1], colors.offwhite[2], colors.offwhite[3])
 				else 
 					-- titles
 					if data.title then 

@@ -303,6 +303,7 @@ end
 
 local OnTooltipHide = function(tooltip)
 	tooltip.unit = nil
+	tooltip.vendorSellLineID = nil
 	LOCKDOWNS[tooltip] = nil
 	if (tooltip:IsForbidden()) then 
 		return
@@ -314,10 +315,6 @@ local formatMoney = function(money)
 	local silver = math_floor((money - (gold * COPPER_PER_SILVER * SILVER_PER_GOLD)) / COPPER_PER_SILVER)
 	local copper = math_mod(money, COPPER_PER_SILVER)
 	
-	--local goldIcon = [[|TInterface\MoneyFrame\UI-GoldIcon:16:16:0:0|t]]
-	--local silverIcon = [[|TInterface\MoneyFrame\UI-SilverIcon:16:16:0:0|t]]
-	--local copperIcon = [[|TInterface\MoneyFrame\UI-CopperIcon:16:16:0:0|t]]
-
 	local goldIcon = string_format([[|T%s:16:16:0:0:64:64:%d:%d:%d:%d|t]], GetMedia("coins"), 0,32,0,32)
 	local silverIcon = string_format([[|T%s:16:16:0:0:64:64:%d:%d:%d:%d|t]], GetMedia("coins"), 32,64,0,32)
 	local copperIcon = string_format([[|T%s:16:16:0:0:64:64:%d:%d:%d:%d|t]], GetMedia("coins"), 0,32,32,64)
@@ -362,6 +359,13 @@ local OnTooltipSetItem = function(tooltip)
 					local price = formatMoney((itemCount or 1) * itemSellPrice)
 					local color = Colors.offwhite
 
+					if (tooltip.vendorSellLineID) then 
+						_G[tooltip:GetName().."TextLeft"..tooltip.vendorSellLineID]:SetText("")
+						_G[tooltip:GetName().."TextLeft"..(tooltip.vendorSellLineID+1)]:SetText("")
+						_G[tooltip:GetName().."TextRight"..(tooltip.vendorSellLineID+1)]:SetText("")
+					end
+
+					tooltip.vendorSellLineID = tooltip:NumLines() + 1
 					tooltip:AddLine(" ")
 					tooltip:AddDoubleLine(label, price, color[1], color[2], color[3], color[1], color[2], color[3])
 
@@ -428,6 +432,10 @@ local OnTooltipSetUnit = function(tooltip)
 	else 
 		if data.isBoss then
 			displayName = BOSS_TEXTURE .. " " .. displayName
+		elseif (data.classification == "rare") or (data.classification == "rareelite") then
+			displayName = displayName .. Colors.quality[3].colorCode .. " (" .. ITEM_QUALITY3_DESC .. ")|r"
+		elseif (data.classification == "elite") then 
+			displayName = displayName .. Colors.title.colorCode .. " (" .. ELITE .. ")|r"
 		end
 	end
 
@@ -447,7 +455,7 @@ local OnTooltipSetUnit = function(tooltip)
 	-- Players
 	if data.isPlayer then 
 		if data.isDead then 
-			lineIndex = AddLine(tooltip, lineIndex, CORPSE, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
+			lineIndex = AddLine(tooltip, lineIndex, data.isGhost and DEAD or CORPSE, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
 		else 
 			if data.guild then 
 				lineIndex = AddLine(tooltip, lineIndex, "<"..data.guild..">", Colors.title[1], Colors.title[2], Colors.title[3])
@@ -476,7 +484,7 @@ local OnTooltipSetUnit = function(tooltip)
 	-- All other NPCs
 	else 
 		if data.isDead then 
-			lineIndex = AddLine(tooltip, lineIndex, CORPSE, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
+			lineIndex = AddLine(tooltip, lineIndex, data.isGhost and DEAD or CORPSE, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
 		else 
 			-- titles
 			if data.title then 
