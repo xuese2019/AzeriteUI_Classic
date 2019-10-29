@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.66-RC] 2019-10-29
+### Changed
+- Started major reformatting of stylesheet and unitframe styling code structure. First step in changes that eventually will affect the whole addon. 
+- Every time you reach a new reputation standing or experience level and your current value in these are below one percent, the minimap badge tracking these will now show an exclamation mark instead of the non-localized "xp" or "rp" texts they used to show. 
+- Tooltips should now show dead players in spirit form as simply "Dead", not "Corpse". 
+- Tooltips now indicates the rare- or elite status of NPCs much better. 
+
+### Fixed
+- Health numbers and percentages should no longer be visible on critters with the tiny critter unitframe, even if they're above level one. 
+- Changed the way the blizzard gametooltip fonts are set to work around some alignment issues that arose in a recent version.
+- Fixed an issue where the vendor sell price in some cases (e.g. AtlasLoot) would be displayed twice in the same tooltip.
+
 ## [1.0.65-RC] 2019-10-28
 ### Changed
 - Renamed the whole library system for classic, since some adventurous tinkerers kept mixing files from retail into the classic files, leading to a series of unpredictable issues. 
