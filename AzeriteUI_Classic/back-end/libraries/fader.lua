@@ -1,4 +1,4 @@
-local LibFader = Wheel:Set("LibFader", 22)
+local LibFader = Wheel:Set("LibFader", 23)
 if (not LibFader) then	
 	return
 end
@@ -100,7 +100,8 @@ local safeDebuffs = {
 	[ 26898] = true, -- Heartbroken "You have been rejected and can no longer give Love Tokens!"
 	[ 71909] = true, -- Heartbroken "Suffering from a broken heart."
 	[ 43052] = true, -- Ram Fatigue "Your racing ram is fatigued."
-	[ 69438] = true  -- Sample Satisfaction (some love crap)
+	[ 69438] = true, -- Sample Satisfaction (some love crap)
+	[ 24755] = true  -- Tricked or Treated (Hallow's End)
 }
 
 -- These are buffs that will keep the interface visible while active. 
