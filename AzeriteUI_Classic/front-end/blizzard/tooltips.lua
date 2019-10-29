@@ -230,36 +230,23 @@ local StatusBar_OnHide = function(statusbar)
 	Module:SetBlizzardTooltipBackdropOffsets(statusbar._owner, 10, 10, 10, 12)
 end
 
+-- General scale and font object corrections on tooltip show. 
 local OnTooltipShow = function(tooltip)
-
 	-- Set the tooltip to the same scale as our own. 
 	local targetScale = Module:GetFrame("UICenter"):GetEffectiveScale()
 	local tooltipParentScale = (tooltip:GetParent() or WorldFrame):GetEffectiveScale()
 	tooltip:SetScale(targetScale/tooltipParentScale)
 
-	local lineIndex = 1
-	repeat 
-		local left = _G[tooltip:GetName().."TextLeft"..lineIndex]
-		local right = _G[tooltip:GetName().."TextRight"..lineIndex]
-		if (left) then 
-			local oldLeftObject = left:GetFontObject()
-			local oldRightObject = right:GetFontObject()
-			local leftObject = (lineIndex == 1) and GetFont(15, true) or GetFont(13, true)
-			local rightObject = (lineIndex == 1) and GetFont(15, true) or GetFont(13, true)
-			if (leftObject ~= oldLeftObject) then 
-				left:SetFontObject(leftObject)
-			end
-			if (rightObject ~= oldRightObject) then 
-				right:SetFontObject(rightObject)
-			end
-			--if (lineIndex > 1) then 
-			--	left:SetPoint("TOPLEFT", _G[tooltip:GetName().."TextLeft"..(lineIndex-1)], "BOTTOMLEFT", 0, -4)
-			--end 
-			lineIndex = lineIndex + 1
-		else
-			lineIndex = nil
-		end
-	until (not lineIndex)
+	-- Change the original font object and use inheritance, 
+	-- as changing line by line produced weird alignments.
+	local headerFontObject = GetFont(15,true)
+	if (GameTooltipHeader:GetFontObject() ~= headerFontObject) then 
+		GameTooltipHeader:SetFontObject(headerFontObject)
+	end
+	local lineFontObject = GetFont(13,true)
+	if (GameTooltipText:GetFontObject() ~= lineFontObject) then 
+		GameTooltipText:SetFontObject(lineFontObject)
+	end
 end
 
 local OnTooltipAddLine = function(tooltip, msg)
