@@ -686,10 +686,10 @@ local XP_OverrideValue = function(element, min, max, restedLeft, restedTimeLeft)
 				-- removing the percentage sign
 				percent:SetFormattedText("%.0f", percValue)
 			else 
-				percent:SetText("xp") -- no localization for this
+				percent:SetText(NEW)
 			end 
 		else 
-			percent:SetText(NEW) 
+			percent:SetText(NEW)
 		end 
 	end 
 	if element.colorValue then 
@@ -729,7 +729,7 @@ local Rep_OverrideValue = function(element, current, min, max, factionName, stan
 				-- removing the percentage sign
 				percent:SetFormattedText("%.0f", percValue)
 			else 
-				percent:SetText("rp") 
+				percent:SetText(NEW) 
 			end 
 		else 
 			percent:SetText(NEW) 
