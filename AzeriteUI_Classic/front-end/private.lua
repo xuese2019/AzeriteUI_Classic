@@ -318,7 +318,8 @@ local NeverOnPlate 		= 2^18 -- Never show on plates
 local NoCombat 			= 2^19 -- Never show in combat 
 local Warn 				= 2^20 -- Show when there is 30 secs left or less
 
-local showUnfilteredSpellID = (UnitName("player") == "Goldpaw") and (GetRealmName() == "Dragonfang") and (GetCurrentRegion() == 3)
+local playerName = UnitName("player")
+local showUnfilteredSpellID = (playerName == "Goldpaw" or playerName == "Lars") and (GetRealmName() == "Dragonfang") and (GetCurrentRegion() == 3)
 
 -- Aura Filter Functions
 -----------------------------------------------------------------
