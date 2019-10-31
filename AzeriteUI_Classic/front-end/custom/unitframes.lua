@@ -668,7 +668,7 @@ local Target_PostUpdateTextures = function(self)
 	local creatureType = UnitCreatureType("target")
 
 	if UnitIsPlayer("target") then 
-		if ((targetLevel >= maxLevel) or (UnitIsUnit("target", "player") and (not PlayerHasXP()))) then 
+		if ((targetLevel < 1) or (targetLevel >= maxLevel) or (UnitIsUnit("target", "player") and (not PlayerHasXP()))) then 
 			targetStyle = "Seasoned"
 		elseif (targetLevel >= self.layout.HardenedLevel) then 
 			targetStyle = "Hardened"
