@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.67-RC] 2019-11-02
+### Fixed
+- Targeted high level hostile players should no longer get a wooden unit frame border, but instead the same spiked stone frame as max level units.
+- Skinnable dead units should once more show that they can be skinned in the tooltips. This applies to both units that can be skinned for leather, as well as herbs or ore. 
+
 ## [1.0.66-RC] 2019-10-29
 ### Changed
 - Started major reformatting of stylesheet and unitframe styling code structure. First step in changes that eventually will affect the whole addon. 
