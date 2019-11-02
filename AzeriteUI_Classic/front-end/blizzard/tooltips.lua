@@ -485,6 +485,9 @@ local OnTooltipSetUnit = function(tooltip)
 	else 
 		if data.isDead then 
 			lineIndex = AddLine(tooltip, lineIndex, data.isGhost and DEAD or CORPSE, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
+			if (data.isSkinnable) then 
+				lineIndex = AddLine(tooltip, lineIndex, data.skinnableMsg, data.skinnableColor[1], data.skinnableColor[2], data.skinnableColor[3])
+			end
 		else 
 			-- titles
 			if data.title then 

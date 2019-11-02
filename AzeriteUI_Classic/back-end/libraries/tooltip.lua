@@ -1,4 +1,4 @@
-local LibTooltip = Wheel:Set("LibTooltip", 64)
+local LibTooltip = Wheel:Set("LibTooltip", 65)
 if (not LibTooltip) then
 	return
 end
@@ -1523,6 +1523,10 @@ Tooltip.SetUnit = function(self, unit)
 
 				if data.isDead then 
 					self:AddLine(data.isGhost and DEAD or CORPSE, colors.offwhite[1], colors.offwhite[2], colors.offwhite[3])
+
+					if (data.isSkinnable) then 
+						self:AddLine(data.skinnableMsg, data.skinnableColor[1], data.skinnableColor[2], data.skinnableColor[3])
+					end
 				else 
 					-- titles
 					if data.title then 

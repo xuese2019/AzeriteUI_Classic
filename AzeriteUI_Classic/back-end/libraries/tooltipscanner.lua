@@ -1,4 +1,4 @@
-local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 39)
+local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 40)
 if (not LibTooltipScanner) then	
 	return
 end
@@ -120,6 +120,11 @@ local Constants = {
 	RangeUnlimited = _G.SPELL_RANGE_UNLIMITED, 
 
 	SpellRequiresForm = _G.SPELL_REQUIRED_FORM, 
+
+	UnitSkinnable1 = _G.UNIT_SKINNABLE_LEATHER, -- "Skinnable"
+	UnitSkinnable2 = _G.UNIT_SKINNABLE_BOLTS, -- "Requires Engineering"
+	UnitSkinnable3 = _G.UNIT_SKINNABLE_HERB, -- "Requires Herbalism"
+	UnitSkinnable4 = _G.UNIT_SKINNABLE_ROCK, -- "Requires Mining"
 }
 
 local singlePattern = function(msg, plain)
@@ -216,6 +221,11 @@ local Patterns = {
 	-- Spell Requirements
 	SpellRequiresForm = 			   "(" .. (string_gsub(Constants.SpellRequiresForm, "%%s", "(.+)")) .. ")", 
 
+	-- Skinnables
+	UnitSkinnable1 = 			"^" .. Constants.UnitSkinnable1,
+	UnitSkinnable2 = 			"^" .. Constants.UnitSkinnable2,
+	UnitSkinnable3 = 			"^" .. Constants.UnitSkinnable3,
+	UnitSkinnable4 = 			"^" .. Constants.UnitSkinnable4
 }
 
 local isPrimaryStat = {
@@ -1566,6 +1576,7 @@ LibTooltipScanner.GetTooltipDataForUnit = function(self, unit, tbl)
 			-- since things are always placed in a certain order. 
 			-- We'll be able to guesstimate what the content means by this. 
 			local foundTitle, foundLevel, foundCity, foundPvP, foundLeader
+			local foundSkinnable
 
 			local numLines = Scanner:NumLines()
 			for lineIndex = 2,numLines do 
@@ -1598,6 +1609,24 @@ LibTooltipScanner.GetTooltipDataForUnit = function(self, unit, tbl)
 						if (msg == FACTION_ALLIANCE) or (msg == FACTION_HORDE) then
 							tbl.localizedFaction = msg
 						end
+
+						-- search for range
+						if (not foundSkinnable) then 
+							local id = 1
+							while Patterns["UnitSkinnable"..id] do 
+								if (string_find(msg, Patterns["UnitSkinnable"..id])) then 
+								
+									-- found the range line
+									foundSkinnable = lineIndex
+									tbl.skinnableMsg = msg
+									tbl.skinnableColor = { line:GetTextColor() }
+									tbl.isSkinnable = true
+									break
+								end 
+								id = id + 1
+							end 
+						end 
+
 					end 
 				end 
 			end 
