@@ -6,8 +6,6 @@ with static layout data used during the setup phase.
 --]]--
 
 local ADDON, Private = ...
-local Layouts = {}
-
 local L = Wheel("LibLocale"):GetLocale(ADDON)
 local LibDB = Wheel("LibDB")
 
@@ -795,59 +793,6 @@ end
 ------------------------------------------------
 -- Module Stylesheets
 ------------------------------------------------
--- Addon Core
-local Core = {
-	Colors = Colors,
-
-	FadeInUI = true, 
-		FadeInSpeed = .75,
-		FadeInDelay = 1.5,
-
-	DisableUIWidgets = {
-		ActionBars = true, 
-		Auras = true,
-		CaptureBar = true,
-		CastBars = true,
-		Minimap = true,
-		--QuestWatchFrame = true, 
-		UnitFramePlayer = true,
-		UnitFramePet = true,
-		UnitFrameTarget = true,
-		UnitFrameToT = true,
-		UnitFrameParty = true,
-		--UnitFrameRaid = true,
-		UnitFrameBoss = true,
-		--Warnings = true,
-		ZoneText = true
-	},
-	DisableUIMenuPages = {
-		{ ID = 5, Name = "InterfaceOptionsActionBarsPanel" },
-		--{ ID = 10, Name = "CompactUnitFrameProfiles" }
-	},
-	UseMenu = true, 
-		MenuPlace = { "BOTTOMRIGHT", -41, 32 },
-		MenuSize = { 320 -10, 70 }, 
-
-		MenuToggleButtonSize = { 48, 48 }, 
-		MenuToggleButtonPlace = { "BOTTOMRIGHT", -4, 4 }, 
-		MenuToggleButtonIcon = GetMedia("config_button"), 
-		MenuToggleButtonIconPlace = { "CENTER", 0, 0 }, 
-		MenuToggleButtonIconSize = { 96, 96 }, 
-		MenuToggleButtonIconColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
-
-		MenuBorderBackdropColor = { .05, .05, .05, .85 },
-		MenuBorderBackdropBorderColor = { 1, 1, 1, 1 },
-		MenuWindow_CreateBorder = Core_Window_CreateBorder,
-		MenuWindow_OnHide = Core_Window_OnHide, 
-		MenuWindow_OnShow = Core_Window_OnShow,
-
-		MenuButtonSize = { MenuButtonW, MenuButtonH },
-		MenuButtonSpacing = 10, 
-		MenuButtonSizeMod = .75, 
-		MenuButton_PostCreate = Core_MenuButton_PostCreate, 
-		MenuButton_PostUpdate = Core_MenuButton_PostUpdate
-}
-
 -- ActionBars
 local ActionBars = {
 	Colors = Colors,
@@ -1063,36 +1008,6 @@ local BlizzardGameMenu = {
 	MenuButtonSizeMod = .75, 
 	MenuButton_PostCreate = Blizzard_GameMenu_Button_PostCreate,
 	MenuButton_PostUpdate = Blizzard_GameMenu_Button_PostUpdate
-}
-
--- Blizzard MicroMenu
-local BlizzardMicroMenu = {
-	Colors = Colors,
-
-	ButtonFont = GetFont(MenuButtonFontSize, false),
-	ButtonFontColor = { 0, 0, 0 }, 
-	ButtonFontShadowOffset = { 0, -.85 },
-	ButtonFontShadowColor = { 1, 1, 1, .5 },
-	ConfigWindowBackdrop = {
-		bgFile = [[Interface\ChatFrame\ChatFrameBackground]],
-		edgeFile = GetMedia("tooltip_border"),
-		edgeSize = 32 *.75, 
-		insets = { 
-			top = 23 *.75, 
-			bottom = 23 *.75, 
-			left = 23 *.75, 
-			right = 23 *.75 
-		}
-	},
-
-	MenuButtonSize = { MenuButtonW, MenuButtonH },
-	MenuButtonSpacing = 10, 
-	MenuButtonSizeMod = .75, 
-	MenuButtonTitleColor = { Colors.title[1], Colors.title[2], Colors.title[3] },
-	MenuButtonNormalColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] }, 
-	MenuButton_PostCreate = BlizzardMicroMenu_Button_PostCreate,
-	MenuButton_PostUpdate = BlizzardMicroMenu_Button_PostUpdate, 
-	MenuWindow_CreateBorder = Core_Window_CreateBorder
 }
 
 -- Blizzard Objectives Tracker
@@ -1692,17 +1607,6 @@ local TooltipStyling = {
 	PostCreateBar = Tooltip_Bar_PostCreate
 }
 
-------------------------------------------------
--- Module Layouts
-------------------------------------------------
-Layouts.BlizzardWorldMap = {
-
-}
-
-Layouts.FloaterHUD = {
-	Place = { "CENTER", "UICenter", "CENTER", 190, 0 }
-}
-
 ------------------------------------------------------------------
 -- UnitFrame Config Templates
 ------------------------------------------------------------------
@@ -1889,85 +1793,67 @@ local Template_SmallFrameReversed_Auras = setmetatable({
 
 local Template_TinyFrame = {
 	Colors = Colors,
-
 	Size = Constant.TinyFrame,
 
+	RangeOutsideAlpha = .6, -- was .35, but that's too hard to see
+
 	HealthPlace = { "BOTTOM", 0, 0 }, 
-		HealthSize = Constant.TinyBar,  -- health size
-		HealthType = "StatusBar", -- health type
-		HealthBarTexture = Constant.TinyBarTexture, 
-		HealthBarOrientation = "RIGHT", -- bar orientation
-		HealthBarSetFlippedHorizontally = false, 
-		HealthBarSparkMap = {
-			top = {
-				{ keyPercent =   0/128, offset = -16/32 }, 
-				{ keyPercent =  10/128, offset =   0/32 }, 
-				{ keyPercent = 119/128, offset =   0/32 }, 
-				{ keyPercent = 128/128, offset = -16/32 }
-			},
-			bottom = {
-				{ keyPercent =   0/128, offset = -16/32 }, 
-				{ keyPercent =  10/128, offset =   0/32 }, 
-				{ keyPercent = 119/128, offset =   0/32 }, 
-				{ keyPercent = 128/128, offset = -16/32 }
-			}
+	HealthSize = Constant.TinyBar,  -- health size
+	HealthBarTexture = Constant.TinyBarTexture, 
+	HealthBarOrientation = "RIGHT", -- bar orientation
+	HealthBarSetFlippedHorizontally = false, 
+	HealthBarSparkMap = {
+		top = {
+			{ keyPercent =   0/128, offset = -16/32 }, 
+			{ keyPercent =  10/128, offset =   0/32 }, 
+			{ keyPercent = 119/128, offset =   0/32 }, 
+			{ keyPercent = 128/128, offset = -16/32 }
 		},
-		HealthSmoothingMode = "bezier-fast-in-slow-out", -- smoothing method
-		HealthSmoothingFrequency = .2, -- speed of the smoothing method
-		HealthFrequentUpdates = true, -- listen to frequent health events for more accurate updates
-
-		UseHealthBackdrop = true,
-			HealthBackdropPlace = { "CENTER", 1, -2 },
-			HealthBackdropSize = { 140,90 },
-			HealthBackdropTexture = GetMedia("cast_back"), 
-			HealthBackdropDrawLayer = { "BACKGROUND", -1 },
-			HealthBackdropColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
-
-		UseHealthValue = true, 
-			HealthValuePlace = { "CENTER", 0, 0 },
-			HealthValueDrawLayer = { "OVERLAY", 1 },
-			HealthValueJustifyH = "CENTER", 
-			HealthValueJustifyV = "MIDDLE", 
-			HealthValueFont = GetFont(13, true),
-			HealthValueColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
-			HealthShowPercent = true, 
-		
+		bottom = {
+			{ keyPercent =   0/128, offset = -16/32 }, 
+			{ keyPercent =  10/128, offset =   0/32 }, 
+			{ keyPercent = 119/128, offset =   0/32 }, 
+			{ keyPercent = 128/128, offset = -16/32 }
+		}
+	},
+	HealthSmoothingMode = "bezier-fast-in-slow-out", -- smoothing method
+	HealthSmoothingFrequency = .2, -- speed of the smoothing method
+	HealthFrequentUpdates = true, -- listen to frequent health events for more accurate updates
+	HealthBackdropPlace = { "CENTER", 1, -2 },
+	HealthBackdropSize = { 140,90 },
+	HealthBackdropTexture = GetMedia("cast_back"), 
+	HealthBackdropDrawLayer = { "BACKGROUND", -1 },
+	HealthBackdropColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
 	
-	UseCastBar = true,
-		CastBarPlace = { "BOTTOM", 0, 0 },
-		CastBarSize = Constant.TinyBar,
-		CastBarOrientation = "RIGHT", 
-		CastBarSmoothingMode = "bezier-fast-in-slow-out", 
-		CastBarSmoothingFrequency = .15,
-		CastBarSparkMap = {
-			top = {
-				{ keyPercent =   0/128, offset = -16/32 }, 
-				{ keyPercent =  10/128, offset =   0/32 }, 
-				{ keyPercent = 119/128, offset =   0/32 }, 
-				{ keyPercent = 128/128, offset = -16/32 }
-			},
-			bottom = {
-				{ keyPercent =   0/128, offset = -16/32 }, 
-				{ keyPercent =  10/128, offset =   0/32 }, 
-				{ keyPercent = 119/128, offset =   0/32 }, 
-				{ keyPercent = 128/128, offset = -16/32 }
-			}
+	CastBarPlace = { "BOTTOM", 0, 0 },
+	CastBarSize = Constant.TinyBar,
+	CastBarOrientation = "RIGHT", 
+	CastBarSmoothingMode = "bezier-fast-in-slow-out", 
+	CastBarSmoothingFrequency = .15,
+	CastBarSparkMap = {
+		top = {
+			{ keyPercent =   0/128, offset = -16/32 }, 
+			{ keyPercent =  10/128, offset =   0/32 }, 
+			{ keyPercent = 119/128, offset =   0/32 }, 
+			{ keyPercent = 128/128, offset = -16/32 }
 		},
-		CastBarTexture = Constant.TinyBarTexture, 
-		CastBarColor = { 1, 1, 1, .15 },
+		bottom = {
+			{ keyPercent =   0/128, offset = -16/32 }, 
+			{ keyPercent =  10/128, offset =   0/32 }, 
+			{ keyPercent = 119/128, offset =   0/32 }, 
+			{ keyPercent = 128/128, offset = -16/32 }
+		}
+	},
+	CastBarTexture = Constant.TinyBarTexture, 
+	CastBarColor = { 1, 1, 1, .15 },
 
-	UseRange = true, 
-		RangeOutsideAlpha = .6, -- was .35, but that's too hard to see
-
-	UseTargetHighlight = true, 
-		TargetHighlightParent = "Health", 
-		TargetHighlightPlace = { "CENTER", 1, -2 },
-		TargetHighlightSize = { 140, 90 },
-		TargetHighlightTexture = GetMedia("cast_back_outline"), 
-		TargetHighlightDrawLayer = { "BACKGROUND", 0 },
-		TargetHighlightShowTarget = true, TargetHighlightTargetColor = { 255/255, 229/255, 109/255, 1 }, 
-		TargetHighlightShowFocus = true, TargetHighlightFocusColor = { 44/255, 165/255, 255/255, 1 }, 
-
+	TargetHighlightParent = "Health", 
+	TargetHighlightPlace = { "CENTER", 1, -2 },
+	TargetHighlightSize = { 140, 90 },
+	TargetHighlightTexture = GetMedia("cast_back_outline"), 
+	TargetHighlightDrawLayer = { "BACKGROUND", 0 },
+	TargetHighlightShowTarget = true, TargetHighlightTargetColor = { 255/255, 229/255, 109/255, 1 }, 
+	TargetHighlightShowFocus = true, TargetHighlightFocusColor = { 44/255, 165/255, 255/255, 1 }, 
 }
 
 ------------------------------------------------------------------
@@ -2305,453 +2191,6 @@ local UnitFramePlayer = {
 		NoviceCastTexture = GetMedia("hp_lowmid_bar"),
 		NoviceManaOrbTexture = GetMedia("orb_case_low"),
 		NoviceManaOrbColor = { Colors.ui.wood[1], Colors.ui.wood[2], Colors.ui.wood[3] },
-}
-
--- PlayerHUD (combo points and castbar)
-local UnitFramePlayerHUD = {
-	Colors = Colors,
-
-	Size = { 103, 103 }, 
-	Place = { "BOTTOMLEFT", 75, 127 },
-	IgnoreMouseOver = true,  
-
-	UseCastBar = true,
-		CastBarPlace = { "CENTER", "UICenter", "CENTER", 0, -133 }, 
-		CastBarSize = Constant.SmallBar,
-		CastBarTexture = Constant.SmallBarTexture, 
-		CastBarColor = { 70/255, 255/255, 131/255, .69 }, 
-		CastBarOrientation = "RIGHT",
-		CastTimeToHoldFailed = .5, 
-		CastBarSparkMap = {
-			top = {
-				{ keyPercent =   0/128, offset = -16/32 }, 
-				{ keyPercent =  10/128, offset =   0/32 }, 
-				{ keyPercent = 119/128, offset =   0/32 }, 
-				{ keyPercent = 128/128, offset = -16/32 }
-			},
-			bottom = {
-				{ keyPercent =   0/128, offset = -16/32 }, 
-				{ keyPercent =  10/128, offset =   0/32 }, 
-				{ keyPercent = 119/128, offset =   0/32 }, 
-				{ keyPercent = 128/128, offset = -16/32 }
-			}
-		},
-
-		UseCastBarBackground = true, 
-			CastBarBackgroundPlace = { "CENTER", 1, -1 }, 
-			CastBarBackgroundSize = { 193,93 },
-			CastBarBackgroundTexture = GetMedia("cast_back"), 
-			CastBarBackgroundDrawLayer = { "BACKGROUND", 1 },
-			CastBarBackgroundColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
-			
-		UseCastBarValue = true, 
-			CastBarValuePlace = { "CENTER", 0, 0 },
-			CastBarValueFont = GetFont(14, true),
-			CastBarValueDrawLayer = { "OVERLAY", 1 },
-			CastBarValueJustifyH = "CENTER",
-			CastBarValueJustifyV = "MIDDLE",
-			CastBarValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-
-		UseCastBarName = true, 
-			CastBarNamePlace = { "TOP", 0, -(12 + 14) },
-			CastBarNameFont = GetFont(15, true),
-			CastBarNameDrawLayer = { "OVERLAY", 1 },
-			CastBarNameJustifyH = "CENTER",
-			CastBarNameJustifyV = "MIDDLE",
-			CastBarNameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-
-		UseCastBarShield = true, 
-			CastBarShieldPlace = { "CENTER", 1, -2 }, 
-			CastBarShieldSize = { 193, 93 },
-			CastBarShieldTexture = GetMedia("cast_back_spiked"), 
-			CastBarShieldDrawLayer = { "BACKGROUND", 1 }, 
-			CastBarShieldColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
-			CastShieldHideBgWhenShielded = true, 
-
-		UseCastBarSpellQueue = true, 
-			CastBarSpellQueuePlace = { "CENTER", "UICenter", "CENTER", 0, -133 }, 
-			CastBarSpellQueueSize = Constant.SmallBar,
-			CastBarSpellQueueTexture = Constant.SmallBarTexture, 
-			CastBarSpellQueueColor = { 1, 1, 1, .5 },
-			CastBarSpellQueueOrientation = "LEFT",
-			CastBarSpellQueueSparkMap = {
-				top = {
-					{ keyPercent =   0/128, offset = -16/32 }, 
-					{ keyPercent =  10/128, offset =   0/32 }, 
-					{ keyPercent = 119/128, offset =   0/32 }, 
-					{ keyPercent = 128/128, offset = -16/32 }
-				},
-				bottom = {
-					{ keyPercent =   0/128, offset = -16/32 }, 
-					{ keyPercent =  10/128, offset =   0/32 }, 
-					{ keyPercent = 119/128, offset =   0/32 }, 
-					{ keyPercent = 128/128, offset = -16/32 }
-				}
-			},
-
-	UseClassPower = not Wheel("LibModule"):IsAddOnEnabled("SimpleClassPower"), 
-		ClassPowerPlace = { "CENTER", "UICenter", "CENTER", 0, 0 }, 
-		ClassPowerSize = { 2,2 }, 
-		ClassPowerHideWhenUnattackable = true, 
-		ClassPowerMaxComboPoints = 5, 
-		ClassPowerHideWhenNoTarget = true, 
-		ClassPowerAlphaWhenEmpty = .5, 
-		ClassPowerAlphaWhenOutOfCombat = 1,
-		ClassPowerAlphaWhenOutOfCombatRunes = .5, 
-		ClassPowerReverseSides = false, 
-		ClassPowerRuneSortOrder = "ASC",
-
-		ClassPowerPostCreatePoint = function(element, id, point)
-			point.case = point:CreateTexture()
-			point.case:SetDrawLayer("BACKGROUND", -2)
-			point.case:SetVertexColor(211/255, 200/255, 169/255)
-
-			point.slotTexture:SetPoint("TOPLEFT", -1.5, 1.5)
-			point.slotTexture:SetPoint("BOTTOMRIGHT", 1.5, -1.5)
-			point.slotTexture:SetVertexColor(130/255 *.3, 133/255 *.3, 130/255 *.3, 2/3)
-
-			point:SetOrientation("UP") -- set the bars to grow from bottom to top.
-			point:SetSparkTexture(GetMedia("blank")) -- this will be too tricky to rotate and map
-			
-		end,
-
-		ClassPowerPostUpdate = function(element, unit, min, max, newMax, powerType)
-
-			--	Class Powers available in Legion/BfA: 
-			--------------------------------------------------------------------------------- 
-			-- 	* Arcane Charges 	Generated points. 5 cap. 0 baseline.
-			--	* Chi: 				Generated points. 5 cap, 6 if talented, 0 baseline.
-			--	* Combo Points: 	Fast generated points. 5 cap, 6-10 if talented, 0 baseline.
-			--	* Holy Power: 		Fast generated points. 5 cap, 0 baseline.
-			--	* Soul Shards: 		Slowly generated points. 5 cap, 1 point baseline.
-			--	* Stagger: 			Generated points. 3 cap. 3 baseline. 
-			--	* Runes: 			Fast refilling points. 6 cap, 6 baseline.
-		
-			local style
-		
-			-- 5 points: 4 circles, 1 larger crystal
-			if (powerType == "COMBO_POINTS") then 
-				style = "ComboPoints"
-		
-			-- 5 points: 5 circles, center one larger
-			elseif (powerType == "CHI") then
-				style = "Chi"
-		
-			--5 points: 3 circles, 3 crystals, last crystal larger
-			elseif (powerType == "ARCANE_CHARGES") or (powerType == "HOLY_POWER") or (powerType == "SOUL_SHARDS") then 
-				style = "SoulShards"
-		
-			-- 3 points: 
-			elseif (powerType == "STAGGER") then 
-				style = "Stagger"
-		
-			-- 6 points: 
-			elseif (powerType == "RUNES") then 
-				style = "Runes"
-			end 
-		
-			-- For my own reference, these are properly sized and aligned so far:
-			-- yes 	ComboPoints 
-			-- no 	Chi
-			-- yes 	SoulShards (also ArcaneCharges, HolyPower)
-			-- no 	Stagger
-			-- no 	Runes
-		
-			-- Do we need to set or update the textures?
-			if (style ~= element.powerStyle) then 
-		
-				local posMod = element.flipSide and -1 or 1
-		
-				if (style == "ComboPoints") then
-					local point1, point2, point3, point4, point5 = element[1], element[2], element[3], element[4], element[5]
-		
-					point1:SetPoint("CENTER", -203*posMod,-137)
-					point1:SetSize(13,13)
-					point1:SetStatusBarTexture(GetMedia("point_crystal"))
-					point1:GetStatusBarTexture():SetRotation(degreesToRadians(6*posMod))
-					point1.slotTexture:SetTexture(GetMedia("point_crystal"))
-					point1.slotTexture:SetRotation(degreesToRadians(6*posMod))
-					point1.case:SetPoint("CENTER", 0, 0)
-					point1.case:SetSize(58,58)
-					point1.case:SetRotation(degreesToRadians(6*posMod))
-					point1.case:SetTexture(GetMedia("point_plate"))
-		
-					point2:SetPoint("CENTER", -221*posMod,-111)
-					point2:SetSize(13,13)
-					point2:SetStatusBarTexture(GetMedia("point_crystal"))
-					point2:GetStatusBarTexture():SetRotation(degreesToRadians(5*posMod))
-					point2.slotTexture:SetTexture(GetMedia("point_crystal"))
-					point2.slotTexture:SetRotation(degreesToRadians(5*posMod))
-					point2.case:SetPoint("CENTER", 0, 0)
-					point2.case:SetSize(60,60)
-					point2.case:SetRotation(degreesToRadians(5*posMod))
-					point2.case:SetTexture(GetMedia("point_plate"))
-		
-					point3:SetPoint("CENTER", -231*posMod,-79)
-					point3:SetSize(13,13)
-					point3:SetStatusBarTexture(GetMedia("point_crystal"))
-					point3:GetStatusBarTexture():SetRotation(degreesToRadians(4*posMod))
-					point3.slotTexture:SetTexture(GetMedia("point_crystal"))
-					point3.slotTexture:SetRotation(degreesToRadians(4*posMod))
-					point3.case:SetPoint("CENTER", 0,0)
-					point3.case:SetSize(60,60)
-					point3.case:SetRotation(degreesToRadians(4*posMod))
-					point3.case:SetTexture(GetMedia("point_plate"))
-				
-					point4:SetPoint("CENTER", -225*posMod,-44)
-					point4:SetSize(13,13)
-					point4:SetStatusBarTexture(GetMedia("point_crystal"))
-					point4:GetStatusBarTexture():SetRotation(degreesToRadians(3*posMod))
-					point4.slotTexture:SetTexture(GetMedia("point_crystal"))
-					point4.slotTexture:SetRotation(degreesToRadians(3*posMod))
-					point4.case:SetPoint("CENTER", 0, 0)
-					point4.case:SetSize(60,60)
-					point4.case:SetRotation(0)
-					point4.case:SetTexture(GetMedia("point_plate"))
-				
-					point5:SetPoint("CENTER", -203*posMod,-11)
-					point5:SetSize(14,21)
-					point5:SetStatusBarTexture(GetMedia("point_crystal"))
-					point5:GetStatusBarTexture():SetRotation(degreesToRadians(1*posMod))
-					point5.slotTexture:SetTexture(GetMedia("point_crystal"))
-					point5.slotTexture:SetRotation(degreesToRadians(1*posMod))
-					point5.case:SetRotation(degreesToRadians(1*posMod))
-					point5.case:SetPoint("CENTER",0,0)
-					point5.case:SetSize(82,96)
-					point5.case:SetRotation(degreesToRadians(1*posMod))
-					point5.case:SetTexture(GetMedia("point_diamond"))
-		
-				elseif (style == "Chi") then
-					local point1, point2, point3, point4, point5 = element[1], element[2], element[3], element[4], element[5]
-		
-					point1:SetPoint("CENTER", -203*posMod,-137)
-					point1:SetSize(13,13)
-					point1:SetStatusBarTexture(GetMedia("point_crystal"))
-					point1:GetStatusBarTexture():SetRotation(degreesToRadians(6*posMod))
-					point1.slotTexture:SetTexture(GetMedia("point_crystal"))
-					point1.slotTexture:SetRotation(degreesToRadians(6*posMod))
-					point1.case:SetPoint("CENTER", 0, 0)
-					point1.case:SetSize(58,58)
-					point1.case:SetRotation(degreesToRadians(6*posMod))
-					point1.case:SetTexture(GetMedia("point_plate"))
-		
-					point2:SetPoint("CENTER", -223*posMod,-109)
-					point2:SetSize(13,13)
-					point2:SetStatusBarTexture(GetMedia("point_crystal"))
-					point2:GetStatusBarTexture():SetRotation(degreesToRadians(5*posMod))
-					point2.slotTexture:SetTexture(GetMedia("point_crystal"))
-					point2.slotTexture:SetRotation(degreesToRadians(5*posMod))
-					point2.case:SetPoint("CENTER", 0, 0)
-					point2.case:SetSize(60,60)
-					point2.case:SetRotation(degreesToRadians(5*posMod))
-					point2.case:SetTexture(GetMedia("point_plate"))
-		
-					point3:SetPoint("CENTER", -234*posMod,-73)
-					point3:SetSize(39,40)
-					point3:SetStatusBarTexture(GetMedia("point_hearth"))
-					point3:GetStatusBarTexture():SetRotation(0)
-					point3.slotTexture:SetTexture(GetMedia("point_hearth"))
-					point3.slotTexture:SetRotation(0)
-					point3.case:SetPoint("CENTER", 0,0)
-					point3.case:SetSize(80,80)
-					point3.case:SetRotation(0)
-					point3.case:SetTexture(GetMedia("point_plate"))
-				
-					point4:SetPoint("CENTER", -221*posMod,-36)
-					point4:SetSize(13,13)
-					point4:SetStatusBarTexture(GetMedia("point_crystal"))
-					point4:GetStatusBarTexture():SetRotation(0)
-					point4.slotTexture:SetTexture(GetMedia("point_crystal"))
-					point4.slotTexture:SetRotation(0)
-					point4.case:SetPoint("CENTER", 0, 0)
-					point4.case:SetSize(60,60)
-					point4.case:SetRotation(0)
-					point4.case:SetTexture(GetMedia("point_plate"))
-				
-					point5:SetPoint("CENTER", -203*posMod,-9)
-					point5:SetSize(13,13)
-					point5:SetStatusBarTexture(GetMedia("point_crystal"))
-					point5:GetStatusBarTexture():SetRotation(0)
-					point5.slotTexture:SetTexture(GetMedia("point_crystal"))
-					point5.slotTexture:SetRotation(0)
-					point5.case:SetPoint("CENTER",0, 0)
-					point5.case:SetSize(60,60)
-					point5.case:SetRotation(0)
-					point5.case:SetTexture(GetMedia("point_plate"))
-		
-				elseif (style == "SoulShards") then 
-					local point1, point2, point3, point4, point5 = element[1], element[2], element[3], element[4], element[5]
-		
-					point1:SetPoint("CENTER", -203*posMod,-137)
-					point1:SetSize(12,12)
-					point1:SetStatusBarTexture(GetMedia("point_crystal"))
-					point1:GetStatusBarTexture():SetRotation(degreesToRadians(6*posMod))
-					point1.slotTexture:SetTexture(GetMedia("point_crystal"))
-					point1.slotTexture:SetRotation(degreesToRadians(6*posMod))
-					point1.case:SetPoint("CENTER", 0, 0)
-					point1.case:SetSize(54,54)
-					point1.case:SetRotation(degreesToRadians(6*posMod))
-					point1.case:SetTexture(GetMedia("point_plate"))
-		
-					point2:SetPoint("CENTER", -221*posMod,-111)
-					point2:SetSize(13,13)
-					point2:SetStatusBarTexture(GetMedia("point_crystal"))
-					point2:GetStatusBarTexture():SetRotation(degreesToRadians(5*posMod))
-					point2.slotTexture:SetTexture(GetMedia("point_crystal"))
-					point2.slotTexture:SetRotation(degreesToRadians(5*posMod))
-					point2.case:SetPoint("CENTER", 0, 0)
-					point2.case:SetSize(60,60)
-					point2.case:SetRotation(degreesToRadians(5*posMod))
-					point2.case:SetTexture(GetMedia("point_plate"))
-		
-					point3:SetPoint("CENTER", -235*posMod,-80)
-					point3:SetSize(11,15)
-					point3:SetStatusBarTexture(GetMedia("point_crystal"))
-					point3:GetStatusBarTexture():SetRotation(degreesToRadians(3*posMod))
-					point3.slotTexture:SetTexture(GetMedia("point_crystal"))
-					point3.slotTexture:SetRotation(degreesToRadians(3*posMod))
-					point3.case:SetPoint("CENTER",0,0)
-					point3.case:SetSize(65,60)
-					point3.case:SetRotation(degreesToRadians(3*posMod))
-					point3.case:SetTexture(GetMedia("point_diamond"))
-				
-					point4:SetPoint("CENTER", -227*posMod,-44)
-					point4:SetSize(12,18)
-					point4:SetStatusBarTexture(GetMedia("point_crystal"))
-					point4:GetStatusBarTexture():SetRotation(degreesToRadians(3*posMod))
-					point4.slotTexture:SetTexture(GetMedia("point_crystal"))
-					point4.slotTexture:SetRotation(degreesToRadians(3*posMod))
-					point4.case:SetPoint("CENTER",0,0)
-					point4.case:SetSize(78,79)
-					point4.case:SetRotation(degreesToRadians(3*posMod))
-					point4.case:SetTexture(GetMedia("point_diamond"))
-				
-					point5:SetPoint("CENTER", -203*posMod,-11)
-					point5:SetSize(14,21)
-					point5:SetStatusBarTexture(GetMedia("point_crystal"))
-					point5:GetStatusBarTexture():SetRotation(degreesToRadians(1*posMod))
-					point5.slotTexture:SetTexture(GetMedia("point_crystal"))
-					point5.slotTexture:SetRotation(degreesToRadians(1*posMod))
-					point5.case:SetRotation(degreesToRadians(1*posMod))
-					point5.case:SetPoint("CENTER",0,0)
-					point5.case:SetSize(82,96)
-					point5.case:SetRotation(degreesToRadians(1*posMod))
-					point5.case:SetTexture(GetMedia("point_diamond"))
-		
-		
-					-- 1.414213562
-				elseif (style == "Stagger") then 
-					local point1, point2, point3 = element[1], element[2], element[3]
-		
-					point1:SetPoint("CENTER", -223*posMod,-109)
-					point1:SetSize(13,13)
-					point1:SetStatusBarTexture(GetMedia("point_crystal"))
-					point1:GetStatusBarTexture():SetRotation(degreesToRadians(5*posMod))
-					point1.slotTexture:SetTexture(GetMedia("point_crystal"))
-					point1.slotTexture:SetRotation(degreesToRadians(5*posMod))
-					point1.case:SetPoint("CENTER", 0, 0)
-					point1.case:SetSize(60,60)
-					point1.case:SetRotation(degreesToRadians(5*posMod))
-					point1.case:SetTexture(GetMedia("point_plate"))
-		
-					point2:SetPoint("CENTER", -234*posMod,-73)
-					point2:SetSize(39,40)
-					point2:SetStatusBarTexture(GetMedia("point_hearth"))
-					point2:GetStatusBarTexture():SetRotation(0)
-					point2.slotTexture:SetTexture(GetMedia("point_hearth"))
-					point2.slotTexture:SetRotation(0)
-					point2.case:SetPoint("CENTER", 0,0)
-					point2.case:SetSize(80,80)
-					point2.case:SetRotation(0)
-					point2.case:SetTexture(GetMedia("point_plate"))
-				
-					point3:SetPoint("CENTER", -221*posMod,-36)
-					point3:SetSize(13,13)
-					point3:SetStatusBarTexture(GetMedia("point_crystal"))
-					point3:GetStatusBarTexture():SetRotation(0)
-					point3.slotTexture:SetTexture(GetMedia("point_crystal"))
-					point3.slotTexture:SetRotation(0)
-					point3.case:SetPoint("CENTER", 0, 0)
-					point3.case:SetSize(60,60)
-					point3.case:SetRotation(0)
-					point3.case:SetTexture(GetMedia("point_plate"))
-		
-		
-				elseif (style == "Runes") then 
-					local point1, point2, point3, point4, point5, point6 = element[1], element[2], element[3], element[4], element[5], element[6]
-		
-					point1:SetPoint("CENTER", -203*posMod,-131)
-					point1:SetSize(28,28)
-					point1:SetStatusBarTexture(GetMedia("point_rune2"))
-					point1:GetStatusBarTexture():SetRotation(0)
-					point1.slotTexture:SetTexture(GetMedia("point_rune2"))
-					point1.slotTexture:SetRotation(0)
-					point1.case:SetPoint("CENTER", 0, 0)
-					point1.case:SetSize(58,58)
-					point1.case:SetRotation(0)
-					point1.case:SetTexture(GetMedia("point_dk_block"))
-		
-					point2:SetPoint("CENTER", -227*posMod,-107)
-					point2:SetSize(28,28)
-					point2:SetStatusBarTexture(GetMedia("point_rune4"))
-					point2:GetStatusBarTexture():SetRotation(0)
-					point2.slotTexture:SetTexture(GetMedia("point_rune4"))
-					point2.slotTexture:SetRotation(0)
-					point2.case:SetPoint("CENTER", 0, 0)
-					point2.case:SetSize(68,68)
-					point2.case:SetRotation(0)
-					point2.case:SetTexture(GetMedia("point_dk_block"))
-		
-					point3:SetPoint("CENTER", -253*posMod,-83)
-					point3:SetSize(30,30)
-					point3:SetStatusBarTexture(GetMedia("point_rune1"))
-					point3:GetStatusBarTexture():SetRotation(0)
-					point3.slotTexture:SetTexture(GetMedia("point_rune1"))
-					point3.slotTexture:SetRotation(0)
-					point3.case:SetPoint("CENTER", 0,0)
-					point3.case:SetSize(74,74)
-					point3.case:SetRotation(0)
-					point3.case:SetTexture(GetMedia("point_dk_block"))
-				
-					point4:SetPoint("CENTER", -220*posMod,-64)
-					point4:SetSize(28,28)
-					point4:SetStatusBarTexture(GetMedia("point_rune3"))
-					point4:GetStatusBarTexture():SetRotation(0)
-					point4.slotTexture:SetTexture(GetMedia("point_rune3"))
-					point4.slotTexture:SetRotation(0)
-					point4.case:SetPoint("CENTER", 0, 0)
-					point4.case:SetSize(68,68)
-					point4.case:SetRotation(0)
-					point4.case:SetTexture(GetMedia("point_dk_block"))
-		
-					point5:SetPoint("CENTER", -246*posMod,-38)
-					point5:SetSize(32,32)
-					point5:SetStatusBarTexture(GetMedia("point_rune2"))
-					point5:GetStatusBarTexture():SetRotation(0)
-					point5.slotTexture:SetTexture(GetMedia("point_rune2"))
-					point5.slotTexture:SetRotation(0)
-					point5.case:SetPoint("CENTER", 0, 0)
-					point5.case:SetSize(78,78)
-					point5.case:SetRotation(0)
-					point5.case:SetTexture(GetMedia("point_dk_block"))
-		
-					point6:SetPoint("CENTER", -214*posMod,-10)
-					point6:SetSize(40,40)
-					point6:SetStatusBarTexture(GetMedia("point_rune1"))
-					point6:GetStatusBarTexture():SetRotation(0)
-					point6.slotTexture:SetTexture(GetMedia("point_rune1"))
-					point6.slotTexture:SetRotation(0)
-					point6.case:SetPoint("CENTER", 0, 0)
-					point6.case:SetSize(98,98)
-					point6.case:SetRotation(0)
-					point6.case:SetTexture(GetMedia("point_dk_block"))
-		
-				end 
-		
-				-- Store the element's full stylestring
-				element.powerStyle = style
-			end 
-		end, 
 }
 
 -- Target
@@ -3303,592 +2742,6 @@ local UnitFrameBoss = setmetatable({
 
 }, { __index = Template_SmallFrameReversed_Auras })
 
--- Arena 
-local UnitFrameArena = setmetatable({
-	Place = { "TOPRIGHT", "UICenter", "RIGHT", -64, 261 }, -- Position of the initial frame
-		GrowthX = 0, -- Horizontal growth per new unit
-		GrowthY = -97, -- Vertical growth per new unit
-
-	UseName = true, 
-		NamePlace = { "BOTTOMRIGHT", -(Constant.SmallFrame[1] - Constant.SmallBar[1])/2, Constant.SmallFrame[2] - Constant.SmallBar[2] + 16 }, 
-		NameDrawLayer = { "OVERLAY", 1 },
-		NameJustifyH = "CENTER",
-		NameJustifyV = "TOP",
-		NameFont = GetFont(14, true),
-		NameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .75 },
-		NameSize = nil,
-
-	BuffFilterFunc = GetAuraFilterFunc("arena"), 
-	DebuffFilterFunc = GetAuraFilterFunc("arena"), 
-
-	HealthColorTapped = false, -- color tap denied units 
-	HealthColorDisconnected = true, -- color disconnected units
-	HealthColorClass = true, -- color players by class 
-	HealthColorPetAsPlayer = false, -- color your pet as you 
-	HealthColorReaction = true, -- color NPCs by their reaction standing with us
-	HealthColorHealth = true, -- color anything else in the default health color
-	
-}, { __index = Template_SmallFrameReversed_Auras })
-
--- Party 
-local UnitFrameParty = setmetatable({
-
-	Size = { 130, 130 }, -- Add room for portraits
-	Place = { "TOPLEFT", "UICenter", "TOPLEFT", 50, -42 }, -- Position of the initial frame
-		GroupAnchor = "TOPLEFT", 
-		GrowthX = 130, -- Horizontal growth per new unit
-		GrowthY = 0, -- Vertical growth per new unit
-	AlternatePlace = { "BOTTOMLEFT", "UICenter", "BOTTOMLEFT", 56, 360 + 10 }, -- Position of the healermode frame
-		AlternateGroupAnchor = "BOTTOMLEFT", 
-		AlternateGrowthX = 140, -- Horizontal growth per new unit
-		AlternateGrowthY = 0, -- Vertical growth per new unit
-
-	HealthColorTapped = false, -- color tap denied units 
-	HealthColorDisconnected = true, -- color disconnected units
-	HealthColorClass = true, -- color players by class
-	HealthColorPetAsPlayer = true, -- color your pet as you 
-	HealthColorReaction = true, -- color NPCs by their reaction standing with us
-	HealthColorHealth = true, -- color anything else in the default health color
-
-	UseUnitStatus = true, -- Prio #4
-		UnitStatusPlace = { "CENTER", 0, -(7 + 100/2) },
-		UnitStatusDrawLayer = { "ARTWORK", 2 },
-		UnitStatusJustifyH = "CENTER",
-		UnitStatusJustifyV = "MIDDLE",
-		UnitStatusFont = GetFont(12, true),
-		UnitStatusColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .75 },
-		UseUnitStatusMessageOOM = L["oom"],
-		UnitStatusHideAFK = true, 
-		UnitStatusHideOffline = true, 
-		UnitStatusHideDead = true, 
-		UnitStatusSize = nil, 
-		UnitStatusPostUpdate = function(element, unit) 
-			local self = element._owner
-
-			local rc = self.ReadyCheck
-			local rd = self.GroupAura
-			local rz = self.ResurrectIndicator
-			local hv = self.Health.Value
-
-			if element:IsShown() then 
-				-- Hide if a higher priority element is visible
-				if (rd:IsShown() or rc.status or rz.status) then 
-					element:Hide()
-				end 
-				hv:Hide()
-			else
-				hv:Show()
-			end 
-		end,
-
-	UseResurrectIndicator = true, -- Prio #3
-		ResurrectIndicatorPlace = { "CENTER", 0, -7 }, 
-		ResurrectIndicatorSize = { 32, 32 }, 
-		ResurrectIndicatorDrawLayer = { "OVERLAY", 1 },
-		ResurrectIndicatorPostUpdate = function(element, unit, incomingResurrect) 
-			local self = element._owner
-
-			local rc = self.ReadyCheck
-			local rd = self.GroupAura
-			local us = self.UnitStatus
-			local hv = self.Health.Value
-
-			if element:IsShown() then 
-				hv:Hide()
-
-				-- Hide if a higher priority element is visible
-				if (rd:IsShown() or rc.status) then 
-					return element:Hide()
-				end 
-				-- Hide lower priority element
-				us:Hide()
-			else
-				-- Show lower priority elements if no higher is visible
-				if (not rd:IsShown()) and (not rc.status) then 
-					if (us.status) then 
-						us:Show()
-						hv:Hide()
-					else
-						hv:Show()
-					end 
-				end
-			end 
-		end,
-
-	UseReadyCheck = true, -- Prio #2
-		ReadyCheckPlace = { "CENTER", 0, -7 }, 
-		ReadyCheckSize = { 32, 32 }, 
-		ReadyCheckDrawLayer = { "OVERLAY", 7 },
-		ReadyCheckPostUpdate = function(element, unit, status) 
-			local self = element._owner
-
-			local rd = self.GroupAura
-			local rz = self.ResurrectIndicator
-			local us = self.UnitStatus
-			local hv = self.Health.Value
-
-			if element:IsShown() then 
-				hv:Hide()
-
-				-- Hide if a higher priority element is visible
-				if rd:IsShown() then 
-					return element:Hide()
-				end 
-				-- Hide all lower priority elements
-				rz:Hide()
-				us:Hide()
-			else 
-				-- Show lower priority elements if no higher is visible
-				if (not rd:IsShown()) then 
-					if (rz.status) then 
-						rz:Show()
-						us:Hide()
-						hv:Hide()
-					elseif (us.status) then 
-						rz:Hide()
-						us:Show()
-						hv:Hide()
-					else 
-						hv:Show()
-					end 
-				else 
-					hv:Show()
-				end 
-			end 
-		end,
-
-	UseGroupAura = true, -- Prio #1
-		GroupAuraSize = { 36, 36 },
-		GroupAuraPlace = { "BOTTOM", 0, Constant.TinyBar[2]/2 - 36/2 -1 }, 
-		GroupAuraButtonIconPlace = { "CENTER", 0, 0 },
-		GroupAuraButtonIconSize = { 36 - 6, 36 - 6 },
-		GroupAuraButtonIconTexCoord = { 5/64, 59/64, 5/64, 59/64 }, -- aura icon tex coords
-		GroupAuraButtonCountPlace = { "BOTTOMRIGHT", 9, -6 },
-		GroupAuraButtonCountFont = GetFont(12, true),
-		GroupAuraButtonCountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
-		GroupAuraButtonTimePlace = { "CENTER", 0, 0 },
-		GroupAuraButtonTimeFont = GetFont(11, true),
-		GroupAuraButtonTimeColor = { 250/255, 250/255, 250/255, .85 },
-		GroupAuraButtonBorderFramePlace = { "CENTER", 0, 0 }, 
-		GroupAuraButtonBorderFrameSize = { 36 + 16, 36 + 16 },
-		GroupAuraButtonBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 16 },
-		GroupAuraButtonBorderBackdropColor = { 0, 0, 0, 0 },
-		GroupAuraButtonBorderBackdropBorderColor = { Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3 },
-		GroupAuraButtonDisableMouse = false, 
-		GroupAuraTooltipDefaultPosition = nil, 
-		--GroupAuraTooltipPoint = "BOTTOMLEFT", 
-		--GroupAuraTooltipAnchor = nil, 
-		--GroupAuraTooltipRelPoint = "TOPLEFT", 
-		--GroupAuraTooltipOffsetX = -8, 
-		--GroupAuraTooltipOffsetY = -16,
-
-		GroupAuraPostUpdate = function(element, unit)
-			local self = element._owner 
-
-			local rz = self.ResurrectIndicator
-			local rc = self.ReadyCheck
-			local us = self.UnitStatus
-			local hv = self.Health.Value
-
-			if element:IsShown() then 
-				-- Hide all lower priority elements
-				rc:Hide()
-				rz:Hide()
-				us:Hide()
-				hv:Hide()
-
-				-- Colorize the border
-				if (element.filter == "HARMFUL") then 
-					local color = element.debuffType and spellTypeColor[element.debuffType]
-					if color then 
-						element.Border:SetBackdropBorderColor(color[1], color[2], color[3])
-					else
-						element.Border:SetBackdropBorderColor(Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3)
-					end
-				else
-					element.Border:SetBackdropBorderColor(Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3)
-				end
-
-			else 
-				-- Display lower priority elements as needed 
-				if rc.status then 
-					rc:Show()
-					rz:Hide()
-					us:Hide()
-					hv:Hide()
-				elseif rz.status then 
-					rc:Hide()
-					rz:Show()
-					us:Hide()
-					hv:Hide()
-				elseif us.status then 
-					rc:Hide()
-					rz:Hide()
-					us:Show()
-					hv:Hide()
-				else
-					hv:Show()
-				end 
-			end 
-		end, 
-
-	-- Currently this is DAMAGER for all, so let's just disable it for now. 
-	UseGroupRole = false, 
-		GroupRolePlace = { "TOP", 0, 0 }, 
-		GroupRoleSize = { 40, 40 }, 
-
-		UseGroupRoleBackground = true, 
-			GroupRoleBackgroundPlace = { "CENTER", 0, 0 }, 
-			GroupRoleBackgroundSize = { 77, 77 }, 
-			GroupRoleBackgroundDrawLayer = { "BACKGROUND", 1 }, 
-			GroupRoleBackgroundTexture = GetMedia("point_plate"),
-			GroupRoleBackgroundColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
-
-		UseGroupRoleHealer = true, 
-			GroupRoleHealerPlace = { "CENTER", 0, 0 }, 
-			GroupRoleHealerSize = { 34, 34 },
-			GroupRoleHealerTexture = GetMedia("grouprole-icons-heal"),
-			GroupRoleHealerDrawLayer = { "ARTWORK", 1 },
-
-		UseGroupRoleTank = true, 
-			GroupRoleTankPlace = { "CENTER", 0, 0 }, 
-			GroupRoleTankSize = { 34, 34 },
-			GroupRoleTankTexture = GetMedia("grouprole-icons-tank"),
-			GroupRoleTankDrawLayer = { "ARTWORK", 1 },
-
-		UseGroupRoleDPS = true, 
-			GroupRoleDPSPlace = { "CENTER", 0, 0 }, 
-			GroupRoleDPSSize = { 34, 34 },
-			GroupRoleDPSTexture = GetMedia("grouprole-icons-dps"),
-			GroupRoleDPSDrawLayer = { "ARTWORK", 1 },
-
-
-	UsePortrait = true, 
-		PortraitPlace = { "BOTTOM", 0, 22 },
-		PortraitSize = { 70, 73 }, 
-		PortraitAlpha = .85, 
-		PortraitDistanceScale = 1,
-		PortraitPositionX = 0,
-		PortraitPositionY = 0,
-		PortraitPositionZ = 0,
-		PortraitRotation = 0, -- in degrees
-		PortraitShowFallback2D = true, -- display 2D portraits when unit is out of range of 3D models
-
-		UsePortraitBackground = true, 
-			PortraitBackgroundPlace = { "BOTTOM", 0, -6 }, 
-			PortraitBackgroundSize = { 130, 130 },
-			PortraitBackgroundTexture = GetMedia("party_portrait_back"), 
-			PortraitBackgroundDrawLayer = { "BACKGROUND", 0 }, 
-			PortraitBackgroundColor = { .5, .5, .5 }, 
-
-		UsePortraitShade = true, 
-			PortraitShadePlace = { "BOTTOM", 0, 16 },
-			PortraitShadeSize = { 86, 86 }, 
-			PortraitShadeTexture = GetMedia("shade_circle"),
-			PortraitShadeDrawLayer = { "BACKGROUND", -1 },
-
-		UsePortraitForeground = true, 
-			PortraitForegroundPlace = { "BOTTOM", 0, -38 },
-			PortraitForegroundSize = { 194, 194 },
-			PortraitForegroundTexture = GetMedia("party_portrait_border"), 
-			PortraitForegroundDrawLayer = { "BACKGROUND", 0 },
-			PortraitForegroundColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
-
-	UseAuras = true, 
-
-		AuraProperties = {
-			growthX = "RIGHT", 
-			growthY = "DOWN", 
-			spacingH = 4, 
-			spacingV = 4, 
-			auraSize = 30, auraWidth = nil, auraHeight = nil, 
-			maxVisible = 6, maxBuffs = nil, maxDebuffs = nil, 
-			filter = nil, filterBuffs = "PLAYER HELPFUL", filterDebuffs = "PLAYER HARMFUL", 
-			func = nil, funcBuffs = GetAuraFilterFunc("party"), funcDebuffs = GetAuraFilterFunc("party"), 
-			debuffsFirst = false, 
-			disableMouse = false, 
-			showSpirals = false, 
-			showDurations = true, 
-			showLongDurations = true,
-			tooltipDefaultPosition = false, 
-			tooltipPoint = "TOPRIGHT",
-			tooltipAnchor = nil,
-			tooltipRelPoint = "BOTTOMRIGHT",
-			tooltipOffsetX = -8,
-			tooltipOffsetY = -16
-		},
-
-		AuraFrameSize = { 30*3 + 2*5, 30*2 + 5  }, 
-		AuraFramePlace = { "BOTTOM", 0, -(30*2 + 5 + 16) },
-		AuraIconPlace = { "CENTER", 0, 0 },
-		AuraIconSize = { 30 - 6, 30 - 6 },
-		AuraIconTexCoord = { 5/64, 59/64, 5/64, 59/64 }, -- aura icon tex coords
-		AuraCountPlace = { "BOTTOMRIGHT", 9, -6 },
-		AuraCountFont = GetFont(12, true),
-		AuraCountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
-		AuraTimePlace = { "TOPLEFT", -6, 6 },
-		AuraTimeFont = GetFont(11, true),
-		AuraBorderFramePlace = { "CENTER", 0, 0 }, 
-		AuraBorderFrameSize = { 30 + 10, 30 + 10 },
-		AuraBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 12 },
-		AuraBorderBackdropColor = { 0, 0, 0, 0 },
-		AuraBorderBackdropBorderColor = { Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3 },
-	
-}, { __index = Template_TinyFrame })
-
--- Raid
-local UnitFrameRaid = setmetatable({
-
-	Size = Constant.RaidFrame, 
-	Place = { "TOPLEFT", "UICenter", "TOPLEFT", 64, -42 }, -- Position of the initial frame
-	AlternatePlace = { "BOTTOMLEFT", "UICenter", "BOTTOMLEFT", 64, 360 - 10 }, -- Position of the initial frame
-		GroupSizeNormal = 5,
-		GrowthXNormal = 0, -- Horizontal growth per new unit within a group
-		GrowthYNormal = -38 - 4, -- Vertical growth per new unit within a group
-		GrowthYNormalHealerMode = -(-38 - 4), -- Vertical growth per new unit within a group
-		GroupGrowthXNormal = 110, 
-		GroupGrowthYNormal = -(38 + 8)*5 - 10,
-		GroupGrowthYNormalHealerMode = -(-(38 + 8)*5 - 10),
-		GroupColsNormal = 5, 
-		GroupRowsNormal = 1, 
-		GroupAnchorNormal = "TOPLEFT", 
-		GroupAnchorNormalHealerMode = "BOTTOMLEFT", 
-
-		GroupSizeEpic = 8,
-		GrowthXEpic = 0, 
-		GrowthYEpic = -38 - 4,
-		GrowthYEpicHealerMode = -(-38 - 4),
-		GroupGrowthXEpic = 110, 
-		GroupGrowthYEpic = -(38 + 8)*8 - 10,
-		GroupGrowthYEpicHealerMode = -(-(38 + 8)*8 - 10),
-		GroupColsEpic = 5, 
-		GroupRowsEpic = 1, 
-		GroupAnchorEpic = "TOPLEFT", 
-		GroupAnchorEpicHealerMode = "BOTTOMLEFT", 
-
-	HealthSize = Constant.RaidBar, 
-		HealthBackdropSize = { 140 *.94, 90 *.94 },
-		HealthColorTapped = false, -- color tap denied units 
-		HealthColorDisconnected = true, -- color disconnected units
-		HealthColorClass = true, -- color players by class
-		HealthColorPetAsPlayer = true, -- color your pet as you 
-		HealthColorReaction = true, -- color NPCs by their reaction standing with us
-		HealthColorHealth = true, -- color anything else in the default health color
-		UseHealthValue = false,
-
-	UseName = true, 
-		NamePlace = { "TOP", 0, 1 - 2 }, 
-		NameDrawLayer = { "ARTWORK", 1 },
-		NameJustifyH = "CENTER",
-		NameJustifyV = "TOP",
-		NameFont = GetFont(11, true),
-		NameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .75 },
-		NameSize = nil,
-		NameMaxChars = 8, 
-		NameUseDots = false, 
-
-	UseUnitStatus = true, -- Prio #4
-		UnitStatusPlace = { "CENTER", 0, -7 },
-		UnitStatusDrawLayer = { "ARTWORK", 2 },
-		UnitStatusJustifyH = "CENTER",
-		UnitStatusJustifyV = "MIDDLE",
-		UnitStatusFont = GetFont(12, true),
-		UnitStatusColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .75 },
-		UseUnitStatusMessageOOM = L["oom"],
-		UnitStatusSize = nil, 
-		UnitStatusPostUpdate = function(element, unit) 
-			local self = element._owner
-
-			local rc = self.ReadyCheck
-			local rd = self.GroupAura
-			local rz = self.ResurrectIndicator
-
-			if element:IsShown() then 
-				-- Hide if a higher priority element is visible
-				if (rd:IsShown() or rc.status or rz.status) then 
-					element:Hide()
-				end 
-			end 
-		end,
-
-	UseGroupRole = true, 
-		GroupRolePlace = { "RIGHT", 10, -8 }, 
-		GroupRoleSize = { 28, 28 }, 
-
-		UseGroupRoleBackground = true, 
-			GroupRoleBackgroundPlace = { "CENTER", 0, 0 }, 
-			GroupRoleBackgroundSize = { 54, 54 }, 
-			GroupRoleBackgroundDrawLayer = { "BACKGROUND", 1 }, 
-			GroupRoleBackgroundTexture = GetMedia("point_plate"),
-			GroupRoleBackgroundColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
-
-		UseGroupRoleHealer = true, 
-			GroupRoleHealerPlace = { "CENTER", 0, 0 }, 
-			GroupRoleHealerSize = { 24, 24 },
-			GroupRoleHealerTexture = GetMedia("grouprole-icons-heal"),
-			GroupRoleHealerDrawLayer = { "ARTWORK", 1 },
-
-		UseGroupRoleTank = true, 
-			GroupRoleTankPlace = { "CENTER", 0, 0 }, 
-			GroupRoleTankSize = { 24, 24 },
-			GroupRoleTankTexture = GetMedia("grouprole-icons-tank"),
-			GroupRoleTankDrawLayer = { "ARTWORK", 1 },
-
-		UseGroupRoleDPS = false, 
-			GroupRoleDPSPlace = { "CENTER", 0, 0 }, 
-			GroupRoleDPSSize = { 24, 24 },
-			GroupRoleDPSTexture = GetMedia("grouprole-icons-dps"),
-			GroupRoleDPSDrawLayer = { "ARTWORK", 1 },
-
-		GroupRolePostUpdate = function(element, unit, groupRole)
-			if groupRole then 
-				if groupRole == "DAMAGER" then 
-					element.Bg:Hide()
-				else 
-					element.Bg:Show()
-				end 
-			end 
-		end, 
-
-	UseResurrectIndicator = true, -- Prio #3
-		ResurrectIndicatorPlace = { "CENTER", 0, -7 }, 
-		ResurrectIndicatorSize = { 32, 32 }, 
-		ResurrectIndicatorDrawLayer = { "OVERLAY", 1 },
-		ResurrectIndicatorPostUpdate = function(element, unit, incomingResurrect) 
-			local self = element._owner
-
-			local rc = self.ReadyCheck
-			local rd = self.GroupAura
-			local us = self.UnitStatus
-
-			if element:IsShown() then 
-				-- Hide if a higher priority element is visible
-				if (rd:IsShown() or rc.status) then 
-					return element:Hide()
-				end 
-				-- Hide lower priority element
-				us:Hide()
-			else
-				-- Show lower priority elements if no higher is visible
-				if (not rd:IsShown()) and (not rc.status) then 
-					if (us.status) then 
-						us:Show()
-					end 
-				end
-			end 
-		end,
-
-	UseReadyCheck = true, -- Prio #2
-		ReadyCheckPlace = { "CENTER", 0, -7 }, 
-		ReadyCheckSize = { 32, 32 }, 
-		ReadyCheckDrawLayer = { "OVERLAY", 7 },
-		ReadyCheckPostUpdate = function(element, unit, status) 
-			local self = element._owner
-
-			local rd = self.GroupAura
-			local rz = self.ResurrectIndicator
-			local us = self.UnitStatus
-
-			if element:IsShown() then 
-				-- Hide if a higher priority element is visible
-				if rd:IsShown() then 
-					return element:Hide()
-				end 
-				-- Hide all lower priority elements
-				rz:Hide()
-				us:Hide()
-			else 
-				-- Show lower priority elements if no higher is visible
-				if (not rd:IsShown()) then 
-					if (rz.status) then 
-						rz:Show()
-						us:Hide()
-					elseif (us.status) then 
-						rz:Hide()
-						us:Show()
-					end 
-				end 
-			end 
-		end,
-
-	UseRaidRole = true, 
-		RaidRolePoint = "RIGHT", RaidRoleAnchor = "Name", RaidRolePlace = { "LEFT", -1, 1 }, 
-		RaidRoleSize = { 16, 16 }, 
-		RaidRoleDrawLayer = { "ARTWORK", 3 },
-		RaidRoleRaidTargetTexture = GetMedia("raid_target_icons_small"),
-
-	UseGroupAura = true, -- Prio #1
-		GroupAuraSize = { 24, 24 },
-		GroupAuraPlace = { "BOTTOM", 0, Constant.TinyBar[2]/2 - 24/2 -(1 + 2) }, 
-		GroupAuraButtonIconPlace = { "CENTER", 0, 0 },
-		GroupAuraButtonIconSize = { 24 - 6, 24 - 6 },
-		GroupAuraButtonIconTexCoord = { 5/64, 59/64, 5/64, 59/64 }, -- aura icon tex coords
-		GroupAuraButtonCountPlace = { "BOTTOMRIGHT", 9, -6 },
-		GroupAuraButtonCountFont = GetFont(12, true),
-		GroupAuraButtonCountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
-		GroupAuraButtonTimePlace = { "CENTER", 0, 0 },
-		GroupAuraButtonTimeFont = GetFont(11, true),
-		GroupAuraButtonTimeColor = { 250/255, 250/255, 250/255, .85 },
-		GroupAuraButtonBorderFramePlace = { "CENTER", 0, 0 }, 
-		GroupAuraButtonBorderFrameSize = { 24 + 12, 24 + 12 },
-		GroupAuraButtonBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 12 },
-		GroupAuraButtonBorderBackdropColor = { 0, 0, 0, 0 },
-		GroupAuraButtonBorderBackdropBorderColor = { Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3 },
-		GroupAuraButtonDisableMouse = false, 
-		GroupAuraTooltipDefaultPosition = nil, 
-		--GroupAuraTooltipPoint = "BOTTOMLEFT", 
-		--GroupAuraTooltipAnchor = nil, 
-		--GroupAuraTooltipRelPoint = "TOPLEFT", 
-		--GroupAuraTooltipOffsetX = -8, 
-		--GroupAuraTooltipOffsetY = -16,
-
-		GroupAuraPostUpdate = function(element, unit)
-			local self = element._owner 
-
-			local rz = self.ResurrectIndicator
-			local rc = self.ReadyCheck
-			local us = self.UnitStatus
-
-			if element:IsShown() then 
-				-- Hide all lower priority elements
-				rc:Hide()
-				rz:Hide()
-				us:Hide()
-
-				-- Colorize the border
-				if (element.filter == "HARMFUL") then 
-					local color = element.debuffType and spellTypeColor[element.debuffType]
-					if color then 
-						element.Border:SetBackdropBorderColor(color[1], color[2], color[3])
-					else
-						element.Border:SetBackdropBorderColor(Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3)
-					end
-				else
-					element.Border:SetBackdropBorderColor(Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3)
-				end
-		
-			else 
-				-- Display lower priority elements as needed 
-				if rc.status then 
-					rc:Show()
-					rz:Hide()
-					us:Hide()
-				elseif rz.status then 
-					rc:Hide()
-					rz:Show()
-					us:Hide()
-				elseif us.status then 
-					rc:Hide()
-					rz:Hide()
-					us:Show()
-				end 
-			end 
-		end, 
-
-	TargetHighlightSize = { 140 * .94, 90 *.94 },
-
-}, { __index = Template_TinyFrame })
-
 LibDB:NewDatabase(ADDON..":[Core]", Core)
 LibDB:NewDatabase(ADDON..":[ActionBarMain]", ActionBars)
 LibDB:NewDatabase(ADDON..":[Bindings]", BindMode)
@@ -3896,7 +2749,6 @@ LibDB:NewDatabase(ADDON..":[BlizzardChatFrames]", BlizzardChatFrames)
 LibDB:NewDatabase(ADDON..":[BlizzardFloaterHUD]", BlizzardFloaterHUD)
 LibDB:NewDatabase(ADDON..":[BlizzardFonts]", BlizzardFonts)
 LibDB:NewDatabase(ADDON..":[BlizzardGameMenu]", BlizzardGameMenu)
-LibDB:NewDatabase(ADDON..":[BlizzardMicroMenu]", BlizzardMicroMenu)
 LibDB:NewDatabase(ADDON..":[BlizzardObjectivesTracker]", BlizzardObjectivesTracker)
 LibDB:NewDatabase(ADDON..":[BlizzardPopupStyling]", BlizzardPopupStyling)
 LibDB:NewDatabase(ADDON..":[BlizzardTimers]", BlizzardTimers)
@@ -3904,19 +2756,1066 @@ LibDB:NewDatabase(ADDON..":[GroupTools]", GroupTools)
 LibDB:NewDatabase(ADDON..":[Minimap]", Minimap)
 LibDB:NewDatabase(ADDON..":[NamePlates]", NamePlates)
 LibDB:NewDatabase(ADDON..":[TooltipStyling]", TooltipStyling)
-LibDB:NewDatabase(ADDON..":[UnitFramePlayerHUD]", UnitFramePlayerHUD)
 LibDB:NewDatabase(ADDON..":[UnitFramePlayer]", UnitFramePlayer)
 LibDB:NewDatabase(ADDON..":[UnitFramePet]", UnitFramePet)
 LibDB:NewDatabase(ADDON..":[UnitFrameTarget]", UnitFrameTarget)
 LibDB:NewDatabase(ADDON..":[UnitFrameToT]", UnitFrameToT)
 LibDB:NewDatabase(ADDON..":[UnitFrameFocus]", UnitFrameFocus)
 LibDB:NewDatabase(ADDON..":[UnitFrameBoss]", UnitFrameBoss)
-LibDB:NewDatabase(ADDON..":[UnitFrameArena]", UnitFrameArena)
-LibDB:NewDatabase(ADDON..":[UnitFrameParty]", UnitFrameParty)
-LibDB:NewDatabase(ADDON..":[UnitFrameRaid]", UnitFrameRaid)
+
+------------------------------------------------
+-- Module Defaults
+------------------------------------------------
+-- The purpose of this is to supply all the front-end modules
+-- with default settings for all the user configurable choices.
+-- Note that changing these won't change anything for existing
+-- characters in-game, they only affect new characters or the first install.
+local Defaults = {}
+
+Defaults[ADDON] = {
+	-- Enables a layout switch targeted towards healers
+	enableHealerMode = false,
+
+	-- Loads all child modules with debug functionality, 
+	-- doesn't actually load any consoles. 
+	loadDebugConsole = true, 
+
+	-- Enable console visibility. 
+	-- Requires the above to be true. 
+	enableDebugConsole = false,
+
+	-- Block group invite spam
+	blockGroupInvites = false, 
+	allowGuildInvites = true,
+	allowFriendInvites = true, 
+	blockCounter = {}
+}
+
+Defaults.UnitFramePlayerHUD = {
+	enableCast = true,
+	enableClassPower = true
+}
+
+Defaults.UnitFrameParty = {
+	enablePartyFrames = true
+}
+
+Defaults.UnitFrameRaid = {
+	enableRaidFrames = true
+}
+------------------------------------------------
+-- Module Layouts
+------------------------------------------------
+-- The purpose of this is to supply all the front-end modules
+-- with static layout data used during the setup phase.
+local Layouts = {}
+
+-- Addon Core
+Layouts[ADDON] = {
+	Colors = Colors,
+
+	FadeInUI = true, 
+		FadeInSpeed = .75,
+		FadeInDelay = 1.5,
+
+	DisableUIWidgets = {
+		ActionBars = true, 
+		Auras = true,
+		CaptureBar = true,
+		CastBars = true,
+		Minimap = true,
+		--QuestWatchFrame = true, 
+		UnitFramePlayer = true,
+		UnitFramePet = true,
+		UnitFrameTarget = true,
+		UnitFrameToT = true,
+		UnitFrameParty = true,
+		--UnitFrameRaid = true,
+		UnitFrameBoss = true,
+		--Warnings = true,
+		ZoneText = true
+	},
+	DisableUIMenuPages = {
+		{ ID = 5, Name = "InterfaceOptionsActionBarsPanel" },
+		--{ ID = 10, Name = "CompactUnitFrameProfiles" }
+	},
+	UseMenu = true, 
+		MenuPlace = { "BOTTOMRIGHT", -41, 32 },
+		MenuSize = { 320 -10, 70 }, 
+
+		MenuToggleButtonSize = { 48, 48 }, 
+		MenuToggleButtonPlace = { "BOTTOMRIGHT", -4, 4 }, 
+		MenuToggleButtonIcon = GetMedia("config_button"), 
+		MenuToggleButtonIconPlace = { "CENTER", 0, 0 }, 
+		MenuToggleButtonIconSize = { 96, 96 }, 
+		MenuToggleButtonIconColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
+
+		MenuBorderBackdropColor = { .05, .05, .05, .85 },
+		MenuBorderBackdropBorderColor = { 1, 1, 1, 1 },
+		MenuWindow_CreateBorder = Core_Window_CreateBorder,
+		MenuWindow_OnHide = Core_Window_OnHide, 
+		MenuWindow_OnShow = Core_Window_OnShow,
+
+		MenuButtonSize = { MenuButtonW, MenuButtonH },
+		MenuButtonSpacing = 10, 
+		MenuButtonSizeMod = .75, 
+		MenuButton_PostCreate = Core_MenuButton_PostCreate, 
+		MenuButton_PostUpdate = Core_MenuButton_PostUpdate
+}
+
+-- Blizzard MicroMenu
+Layouts.BlizzardMicroMenu = {
+	Colors = Colors,
+
+	ButtonFont = GetFont(MenuButtonFontSize, false),
+	ButtonFontColor = { 0, 0, 0 }, 
+	ButtonFontShadowOffset = { 0, -.85 },
+	ButtonFontShadowColor = { 1, 1, 1, .5 },
+	ConfigWindowBackdrop = {
+		bgFile = [[Interface\ChatFrame\ChatFrameBackground]],
+		edgeFile = GetMedia("tooltip_border"),
+		edgeSize = 32 *.75, 
+		insets = { 
+			top = 23 *.75, 
+			bottom = 23 *.75, 
+			left = 23 *.75, 
+			right = 23 *.75 
+		}
+	},
+
+	MenuButtonSize = { MenuButtonW, MenuButtonH },
+	MenuButtonSpacing = 10, 
+	MenuButtonSizeMod = .75, 
+	MenuButtonTitleColor = { Colors.title[1], Colors.title[2], Colors.title[3] },
+	MenuButtonNormalColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] }, 
+	MenuButton_PostCreate = BlizzardMicroMenu_Button_PostCreate,
+	MenuButton_PostUpdate = BlizzardMicroMenu_Button_PostUpdate, 
+	MenuWindow_CreateBorder = Core_Window_CreateBorder
+}
+
+-- Blizzard World Map
+Layouts.BlizzardWorldMap = {
+
+}
+
+-- Floaters. Durability only currently. 
+Layouts.FloaterHUD = {
+	Place = { "CENTER", "UICenter", "CENTER", 190, 0 }
+}
+
+-- PlayerHUD (combo points and castbar)
+Layouts.UnitFramePlayerHUD = {
+	Colors = Colors,
+
+	Size = { 103, 103 }, 
+	Place = { "BOTTOMLEFT", 75, 127 },
+	IgnoreMouseOver = true, 
+
+	CastBarPlace = { "CENTER", "UICenter", "CENTER", 0, -133 }, 
+	CastBarSize = Constant.SmallBar,
+	CastBarTexture = Constant.SmallBarTexture, 
+	CastBarColor = { 70/255, 255/255, 131/255, .69 }, 
+	CastBarOrientation = "RIGHT",
+	CastTimeToHoldFailed = .5, 
+	CastBarSparkMap = {
+		top = {
+			{ keyPercent =   0/128, offset = -16/32 }, 
+			{ keyPercent =  10/128, offset =   0/32 }, 
+			{ keyPercent = 119/128, offset =   0/32 }, 
+			{ keyPercent = 128/128, offset = -16/32 }
+		},
+		bottom = {
+			{ keyPercent =   0/128, offset = -16/32 }, 
+			{ keyPercent =  10/128, offset =   0/32 }, 
+			{ keyPercent = 119/128, offset =   0/32 }, 
+			{ keyPercent = 128/128, offset = -16/32 }
+		}
+	},
+	CastBarBackgroundPlace = { "CENTER", 1, -1 }, 
+	CastBarBackgroundSize = { 193,93 },
+	CastBarBackgroundTexture = GetMedia("cast_back"), 
+	CastBarBackgroundDrawLayer = { "BACKGROUND", 1 },
+	CastBarBackgroundColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
+	CastBarValuePlace = { "CENTER", 0, 0 },
+	CastBarValueFont = GetFont(14, true),
+	CastBarValueDrawLayer = { "OVERLAY", 1 },
+	CastBarValueJustifyH = "CENTER",
+	CastBarValueJustifyV = "MIDDLE",
+	CastBarValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+	CastBarNamePlace = { "TOP", 0, -(12 + 14) },
+	CastBarNameFont = GetFont(15, true),
+	CastBarNameDrawLayer = { "OVERLAY", 1 },
+	CastBarNameJustifyH = "CENTER",
+	CastBarNameJustifyV = "MIDDLE",
+	CastBarNameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+	CastBarShieldPlace = { "CENTER", 1, -2 }, 
+	CastBarShieldSize = { 193, 93 },
+	CastBarShieldTexture = GetMedia("cast_back_spiked"), 
+	CastBarShieldDrawLayer = { "BACKGROUND", 1 }, 
+	CastBarShieldColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
+	CastBarSpellQueuePlace = { "CENTER", "UICenter", "CENTER", 0, -133 }, 
+	CastBarSpellQueueSize = Constant.SmallBar,
+	CastBarSpellQueueTexture = Constant.SmallBarTexture, 
+	CastBarSpellQueueColor = { 1, 1, 1, .5 },
+	CastBarSpellQueueOrientation = "LEFT",
+	CastBarSpellQueueSparkMap = {
+		top = {
+			{ keyPercent =   0/128, offset = -16/32 }, 
+			{ keyPercent =  10/128, offset =   0/32 }, 
+			{ keyPercent = 119/128, offset =   0/32 }, 
+			{ keyPercent = 128/128, offset = -16/32 }
+		},
+		bottom = {
+			{ keyPercent =   0/128, offset = -16/32 }, 
+			{ keyPercent =  10/128, offset =   0/32 }, 
+			{ keyPercent = 119/128, offset =   0/32 }, 
+			{ keyPercent = 128/128, offset = -16/32 }
+		}
+	},
+
+	ClassPowerPlace = { "CENTER", "UICenter", "CENTER", 0, 0 }, 
+	ClassPowerSize = { 2,2 }, 
+	ClassPowerHideWhenUnattackable = true, 
+	ClassPowerMaxComboPoints = 5, 
+	ClassPowerHideWhenNoTarget = true, 
+	ClassPowerAlphaWhenEmpty = .5, 
+	ClassPowerAlphaWhenOutOfCombat = 1,
+	ClassPowerAlphaWhenOutOfCombatRunes = .5, 
+	ClassPowerReverseSides = false, 
+	ClassPowerRuneSortOrder = "ASC",
+
+	ClassPowerPostCreatePoint = function(element, id, point)
+		point.case = point:CreateTexture()
+		point.case:SetDrawLayer("BACKGROUND", -2)
+		point.case:SetVertexColor(211/255, 200/255, 169/255)
+
+		point.slotTexture:SetPoint("TOPLEFT", -1.5, 1.5)
+		point.slotTexture:SetPoint("BOTTOMRIGHT", 1.5, -1.5)
+		point.slotTexture:SetVertexColor(130/255 *.3, 133/255 *.3, 130/255 *.3, 2/3)
+
+		point:SetOrientation("UP") -- set the bars to grow from bottom to top.
+		point:SetSparkTexture(GetMedia("blank")) -- this will be too tricky to rotate and map
+		
+	end,
+
+	ClassPowerPostUpdate = function(element, unit, min, max, newMax, powerType)
+
+		--	Class Powers available in Legion/BfA: 
+		--------------------------------------------------------------------------------- 
+		-- 	* Arcane Charges 	Generated points. 5 cap. 0 baseline.
+		--	* Chi: 				Generated points. 5 cap, 6 if talented, 0 baseline.
+		--	* Combo Points: 	Fast generated points. 5 cap, 6-10 if talented, 0 baseline.
+		--	* Holy Power: 		Fast generated points. 5 cap, 0 baseline.
+		--	* Soul Shards: 		Slowly generated points. 5 cap, 1 point baseline.
+		--	* Stagger: 			Generated points. 3 cap. 3 baseline. 
+		--	* Runes: 			Fast refilling points. 6 cap, 6 baseline.
+	
+		local style
+	
+		-- 5 points: 4 circles, 1 larger crystal
+		if (powerType == "COMBO_POINTS") then 
+			style = "ComboPoints"
+	
+		-- 5 points: 5 circles, center one larger
+		elseif (powerType == "CHI") then
+			style = "Chi"
+	
+		--5 points: 3 circles, 3 crystals, last crystal larger
+		elseif (powerType == "ARCANE_CHARGES") or (powerType == "HOLY_POWER") or (powerType == "SOUL_SHARDS") then 
+			style = "SoulShards"
+	
+		-- 3 points: 
+		elseif (powerType == "STAGGER") then 
+			style = "Stagger"
+	
+		-- 6 points: 
+		elseif (powerType == "RUNES") then 
+			style = "Runes"
+		end 
+	
+		-- For my own reference, these are properly sized and aligned so far:
+		-- yes 	ComboPoints 
+		-- no 	Chi
+		-- yes 	SoulShards (also ArcaneCharges, HolyPower)
+		-- no 	Stagger
+		-- no 	Runes
+	
+		-- Do we need to set or update the textures?
+		if (style ~= element.powerStyle) then 
+	
+			local posMod = element.flipSide and -1 or 1
+	
+			if (style == "ComboPoints") then
+				local point1, point2, point3, point4, point5 = element[1], element[2], element[3], element[4], element[5]
+	
+				point1:SetPoint("CENTER", -203*posMod,-137)
+				point1:SetSize(13,13)
+				point1:SetStatusBarTexture(GetMedia("point_crystal"))
+				point1:GetStatusBarTexture():SetRotation(degreesToRadians(6*posMod))
+				point1.slotTexture:SetTexture(GetMedia("point_crystal"))
+				point1.slotTexture:SetRotation(degreesToRadians(6*posMod))
+				point1.case:SetPoint("CENTER", 0, 0)
+				point1.case:SetSize(58,58)
+				point1.case:SetRotation(degreesToRadians(6*posMod))
+				point1.case:SetTexture(GetMedia("point_plate"))
+	
+				point2:SetPoint("CENTER", -221*posMod,-111)
+				point2:SetSize(13,13)
+				point2:SetStatusBarTexture(GetMedia("point_crystal"))
+				point2:GetStatusBarTexture():SetRotation(degreesToRadians(5*posMod))
+				point2.slotTexture:SetTexture(GetMedia("point_crystal"))
+				point2.slotTexture:SetRotation(degreesToRadians(5*posMod))
+				point2.case:SetPoint("CENTER", 0, 0)
+				point2.case:SetSize(60,60)
+				point2.case:SetRotation(degreesToRadians(5*posMod))
+				point2.case:SetTexture(GetMedia("point_plate"))
+	
+				point3:SetPoint("CENTER", -231*posMod,-79)
+				point3:SetSize(13,13)
+				point3:SetStatusBarTexture(GetMedia("point_crystal"))
+				point3:GetStatusBarTexture():SetRotation(degreesToRadians(4*posMod))
+				point3.slotTexture:SetTexture(GetMedia("point_crystal"))
+				point3.slotTexture:SetRotation(degreesToRadians(4*posMod))
+				point3.case:SetPoint("CENTER", 0,0)
+				point3.case:SetSize(60,60)
+				point3.case:SetRotation(degreesToRadians(4*posMod))
+				point3.case:SetTexture(GetMedia("point_plate"))
+			
+				point4:SetPoint("CENTER", -225*posMod,-44)
+				point4:SetSize(13,13)
+				point4:SetStatusBarTexture(GetMedia("point_crystal"))
+				point4:GetStatusBarTexture():SetRotation(degreesToRadians(3*posMod))
+				point4.slotTexture:SetTexture(GetMedia("point_crystal"))
+				point4.slotTexture:SetRotation(degreesToRadians(3*posMod))
+				point4.case:SetPoint("CENTER", 0, 0)
+				point4.case:SetSize(60,60)
+				point4.case:SetRotation(0)
+				point4.case:SetTexture(GetMedia("point_plate"))
+			
+				point5:SetPoint("CENTER", -203*posMod,-11)
+				point5:SetSize(14,21)
+				point5:SetStatusBarTexture(GetMedia("point_crystal"))
+				point5:GetStatusBarTexture():SetRotation(degreesToRadians(1*posMod))
+				point5.slotTexture:SetTexture(GetMedia("point_crystal"))
+				point5.slotTexture:SetRotation(degreesToRadians(1*posMod))
+				point5.case:SetRotation(degreesToRadians(1*posMod))
+				point5.case:SetPoint("CENTER",0,0)
+				point5.case:SetSize(82,96)
+				point5.case:SetRotation(degreesToRadians(1*posMod))
+				point5.case:SetTexture(GetMedia("point_diamond"))
+	
+			elseif (style == "Chi") then
+				local point1, point2, point3, point4, point5 = element[1], element[2], element[3], element[4], element[5]
+	
+				point1:SetPoint("CENTER", -203*posMod,-137)
+				point1:SetSize(13,13)
+				point1:SetStatusBarTexture(GetMedia("point_crystal"))
+				point1:GetStatusBarTexture():SetRotation(degreesToRadians(6*posMod))
+				point1.slotTexture:SetTexture(GetMedia("point_crystal"))
+				point1.slotTexture:SetRotation(degreesToRadians(6*posMod))
+				point1.case:SetPoint("CENTER", 0, 0)
+				point1.case:SetSize(58,58)
+				point1.case:SetRotation(degreesToRadians(6*posMod))
+				point1.case:SetTexture(GetMedia("point_plate"))
+	
+				point2:SetPoint("CENTER", -223*posMod,-109)
+				point2:SetSize(13,13)
+				point2:SetStatusBarTexture(GetMedia("point_crystal"))
+				point2:GetStatusBarTexture():SetRotation(degreesToRadians(5*posMod))
+				point2.slotTexture:SetTexture(GetMedia("point_crystal"))
+				point2.slotTexture:SetRotation(degreesToRadians(5*posMod))
+				point2.case:SetPoint("CENTER", 0, 0)
+				point2.case:SetSize(60,60)
+				point2.case:SetRotation(degreesToRadians(5*posMod))
+				point2.case:SetTexture(GetMedia("point_plate"))
+	
+				point3:SetPoint("CENTER", -234*posMod,-73)
+				point3:SetSize(39,40)
+				point3:SetStatusBarTexture(GetMedia("point_hearth"))
+				point3:GetStatusBarTexture():SetRotation(0)
+				point3.slotTexture:SetTexture(GetMedia("point_hearth"))
+				point3.slotTexture:SetRotation(0)
+				point3.case:SetPoint("CENTER", 0,0)
+				point3.case:SetSize(80,80)
+				point3.case:SetRotation(0)
+				point3.case:SetTexture(GetMedia("point_plate"))
+			
+				point4:SetPoint("CENTER", -221*posMod,-36)
+				point4:SetSize(13,13)
+				point4:SetStatusBarTexture(GetMedia("point_crystal"))
+				point4:GetStatusBarTexture():SetRotation(0)
+				point4.slotTexture:SetTexture(GetMedia("point_crystal"))
+				point4.slotTexture:SetRotation(0)
+				point4.case:SetPoint("CENTER", 0, 0)
+				point4.case:SetSize(60,60)
+				point4.case:SetRotation(0)
+				point4.case:SetTexture(GetMedia("point_plate"))
+			
+				point5:SetPoint("CENTER", -203*posMod,-9)
+				point5:SetSize(13,13)
+				point5:SetStatusBarTexture(GetMedia("point_crystal"))
+				point5:GetStatusBarTexture():SetRotation(0)
+				point5.slotTexture:SetTexture(GetMedia("point_crystal"))
+				point5.slotTexture:SetRotation(0)
+				point5.case:SetPoint("CENTER",0, 0)
+				point5.case:SetSize(60,60)
+				point5.case:SetRotation(0)
+				point5.case:SetTexture(GetMedia("point_plate"))
+	
+			elseif (style == "SoulShards") then 
+				local point1, point2, point3, point4, point5 = element[1], element[2], element[3], element[4], element[5]
+	
+				point1:SetPoint("CENTER", -203*posMod,-137)
+				point1:SetSize(12,12)
+				point1:SetStatusBarTexture(GetMedia("point_crystal"))
+				point1:GetStatusBarTexture():SetRotation(degreesToRadians(6*posMod))
+				point1.slotTexture:SetTexture(GetMedia("point_crystal"))
+				point1.slotTexture:SetRotation(degreesToRadians(6*posMod))
+				point1.case:SetPoint("CENTER", 0, 0)
+				point1.case:SetSize(54,54)
+				point1.case:SetRotation(degreesToRadians(6*posMod))
+				point1.case:SetTexture(GetMedia("point_plate"))
+	
+				point2:SetPoint("CENTER", -221*posMod,-111)
+				point2:SetSize(13,13)
+				point2:SetStatusBarTexture(GetMedia("point_crystal"))
+				point2:GetStatusBarTexture():SetRotation(degreesToRadians(5*posMod))
+				point2.slotTexture:SetTexture(GetMedia("point_crystal"))
+				point2.slotTexture:SetRotation(degreesToRadians(5*posMod))
+				point2.case:SetPoint("CENTER", 0, 0)
+				point2.case:SetSize(60,60)
+				point2.case:SetRotation(degreesToRadians(5*posMod))
+				point2.case:SetTexture(GetMedia("point_plate"))
+	
+				point3:SetPoint("CENTER", -235*posMod,-80)
+				point3:SetSize(11,15)
+				point3:SetStatusBarTexture(GetMedia("point_crystal"))
+				point3:GetStatusBarTexture():SetRotation(degreesToRadians(3*posMod))
+				point3.slotTexture:SetTexture(GetMedia("point_crystal"))
+				point3.slotTexture:SetRotation(degreesToRadians(3*posMod))
+				point3.case:SetPoint("CENTER",0,0)
+				point3.case:SetSize(65,60)
+				point3.case:SetRotation(degreesToRadians(3*posMod))
+				point3.case:SetTexture(GetMedia("point_diamond"))
+			
+				point4:SetPoint("CENTER", -227*posMod,-44)
+				point4:SetSize(12,18)
+				point4:SetStatusBarTexture(GetMedia("point_crystal"))
+				point4:GetStatusBarTexture():SetRotation(degreesToRadians(3*posMod))
+				point4.slotTexture:SetTexture(GetMedia("point_crystal"))
+				point4.slotTexture:SetRotation(degreesToRadians(3*posMod))
+				point4.case:SetPoint("CENTER",0,0)
+				point4.case:SetSize(78,79)
+				point4.case:SetRotation(degreesToRadians(3*posMod))
+				point4.case:SetTexture(GetMedia("point_diamond"))
+			
+				point5:SetPoint("CENTER", -203*posMod,-11)
+				point5:SetSize(14,21)
+				point5:SetStatusBarTexture(GetMedia("point_crystal"))
+				point5:GetStatusBarTexture():SetRotation(degreesToRadians(1*posMod))
+				point5.slotTexture:SetTexture(GetMedia("point_crystal"))
+				point5.slotTexture:SetRotation(degreesToRadians(1*posMod))
+				point5.case:SetRotation(degreesToRadians(1*posMod))
+				point5.case:SetPoint("CENTER",0,0)
+				point5.case:SetSize(82,96)
+				point5.case:SetRotation(degreesToRadians(1*posMod))
+				point5.case:SetTexture(GetMedia("point_diamond"))
+	
+	
+				-- 1.414213562
+			elseif (style == "Stagger") then 
+				local point1, point2, point3 = element[1], element[2], element[3]
+	
+				point1:SetPoint("CENTER", -223*posMod,-109)
+				point1:SetSize(13,13)
+				point1:SetStatusBarTexture(GetMedia("point_crystal"))
+				point1:GetStatusBarTexture():SetRotation(degreesToRadians(5*posMod))
+				point1.slotTexture:SetTexture(GetMedia("point_crystal"))
+				point1.slotTexture:SetRotation(degreesToRadians(5*posMod))
+				point1.case:SetPoint("CENTER", 0, 0)
+				point1.case:SetSize(60,60)
+				point1.case:SetRotation(degreesToRadians(5*posMod))
+				point1.case:SetTexture(GetMedia("point_plate"))
+	
+				point2:SetPoint("CENTER", -234*posMod,-73)
+				point2:SetSize(39,40)
+				point2:SetStatusBarTexture(GetMedia("point_hearth"))
+				point2:GetStatusBarTexture():SetRotation(0)
+				point2.slotTexture:SetTexture(GetMedia("point_hearth"))
+				point2.slotTexture:SetRotation(0)
+				point2.case:SetPoint("CENTER", 0,0)
+				point2.case:SetSize(80,80)
+				point2.case:SetRotation(0)
+				point2.case:SetTexture(GetMedia("point_plate"))
+			
+				point3:SetPoint("CENTER", -221*posMod,-36)
+				point3:SetSize(13,13)
+				point3:SetStatusBarTexture(GetMedia("point_crystal"))
+				point3:GetStatusBarTexture():SetRotation(0)
+				point3.slotTexture:SetTexture(GetMedia("point_crystal"))
+				point3.slotTexture:SetRotation(0)
+				point3.case:SetPoint("CENTER", 0, 0)
+				point3.case:SetSize(60,60)
+				point3.case:SetRotation(0)
+				point3.case:SetTexture(GetMedia("point_plate"))
+	
+	
+			elseif (style == "Runes") then 
+				local point1, point2, point3, point4, point5, point6 = element[1], element[2], element[3], element[4], element[5], element[6]
+	
+				point1:SetPoint("CENTER", -203*posMod,-131)
+				point1:SetSize(28,28)
+				point1:SetStatusBarTexture(GetMedia("point_rune2"))
+				point1:GetStatusBarTexture():SetRotation(0)
+				point1.slotTexture:SetTexture(GetMedia("point_rune2"))
+				point1.slotTexture:SetRotation(0)
+				point1.case:SetPoint("CENTER", 0, 0)
+				point1.case:SetSize(58,58)
+				point1.case:SetRotation(0)
+				point1.case:SetTexture(GetMedia("point_dk_block"))
+	
+				point2:SetPoint("CENTER", -227*posMod,-107)
+				point2:SetSize(28,28)
+				point2:SetStatusBarTexture(GetMedia("point_rune4"))
+				point2:GetStatusBarTexture():SetRotation(0)
+				point2.slotTexture:SetTexture(GetMedia("point_rune4"))
+				point2.slotTexture:SetRotation(0)
+				point2.case:SetPoint("CENTER", 0, 0)
+				point2.case:SetSize(68,68)
+				point2.case:SetRotation(0)
+				point2.case:SetTexture(GetMedia("point_dk_block"))
+	
+				point3:SetPoint("CENTER", -253*posMod,-83)
+				point3:SetSize(30,30)
+				point3:SetStatusBarTexture(GetMedia("point_rune1"))
+				point3:GetStatusBarTexture():SetRotation(0)
+				point3.slotTexture:SetTexture(GetMedia("point_rune1"))
+				point3.slotTexture:SetRotation(0)
+				point3.case:SetPoint("CENTER", 0,0)
+				point3.case:SetSize(74,74)
+				point3.case:SetRotation(0)
+				point3.case:SetTexture(GetMedia("point_dk_block"))
+			
+				point4:SetPoint("CENTER", -220*posMod,-64)
+				point4:SetSize(28,28)
+				point4:SetStatusBarTexture(GetMedia("point_rune3"))
+				point4:GetStatusBarTexture():SetRotation(0)
+				point4.slotTexture:SetTexture(GetMedia("point_rune3"))
+				point4.slotTexture:SetRotation(0)
+				point4.case:SetPoint("CENTER", 0, 0)
+				point4.case:SetSize(68,68)
+				point4.case:SetRotation(0)
+				point4.case:SetTexture(GetMedia("point_dk_block"))
+	
+				point5:SetPoint("CENTER", -246*posMod,-38)
+				point5:SetSize(32,32)
+				point5:SetStatusBarTexture(GetMedia("point_rune2"))
+				point5:GetStatusBarTexture():SetRotation(0)
+				point5.slotTexture:SetTexture(GetMedia("point_rune2"))
+				point5.slotTexture:SetRotation(0)
+				point5.case:SetPoint("CENTER", 0, 0)
+				point5.case:SetSize(78,78)
+				point5.case:SetRotation(0)
+				point5.case:SetTexture(GetMedia("point_dk_block"))
+	
+				point6:SetPoint("CENTER", -214*posMod,-10)
+				point6:SetSize(40,40)
+				point6:SetStatusBarTexture(GetMedia("point_rune1"))
+				point6:GetStatusBarTexture():SetRotation(0)
+				point6.slotTexture:SetTexture(GetMedia("point_rune1"))
+				point6.slotTexture:SetRotation(0)
+				point6.case:SetPoint("CENTER", 0, 0)
+				point6.case:SetSize(98,98)
+				point6.case:SetRotation(0)
+				point6.case:SetTexture(GetMedia("point_dk_block"))
+	
+			end 
+	
+			-- Store the element's full stylestring
+			element.powerStyle = style
+		end 
+	end
+}
+
+-- 2-5 player groups
+Layouts.UnitFrameParty = setmetatable({
+	
+	Size = { 130, 130 }, -- Add room for portraits
+	Place = { "TOPLEFT", "UICenter", "TOPLEFT", 50, -42 }, -- Position of the initial frame
+	GroupAnchor = "TOPLEFT", 
+	GrowthX = 130, -- Horizontal growth per new unit
+	GrowthY = 0, -- Vertical growth per new unit
+	AlternatePlace = { "BOTTOMLEFT", "UICenter", "BOTTOMLEFT", 56, 360 + 10 }, -- Position of the healermode frame
+	AlternateGroupAnchor = "BOTTOMLEFT", 
+	AlternateGrowthX = 140, -- Horizontal growth per new unit
+	AlternateGrowthY = 0, -- Vertical growth per new unit
+	
+	HealthColorTapped = false, -- color tap denied units 
+	HealthColorDisconnected = true, -- color disconnected units
+	HealthColorClass = true, -- color players by class
+	HealthColorPetAsPlayer = true, -- color your pet as you 
+	HealthColorReaction = true, -- color NPCs by their reaction standing with us
+	HealthColorHealth = true, -- color anything else in the default health color
+	HealthValuePlace = { "CENTER", 0, 0 },
+	HealthValueDrawLayer = { "OVERLAY", 1 },
+	HealthValueJustifyH = "CENTER", 
+	HealthValueJustifyV = "MIDDLE", 
+	HealthValueFont = GetFont(13, true),
+	HealthValueColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
+	HealthShowPercent = true, 
+
+	PortraitPlace = { "BOTTOM", 0, 22 },
+	PortraitSize = { 70, 73 }, 
+	PortraitAlpha = .85, 
+	PortraitDistanceScale = 1,
+	PortraitPositionX = 0,
+	PortraitPositionY = 0,
+	PortraitPositionZ = 0,
+	PortraitRotation = 0, -- in degrees
+	PortraitShowFallback2D = true, -- display 2D portraits when unit is out of range of 3D models
+	PortraitBackgroundPlace = { "BOTTOM", 0, -6 }, 
+	PortraitBackgroundSize = { 130, 130 },
+	PortraitBackgroundTexture = GetMedia("party_portrait_back"), 
+	PortraitBackgroundDrawLayer = { "BACKGROUND", 0 }, 
+	PortraitBackgroundColor = { .5, .5, .5 }, 
+	PortraitShadePlace = { "BOTTOM", 0, 16 },
+	PortraitShadeSize = { 86, 86 }, 
+	PortraitShadeTexture = GetMedia("shade_circle"),
+	PortraitShadeDrawLayer = { "BACKGROUND", -1 },
+	PortraitForegroundPlace = { "BOTTOM", 0, -38 },
+	PortraitForegroundSize = { 194, 194 },
+	PortraitForegroundTexture = GetMedia("party_portrait_border"), 
+	PortraitForegroundDrawLayer = { "BACKGROUND", 0 },
+	PortraitForegroundColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
+
+		
+	AuraProperties = {
+		growthX = "RIGHT", 
+		growthY = "DOWN", 
+		spacingH = 4, 
+		spacingV = 4, 
+		auraSize = 30, auraWidth = nil, auraHeight = nil, 
+		maxVisible = 6, maxBuffs = nil, maxDebuffs = nil, 
+		filter = nil, filterBuffs = "PLAYER HELPFUL", filterDebuffs = "PLAYER HARMFUL", 
+		func = nil, funcBuffs = GetAuraFilterFunc("party"), funcDebuffs = GetAuraFilterFunc("party"), 
+		debuffsFirst = false, 
+		disableMouse = false, 
+		showSpirals = false, 
+		showDurations = true, 
+		showLongDurations = true,
+		tooltipDefaultPosition = false, 
+		tooltipPoint = "TOPRIGHT",
+		tooltipAnchor = nil,
+		tooltipRelPoint = "BOTTOMRIGHT",
+		tooltipOffsetX = -8,
+		tooltipOffsetY = -16
+	},
+	AuraFrameSize = { 30*3 + 2*5, 30*2 + 5  }, 
+	AuraFramePlace = { "BOTTOM", 0, -(30*2 + 5 + 16) },
+	AuraIconPlace = { "CENTER", 0, 0 },
+	AuraIconSize = { 30 - 6, 30 - 6 },
+	AuraIconTexCoord = { 5/64, 59/64, 5/64, 59/64 }, -- aura icon tex coords
+	AuraCountPlace = { "BOTTOMRIGHT", 9, -6 },
+	AuraCountFont = GetFont(12, true),
+	AuraCountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
+	AuraTimePlace = { "TOPLEFT", -6, 6 },
+	AuraTimeFont = GetFont(11, true),
+	AuraBorderFramePlace = { "CENTER", 0, 0 }, 
+	AuraBorderFrameSize = { 30 + 10, 30 + 10 },
+	AuraBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 12 },
+	AuraBorderBackdropColor = { 0, 0, 0, 0 },
+	AuraBorderBackdropBorderColor = { Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3 },
+
+	-- Prio #1
+	GroupAuraSize = { 36, 36 },
+	GroupAuraPlace = { "BOTTOM", 0, Constant.TinyBar[2]/2 - 36/2 -1 }, 
+	GroupAuraButtonIconPlace = { "CENTER", 0, 0 },
+	GroupAuraButtonIconSize = { 36 - 6, 36 - 6 },
+	GroupAuraButtonIconTexCoord = { 5/64, 59/64, 5/64, 59/64 }, -- aura icon tex coords
+	GroupAuraButtonCountPlace = { "BOTTOMRIGHT", 9, -6 },
+	GroupAuraButtonCountFont = GetFont(12, true),
+	GroupAuraButtonCountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
+	GroupAuraButtonTimePlace = { "CENTER", 0, 0 },
+	GroupAuraButtonTimeFont = GetFont(11, true),
+	GroupAuraButtonTimeColor = { 250/255, 250/255, 250/255, .85 },
+	GroupAuraButtonBorderFramePlace = { "CENTER", 0, 0 }, 
+	GroupAuraButtonBorderFrameSize = { 36 + 16, 36 + 16 },
+	GroupAuraButtonBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 16 },
+	GroupAuraButtonBorderBackdropColor = { 0, 0, 0, 0 },
+	GroupAuraButtonBorderBackdropBorderColor = { Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3 },
+	GroupAuraButtonDisableMouse = false, 
+	GroupAuraTooltipDefaultPosition = nil, 
+	GroupAuraPostUpdate = function(element, unit)
+		local self = element._owner 
+
+		local rz = self.ResurrectIndicator
+		local rc = self.ReadyCheck
+		local us = self.UnitStatus
+		local hv = self.Health.Value
+
+		if element:IsShown() then 
+			-- Hide all lower priority elements
+			rc:Hide()
+			rz:Hide()
+			us:Hide()
+			hv:Hide()
+
+			-- Colorize the border
+			if (element.filter == "HARMFUL") then 
+				local color = element.debuffType and spellTypeColor[element.debuffType]
+				if color then 
+					element.Border:SetBackdropBorderColor(color[1], color[2], color[3])
+				else
+					element.Border:SetBackdropBorderColor(Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3)
+				end
+			else
+				element.Border:SetBackdropBorderColor(Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3)
+			end
+
+		else 
+			-- Display lower priority elements as needed 
+			if rc.status then 
+				rc:Show()
+				rz:Hide()
+				us:Hide()
+				hv:Hide()
+			elseif rz.status then 
+				rc:Hide()
+				rz:Show()
+				us:Hide()
+				hv:Hide()
+			elseif us.status then 
+				rc:Hide()
+				rz:Hide()
+				us:Show()
+				hv:Hide()
+			else
+				hv:Show()
+			end 
+		end 
+	end, 
+
+	-- Prio #2
+	ReadyCheckPlace = { "CENTER", 0, -7 }, 
+	ReadyCheckSize = { 32, 32 }, 
+	ReadyCheckDrawLayer = { "OVERLAY", 7 },
+	ReadyCheckPostUpdate = function(element, unit, status) 
+		local self = element._owner
+
+		local rd = self.GroupAura
+		local rz = self.ResurrectIndicator
+		local us = self.UnitStatus
+		local hv = self.Health.Value
+
+		if element:IsShown() then 
+			hv:Hide()
+
+			-- Hide if a higher priority element is visible
+			if rd:IsShown() then 
+				return element:Hide()
+			end 
+			-- Hide all lower priority elements
+			rz:Hide()
+			us:Hide()
+		else 
+			-- Show lower priority elements if no higher is visible
+			if (not rd:IsShown()) then 
+				if (rz.status) then 
+					rz:Show()
+					us:Hide()
+					hv:Hide()
+				elseif (us.status) then 
+					rz:Hide()
+					us:Show()
+					hv:Hide()
+				else 
+					hv:Show()
+				end 
+			else 
+				hv:Show()
+			end 
+		end 
+	end,
+	
+	-- Prio #3
+	ResurrectIndicatorPlace = { "CENTER", 0, -7 }, 
+	ResurrectIndicatorSize = { 32, 32 }, 
+	ResurrectIndicatorDrawLayer = { "OVERLAY", 1 },
+	ResurrectIndicatorPostUpdate = function(element, unit, incomingResurrect) 
+		local self = element._owner
+
+		local rc = self.ReadyCheck
+		local rd = self.GroupAura
+		local us = self.UnitStatus
+		local hv = self.Health.Value
+
+		if element:IsShown() then 
+			hv:Hide()
+
+			-- Hide if a higher priority element is visible
+			if (rd:IsShown() or rc.status) then 
+				return element:Hide()
+			end 
+			-- Hide lower priority element
+			us:Hide()
+		else
+			-- Show lower priority elements if no higher is visible
+			if (not rd:IsShown()) and (not rc.status) then 
+				if (us.status) then 
+					us:Show()
+					hv:Hide()
+				else
+					hv:Show()
+				end 
+			end
+		end 
+	end,
+
+	-- Prio #4
+	UnitStatusPlace = { "CENTER", 0, -(7 + 100/2) },
+	UnitStatusDrawLayer = { "ARTWORK", 2 },
+	UnitStatusJustifyH = "CENTER",
+	UnitStatusJustifyV = "MIDDLE",
+	UnitStatusFont = GetFont(12, true),
+	UnitStatusColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .75 },
+	UseUnitStatusMessageOOM = L["oom"],
+	UnitStatusHideAFK = true, 
+	UnitStatusHideOffline = true, 
+	UnitStatusHideDead = true, 
+	UnitStatusPostUpdate = function(element, unit) 
+		local self = element._owner
+
+		local rc = self.ReadyCheck
+		local rd = self.GroupAura
+		local rz = self.ResurrectIndicator
+		local hv = self.Health.Value
+
+		if element:IsShown() then 
+			-- Hide if a higher priority element is visible
+			if (rd:IsShown() or rc.status or rz.status) then 
+				element:Hide()
+			end 
+			hv:Hide()
+		else
+			hv:Show()
+		end 
+	end,
+	
+}, { __index = Template_TinyFrame })
+
+-- 6-40 player groups
+Layouts.UnitFrameRaid = setmetatable({
+
+	TargetHighlightSize = { 140 * .94, 90 *.94 },
+	Size = Constant.RaidFrame, 
+	Place = { "TOPLEFT", "UICenter", "TOPLEFT", 64, -42 }, -- Position of the initial frame
+	AlternatePlace = { "BOTTOMLEFT", "UICenter", "BOTTOMLEFT", 64, 360 - 10 }, -- Position of the initial frame
+
+	GroupSizeNormal = 5,
+	GrowthXNormal = 0, -- Horizontal growth per new unit within a group
+	GrowthYNormal = -38 - 4, -- Vertical growth per new unit within a group
+	GrowthYNormalHealerMode = -(-38 - 4), -- Vertical growth per new unit within a group
+	GroupGrowthXNormal = 110, 
+	GroupGrowthYNormal = -(38 + 8)*5 - 10,
+	GroupGrowthYNormalHealerMode = -(-(38 + 8)*5 - 10),
+	GroupColsNormal = 5, 
+	GroupRowsNormal = 1, 
+	GroupAnchorNormal = "TOPLEFT", 
+	GroupAnchorNormalHealerMode = "BOTTOMLEFT", 
+	GroupSizeEpic = 8,
+	GrowthXEpic = 0, 
+	GrowthYEpic = -38 - 4,
+	GrowthYEpicHealerMode = -(-38 - 4),
+	GroupGrowthXEpic = 110, 
+	GroupGrowthYEpic = -(38 + 8)*8 - 10,
+	GroupGrowthYEpicHealerMode = -(-(38 + 8)*8 - 10),
+	GroupColsEpic = 5, 
+	GroupRowsEpic = 1, 
+	GroupAnchorEpic = "TOPLEFT", 
+	GroupAnchorEpicHealerMode = "BOTTOMLEFT", 
+
+	HealthSize = Constant.RaidBar, 
+	HealthBackdropSize = { 140 *.94, 90 *.94 },
+	HealthColorTapped = false, -- color tap denied units 
+	HealthColorDisconnected = true, -- color disconnected units
+	HealthColorClass = true, -- color players by class
+	HealthColorPetAsPlayer = true, -- color your pet as you 
+	HealthColorReaction = true, -- color NPCs by their reaction standing with us
+	HealthColorHealth = true, -- color anything else in the default health color
+
+	NamePlace = { "TOP", 0, 1 - 2 }, 
+	NameDrawLayer = { "ARTWORK", 1 },
+	NameJustifyH = "CENTER",
+	NameJustifyV = "TOP",
+	NameFont = GetFont(11, true),
+	NameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .75 },
+	NameMaxChars = 8, 
+	NameUseDots = false, 
+
+	RaidRolePoint = "RIGHT", RaidRoleAnchor = "Name", RaidRolePlace = { "LEFT", -1, 1 }, 
+	RaidRoleSize = { 16, 16 }, 
+	RaidRoleDrawLayer = { "ARTWORK", 3 },
+	RaidRoleRaidTargetTexture = GetMedia("raid_target_icons_small"),
+	
+	-- Prio #1
+	GroupAuraSize = { 24, 24 },
+	GroupAuraPlace = { "BOTTOM", 0, Constant.TinyBar[2]/2 - 24/2 -(1 + 2) }, 
+	GroupAuraButtonIconPlace = { "CENTER", 0, 0 },
+	GroupAuraButtonIconSize = { 24 - 6, 24 - 6 },
+	GroupAuraButtonIconTexCoord = { 5/64, 59/64, 5/64, 59/64 }, -- aura icon tex coords
+	GroupAuraButtonCountPlace = { "BOTTOMRIGHT", 9, -6 },
+	GroupAuraButtonCountFont = GetFont(12, true),
+	GroupAuraButtonCountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
+	GroupAuraButtonTimePlace = { "CENTER", 0, 0 },
+	GroupAuraButtonTimeFont = GetFont(11, true),
+	GroupAuraButtonTimeColor = { 250/255, 250/255, 250/255, .85 },
+	GroupAuraButtonBorderFramePlace = { "CENTER", 0, 0 }, 
+	GroupAuraButtonBorderFrameSize = { 24 + 12, 24 + 12 },
+	GroupAuraButtonBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 12 },
+	GroupAuraButtonBorderBackdropColor = { 0, 0, 0, 0 },
+	GroupAuraButtonBorderBackdropBorderColor = { Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3 },
+	GroupAuraButtonDisableMouse = false, 
+	GroupAuraTooltipDefaultPosition = nil, 
+	GroupAuraPostUpdate = function(element, unit)
+		local self = element._owner 
+
+		local rz = self.ResurrectIndicator
+		local rc = self.ReadyCheck
+		local us = self.UnitStatus
+
+		if element:IsShown() then 
+			-- Hide all lower priority elements
+			rc:Hide()
+			rz:Hide()
+			us:Hide()
+
+			-- Colorize the border
+			if (element.filter == "HARMFUL") then 
+				local color = element.debuffType and spellTypeColor[element.debuffType]
+				if color then 
+					element.Border:SetBackdropBorderColor(color[1], color[2], color[3])
+				else
+					element.Border:SetBackdropBorderColor(Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3)
+				end
+			else
+				element.Border:SetBackdropBorderColor(Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3)
+			end
+	
+		else 
+			-- Display lower priority elements as needed 
+			if rc.status then 
+				rc:Show()
+				rz:Hide()
+				us:Hide()
+			elseif rz.status then 
+				rc:Hide()
+				rz:Show()
+				us:Hide()
+			elseif us.status then 
+				rc:Hide()
+				rz:Hide()
+				us:Show()
+			end 
+		end 
+	end, 
+
+	-- Prio #2
+	ReadyCheckPlace = { "CENTER", 0, -7 }, 
+	ReadyCheckSize = { 32, 32 }, 
+	ReadyCheckDrawLayer = { "OVERLAY", 7 },
+	ReadyCheckPostUpdate = function(element, unit, status) 
+		local self = element._owner
+
+		local rd = self.GroupAura
+		local rz = self.ResurrectIndicator
+		local us = self.UnitStatus
+
+		if element:IsShown() then 
+			-- Hide if a higher priority element is visible
+			if rd:IsShown() then 
+				return element:Hide()
+			end 
+			-- Hide all lower priority elements
+			rz:Hide()
+			us:Hide()
+		else 
+			-- Show lower priority elements if no higher is visible
+			if (not rd:IsShown()) then 
+				if (rz.status) then 
+					rz:Show()
+					us:Hide()
+				elseif (us.status) then 
+					rz:Hide()
+					us:Show()
+				end 
+			end 
+		end 
+	end,
+
+	-- Prio #3
+	ResurrectIndicatorPlace = { "CENTER", 0, -7 }, 
+	ResurrectIndicatorSize = { 32, 32 }, 
+	ResurrectIndicatorDrawLayer = { "OVERLAY", 1 },
+	ResurrectIndicatorPostUpdate = function(element, unit, incomingResurrect) 
+		local self = element._owner
+
+		local rc = self.ReadyCheck
+		local rd = self.GroupAura
+		local us = self.UnitStatus
+
+		if element:IsShown() then 
+			-- Hide if a higher priority element is visible
+			if (rd:IsShown() or rc.status) then 
+				return element:Hide()
+			end 
+			-- Hide lower priority element
+			us:Hide()
+		else
+			-- Show lower priority elements if no higher is visible
+			if (not rd:IsShown()) and (not rc.status) then 
+				if (us.status) then 
+					us:Show()
+				end 
+			end
+		end 
+	end,
+
+	-- Prio #4
+	UnitStatusPlace = { "CENTER", 0, -7 },
+	UnitStatusDrawLayer = { "ARTWORK", 2 },
+	UnitStatusJustifyH = "CENTER",
+	UnitStatusJustifyV = "MIDDLE",
+	UnitStatusFont = GetFont(12, true),
+	UnitStatusColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .75 },
+	UseUnitStatusMessageOOM = L["oom"],
+	UnitStatusPostUpdate = function(element, unit) 
+		local self = element._owner
+		local rc = self.ReadyCheck
+		local rd = self.GroupAura
+		local rz = self.ResurrectIndicator
+		if element:IsShown() then 
+			-- Hide if a higher priority element is visible
+			if (rd:IsShown() or rc.status or rz.status) then 
+				element:Hide()
+			end 
+		end 
+	end,
+
+}, { __index = Template_TinyFrame })
 
 ------------------------------------------------
 -- Private Addon API
 ------------------------------------------------
+-- Initialize or retrieve the saved settings
+Private.GetConfig = function(name, profile)
+	local db = Wheel("LibModule"):GetModule(ADDON):GetConfig(name, profile or "global", nil, true)
+	return db or Wheel("LibModule"):GetModule(ADDON):NewConfig(name, Private.GetDefaults(name), profile or "global")
+end 
+
+-- Retrieve default settings
+Private.GetDefaults = function(name) 
+	return Defaults[name] 
+end 
+
 -- Retrieve layout
 Private.GetLayout = function(moduleName) return Layouts[moduleName] end 

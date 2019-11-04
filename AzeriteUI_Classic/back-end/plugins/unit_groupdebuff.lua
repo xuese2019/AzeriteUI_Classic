@@ -12,10 +12,10 @@ local playerClass = select(2, UnitClass("player"))
 
 -- Default aura types to parse for dispel classes
 local classFilter = ({
-	DRUID 		= { HARMFUL = { Boss = true, Magic = false, Curse =  true, Poison =  true, Disease = false } }, 
-	PALADIN 	= { HARMFUL = { Boss = true, Magic = false, Curse = false, Poison =  true, Disease =  true } },
+	DRUID 		= { HARMFUL = { Boss = true, Magic = false, Curse =  true, Poison =  true, Disease = false } },
+	PALADIN 	= { HARMFUL = { Boss = true, Magic =  true, Curse = false, Poison =  true, Disease =  true } },
 	PRIEST 		= { HARMFUL = { Boss = true, Magic =  true, Curse = false, Poison = false, Disease =  true }, HELPFUL = { Custom = true } },
-	SHAMAN 		= { HARMFUL = { Boss = true, Magic = false, Curse = true } },
+	SHAMAN 		= { HARMFUL = { Boss = true, Magic = false, Curse = false, Poison =  true, Disease =  true } },
 })[playerClass] or { HARMFUL = { Boss = true } } 
 
 -- SpellIDs that will have their type overridden, 
@@ -366,5 +366,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("GroupAura", Enable, Disable, Proxy, 11)
+	Lib:RegisterElement("GroupAura", Enable, Disable, Proxy, 12)
 end 

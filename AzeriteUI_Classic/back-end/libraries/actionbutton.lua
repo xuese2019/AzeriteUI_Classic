@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 64)
+local LibSecureButton = Wheel:Set("LibSecureButton", 65)
 if (not LibSecureButton) then	
 	return
 end
@@ -53,10 +53,8 @@ local GetActionTexture = _G.GetActionTexture
 local GetBindingKey = _G.GetBindingKey 
 local GetCursorInfo = _G.GetCursorInfo
 local GetMacroSpell = _G.GetMacroSpell
-local GetOverrideBarIndex = _G.GetOverrideBarIndex
 local GetSpellInfo = _G.GetSpellInfo
 local GetSpellSubtext = _G.GetSpellSubtext
-local GetTempShapeshiftBarIndex = _G.GetTempShapeshiftBarIndex
 local GetTime = _G.GetTime
 local HasAction = _G.HasAction
 local IsActionInRange = _G.IsActionInRange
@@ -67,12 +65,6 @@ local IsStackableAction = _G.IsStackableAction
 local IsUsableAction = _G.IsUsableAction
 local SetClampedTextureRotation = _G.SetClampedTextureRotation
 local UnitClass = _G.UnitClass
-
--- TODO: remove and fix
-GetOverrideBarIndex = function() return 0 end
-GetVehicleBarIndex = function() return 0 end
-GetTempShapeshiftBarIndex = function() return 0 end
-GetVehicleBarIndex = function() return 0 end
 
 -- Doing it this way to make the transition to library later on easier
 LibSecureButton.embeds = LibSecureButton.embeds or {} 
@@ -1167,19 +1159,6 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 		end
 	]=])
 
-	-- Add a page driver layer, basically a fake bar for the current button
-	-- 
-	-- *Note that the functions meant to check for the various types of bars
-	--  sometimes will return 'false' directly after a page change, when they should be 'true'. 
-	--  No idea as to why this randomly happens, but the macro driver at least responds correctly, 
-	--  and the bar index can still be retrieved correctly, so for now we just skip the checks. 
-	-- 
-	-- Affected functions, which we choose to avoid/work around here: 
-	-- 		HasVehicleActionBar()
-	-- 		HasOverrideActionBar()
-	-- 		HasTempShapeshiftActionBar()
-	-- 		HasBonusActionBar()
-
 	-- Need to figure these out on button creation, 
 	-- as we're not interested in the library owner's name, 
 	-- but rather the addon name of the module calling this method. 
@@ -1187,18 +1166,13 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 	if self.GetAddon then 
 		local addon = self:GetAddon() 
 		if addon then 
-			-- We're making the addon naming scheme a rule here?
-			-- Seems clunky, but for the time being it'll have to do. 
-			-- Eventually we'll find a better way of implementing this. 
 			if self:GetOwner():IsDebugModeEnabled() then 
 				DEBUG_ENABLED = true 
 			end
-			--if Wheel("LibModule"):IsAddOnEnabled((addon or "").."_Debug") then 
-			--	DEBUG_ENABLED = true 
-			--end
 		end
 	end
 
+	-- Add a page driver layer, basically a fake bar for the current button
 	local page = visibility:CreateFrame("Frame", nil, "SecureHandlerAttributeTemplate")
 	page.id = barID
 	page.AddDebugMessage = DEBUG_ENABLED and self.AddDebugMessageFormatted or nil

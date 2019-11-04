@@ -3,8 +3,9 @@ local Core = Wheel("LibModule"):GetModule(ADDON)
 if (not Core) then 
 	return 
 end
+
 local Module = Core:NewModule("OptionsMenu", "HIGH", "LibMessage", "LibEvent", "LibDB", "LibFrame", "LibSound", "LibTooltip")
-local Layout, L, MenuTable
+local MenuTable
 
 -- Registries
 Module.buttons = Module.buttons or {}
@@ -24,6 +25,12 @@ local Windows = Module.windows
 local _G = _G
 local math_min = math.min
 local table_insert = table.insert
+
+-- Private API
+local GetLayout = Private.GetLayout
+
+local Layout = GetLayout(ADDON)
+local L = Wheel("LibLocale"):GetLocale(ADDON)
 
 -- Secure script snippets
 local secureSnippets = {
@@ -716,27 +723,16 @@ Module.CreateMenuTable = function(self)
 		table_insert(DebugMenu.buttons, {
 			enabledTitle = L_ENABLED:format(L["Debug Console"]),
 			disabledTitle = L_DISABLED:format(L["Debug Console"]),
-			--type = "TOGGLE_VALUE", 
-			--configDB = "Core", configKey = "enableDebugConsole", 
-			--proxyModule = nil, useCore = true
 			type = "TOGGLE_MODE", hasWindow = false, 
-			configDB = "Core", modeName = "enableDebugConsole", 
+			configDB = ADDON, modeName = "enableDebugConsole", 
 			proxyModule = nil, useCore = true
 		})
-		-- Don't give this option. Make this a one way street. 
-		--table_insert(DebugMenu.buttons, {
-		--	enabledTitle = L_ENABLED:format(L["Unload Console"]),
-		--	disabledTitle = L_DISABLED:format(L["Unload Console"]),
-		--	type = "TOGGLE_MODE", hasWindow = false, 
-		--	configDB = "Core", modeName = "unloadConsole", 
-		--	proxyModule = nil, useCore = true
-		--})
 	else
 		table_insert(DebugMenu.buttons, {
 			enabledTitle = L_ENABLED:format(L["Load Console"]),
 			disabledTitle = L_DISABLED:format(L["Load Console"]),
 			type = "TOGGLE_MODE", hasWindow = false, 
-			configDB = "Core", modeName = "loadConsole", 
+			configDB = ADDON, modeName = "loadConsole", 
 			proxyModule = nil, useCore = true
 		})
 	end
@@ -744,7 +740,7 @@ Module.CreateMenuTable = function(self)
 		enabledTitle = L_ENABLED:format(L["Reload UI"]),
 		disabledTitle = L_DISABLED:format(L["Reload UI"]),
 		type = "TOGGLE_MODE", hasWindow = false, 
-		configDB = "Core", modeName = "reloadUI", 
+		configDB = ADDON, modeName = "reloadUI", 
 		proxyModule = nil, useCore = true
 	})
 	table_insert(MenuTable, DebugMenu)
@@ -902,6 +898,30 @@ Module.CreateMenuTable = function(self)
 	end
 	table_insert(MenuTable, UnitFrameMenu)
 
+	-- HUD
+	local UnitFramePlayerHUD = Core:GetModule("UnitFramePlayerHUD", true)
+	if UnitFramePlayerHUD and not (UnitFramePlayerHUD:IsIncompatible() or UnitFramePlayerHUD:DependencyFailed()) then 
+		table_insert(MenuTable, {
+			title = L["HUD"], type = nil, hasWindow = true, 
+			buttons = {
+				{
+					enabledTitle = L_ENABLED:format(L["CastBar"]),
+					disabledTitle = L_DISABLED:format(L["CastBar"]),
+					type = "TOGGLE_VALUE", 
+					configDB = "UnitFramePlayerHUD", configKey = "enableCast", 
+					proxyModule = "UnitFramePlayerHUD"
+				},
+				{
+					enabledTitle = L_ENABLED:format(L["ClassPower"]),
+					disabledTitle = L_DISABLED:format(L["ClassPower"]),
+					type = "TOGGLE_VALUE", 
+					configDB = "UnitFramePlayerHUD", configKey = "enableClassPower", 
+					proxyModule = "UnitFramePlayerHUD"
+				},
+			}
+		})
+	end
+
 	-- Explorer Mode
 	local ExplorerMode = Core:GetModule("ExplorerMode", true)
 	if ExplorerMode and not (ExplorerMode:IsIncompatible() or ExplorerMode:DependencyFailed()) then 
@@ -932,16 +952,10 @@ Module.CreateMenuTable = function(self)
 		enabledTitle = L_ENABLED:format(L["Healer Mode"]),
 		disabledTitle = L_DISABLED:format(L["Healer Mode"]),
 		type = "TOGGLE_VALUE", 
-		configDB = "Core", configKey = "enableHealerMode", 
+		configDB = ADDON, configKey = "enableHealerMode", 
 		proxyModule = nil, useCore = true, modeName = "healerMode"
 	})
 
-end
-
-Module.PreInit = function(self)
-	local PREFIX = Core:GetPrefix()
-	Layout = Wheel("LibDB"):GetDatabase(PREFIX..":[Core]")
-	L = Wheel("LibLocale"):GetLocale(PREFIX)
 end
 
 Module.OnInit = function(self)

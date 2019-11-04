@@ -1,4 +1,4 @@
-local ADDON = ...
+local ADDON, Private = ...
 
 local Core = Wheel("LibModule"):GetModule(ADDON)
 if (not Core) then 
@@ -27,6 +27,9 @@ local UIFrameFadeRemoveFrame = _G.UIFrameFadeRemoveFrame
 local UIFrameIsFading = _G.UIFrameIsFading
 local UnitAffectingCombat = _G.UnitAffectingCombat
 local VoiceChat_IsLoggedIn = _G.C_VoiceChat and _G.C_VoiceChat.IsLoggedIn
+
+-- Private API
+local GetConfig = Private.GetConfig
 
 local alphaLocks = {}
 local scaffolds = {}
@@ -625,7 +628,7 @@ end
 Module.UpdateChatDockPosition = function(self)
 	local frame = self.frame 
 	if frame then 
-		local coreDB = self:GetConfig("Core")
+		local coreDB = GetConfig(ADDON)
 		if (coreDB and coreDB.enableHealerMode) then 
 			frame:ClearAllPoints()
 			frame:SetPoint(unpack(Layout.AlternateChatFramePlace))

@@ -34,32 +34,14 @@ local SetActionBarToggles = _G.SetActionBarToggles
 
 -- Private Addon API
 local GetAuraFilterFunc = Private.GetAuraFilterFunc
+local GetConfig = Private.GetConfig
 local GetFont = Private.GetFont
+local GetLayout = Private.GetLayout
 local GetMedia = Private.GetMedia
 local Colors = Private.Colors
 
 -- Addon localization
 local L = Wheel("LibLocale"):GetLocale(ADDON)
-
--- Addon defaults
-local defaults = {
-	-- Enables a layout switch targeted towards healers
-	enableHealerMode = false,
-
-	-- Loads all child modules with debug functionality, 
-	-- doesn't actually load any consoles. 
-	loadDebugConsole = true, 
-
-	-- Enable console visibility. 
-	-- Requires the above to be true. 
-	enableDebugConsole = false,
-
-	-- Block group invite spam
-	blockGroupInvites = false, 
-	allowGuildInvites = true,
-	allowFriendInvites = true, 
-	blockCounter = {}
-}
 
 local SECURE = {
 	HealerMode_SecureCallback = [=[
@@ -313,8 +295,8 @@ Core.OnChatCommand = function(self, editBox, msg)
 end
 
 Core.OnInit = function(self)
-	self.db = self:NewConfig("Core", defaults, "global")
-	self.layout = Wheel("LibDB"):GetDatabase(self:GetPrefix()..":[Core]")
+	self.db = GetConfig(ADDON)
+	self.layout = GetLayout(ADDON)
 
 	-- Hide the entire UI from the start
 	if self.layout.FadeInUI then 

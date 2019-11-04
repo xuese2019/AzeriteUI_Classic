@@ -1,4 +1,4 @@
-local ADDON = ...
+local ADDON,Private = ...
 local Core = Wheel("LibModule"):GetModule(ADDON)
 if (not Core) then 
 	return 
@@ -22,10 +22,14 @@ local GetFramerate = _G.GetFramerate
 local GetMovieDownloadProgress = _G.GetMovieDownloadProgress
 local GetNetStats = _G.GetNetStats
 
+-- Private API
+local GetLayout = Private.GetLayout
+
 local BLANK_TEXTURE = [[Interface\ChatFrame\ChatFrameBackground]]
 local buttonWidth, buttonHeight, buttonSpacing, sizeMod = 300,50,10, .75
 
-local L, Layout, CoreLayout
+local L = Wheel("LibLocale"):GetLocale(ADDON)
+local Layout = GetLayout(Module:GetName())
 
 local getBindingKeyForAction = function(action, useNotBound, useParentheses)
 	local key = GetBindingKey(action)
@@ -218,7 +222,7 @@ Module.GetConfigWindow = function(self)
 		configWindow:Hide()
 		configWindow:SetFrameStrata("DIALOG")
 		configWindow:SetFrameLevel(1000)
-		configWindow:Place(unpack(CoreLayout.MenuPlace))
+		configWindow:Place(unpack(GetLayout(ADDON).MenuPlace))
 		configWindow:EnableMouse(true)
 		configWindow:SetScript("OnShow", ConfigWindow_OnShow)
 		configWindow:SetScript("OnHide", ConfigWindow_OnHide)
@@ -411,13 +415,6 @@ Module.OnEvent = function(self, event, ...)
 		self:UnregisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
 		self:UpdateMicroButtons()
 	end 
-end
-
-Module.PreInit = function(self)
-	local PREFIX = Core:GetPrefix()
-	L = Wheel("LibLocale"):GetLocale(PREFIX)
-	Layout = Wheel("LibDB"):GetDatabase(PREFIX..":[BlizzardMicroMenu]")
-	CoreLayout = Wheel("LibDB"):GetDatabase(PREFIX..":[Core]")
 end
 
 Module.HandleBartenderMicroBar = function(self)
