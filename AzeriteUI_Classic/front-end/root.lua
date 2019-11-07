@@ -107,6 +107,22 @@ local fixMinimap = function()
 	end 
 end
 
+local alreadyFixed
+local fixMacroIcons = function() 
+	if InCombatLockdown() or alreadyFixed then 
+		return 
+	end
+	--  Macro slot index to query. Slots 1 through 120 are general macros; 121 through 138 are per-character macros.
+	local numAccountMacros, numCharacterMacros = GetNumMacros()
+	for macroSlot = 1,138 do 
+		local name, icon, body, isLocal = GetMacroInfo(macroSlot) 
+		if body then 
+			EditMacro(macroSlot, nil, nil, body)
+			alreadyFixed = true
+		end
+	end
+end
+
 Core.IsModeEnabled = function(self, modeName)
 	-- Not actually called by the menu, since we're not
 	-- listing our healerMode as a mode, just a toggleValue. 
@@ -280,6 +296,7 @@ Core.ApplyExperimentalFeatures = function(self)
 
 	-- Add command to /clear the main chatframe
 	self:RegisterChatCommand("clear", function() ChatFrame1:Clear() end)
+	self:RegisterChatCommand("fix", fixMacroIcons)
 end
 
 -- We could add this into the back-end, leaving it here for now, though. 
@@ -414,6 +431,7 @@ Core.OnEvent = function(self, event, ...)
 				if (self.elapsed < 1/60) then 
 					return 
 				end 
+				fixMacroIcons()
 				if self.fading then 
 					self.totalElapsed = self.totalElapsed + self.elapsed
 					self.alpha = self.totalElapsed / self.fadeDuration
@@ -426,6 +444,7 @@ Core.OnEvent = function(self, event, ...)
 						self.fading = nil
 						self:SetScript("OnUpdate", nil)
 						fixMinimap()
+						fixMacroIcons()
 						return 
 					else 
 						Core:GetFrame("UICenter"):SetAlpha(self.alpha)
@@ -458,4 +477,3 @@ Core.OnEvent = function(self, event, ...)
 		self.db.enableDebugConsole = false
 	end 
 end 
-
