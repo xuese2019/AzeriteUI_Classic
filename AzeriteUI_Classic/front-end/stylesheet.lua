@@ -51,8 +51,7 @@ local BLANK_TEXTURE = [[Interface\ChatFrame\ChatFrameBackground]]
 
 -- Use a metatable to dynamically create the colors
 local spellTypeColor = setmetatable({
-	["Custom"] = { 1, .9294, .7607 }, -- same color I used for "unknown" zone names (instances, bgs, contested zones on pve realms)
---	["none"] = { 0, 0, 0 }
+	["Custom"] = { 1, .9294, .7607 } 
 }, { __index = function(tbl,key)
 		local v = DebuffTypeColor[key]
 		if v then
@@ -1189,7 +1188,7 @@ local GroupTools = {
 	OnButtonEnable = GroupTools_Button_OnEnable
 }
 
--- Little trick to see the layout and dimensions of the blib icons
+-- Little trick to see the layout and dimensions of the blip icons
 --local f = UIParent:CreateTexture()
 --f:SetTexture([[Interface\MiniMap\ObjectIconsAtlas.blp]]) 
 --f:SetPoint("CENTER")

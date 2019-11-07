@@ -8,6 +8,9 @@ but prior to loading any of the module config files.
 Meaning we can reference the general databases with certainty, 
 but any layout data will have to be passed as function arguments.
 
+TODO:
+Remove most of the callbacks, and put them in the stylesheet file.
+
 --]]--
 
 local ADDON, Private = ...
@@ -116,7 +119,8 @@ local SECURE = {
 		elseif (name == "change-enableclasspower") then 
 			local owner = self:GetFrameRef("Owner"); 
 			self:SetAttribute("enableClassPower", value); 
-			if (value) then 
+			local forceDisable = self:GetAttribute("forceDisableClassPower"); 
+			if (value) and (not forceDisable) then 
 				owner:CallMethod("EnableElement", "ClassPower"); 
 				owner:CallMethod("UpdateAllElements"); 
 			else 
@@ -2654,28 +2658,28 @@ end
 -- Dummy counters for testing purposes only
 local fakeBossId, fakePartyId, fakeRaidId = 0, 0, 0, 0
 
-UnitStyles.StyleBossFrames = function(self, unit, id, Layout, ...)
+UnitStyles.StyleBossFrames = function(self, unit, id, layout, ...)
 	if (not id) then 
 		fakeBossId = fakeBossId + 1
 		id = fakeBossId
 	end 
-	return StyleSmallFrame(self, unit, id, Layout, ...)
+	return StyleSmallFrame(self, unit, id, layout, ...)
 end
 
-UnitStyles.StylePartyFrames = function(self, unit, id, Layout, ...)
+UnitStyles.StylePartyFrames = function(self, unit, id, layout, ...)
 	if (not id) then 
 		fakePartyId = fakePartyId + 1
 		id = fakePartyId
 	end 
-	return StylePartyFrame(self, unit, id, Layout, ...)
+	return StylePartyFrame(self, unit, id, layout, ...)
 end
 
-UnitStyles.StyleRaidFrames = function(self, unit, id, Layout, ...)
+UnitStyles.StyleRaidFrames = function(self, unit, id, layout, ...)
 	if (not id) then 
 		fakeRaidId = fakeRaidId + 1
 		id = fakeRaidId
 	end 
-	return StyleRaidFrame(self, unit, id, Layout, ...)
+	return StyleRaidFrame(self, unit, id, layout, ...)
 end
 
 -----------------------------------------------------------
@@ -2726,7 +2730,8 @@ UnitFramePlayerHUD.OnInit = function(self)
 	end)
 
 	-- Create a secure proxy updater for the menu system
-	CreateSecureCallbackFrame(self, self.frame, self.db, SECURE.HUD_SecureCallback)
+	local callbackFrame = CreateSecureCallbackFrame(self, self.frame, self.db, SECURE.HUD_SecureCallback)
+	callbackFrame:SetAttribute("forceDisableClassPower", self:IsAddOnEnabled("SimpleClassPower"))
 end 
 
 UnitFramePlayerHUD.OnEnable = function(self)
