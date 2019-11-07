@@ -901,7 +901,7 @@ Module.CreateMenuTable = function(self)
 	-- HUD
 	local UnitFramePlayerHUD = Core:GetModule("UnitFramePlayerHUD", true)
 	if UnitFramePlayerHUD and not (UnitFramePlayerHUD:IsIncompatible() or UnitFramePlayerHUD:DependencyFailed()) then 
-		table_insert(MenuTable, {
+		local HUDMenu = {
 			title = L["HUD"], type = nil, hasWindow = true, 
 			buttons = {
 				{
@@ -910,16 +910,20 @@ Module.CreateMenuTable = function(self)
 					type = "TOGGLE_VALUE", 
 					configDB = "UnitFramePlayerHUD", configKey = "enableCast", 
 					proxyModule = "UnitFramePlayerHUD"
-				},
-				{
-					enabledTitle = L_ENABLED:format(L["ClassPower"]),
-					disabledTitle = L_DISABLED:format(L["ClassPower"]),
-					type = "TOGGLE_VALUE", 
-					configDB = "UnitFramePlayerHUD", configKey = "enableClassPower", 
-					proxyModule = "UnitFramePlayerHUD"
-				},
+				}
 			}
-		})
+		}
+		-- Only insert this entry if SimpleClassPower isn't loaded. 
+		if (not self:IsAddOnEnabled("SimpleClassPower")) then 
+			table_insert(HUDMenu.buttons, {
+				enabledTitle = L_ENABLED:format(L["ClassPower"]),
+				disabledTitle = L_DISABLED:format(L["ClassPower"]),
+				type = "TOGGLE_VALUE", 
+				configDB = "UnitFramePlayerHUD", configKey = "enableClassPower", 
+				proxyModule = "UnitFramePlayerHUD"
+			})
+		end
+		table_insert(MenuTable, HUDMenu)
 	end
 
 	-- Explorer Mode
