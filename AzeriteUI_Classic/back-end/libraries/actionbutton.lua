@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 65)
+local LibSecureButton = Wheel:Set("LibSecureButton", 66)
 if (not LibSecureButton) then	
 	return
 end
@@ -349,7 +349,7 @@ local Update = function(self, event, ...)
 	elseif (event == "SPELL_UPDATE_CHARGES") then
 		self:UpdateCount()
 
-	elseif (event == "SPELLS_CHANGED") then 
+	elseif (event == "SPELLS_CHANGED") or (event == "UPDATE_MACROS") then 
 		-- Needed for macros. 
 		self:Update() 
 	elseif (event == "SPELL_UPDATE_ICON") then
@@ -864,8 +864,8 @@ ActionButton.OnEnable = function(self)
 	self:RegisterEvent("TRADE_SKILL_CLOSE", Update)
 	self:RegisterEvent("TRADE_SKILL_SHOW", Update)
 	self:RegisterEvent("UPDATE_BINDINGS", Update)
+	self:RegisterEvent("UPDATE_MACROS", Update)
 	self:RegisterEvent("UPDATE_SHAPESHIFT_FORM", Update)
-
 end
 
 ActionButton.OnDisable = function(self)
@@ -891,6 +891,7 @@ ActionButton.OnDisable = function(self)
 	self:UnregisterEvent("TRADE_SKILL_CLOSE", Update)
 	self:UnregisterEvent("TRADE_SKILL_SHOW", Update)
 	self:UnregisterEvent("UPDATE_BINDINGS", Update)
+	self:UnregisterEvent("UPDATE_MACROS", Update)
 	self:UnregisterEvent("UPDATE_SHAPESHIFT_FORM", Update)
 end
 
