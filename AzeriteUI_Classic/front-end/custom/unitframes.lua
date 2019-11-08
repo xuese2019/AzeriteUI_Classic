@@ -2362,8 +2362,8 @@ UnitStyles.StyleTargetFrame = function(self, unit, id, layout, ...)
 	power.hideWhenEmpty = layout.PowerHideWhenEmpty -- hide the bar when it's empty
 	power.hideWhenDead = layout.PowerHideWhenDead -- hide the bar when the unit is dead
 	power.visibilityFilter = layout.PowerVisibilityFilter -- Use filters to decide what units to show for 
+	power:SetAlpha(.75)
 	self.Power = power
-	self.Power.OverrideColor = OverridePowerColor
 
 	local powerBg = power:CreateTexture()
 	powerBg:SetDrawLayer(unpack(layout.PowerBackgroundDrawLayer))
@@ -2372,6 +2372,7 @@ UnitStyles.StyleTargetFrame = function(self, unit, id, layout, ...)
 	powerBg:SetTexture(layout.PowerBackgroundTexture)
 	powerBg:SetVertexColor(unpack(layout.PowerBackgroundColor)) 
 	powerBg:SetTexCoord(unpack(layout.PowerBackgroundTexCoord))
+	powerBg:SetIgnoreParentAlpha(true)
 	self.Power.Bg = powerBg
 
 	local powerVal = self.Power:CreateFontString()

@@ -2248,14 +2248,14 @@ local UnitFrameTarget = {
 		end 
 	end,
 
-	PowerPlace ={ "CENTER", 439/2 + 79 +2, 93/2 -62 + 4 +6 }, 
-	PowerSize = { 68, 68 },
+	PowerPlace ={ "CENTER", 439/2 + 79 +2, -6+ 93/2 -62 + 4 +6 }, 
+	PowerSize = { 68 +12, 68 +12 },
 	PowerType = "StatusBar", 
 	PowerBarSparkTexture = GetMedia("blank"),
 	PowerBarTexture = GetMedia("power_crystal_small_front"),
-	PowerBarTexCoord = { 1, 0, 0, 1 },
+	PowerBarTexCoord = { 0, 1, 0, 1 },
 	PowerBarOrientation = "UP",
-	PowerBarSetFlippedHorizontally = true, 
+	PowerBarSetFlippedHorizontally = false, 
 	PowerBarSmoothingMode = "bezier-fast-in-slow-out",
 	PowerBarSmoothingFrequency = .5,
 	PowerColorSuffix = "_CRYSTAL", 
@@ -2264,13 +2264,6 @@ local UnitFrameTarget = {
 	PowerIgnoredResource = nil,
 	PowerShowAlternate = true, 
 	
-	PowerBackgroundPlace = { "CENTER", 0, 0 },
-	PowerBackgroundSize = { 68, 68 },
-	PowerBackgroundTexture = GetMedia("power_crystal_small_back"),
-	PowerBackgroundTexCoord = { 1, 0, 0, 1 },
-	PowerBackgroundDrawLayer = { "BACKGROUND", -2 },
-	PowerBackgroundColor = { 1, 1, 1, .85 },
-
 	PowerValueOverride = function(element, unit, min, max, powerType, powerID, disconnected, dead, tapped)
 		local value = element.Value
 		if (min == 0 or max == 0) and (not value.showAtZero) then
@@ -2284,8 +2277,15 @@ local UnitFrameTarget = {
 	PowerValueDrawLayer = { "OVERLAY", 1 },
 	PowerValueJustifyH = "CENTER", 
 	PowerValueJustifyV = "MIDDLE", 
-	PowerValueFont = GetFont(13, true),
+	PowerValueFont = GetFont(14, true),
 	PowerValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+
+	PowerBackgroundPlace = { "CENTER", 0, 0 },
+	PowerBackgroundSize = { 68 +12, 68 +12 },
+	PowerBackgroundTexture = GetMedia("power_crystal_small_back"),
+	PowerBackgroundTexCoord = { 0, 1, 0, 1 },
+	PowerBackgroundDrawLayer = { "BACKGROUND", -2 },
+	PowerBackgroundColor = { 1, 1, 1, .85 },
 
 	PortraitPlace = { "TOPRIGHT", 73, 8 },
 	PortraitSize = { 85, 85 }, 
