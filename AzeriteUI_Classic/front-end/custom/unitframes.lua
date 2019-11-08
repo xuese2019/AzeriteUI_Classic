@@ -724,12 +724,16 @@ local Target_PostUpdateName = function(self, event, ...)
 		self.totShown = nil
 	end
 	if (self.totShown and self.totVisible and (not self.Name.usingSmallWidth)) then 
+		self.Name.maxChars = 30
 		self.Name.usingSmallWidth = true
-		self.Name:SetWidth(self.Name.smallWidth)
+		self.Name:ForceUpdate()
+		--self.Name:SetWidth(self.Name.smallWidth)
 		UnitFrameTarget:AddDebugMessageFormatted("UnitFrameTarget changed name element width to small.")
 	elseif (self.Name.usingSmallWidth) then
+		self.Name.maxChars = 64
 		self.Name.usingSmallWidth = nil
-		self.Name:SetWidth(self.Name.fullWidth)
+		--self.Name:SetWidth(self.Name.fullWidth)
+		self.Name:ForceUpdate()
 		UnitFrameTarget:AddDebugMessageFormatted("UnitFrameTarget changed name element width to full.")
 	end 
 end
@@ -2598,9 +2602,11 @@ UnitStyles.StyleTargetFrame = function(self, unit, id, layout, ...)
 	name:SetJustifyV(layout.NameJustifyV)
 	name:SetFontObject(layout.NameFont)
 	name:SetTextColor(unpack(layout.NameColor))
-	name.smallWidth = layout.NameSize[1]
-	name.fullWidth = layout.Size[1]*2
-	name:SetSize(name.fullWidth, layout.NameSize[2])
+	name.showLevel = true
+	name.showLevelLast = true
+	--name.smallWidth = layout.NameSize[1]
+	--name.fullWidth = layout.Size[1]*2
+	--name:SetSize(name.fullWidth, layout.NameSize[2])
 	self.Name = name
 
 	-- Health Value
