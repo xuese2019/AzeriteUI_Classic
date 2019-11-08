@@ -2239,8 +2239,13 @@ local UnitFrameTarget = {
 		end 
 	end,
 
+	-- Show the badge for dead units (dead skull)
 	LevelVisibilityFilter = function(element, unit) 
-		return false
+		if UnitIsDeadOrGhost(unit) then 
+			return true 
+		else 
+			return false
+		end 
 	end,
 
 	PowerPlace ={ "CENTER", 439/2 + 79 +2, 93/2 -62 + 4 +6 }, 
