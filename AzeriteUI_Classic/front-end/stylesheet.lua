@@ -2898,7 +2898,7 @@ Layouts.UnitFramePlayerHUD = {
 	Place = { "BOTTOMLEFT", 75, 127 },
 	IgnoreMouseOver = true, 
 
-	CastBarPlace = { "CENTER", "UICenter", "CENTER", 0, -133 }, 
+	CastBarPlace = { "BOTTOM", "UICenter", "BOTTOM", 0, 250 }, -- CENTER, 0, -133
 	CastBarSize = Constant.SmallBar,
 	CastBarTexture = Constant.SmallBarTexture, 
 	CastBarColor = { 70/255, 255/255, 131/255, .69 }, 
@@ -2940,7 +2940,7 @@ Layouts.UnitFramePlayerHUD = {
 	CastBarShieldTexture = GetMedia("cast_back_spiked"), 
 	CastBarShieldDrawLayer = { "BACKGROUND", 1 }, 
 	CastBarShieldColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
-	CastBarSpellQueuePlace = { "CENTER", "UICenter", "CENTER", 0, -133 }, 
+	CastBarSpellQueuePlace = { "BOTTOM", "UICenter", "BOTTOM", 0, 250 }, 
 	CastBarSpellQueueSize = Constant.SmallBar,
 	CastBarSpellQueueTexture = Constant.SmallBarTexture, 
 	CastBarSpellQueueColor = { 1, 1, 1, .5 },
