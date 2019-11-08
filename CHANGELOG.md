@@ -4,14 +4,22 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.69-RC] 2019-11-08
+### Changed
+- The HUD castbar is now anchored to the bottom rather than the center of the screen. It has also been moved farther down, to not be as much in the way.
+- Removed the target level badge for most units. 
+- Added the target's level to its name text, like in the tooltips.
+- Added the small target power crystal for all units that have power. 
+- Changed the small target power crystal to be slightly larger, and slightly more toned down. 
+
 ## [1.0.68-RC] 2019-11-07
 
-*DISCLAIMER:* 
-Loss of limbs, life or sanity is not the responsibility of the author.
+_**DISCLAIMER:**_  
+_Loss of limbs, life or sanity is not the responsibility of the author._
 
 ### Changed
 - There is now a new HUD entry in our options menu, where you can choose to disable the combo point display and the on-screen castbar. 
-- Added a highly experimental feature to work around the Blizzard issue where macro buttons sometimes are missing their info and icon until the macro frame is opened or the interface reloaded. This fix might cause the whole universe to implode, and you're thus installing this at your own risk.  
+- Added a highly experimental feature to work around the Blizzard issue where macro buttons sometimes are missing their info and icon until the macro frame is opened or the interface reloaded. This fix might cause the whole universe to implode, and you're thus installing this at your own risk. 
 
 ## [1.0.67-RC] 2019-11-02
 ### Fixed
