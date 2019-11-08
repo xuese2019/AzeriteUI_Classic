@@ -2008,7 +2008,7 @@ local UnitFramePlayer = {
 			CastBarNameParent = "Health",
 			CastBarNamePlace = { "LEFT", 27, 4 },
 			CastBarNameSize = { 250, 40 }, 
-			CastBarNameFont = GetFont(18, true),
+			CastBarNameFont = GetFont(16, true),
 			CastBarNameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
 			CastBarNameDrawLayer = { "OVERLAY", 1 }, 
 			CastBarNameJustifyH = "LEFT", 
@@ -2234,15 +2234,13 @@ local UnitFrameTarget = {
 	PowerVisibilityFilter = function(element, unit) 
 		if UnitIsDeadOrGhost(unit) then 
 			return false 
-		end 
-		if (UnitIsPlayer(unit) and (IsInGroup() or IsInInstance())) then 
-			return true 
-		end 
-		local unitLevel = UnitLevel(unit)
-		local unitClassification = (unitLevel and (unitLevel < 1)) and "worldboss" or UnitClassification(unit)
-		if (unitClassification == "boss") or (unitClassification == "worldboss") then 
+		else 
 			return true
 		end 
+	end,
+
+	LevelVisibilityFilter = function(element, unit) 
+		return false
 	end,
 
 	PowerPlace ={ "CENTER", 439/2 + 79 +2, 93/2 -62 + 4 +6 }, 
@@ -2348,21 +2346,6 @@ local UnitFrameTarget = {
 	ClassificationIndicatorEliteTexture = GetMedia("icon_classification_elite"),
 	ClassificationIndicatorRareTexture = GetMedia("icon_classification_rare"),
 
-	LevelVisibilityFilter = function(element, unit) 
-		if UnitIsDeadOrGhost(unit) then 
-			return false 
-		end 
-		if (UnitIsPlayer(unit) and (IsInGroup() or IsInInstance())) then 
-			return false
-		end 
-		local unitLevel = UnitLevel(unit)
-		local unitClassification = (unitLevel and (unitLevel < 1)) and "worldboss" or UnitClassification(unit)
-		if (unitClassification == "boss") or (unitClassification == "worldboss") then 
-			return false
-		end 
-		return true
-	end,
-
 	LevelPlace = { "CENTER", 298, -15 }, 
 	LevelDrawLayer = { "BORDER", 1 },
 	LevelJustifyH = "CENTER",
@@ -2409,7 +2392,7 @@ local UnitFrameTarget = {
 
 	CastBarNamePlace = { "RIGHT", -27, 4 },
 	CastBarNameSize = { 250, 40 }, 
-	CastBarNameFont = GetFont(18, true),
+	CastBarNameFont = GetFont(16, true),
 	CastBarNameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
 	CastBarNameDrawLayer = { "OVERLAY", 1 }, 
 	CastBarNameJustifyH = "RIGHT", 
