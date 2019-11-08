@@ -38,7 +38,6 @@ local UnitFrameRaid = Core:NewModule("UnitFrameRaid", "LibDB", "LibFrame", "LibU
 local UnitStyles = {} 
 
 -- Lua API
-local _G = _G
 local date = date
 local math_floor = math.floor
 local math_pi = math.pi
@@ -52,23 +51,16 @@ local tostring = tostring
 local unpack = unpack
 
 -- WoW API
-local GetAccountExpansionLevel = _G.GetAccountExpansionLevel
-local GetCVarBool = _G.GetCVarBool
-local GetExpansionLevel = _G.GetExpansionLevel
-local IsXPUserDisabled = _G.IsXPUserDisabled
-local RegisterAttributeDriver = _G.RegisterAttributeDriver
-local UnitClass = _G.UnitClass
-local UnitClassification = _G.UnitClassification
-local UnitCreatureType = _G.UnitCreatureType
-local UnitExists = _G.UnitExists
-local UnitIsConnected = _G.UnitIsConnected
-local UnitIsDeadOrGhost = _G.UnitIsDeadOrGhost
-local UnitIsEnemy = _G.UnitIsEnemy
-local UnitIsFriend = _G.UnitIsFriend
-local UnitIsPlayer = _G.UnitIsPlayer
-local UnitIsTrivial = _G.UnitIsTrivial
-local UnitIsUnit = _G.UnitIsUnit
-local UnitLevel = _G.UnitLevel
+local RegisterAttributeDriver = RegisterAttributeDriver
+local UnitClass = UnitClass
+local UnitClassification = UnitClassification
+local UnitCreatureType = UnitCreatureType
+local UnitExists = UnitExists
+local UnitIsEnemy = UnitIsEnemy
+local UnitIsFriend = UnitIsFriend
+local UnitIsPlayer = UnitIsPlayer
+local UnitIsUnit = UnitIsUnit
+local UnitLevel = UnitLevel
 
 -- Private API
 local GetConfig = Private.GetConfig
@@ -76,9 +68,9 @@ local GetDefaults = Private.GetDefaults
 local GetLayout = Private.GetLayout
 
 -- WoW Strings
-local S_AFK = _G.AFK
-local S_DEAD = _G.DEAD
-local S_PLAYER_OFFLINE = _G.PLAYER_OFFLINE
+local S_AFK = AFK
+local S_DEAD = DEAD
+local S_PLAYER_OFFLINE = PLAYER_OFFLINE
 
 -- WoW Textures
 local EDGE_NORMAL_TEXTURE = [[Interface\Cooldown\edge]]
