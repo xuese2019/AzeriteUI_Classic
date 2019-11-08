@@ -1,4 +1,4 @@
-local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 40)
+local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 41)
 if (not LibTooltipScanner) then	
 	return
 end
@@ -1477,7 +1477,6 @@ LibTooltipScanner.GetTooltipDataForUnit = function(self, unit, tbl)
 		local isBattlePet = UnitIsBattlePetCompanion and UnitIsBattlePetCompanion(unit)
 		local isWildPet = UnitIsWildBattlePet and UnitIsWildBattlePet(unit)
 		local unitLevel = UnitLevel(unit)
-		local unitEffectiveLevel = UnitEffectiveLevel and UnitEffectiveLevel(unit) or unitLevel
 		local unitName, unitRealm = UnitName(unit)
 		local isDead = UnitIsDead(unit)
 		local isGhost = UnitIsGhost(unit)
@@ -1507,7 +1506,7 @@ LibTooltipScanner.GetTooltipDataForUnit = function(self, unit, tbl)
 			tbl.englishFaction = englishFaction
 			tbl.localizedFaction = localizedFaction
 			tbl.level = unitLevel
-			tbl.effectiveLevel = unitEffectiveLevel or unitLevel
+			tbl.effectiveLevel = unitLevel
 			tbl.guild = guildName
 			tbl.classDisplayName = classDisplayName
 			tbl.class = class
@@ -1559,14 +1558,14 @@ LibTooltipScanner.GetTooltipDataForUnit = function(self, unit, tbl)
 			local englishFaction, localizedFaction = UnitFactionGroup(unit)
 			local reaction = UnitReaction(unit, "player")
 			local classification = UnitClassification(unit)
-			if (unitLevel < 0) or (unitEffectiveLevel < 0) then
+			if (unitLevel < 0) then
 				classification = "worldboss"
 			end
 	
 			tbl.englishFaction = englishFaction
 			tbl.localizedFaction = localizedFaction
 			tbl.level = unitLevel
-			tbl.effectiveLevel = unitEffectiveLevel or unitLevel
+			tbl.effectiveLevel = unitLevel
 			tbl.classification = classification
 			tbl.creatureFamily = UnitCreatureFamily(unit)
 			tbl.creatureType = UnitCreatureType(unit)
