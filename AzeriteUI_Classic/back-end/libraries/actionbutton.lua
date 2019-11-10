@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 66)
+local LibSecureButton = Wheel:Set("LibSecureButton", 67)
 if (not LibSecureButton) then	
 	return
 end
@@ -65,6 +65,9 @@ local IsStackableAction = _G.IsStackableAction
 local IsUsableAction = _G.IsUsableAction
 local SetClampedTextureRotation = _G.SetClampedTextureRotation
 local UnitClass = _G.UnitClass
+
+-- Will implement this through the back-end
+local IsSpellOverlayed = function() end
 
 -- Doing it this way to make the transition to library later on easier
 LibSecureButton.embeds = LibSecureButton.embeds or {} 
@@ -315,6 +318,7 @@ local Update = function(self, event, ...)
 
 	elseif (event == "ACTIONBAR_SLOT_CHANGED") then
 		if ((arg1 == 0) or (arg1 == self.buttonAction)) then
+			self:HideOverlayGlow()
 			self:Update()
 			self:UpdateAutoCastMacro()
 		end
@@ -345,6 +349,28 @@ local Update = function(self, event, ...)
 
 	elseif (event == "PLAYER_MOUNT_DISPLAY_CHANGED") then 
 		self:UpdateUsable()
+
+	elseif (event == "GP_SPELL_ACTIVATION_OVERLAY_GLOW_SHOW") then
+		local spellID = self:GetSpellID()
+		if (spellID and (spellID == arg1)) then
+			self:ShowOverlayGlow()
+		else
+			local actionType, id = GetActionInfo(self.buttonAction)
+			if (actionType == "flyout") and FlyoutHasSpell(id, arg1) then
+				self:ShowOverlayGlow()
+			end
+		end
+
+	elseif (event == "GP_SPELL_ACTIVATION_OVERLAY_GLOW_HIDE") then
+		local spellID = self:GetSpellID()
+		if (spellID and (spellID == arg1)) then
+			self:HideOverlayGlow()
+		else
+			local actionType, id = GetActionInfo(self.buttonAction)
+			if actionType == "flyout" and FlyoutHasSpell(id, arg1) then
+				self:HideOverlayGlow()
+			end
+		end
 
 	elseif (event == "SPELL_UPDATE_CHARGES") then
 		self:UpdateCount()
@@ -476,6 +502,7 @@ ActionButton.Update = function(self)
 	self:UpdateGrid()
 	self:UpdateAutoCast()
 	self:UpdateFlyout()
+	self:UpdateSpellHighlight()
 
 	if self.PostUpdate then 
 		self:PostUpdate()
@@ -752,7 +779,39 @@ ActionButton.UpdateUsable = function(self)
 			self.Icon:SetVertexColor(.3, .3, .3)
 		end
 	end
-end 
+end
+
+ActionButton.ShowOverlayGlow = function(self)
+	if self.SpellHighlight then 
+		local model = self.SpellHighlight.Model
+		local w,h = self:GetSize()
+		if (w and h) then 
+			model:SetSize(w*2,h*2)
+			model:Show()
+		else 
+			model:Hide()
+		end 
+		self.SpellHighlight:Show()
+	end
+end
+
+ActionButton.HideOverlayGlow = function(self)
+	if self.SpellHighlight then 
+		self.SpellHighlight:Hide()
+		self.SpellHighlight.Model:Hide()
+	end
+end
+
+ActionButton.UpdateSpellHighlight = function(self)
+	if self.SpellHighlight then 
+		local spellId = self:GetSpellID()
+		if (spellId and IsSpellOverlayed(spellId)) then
+			self:ShowOverlayGlow()
+		else
+			self:HideOverlayGlow()
+		end
+	end 
+end
 
 -- Getters
 ----------------------------------------------------
@@ -1119,6 +1178,32 @@ LibSecureButton.CreateFlyoutArrow = function(self, button)
 	button.FlyoutBorderShadow = button:CreateTexture()
 end 
 
+LibSecureButton.CreateButtonSpellHighlight = function(self, button)
+	local spellHighlight = button:CreateFrame("Frame")
+	spellHighlight:Hide()
+	spellHighlight:SetFrameLevel(button:GetFrameLevel() + 10)
+	button.SpellHighlight = spellHighlight
+
+	local texture = spellHighlight:CreateTexture()
+	texture:SetDrawLayer("ARTWORK", 2)
+	texture:SetAllPoints()
+	texture:SetVertexColor(255/255, 225/255, 125/255, 1)
+	button.SpellHighlight.Texture = texture
+
+	local model = spellHighlight:CreateFrame("PlayerModel")
+	model:Hide()
+	model:SetFrameLevel(button:GetFrameLevel()-1)
+	model:SetPoint("CENTER", 0, 0)
+	model:EnableMouse(false)
+	model:ClearModel()
+	model:SetDisplayInfo(26501) 
+	model:SetCamDistanceScale(3)
+	model:SetPortraitZoom(0)
+	model:SetPosition(0, 0, 0)
+
+	button.SpellHighlight.Model = model
+end
+
 -- Public API
 ----------------------------------------------------
 LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTemplate, ...)
@@ -1189,6 +1274,7 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 	LibSecureButton:CreateButtonCount(button)
 	LibSecureButton:CreateButtonKeybind(button)
 	LibSecureButton:CreateButtonAutoCast(button)
+	LibSecureButton:CreateButtonSpellHighlight(button)
 	LibSecureButton:CreateFlyoutArrow(button)
 
 	button:RegisterForDrag("LeftButton", "RightButton")
