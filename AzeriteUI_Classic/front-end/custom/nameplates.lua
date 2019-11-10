@@ -216,12 +216,12 @@ Module.PostUpdateSettings = function(self)
 	end
 end
 
-Module.UpdateCVars = function(self, event, ...)
+Module.PostUpdateCVars = function(self, event, ...)
 	if InCombatLockdown() then 
-		return self:RegisterEvent("PLAYER_REGEN_ENABLED", "UpdateCVars")
+		return self:RegisterEvent("PLAYER_REGEN_ENABLED", "PostUpdateCVars")
 	end 
 	if (event == "PLAYER_REGEN_ENABLED") then 
-		self:UnregisterEvent("PLAYER_REGEN_ENABLED", "UpdateCVars")
+		self:UnregisterEvent("PLAYER_REGEN_ENABLED", "PostUpdateCVars")
 	end 
 	local db = self.db
 	SetNamePlateEnemyClickThrough(db.clickThroughEnemies)
@@ -229,9 +229,13 @@ Module.UpdateCVars = function(self, event, ...)
 	SetNamePlateSelfClickThrough(db.clickThroughSelf)
 end
 
+Module.GetSecureUpdater = function(self)
+	return self.proxyUpdater
+end
+
 Module.OnEvent = function(self, event, ...)
 	if (event == "PLAYER_ENTERING_WORLD") then 
-		self:UpdateCVars()
+		self:PostUpdateCVars()
 	end 
 end
 
@@ -241,7 +245,7 @@ Module.OnInit = function(self)
 
 	local proxy = self:CreateFrame("Frame", nil, "UICenter", "SecureHandlerAttributeTemplate")
 	proxy.PostUpdateSettings = function() self:PostUpdateSettings() end
-	proxy.UpdateCVars = function() self:UpdateCVars() end
+	proxy.PostUpdateCVars = function() self:PostUpdateCVars() end
 	for key,value in pairs(self.db) do 
 		proxy:SetAttribute(key,value)
 	end 
@@ -255,25 +259,21 @@ Module.OnInit = function(self)
 
 		elseif (name == "change-clickthroughenemies") then
 			self:SetAttribute("clickThroughEnemies", value); 
-			self:CallMethod("UpdateCVars"); 
+			self:CallMethod("PostUpdateCVars"); 
 
 		elseif (name == "change-clickthroughfriends") then 
 			self:SetAttribute("clickThroughFriends", value); 
-			self:CallMethod("UpdateCVars"); 
+			self:CallMethod("PostUpdateCVars"); 
 
 		elseif (name == "change-clickthroughself") then 
 			self:SetAttribute("clickThroughSelf", value); 
-			self:CallMethod("UpdateCVars"); 
+			self:CallMethod("PostUpdateCVars"); 
 
 		end 
 	]=])
 
 	self.proxyUpdater = proxy
 end 
-
-Module.GetSecureUpdater = function(self)
-	return self.proxyUpdater
-end
 
 Module.OnEnable = function(self)
 	if self.layout.UseNamePlates then
