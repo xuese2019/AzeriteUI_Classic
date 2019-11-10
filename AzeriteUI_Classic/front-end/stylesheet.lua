@@ -529,18 +529,89 @@ local NamePlates_RaidTarget_PostUpdate = function(element, unit)
 	end 
 end
 
+local NamePlates_Auras_PostCreateButton = function(element, button)
+	local layout = element._owner.layout
+
+	button.Icon:SetTexCoord(unpack(layout.AuraIconTexCoord))
+	button.Icon:SetSize(unpack(layout.AuraIconSize))
+	button.Icon:ClearAllPoints()
+	button.Icon:SetPoint(unpack(layout.AuraIconPlace))
+
+	button.Count:SetFontObject(layout.AuraCountFont)
+	button.Count:SetJustifyH("CENTER")
+	button.Count:SetJustifyV("MIDDLE")
+	button.Count:ClearAllPoints()
+	button.Count:SetPoint(unpack(layout.AuraCountPlace))
+	button.Count:SetTextColor(unpack(layout.AuraCountColor))
+
+	button.Time:SetFontObject(layout.AuraTimeFont)
+	button.Time:ClearAllPoints()
+	button.Time:SetPoint(unpack(layout.AuraTimePlace))
+
+	local layer, level = button.Icon:GetDrawLayer()
+
+	button.Darken = button.Darken or button:CreateTexture()
+	button.Darken:SetDrawLayer(layer, level + 1)
+	button.Darken:SetSize(button.Icon:GetSize())
+	button.Darken:SetPoint("CENTER", 0, 0)
+	button.Darken:SetColorTexture(0, 0, 0, .25)
+
+	button.Overlay:SetFrameLevel(button:GetFrameLevel() + 10)
+	button.Overlay:ClearAllPoints()
+	button.Overlay:SetPoint("CENTER", 0, 0)
+	button.Overlay:SetSize(button.Icon:GetSize())
+
+	button.Border = button.Border or button.Overlay:CreateFrame("Frame", nil, button.Overlay)
+	button.Border:SetFrameLevel(button.Overlay:GetFrameLevel() - 5)
+	button.Border:ClearAllPoints()
+	button.Border:SetPoint(unpack(layout.AuraBorderFramePlace))
+	button.Border:SetSize(unpack(layout.AuraBorderFrameSize))
+	button.Border:SetBackdrop(layout.AuraBorderBackdrop)
+	button.Border:SetBackdropColor(unpack(layout.AuraBorderBackdropColor))
+	button.Border:SetBackdropBorderColor(unpack(layout.AuraBorderBackdropBorderColor))
+end
+
+local NamePlates_Auras_PostUpdateButton = function(element, button)
+	local colors = element._owner.colors
+	local layout = element._owner.layout
+	if UnitIsFriend("player", button.unit) then 
+		if button.isBuff then 
+			local color = layout.AuraBorderBackdropBorderColor
+			if color then 
+				button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
+			end 
+		else
+			local color = colors.debuff[button.debuffType or "none"] or layout.AuraBorderBackdropBorderColor
+			if color then 
+				button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
+			end 
+		end
+	else 
+		if button.isStealable then 
+			local color = colors.power.ARCANE_CHARGES or layout.AuraBorderBackdropBorderColor
+			if color then 
+				button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
+			end 
+		elseif button.isBuff then 
+			local color = colors.quest.green or layout.AuraBorderBackdropBorderColor
+			if color then 
+				button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
+			end 
+		else
+			local color = colors.debuff[button.debuffType or "none"] or layout.AuraBorderBackdropBorderColor
+			if color then 
+				button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
+			end 
+		end
+	end 
+end
+
 local NamePlates_Auras_PostUpdate = function(element, unit, visible)
 	local self = element._owner
 	if (not self) then 
 		return 
 	end 
 
-	-- The aura frame misalignment continues, 
-	-- so we might have to re-anchor it to the frame on post updates. 
-	-- Edit: This does NOT fix it...?
-	-- Do we need to hook to something else?
-	-- Edit2: Trying to anchor to Health element instead, 
-	-- as some blizzard sizing might be the issue(?). 
 	element:ClearAllPoints()
 	if element.point then 
 		element:SetPoint(element.point, element.anchor, element.relPoint, element.offsetX, element.offsetY)
@@ -1365,223 +1436,6 @@ local Minimap = {
 		TrackingButtonIconMask = GetMedia("hp_critter_case_glow"), -- actionbutton_circular_mask
 		TrackingButtonIconBgSize = { 32, 32 },
 		TrackingButtonIconBgTexture = GetMedia("hp_critter_case_glow"),
-}
-
--- NamePlates
-local NamePlates = {
-	Colors = Colors,
-
-	UseNamePlates = true, 
-		Size = { 80, 32 }, 
-	
-	UseHealth = true, 
-		HealthPlace = { "TOP", 0, -2 },
-		HealthSize = { 84, 14 }, 
-		HealthBarOrientation = "LEFT", 
-		HealthTexture = GetMedia("nameplate_bar"),
-		HealthTexCoord = { 14/256,(256-14)/256,14/64,(64-14)/64 },
-		HealthSparkMap = {
-			top = {
-				{ keyPercent =   0/256, offset = -16/32 }, 
-				{ keyPercent =   4/256, offset = -16/32 }, 
-				{ keyPercent =  19/256, offset =   0/32 }, 
-				{ keyPercent = 236/256, offset =   0/32 }, 
-				{ keyPercent = 256/256, offset = -16/32 }
-			},
-			bottom = {
-				{ keyPercent =   0/256, offset = -16/32 }, 
-				{ keyPercent =   4/256, offset = -16/32 }, 
-				{ keyPercent =  19/256, offset =   0/32 }, 
-				{ keyPercent = 236/256, offset =   0/32 }, 
-				{ keyPercent = 256/256, offset = -16/32 }
-			}
-		},
-		HealthColorTapped = true,
-		HealthColorDisconnected = true,
-		HealthColorClass = true, -- color players in their class colors
-		HealthColorCivilian = true, -- color friendly players as civilians
-		HealthColorReaction = true,
-		HealthColorHealth = true,
-		HealthColorPlayer = true, 
-		HealthFrequent = true,
-
-	UseHealthBackdrop = true, 
-		HealthBackdropPlace = { "CENTER", 0, 0 },
-		HealthBackdropSize = { 84*256/(256-28), 14*64/(64-28) },
-		HealthBackdropTexture = GetMedia("nameplate_backdrop"),
-		HealthBackdropDrawLayer = { "BACKGROUND", -2 },
-		HealthBackdropColor = { 1, 1, 1, 1 },
-
-	UseHealPredict = true, 
-		HealPredictPlace = { "TOPRIGHT", 0, 0 }, -- relative to the health bar, not the frame! 
-		HealPredictSize = { 84, 14 }, 
-		HealPredictFrequentUpdates = true, 
-		HealPredictOrientation = "LEFT", 
-		HealPredictTexture = GetMedia("nameplate_bar"),
-		HealPredictTexCoord = { 14/256,(256-14)/256,14/64,(64-14)/64 },
-		HealthPreviewOnTexCoordChanged = HealthPreview_OnTexCoordChanged, 
-
-	UseCast = true, 
-		CastPlace = { "TOP", 0, -20 },
-		CastSize = { 84, 14 }, 
-		CastOrientation = "LEFT", 
-		CastColor = { Colors.cast[1], Colors.cast[2], Colors.cast[3], 1 },
-		CastTexture = GetMedia("nameplate_bar"),
-		CastTexCoord = { 14/256,(256-14)/256,14/64,(64-14)/64 },
-		CastTimeToHoldFailed = .5, 
-		CastSparkMap = {
-			top = {
-				{ keyPercent =   0/256, offset = -16/32 }, 
-				{ keyPercent =   4/256, offset = -16/32 }, 
-				{ keyPercent =  19/256, offset =   0/32 }, 
-				{ keyPercent = 236/256, offset =   0/32 }, 
-				{ keyPercent = 256/256, offset = -16/32 }
-			},
-			bottom = {
-				{ keyPercent =   0/256, offset = -16/32 }, 
-				{ keyPercent =   4/256, offset = -16/32 }, 
-				{ keyPercent =  19/256, offset =   0/32 }, 
-				{ keyPercent = 236/256, offset =   0/32 }, 
-				{ keyPercent = 256/256, offset = -16/32 }
-			}
-		},
-
-		UseCastBackdrop = true, 
-			CastBackdropPlace = { "CENTER", 0, 0 },
-			CastBackdropSize = { 84*256/(256-28), 14*64/(64-28) },
-			CastBackdropTexture = GetMedia("nameplate_backdrop"),
-			CastBackdropDrawLayer = { "BACKGROUND", 0 },
-			CastBackdropColor = { 1, 1, 1, 1 },
-
-		UseCastName = true, 
-			CastNamePlace = { "TOP", 0, -18 },
-			CastNameFont = GetFont(12, true),
-			CastNameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-			CastNameDrawLayer = { "OVERLAY", 1 }, 
-			CastNameJustifyH = "CENTER", 
-			CastNameJustifyV = "MIDDLE",
-
-		UseCastShield = true, 
-			CastShieldPlace = { "CENTER", 0, -1 }, 
-			CastShieldSize = { 124, 69 },
-			CastShieldTexture = GetMedia("cast_back_spiked"),
-			CastShieldDrawLayer = { "BACKGROUND", -5 },
-			CastShieldColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
-
-		CastPostUpdate = NamePlate_CastBar_PostUpdate,
-
-	UseAuras = true, 
-		AuraFrameSize = { 30*3 + 4*2, 30*2 + 4  }, 
-		--AuraFramePlace = { "TOP", 0, 30*2+5 + 10 },
-
-		-- Try to work around the problem with misaligned auras by changing the anchor? 
-		-- I can't seem to find any position but the initial, so it might be that they're 
-		-- anchored before the frame has a real size and the anchor just "sticks"...? 
-		-- Weirdness. Can't reproduce it consistantly, which backs up that theory. 
-		-- So for now I'll just attempt to work around it, see if it goes away!
-		AuraFramePlace = { "TOPLEFT", (84 - (30*3 + 4*2))/2, 30*2 + 4 + 10 },
-		AuraPoint = "BOTTOMLEFT", AuraAnchor = "Health", AuraRelPoint = "TOPLEFT",
-		AuraOffsetX = (84 - (30*3 + 4*2))/2, AuraOffsetY = 10 + 4,
-
-		AuraProperties = {
-			growthX = "LEFT", 
-			growthY = "UP", 
-			spacingH = 4, 
-			spacingV = 4, 
-			auraSize = 30, auraWidth = nil, auraHeight = nil, 
-			maxVisible = 6, maxBuffs = nil, maxDebuffs = nil, 
-			filter = nil, filterBuffs = "PLAYER HELPFUL", filterDebuffs = "PLAYER HARMFUL", 
-			func = GetAuraFilterFunc("nameplate"), funcBuffs = GetAuraFilterFunc("nameplate"), funcDebuffs = GetAuraFilterFunc("nameplate"), 
-			debuffsFirst = true, 
-			disableMouse = true, 
-			showSpirals = false, 
-			showDurations = true, 
-			showLongDurations = true,
-			tooltipDefaultPosition = false, 
-			tooltipPoint = "BOTTOMLEFT",
-			tooltipAnchor = nil,
-			tooltipRelPoint = "TOPLEFT",
-			tooltipOffsetX = -8,
-			tooltipOffsetY = -16
-		},
-
-		AuraIconPlace = { "CENTER", 0, 0 },
-		AuraIconSize = { 30 - 6, 30 - 6 },
-		AuraIconTexCoord = { 5/64, 59/64, 5/64, 59/64 }, -- aura icon tex coords
-		AuraCountPlace = { "BOTTOMRIGHT", 9, -6 },
-		AuraCountFont = GetFont(12, true),
-		AuraCountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
-		AuraTimePlace = { "TOPLEFT", -6, 6 },
-		AuraTimeFont = GetFont(11, true),
-		AuraBorderFramePlace = { "CENTER", 0, 0 }, 
-		AuraBorderFrameSize = { 30 + 10, 30 + 10 },
-		AuraBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 12 },
-		AuraBorderBackdropColor = { 0, 0, 0, 0 },
-		AuraBorderBackdropBorderColor = { Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3 },
-
-		PostUpdateAura = NamePlates_Auras_PostUpdate,
-
-	UseRaidTarget = true, 
-		RaidTargetPlace = { "TOP", 0, 44 }, -- no auras
-		RaidTargetPlace_AuraRow = { "TOP", 0, 80 }, -- auras, 1 row
-		RaidTargetPlace_AuraRows = { "TOP", 0, 112 }, -- auras, 2 rows
-		RaidTargetSize = { 64, 64 },
-		RaidTargetTexture = GetMedia("raid_target_icons"),
-		RaidTargetDrawLayer = { "ARTWORK", 0 },
-		PostUpdateRaidTarget = NamePlates_RaidTarget_PostUpdate,
-
-	-- CVars adjusted at startup
-	SetConsoleVars = {
-		-- Because we want friendly NPC nameplates
-		-- We're toning them down a lot as it is, 
-		-- but we still prefer to have them visible, 
-		-- and not the fugly super sized names we get otherwise.
-		--nameplateShowFriendlyNPCs = 1, -- Don't enforce this
-
-		-- Insets at the top and bottom of the screen 
-		-- which the target nameplate will be kept away from. 
-		-- Used to avoid the target plate being overlapped 
-		-- by the target frame or actionbars and keep it in view.
-		nameplateLargeTopInset = false, -- default .1
-		nameplateOtherTopInset = .1, -- default .08
-		nameplateLargeBottomInset = .02, -- default .15
-		nameplateOtherBottomInset = .02, -- default .1
-		nameplateClassResourceTopInset = 0,
-	
-		-- Nameplate scale
-		nameplateMinScale = false, -- .8
-		nameplateMaxScale = 1, 
-		nameplateLargerScale = 1, -- Scale modifier for large plates, used for important monsters
-		nameplateGlobalScale = 1,
-		NamePlateHorizontalScale = 1,
-		NamePlateVerticalScale = 1,
-	
-		-- Alpha defaults (these are enforced to other values by the back-end now)
-		nameplateMaxAlpha = false, 
-		nameplateMinAlphaDistance = false, 
-		nameplateMinAlpha = false,
-		nameplateMaxAlphaDistance = false,
-		nameplateOccludedAlphaMult = false, 
-		nameplateSelectedAlpha = false, 
-	
-		-- The minimum distance from the camera plates will reach their minimum scale and alpha
-		nameplateMinScaleDistance = false, 
-		
-		-- The maximum distance from the camera where plates will still have max scale and alpha
-		nameplateMaxScaleDistance = 20, -- 10
-	
-		-- Show nameplates above heads or at the base (0 or 2,
-		nameplateOtherAtBase = 0,
-	
-		-- Scale and Alpha of the selected nameplate (current target,
-		nameplateSelectedScale = 1, -- default 1.2
-	
-		-- The max distance to show nameplates.
-		nameplateMaxDistance = false, -- 20 is classic upper limit, 60 is BfA default
-	
-		-- The max distance to show the target nameplate when the target is behind the camera.
-		nameplateTargetBehindMaxDistance = 15 -- default 15
-	}
 }
 
 -- Custom Tooltips
@@ -2741,7 +2595,6 @@ LibDB:NewDatabase(ADDON..":[BlizzardPopupStyling]", BlizzardPopupStyling)
 LibDB:NewDatabase(ADDON..":[BlizzardTimers]", BlizzardTimers)
 LibDB:NewDatabase(ADDON..":[GroupTools]", GroupTools)
 LibDB:NewDatabase(ADDON..":[Minimap]", Minimap)
-LibDB:NewDatabase(ADDON..":[NamePlates]", NamePlates)
 LibDB:NewDatabase(ADDON..":[TooltipStyling]", TooltipStyling)
 LibDB:NewDatabase(ADDON..":[UnitFramePlayer]", UnitFramePlayer)
 LibDB:NewDatabase(ADDON..":[UnitFramePet]", UnitFramePet)
@@ -2776,6 +2629,13 @@ Defaults[ADDON] = {
 	allowGuildInvites = true,
 	allowFriendInvites = true, 
 	blockCounter = {}
+}
+
+Defaults.NamePlates = {
+	enableAuras = true,
+	clickThroughEnemies = false, 
+	clickThroughFriends = false, 
+	clickThroughSelf = false
 }
 
 Defaults.UnitFramePlayerHUD = {
@@ -2888,6 +2748,199 @@ Layouts.BlizzardWorldMap = {
 -- Floaters. Durability only currently. 
 Layouts.FloaterHUD = {
 	Place = { "CENTER", "UICenter", "CENTER", 190, 0 }
+}
+
+-- NamePlates
+Layouts.NamePlates = {
+	Colors = Colors,
+
+	UseNamePlates = true, 
+		Size = { 80, 32 }, 
+	
+	HealthPlace = { "TOP", 0, -2 },
+	HealthSize = { 84, 14 }, 
+	HealthBarOrientation = "LEFT", 
+	HealthTexture = GetMedia("nameplate_bar"),
+	HealthTexCoord = { 14/256,(256-14)/256,14/64,(64-14)/64 },
+	HealthSparkMap = {
+		top = {
+			{ keyPercent =   0/256, offset = -16/32 }, 
+			{ keyPercent =   4/256, offset = -16/32 }, 
+			{ keyPercent =  19/256, offset =   0/32 }, 
+			{ keyPercent = 236/256, offset =   0/32 }, 
+			{ keyPercent = 256/256, offset = -16/32 }
+		},
+		bottom = {
+			{ keyPercent =   0/256, offset = -16/32 }, 
+			{ keyPercent =   4/256, offset = -16/32 }, 
+			{ keyPercent =  19/256, offset =   0/32 }, 
+			{ keyPercent = 236/256, offset =   0/32 }, 
+			{ keyPercent = 256/256, offset = -16/32 }
+		}
+	},
+	HealthColorTapped = true,
+	HealthColorDisconnected = true,
+	HealthColorClass = true, -- color players in their class colors
+	HealthColorCivilian = true, -- color friendly players as civilians
+	HealthColorReaction = true,
+	HealthColorHealth = true,
+	HealthColorPlayer = true, 
+	HealthFrequent = true,
+
+	HealthBackdropPlace = { "CENTER", 0, 0 },
+	HealthBackdropSize = { 84*256/(256-28), 14*64/(64-28) },
+	HealthBackdropTexture = GetMedia("nameplate_backdrop"),
+	HealthBackdropDrawLayer = { "BACKGROUND", -2 },
+	HealthBackdropColor = { 1, 1, 1, 1 },
+
+	CastPlace = { "TOP", 0, -20 },
+	CastSize = { 84, 14 }, 
+	CastOrientation = "LEFT", 
+	CastColor = { Colors.cast[1], Colors.cast[2], Colors.cast[3], 1 },
+	CastTexture = GetMedia("nameplate_bar"),
+	CastTexCoord = { 14/256,(256-14)/256,14/64,(64-14)/64 },
+	CastTimeToHoldFailed = .5, 
+	CastSparkMap = {
+		top = {
+			{ keyPercent =   0/256, offset = -16/32 }, 
+			{ keyPercent =   4/256, offset = -16/32 }, 
+			{ keyPercent =  19/256, offset =   0/32 }, 
+			{ keyPercent = 236/256, offset =   0/32 }, 
+			{ keyPercent = 256/256, offset = -16/32 }
+		},
+		bottom = {
+			{ keyPercent =   0/256, offset = -16/32 }, 
+			{ keyPercent =   4/256, offset = -16/32 }, 
+			{ keyPercent =  19/256, offset =   0/32 }, 
+			{ keyPercent = 236/256, offset =   0/32 }, 
+			{ keyPercent = 256/256, offset = -16/32 }
+		}
+	},
+	CastBackdropPlace = { "CENTER", 0, 0 },
+	CastBackdropSize = { 84*256/(256-28), 14*64/(64-28) },
+	CastBackdropTexture = GetMedia("nameplate_backdrop"),
+	CastBackdropDrawLayer = { "BACKGROUND", 0 },
+	CastBackdropColor = { 1, 1, 1, 1 },
+	CastNamePlace = { "TOP", 0, -18 },
+	CastNameFont = GetFont(12, true),
+	CastNameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+	CastNameDrawLayer = { "OVERLAY", 1 }, 
+	CastNameJustifyH = "CENTER", 
+	CastNameJustifyV = "MIDDLE",
+	CastShieldPlace = { "CENTER", 0, -1 }, 
+	CastShieldSize = { 124, 69 },
+	CastShieldTexture = GetMedia("cast_back_spiked"),
+	CastShieldDrawLayer = { "BACKGROUND", -5 },
+	CastShieldColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
+	CastPostUpdate = NamePlate_CastBar_PostUpdate,
+
+	-- Try to work around the problem with misaligned auras by changing the anchor? 
+	-- I can't seem to find any position but the initial, so it might be that they're 
+	-- anchored before the frame has a real size and the anchor just "sticks"...? 
+	-- Weirdness. Can't reproduce it consistantly, which backs up that theory. 
+	-- So for now I'll just attempt to work around it, see if it goes away!
+	AuraFrameSize = { 30*3 + 4*2, 30*2 + 4  }, 
+	AuraFramePlace = { "TOPLEFT", (84 - (30*3 + 4*2))/2, 30*2 + 4 + 10 },
+	AuraPoint = "BOTTOMLEFT", AuraAnchor = "Health", AuraRelPoint = "TOPLEFT",
+	AuraOffsetX = (84 - (30*3 + 4*2))/2, AuraOffsetY = 10 + 4,
+	AuraProperties = {
+		growthX = "LEFT", 
+		growthY = "UP", 
+		spacingH = 4, 
+		spacingV = 4, 
+		auraSize = 30, auraWidth = nil, auraHeight = nil, 
+		maxVisible = 6, maxBuffs = nil, maxDebuffs = nil, 
+		filter = nil, filterBuffs = "PLAYER HELPFUL", filterDebuffs = "PLAYER HARMFUL", 
+		func = GetAuraFilterFunc("nameplate"), funcBuffs = GetAuraFilterFunc("nameplate"), funcDebuffs = GetAuraFilterFunc("nameplate"), 
+		debuffsFirst = true, 
+		disableMouse = true, 
+		showSpirals = false, 
+		showDurations = true, 
+		showLongDurations = true,
+		tooltipDefaultPosition = false, 
+		tooltipPoint = "BOTTOMLEFT",
+		tooltipAnchor = nil,
+		tooltipRelPoint = "TOPLEFT",
+		tooltipOffsetX = -8,
+		tooltipOffsetY = -16
+	},
+	AuraIconPlace = { "CENTER", 0, 0 },
+	AuraIconSize = { 30 - 6, 30 - 6 },
+	AuraIconTexCoord = { 5/64, 59/64, 5/64, 59/64 }, -- aura icon tex coords
+	AuraCountPlace = { "BOTTOMRIGHT", 9, -6 },
+	AuraCountFont = GetFont(12, true),
+	AuraCountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
+	AuraTimePlace = { "TOPLEFT", -6, 6 },
+	AuraTimeFont = GetFont(11, true),
+	AuraBorderFramePlace = { "CENTER", 0, 0 }, 
+	AuraBorderFrameSize = { 30 + 10, 30 + 10 },
+	AuraBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 12 },
+	AuraBorderBackdropColor = { 0, 0, 0, 0 },
+	AuraBorderBackdropBorderColor = { Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3 },
+	PostUpdateAura = NamePlates_Auras_PostUpdate,
+	PostUpdateAuraButton = NamePlates_Auras_PostUpdateButton,
+	PostCreateAuraButton = NamePlates_Auras_PostCreateButton,
+
+	RaidTargetPlace = { "TOP", 0, 20+ 44 }, -- no auras
+	RaidTargetPlace_AuraRow = { "TOP", 0, 20+ 80 }, -- auras, 1 row
+	RaidTargetPlace_AuraRows = { "TOP", 0, 20+ 112 }, -- auras, 2 rows
+	RaidTargetSize = { 64, 64 },
+	RaidTargetTexture = GetMedia("raid_target_icons"),
+	RaidTargetDrawLayer = { "ARTWORK", 0 },
+	PostUpdateRaidTarget = NamePlates_RaidTarget_PostUpdate,
+
+	-- CVars adjusted at startup
+	SetConsoleVars = {
+		-- Because we want friendly NPC nameplates
+		-- We're toning them down a lot as it is, 
+		-- but we still prefer to have them visible, 
+		-- and not the fugly super sized names we get otherwise.
+		--nameplateShowFriendlyNPCs = 1, -- Don't enforce this
+
+		-- Insets at the top and bottom of the screen 
+		-- which the target nameplate will be kept away from. 
+		-- Used to avoid the target plate being overlapped 
+		-- by the target frame or actionbars and keep it in view.
+		nameplateLargeTopInset = false, -- default .1
+		nameplateOtherTopInset = .1, -- default .08
+		nameplateLargeBottomInset = .02, -- default .15
+		nameplateOtherBottomInset = .02, -- default .1
+		nameplateClassResourceTopInset = 0,
+	
+		-- Nameplate scale
+		nameplateMinScale = false, -- .8
+		nameplateMaxScale = 1, 
+		nameplateLargerScale = 1, -- Scale modifier for large plates, used for important monsters
+		nameplateGlobalScale = 1,
+		NamePlateHorizontalScale = 1,
+		NamePlateVerticalScale = 1,
+	
+		-- Alpha defaults (these are enforced to other values by the back-end now)
+		nameplateMaxAlpha = false, 
+		nameplateMinAlphaDistance = false, 
+		nameplateMinAlpha = false,
+		nameplateMaxAlphaDistance = false,
+		nameplateOccludedAlphaMult = false, 
+		nameplateSelectedAlpha = false, 
+	
+		-- The minimum distance from the camera plates will reach their minimum scale and alpha
+		nameplateMinScaleDistance = false, 
+		
+		-- The maximum distance from the camera where plates will still have max scale and alpha
+		nameplateMaxScaleDistance = 20, -- 10
+	
+		-- Show nameplates above heads or at the base (0 or 2,
+		nameplateOtherAtBase = 0,
+	
+		-- Scale and Alpha of the selected nameplate (current target,
+		nameplateSelectedScale = 1, -- default 1.2
+	
+		-- The max distance to show nameplates.
+		nameplateMaxDistance = false, -- 20 is classic upper limit, 60 is BfA default
+	
+		-- The max distance to show the target nameplate when the target is behind the camera.
+		nameplateTargetBehindMaxDistance = 15 -- default 15
+	}
 }
 
 -- PlayerHUD (combo points and castbar)
