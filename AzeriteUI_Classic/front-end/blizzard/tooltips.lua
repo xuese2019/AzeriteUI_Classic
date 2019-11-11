@@ -511,6 +511,10 @@ local OnTooltipSetUnit = function(tooltip)
 			if data.localizedFaction then 
 				lineIndex = AddLine(tooltip, lineIndex, data.localizedFaction)
 			end 
+
+			if (data.isCivilian) then 
+				lineIndex = AddLine(tooltip, lineIndex, PVP_RANK_CIVILIAN, data.civilianColor[1], data.civilianColor[2], data.civilianColor[3])
+			end
 		end
 	end 
 

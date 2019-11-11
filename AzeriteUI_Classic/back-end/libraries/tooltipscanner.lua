@@ -1,4 +1,4 @@
-local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 41)
+local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 42)
 if (not LibTooltipScanner) then	
 	return
 end
@@ -1575,7 +1575,7 @@ LibTooltipScanner.GetTooltipDataForUnit = function(self, unit, tbl)
 			-- since things are always placed in a certain order. 
 			-- We'll be able to guesstimate what the content means by this. 
 			local foundTitle, foundLevel, foundCity, foundPvP, foundLeader
-			local foundSkinnable
+			local foundSkinnable, foundCivilian
 
 			local numLines = Scanner:NumLines()
 			for lineIndex = 2,numLines do 
@@ -1593,8 +1593,14 @@ LibTooltipScanner.GetTooltipDataForUnit = function(self, unit, tbl)
 								tbl.title = _G[ScannerName.."TextLeft"..foundTitle]:GetText()
 							end 
 						end 
+
+						if (msg == PVP_RANK_CIVILIAN) and (not foundCivilian) then 
+							tbl.isCivilian = true
+							tbl.civilianColor = { line:GetTextColor() }
+							foundCivilian = lineIndex
+						end
 			
-						if (msg == PVP_ENABLED) then
+						if (msg == PVP_ENABLED) and (not foundPvP) then
 							tbl.isPvPEnabled = true
 							foundPvP = lineIndex
 

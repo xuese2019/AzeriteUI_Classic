@@ -1517,6 +1517,10 @@ Tooltip.SetUnit = function(self, unit)
 					if data.localizedFaction then 
 						self:AddLine(data.localizedFaction, colors.offwhite[1], colors.offwhite[2], colors.offwhite[3])
 					end 
+
+					if (data.isCivilian) then 
+						self:AddLine(PVP_RANK_CIVILIAN, data.civilianColor[1], data.civilianColor[2], data.civilianColor[3])
+					end
 				end
 			end 
 
