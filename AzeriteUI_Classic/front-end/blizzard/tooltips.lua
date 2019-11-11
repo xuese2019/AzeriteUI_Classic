@@ -56,6 +56,48 @@ end)("Auctionator", "TradeSkillMaster")
 -- Lockdowns
 local LOCKDOWNS = {} 
 
+-- Make the money display pretty
+local formatMoney = function(money)
+	local gold = math_floor(money / (COPPER_PER_SILVER * SILVER_PER_GOLD))
+	local silver = math_floor((money - (gold * COPPER_PER_SILVER * SILVER_PER_GOLD)) / COPPER_PER_SILVER)
+	local copper = math_mod(money, COPPER_PER_SILVER)
+	
+	local goldIcon = string_format([[|T%s:16:16:0:0:64:64:%d:%d:%d:%d|t]], GetMedia("coins"), 0,32,0,32)
+	local silverIcon = string_format([[|T%s:16:16:0:0:64:64:%d:%d:%d:%d|t]], GetMedia("coins"), 32,64,0,32)
+	local copperIcon = string_format([[|T%s:16:16:0:0:64:64:%d:%d:%d:%d|t]], GetMedia("coins"), 0,32,32,64)
+
+	local moneyString
+	if (gold > 0) then 
+		moneyString = string_format("%d%s", gold, goldIcon)
+	end
+	if (silver > 0) then 
+		moneyString = (moneyString and moneyString.." " or "") .. string_format("%d%s", silver, silverIcon)
+	end
+	if (copper > 0) then 
+		moneyString = (moneyString and moneyString.." " or "") .. string_format("%d%s", copper, copperIcon)
+	end 
+
+	return moneyString
+end
+
+-- Add or replace a line of text in the tooltip
+local AddLine = function(tooltip, lineIndex, msg, r, g, b)
+	r = r or Colors.offwhite[1]
+	g = g or Colors.offwhite[2]
+	b = b or Colors.offwhite[3]
+	local numLines = tooltip:NumLines()
+	if (lineIndex > numLines) then 
+		tooltip:AddLine(msg, r, g, b)
+	else
+		local left = _G[tooltip:GetName().."TextLeft"..lineIndex]
+		left:SetText(msg)
+		if (r and g and b) then 
+			left:SetTextColor(r, g, b)
+		end
+	end
+	return lineIndex + 1
+end
+
 -- Returns the correct difficulty color compared to the player.
 -- Using this as a tooltip method to access our custom colors.
 local GetDifficultyColorByLevel = function(level)
@@ -141,26 +183,39 @@ end
 -- Will expand on this later to tailer all tooltips to our needs.  
 local StatusBar_UpdateValue = function(bar, value, max)
 
+	local isRealValue
 	local unit = bar:GetParent().unit
 	if (unit) then 
-		if not(UnitIsUnit(unit, "player") or UnitIsUnit(unit, "pet") or UnitInParty(unit) or UnitInRaid(unit)) then 
+		isRealValue = UnitIsUnit(unit, "player") or UnitIsUnit(unit, "pet") or UnitInParty(unit) or UnitInRaid(unit)
+		if (not isRealValue) then 
 			local healthCur = Module:UnitHealth(unit)
 			local healthMax = Module:UnitHealthMax(unit)
 			if (healthCur and healthMax) then 
 				value, max = healthCur, healthMax
+				isRealValue = true
 			else
-				value, max = nil, nil
+				-- Don't do this, as it'll make the values hide 
+				-- when not currently mousing over the unit.  
+				--value, max = nil, nil
 			end 
 		end
 	end
 
-	if value then 
-		if (value >= 1e8) then 			bar.value:SetFormattedText("%.0fm", value/1e6) 		-- 100m, 1000m, 2300m, etc
-		elseif (value >= 1e6) then 		bar.value:SetFormattedText("%.1fm", value/1e6) 		-- 1.0m - 99.9m 
-		elseif (value >= 1e5) then 		bar.value:SetFormattedText("%.0fk", value/1e3) 		-- 100k - 999k
-		elseif (value >= 1e3) then 		bar.value:SetFormattedText("%.1fk", value/1e3) 		-- 1.0k - 99.9k
-		elseif (value > 0) then 		bar.value:SetText(tostring(math_floor(value))) 		-- 1 - 999
-		else 							bar.value:SetText(DEAD)
+	if (value) then 
+		if (isRealValue) then 
+			if (value >= 1e8) then 			bar.value:SetFormattedText("%.0fm", value/1e6) 		-- 100m, 1000m, 2300m, etc
+			elseif (value >= 1e6) then 		bar.value:SetFormattedText("%.1fm", value/1e6) 		-- 1.0m - 99.9m 
+			elseif (value >= 1e5) then 		bar.value:SetFormattedText("%.0fk", value/1e3) 		-- 100k - 999k
+			elseif (value >= 1e3) then 		bar.value:SetFormattedText("%.1fk", value/1e3) 		-- 1.0k - 99.9k
+			elseif (value > 0) then 		bar.value:SetText(tostring(math_floor(value))) 		-- 1 - 999
+			else 							bar.value:SetText(DEAD)
+			end 
+		else 
+			if (value > 0) then 
+				bar.value:SetFormattedText("%.0f%%", value)
+			else 
+				bar.value:SetText("")
+			end
 		end 
 		if (not bar.value:IsShown()) then 
 			bar.value:Show()
@@ -249,6 +304,15 @@ local OnTooltipShow = function(tooltip)
 	end
 end
 
+local OnTooltipHide = function(tooltip)
+	tooltip.unit = nil
+	tooltip.vendorSellLineID = nil
+	LOCKDOWNS[tooltip] = nil
+	if (tooltip:IsForbidden()) then 
+		return
+	end
+end
+
 local OnTooltipAddLine = function(tooltip, msg)
 	if not(LOCKDOWNS[tooltip]) then
 		return OnTooltipShow(tooltip)
@@ -282,55 +346,6 @@ local OnTooltipAddDoubleLine = function(tooltip, leftText, rightText)
 			end 
 		end
 	end
-end
-
-local AddLine = function(tooltip, lineIndex, msg, r, g, b)
-	r = r or Colors.offwhite[1]
-	g = g or Colors.offwhite[2]
-	b = b or Colors.offwhite[3]
-	local numLines = tooltip:NumLines()
-	if (lineIndex > numLines) then 
-		tooltip:AddLine(msg, r, g, b)
-	else
-		local left = _G[tooltip:GetName().."TextLeft"..lineIndex]
-		left:SetText(msg)
-		if (r and g and b) then 
-			left:SetTextColor(r, g, b)
-		end
-	end
-	return lineIndex + 1
-end
-
-local OnTooltipHide = function(tooltip)
-	tooltip.unit = nil
-	tooltip.vendorSellLineID = nil
-	LOCKDOWNS[tooltip] = nil
-	if (tooltip:IsForbidden()) then 
-		return
-	end
-end
-
-local formatMoney = function(money)
-	local gold = math_floor(money / (COPPER_PER_SILVER * SILVER_PER_GOLD))
-	local silver = math_floor((money - (gold * COPPER_PER_SILVER * SILVER_PER_GOLD)) / COPPER_PER_SILVER)
-	local copper = math_mod(money, COPPER_PER_SILVER)
-	
-	local goldIcon = string_format([[|T%s:16:16:0:0:64:64:%d:%d:%d:%d|t]], GetMedia("coins"), 0,32,0,32)
-	local silverIcon = string_format([[|T%s:16:16:0:0:64:64:%d:%d:%d:%d|t]], GetMedia("coins"), 32,64,0,32)
-	local copperIcon = string_format([[|T%s:16:16:0:0:64:64:%d:%d:%d:%d|t]], GetMedia("coins"), 0,32,32,64)
-
-	local moneyString
-	if (gold > 0) then 
-		moneyString = string_format("%d%s", gold, goldIcon)
-	end
-	if (silver > 0) then 
-		moneyString = (moneyString and moneyString.." " or "") .. string_format("%d%s", silver, silverIcon)
-	end
-	if (copper > 0) then 
-		moneyString = (moneyString and moneyString.." " or "") .. string_format("%d%s", copper, copperIcon)
-	end 
-
-	return moneyString
 end
 
 local OnTooltipSetItem = function(tooltip)
@@ -397,7 +412,9 @@ local OnTooltipSetUnit = function(tooltip)
 	end
 
 	LOCKDOWNS[tooltip] = nil
+	
 	tooltip.unit = unit
+
 	local numLines = tooltip:NumLines()
 	local lineIndex = 1
 	for i = numLines,1,-1 do 

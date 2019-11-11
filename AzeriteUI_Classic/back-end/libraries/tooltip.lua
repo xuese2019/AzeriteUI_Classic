@@ -1,4 +1,4 @@
-local LibTooltip = Wheel:Set("LibTooltip", 65)
+local LibTooltip = Wheel:Set("LibTooltip", 67)
 if (not LibTooltip) then
 	return
 end
@@ -2059,7 +2059,7 @@ Tooltip.UpdateBarValues = function(self, unit, noUpdate)
 	local guid = UnitGUID(unit)
 	local disconnected = not UnitIsConnected(unit)
 	local dead = UnitIsDeadOrGhost(unit)
-	local needUpdate
+	local needUpdate, isRealValue
 
 	for i,bar in ipairs(self.bars) do
 		local isShown = bar:IsShown()
@@ -2069,9 +2069,13 @@ Tooltip.UpdateBarValues = function(self, unit, noUpdate)
 				needUpdate = needUpdate or updateNeeded
 			else 
 				local min,max
-				if not(UnitIsUnit(unit, "player") or UnitIsUnit(unit, "pet") or UnitInParty(unit) or UnitInRaid(unit)) then 
+				isRealValue = UnitIsUnit(unit, "player") or UnitIsUnit(unit, "pet") or UnitInParty(unit) or UnitInRaid(unit)
+				if (not isRealValue) then 
 					min = LibPlayerData:UnitHealth(unit)
 					max = LibPlayerData:UnitHealthMax(unit)
+					if (min and max) then 
+						isRealValue = true
+					end
 				end 
 				if (not min) or (not max) then 
 					min = UnitHealth(unit) or 0
@@ -2120,7 +2124,8 @@ Tooltip.UpdateBarValues = function(self, unit, noUpdate)
 			end
 		end 
 		if (bar:IsShown() and self.PostUpdateStatusBar) then 
-			self:PostUpdateStatusBar(bar, bar:GetValue(), bar:GetMinMaxValues())
+			local min, max = bar:GetMinMaxValues()
+			self:PostUpdateStatusBar(bar, bar:GetValue(), min, max, isRealValue)
 		end 
 	end 
 
