@@ -690,15 +690,23 @@ end
 -- Tooltip Bar post updates
 -- Show health values for tooltip health bars, and hide others.
 -- Will expand on this later to tailer all tooltips to our needs.  
-local Tooltip_StatusBar_PostUpdate = function(tooltip, bar, value, min, max)
+local Tooltip_StatusBar_PostUpdate = function(tooltip, bar, value, min, max, isRealValue)
 	if (bar.barType == "health") then 
-		if (value >= 1e8) then 			bar.Value:SetFormattedText("%.0fm", value/1e6) 		-- 100m, 1000m, 2300m, etc
-		elseif (value >= 1e6) then 		bar.Value:SetFormattedText("%.1fm", value/1e6) 		-- 1.0m - 99.9m 
-		elseif (value >= 1e5) then 		bar.Value:SetFormattedText("%.0fk", value/1e3) 		-- 100k - 999k
-		elseif (value >= 1e3) then 		bar.Value:SetFormattedText("%.1fk", value/1e3) 		-- 1.0k - 99.9k
-		elseif (value > 0) then 		bar.Value:SetText(tostring(math_floor(value))) 		-- 1 - 999
-		else 							bar.Value:SetText("")
-		end 
+		if (isRealValue) then 
+			if (value >= 1e8) then 			bar.Value:SetFormattedText("%.0fm", value/1e6) 		-- 100m, 1000m, 2300m, etc
+			elseif (value >= 1e6) then 		bar.Value:SetFormattedText("%.1fm", value/1e6) 		-- 1.0m - 99.9m 
+			elseif (value >= 1e5) then 		bar.Value:SetFormattedText("%.0fk", value/1e3) 		-- 100k - 999k
+			elseif (value >= 1e3) then 		bar.Value:SetFormattedText("%.1fk", value/1e3) 		-- 1.0k - 99.9k
+			elseif (value > 0) then 		bar.Value:SetText(tostring(math_floor(value))) 		-- 1 - 999
+			else 							bar.Value:SetText("")
+			end 
+		else 
+			if (value > 0) then 
+				bar.Value:SetFormattedText("%.0f%%", value)
+			else 
+				bar.Value:SetText("")
+			end
+		end
 		if (not bar.Value:IsShown()) then 
 			bar.Value:Show()
 		end
