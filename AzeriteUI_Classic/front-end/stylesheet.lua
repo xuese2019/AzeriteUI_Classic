@@ -1446,28 +1446,6 @@ local Minimap = {
 		TrackingButtonIconBgTexture = GetMedia("hp_critter_case_glow"),
 }
 
--- Custom Tooltips
-local TooltipStyling = {
-	Colors = Colors,
-
-	-- Going with full positioning after 8.2.0. 
-	TooltipPlace = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -(48 + 58 + 213), (107 + 59) }, 
-	--TooltipPlace = { "BOTTOMRIGHT", "Minimap", "BOTTOMLEFT", -48, 107 }, 
-
-	TooltipStatusBarTexture = GetMedia("statusbar_normal"), 
-	TooltipBackdrop = {
-		bgFile = [[Interface\ChatFrame\ChatFrameBackground]], tile = false, 
-		edgeFile = GetMedia("tooltip_border_blizzcompatible"), edgeSize = 32, 
-		insets = { top = 2.5, bottom = 2.5, left = 2.5, right = 2.5 }
-	},
-	TooltipBackdropColor = { .05, .05, .05, .85 },
-	TooltipBackdropBorderColor = { 1, 1, 1, 1 },
-
-	PostCreateTooltip = Tooltip_PostCreate,
-	PostCreateLinePair = Tooltip_LinePair_PostCreate, 
-	PostCreateBar = Tooltip_Bar_PostCreate
-}
-
 ------------------------------------------------------------------
 -- UnitFrame Config Templates
 ------------------------------------------------------------------
@@ -1959,7 +1937,7 @@ local UnitFramePlayer = {
 			spacingH = 6, 
 			spacingV = 6, 
 			auraSize = 40, auraWidth = nil, auraHeight = nil, 
-			maxVisible = 8, maxBuffs = nil, maxDebuffs = 3, 
+			maxVisible = 16, maxBuffs = nil, maxDebuffs = nil, 
 			filter = nil, filterBuffs = "HELPFUL", filterDebuffs = "HARMFUL", 
 			func = nil, funcBuffs = GetAuraFilterFunc("player"), funcDebuffs = GetAuraFilterFunc("player"), 
 			debuffsFirst = true, 
@@ -2591,7 +2569,6 @@ local UnitFrameBoss = setmetatable({
 
 }, { __index = Template_SmallFrameReversed_Auras })
 
-LibDB:NewDatabase(ADDON..":[Core]", Core)
 LibDB:NewDatabase(ADDON..":[ActionBarMain]", ActionBars)
 LibDB:NewDatabase(ADDON..":[Bindings]", BindMode)
 LibDB:NewDatabase(ADDON..":[BlizzardChatFrames]", BlizzardChatFrames)
@@ -2603,7 +2580,6 @@ LibDB:NewDatabase(ADDON..":[BlizzardPopupStyling]", BlizzardPopupStyling)
 LibDB:NewDatabase(ADDON..":[BlizzardTimers]", BlizzardTimers)
 LibDB:NewDatabase(ADDON..":[GroupTools]", GroupTools)
 LibDB:NewDatabase(ADDON..":[Minimap]", Minimap)
-LibDB:NewDatabase(ADDON..":[TooltipStyling]", TooltipStyling)
 LibDB:NewDatabase(ADDON..":[UnitFramePlayer]", UnitFramePlayer)
 LibDB:NewDatabase(ADDON..":[UnitFramePet]", UnitFramePet)
 LibDB:NewDatabase(ADDON..":[UnitFrameTarget]", UnitFrameTarget)
@@ -2658,6 +2634,7 @@ Defaults.UnitFrameParty = {
 Defaults.UnitFrameRaid = {
 	enableRaidFrames = true
 }
+
 ------------------------------------------------
 -- Module Layouts
 ------------------------------------------------
@@ -2748,10 +2725,20 @@ Layouts.BlizzardMicroMenu = {
 	MenuWindow_CreateBorder = Core_Window_CreateBorder
 }
 
--- Blizzard World Map
-Layouts.BlizzardWorldMap = {
-
+-- Blizzard Tooltips
+Layouts.BlizzardTooltips = {
+	TooltipStatusBarTexture = GetMedia("statusbar_normal"), 
+	TooltipBackdrop = {
+		bgFile = [[Interface\ChatFrame\ChatFrameBackground]], tile = false, 
+		edgeFile = GetMedia("tooltip_border_blizzcompatible"), edgeSize = 32, 
+		insets = { top = 2.5, bottom = 2.5, left = 2.5, right = 2.5 }
+	},
+	TooltipBackdropColor = { .05, .05, .05, .85 },
+	TooltipBackdropBorderColor = { 1, 1, 1, 1 }
 }
+
+-- Blizzard World Map
+Layouts.BlizzardWorldMap = {}
 
 -- Floaters. Durability only currently. 
 Layouts.FloaterHUD = {
@@ -2949,6 +2936,28 @@ Layouts.NamePlates = {
 		-- The max distance to show the target nameplate when the target is behind the camera.
 		nameplateTargetBehindMaxDistance = 15 -- default 15
 	}
+}
+
+-- Custom Tooltips
+Layouts.Tooltips = {
+	Colors = Colors,
+
+	-- Going with full positioning after 8.2.0. 
+	TooltipPlace = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -(48 + 58 + 213), (107 + 59) }, 
+	--TooltipPlace = { "BOTTOMRIGHT", "Minimap", "BOTTOMLEFT", -48, 107 }, 
+
+	TooltipStatusBarTexture = GetMedia("statusbar_normal"), 
+	TooltipBackdrop = {
+		bgFile = [[Interface\ChatFrame\ChatFrameBackground]], tile = false, 
+		edgeFile = GetMedia("tooltip_border_blizzcompatible"), edgeSize = 32, 
+		insets = { top = 2.5, bottom = 2.5, left = 2.5, right = 2.5 }
+	},
+	TooltipBackdropColor = { .05, .05, .05, .85 },
+	TooltipBackdropBorderColor = { 1, 1, 1, 1 },
+
+	PostCreateTooltip = Tooltip_PostCreate,
+	PostCreateLinePair = Tooltip_LinePair_PostCreate, 
+	PostCreateBar = Tooltip_Bar_PostCreate
 }
 
 -- PlayerHUD (combo points and castbar)

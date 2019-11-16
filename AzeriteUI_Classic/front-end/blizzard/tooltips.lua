@@ -1,12 +1,10 @@
 local ADDON, Private = ...
-
 local Core = Wheel("LibModule"):GetModule(ADDON)
 if (not Core) then 
 	return 
 end
 
-local Module = Core:NewModule("BlizzardTooltipStyling", "LibEvent", "LibDB", "LibFrame", "LibTooltip", "LibTooltipScanner", "LibPlayerData")
-local Layout
+local Module = Core:NewModule("BlizzardTooltips", "LibEvent", "LibDB", "LibFrame", "LibTooltip", "LibTooltipScanner", "LibPlayerData")
 
 Module:SetIncompatible("TipTac")
 Module:SetIncompatible("TinyTip")
@@ -34,6 +32,7 @@ local UnitLevel = UnitLevel
 -- Private API
 local Colors = Private.Colors
 local GetFont = Private.GetFont
+local GetLayout = Private.GetLayout
 local GetMedia = Private.GetMedia
 
 -- Blizzard textures we use 
@@ -255,10 +254,7 @@ local StatusBar_OnValueChanged = function(statusbar)
 
 	-- Add the green if no other color was detected. Like objects that aren't units, but still have health. 
 	if (not statusbar.color) or (not statusbar:GetParent().unit) then
-		local colors = statusbar:GetParent().colors or Layout.Colors
-		if colors then 
-			statusbar.color = colors.quest.green
-		end 
+		statusbar.color = Colors.quest.green
 	end
 
 	-- The color needs to be updated, or it will pop back to green
@@ -276,10 +272,7 @@ end
 
 -- Do a color and texture reset upon hiding, to make sure it looks right when next shown. 
 local StatusBar_OnHide = function(statusbar)
-	local colors = statusbar:GetParent().colors or Layout.Colors
-	if colors then 
-		statusbar.color = colors.quest.green
-	end 
+	statusbar.color = Colors.quest.green
 	statusbar:GetStatusBarTexture():SetTexCoord(0, 1, 0, 1)
 	statusbar:SetStatusBarColor(unpack(statusbar.color))
 	Module:SetBlizzardTooltipBackdropOffsets(statusbar._owner, 10, 10, 10, 12)
@@ -547,16 +540,16 @@ local OnTooltipSetUnit = function(tooltip)
 end
 
 Module.OnInit = function(self)
-	Layout = Wheel("LibDB"):GetDatabase(Core:GetPrefix()..":[TooltipStyling]")
+	self.layout = GetLayout(self:GetName())
 end 
 
 Module.OnEnable = function(self)
 	for tooltip in self:GetAllBlizzardTooltips() do 
 		self:KillBlizzardBorderedFrameTextures(tooltip)
 		self:KillBlizzardTooltipBackdrop(tooltip)
-		self:SetBlizzardTooltipBackdrop(tooltip, Layout.TooltipBackdrop)
-		self:SetBlizzardTooltipBackdropColor(tooltip, unpack(Layout.TooltipBackdropColor))
-		self:SetBlizzardTooltipBackdropBorderColor(tooltip, unpack(Layout.TooltipBackdropBorderColor))
+		self:SetBlizzardTooltipBackdrop(tooltip, self.layout.TooltipBackdrop)
+		self:SetBlizzardTooltipBackdropColor(tooltip, unpack(self.layout.TooltipBackdropColor))
+		self:SetBlizzardTooltipBackdropBorderColor(tooltip, unpack(self.layout.TooltipBackdropBorderColor))
 		self:SetBlizzardTooltipBackdropOffsets(tooltip, 10, 10, 10, 12)
 
 		if tooltip.SetText then 
