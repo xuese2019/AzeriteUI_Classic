@@ -1,4 +1,4 @@
-local LibCast = Wheel:Set("LibCast", 2)
+local LibCast = Wheel:Set("LibCast", 3)
 if (not LibCast) then
 	return
 end
@@ -12,13 +12,13 @@ assert(LibEvent, "LibCast requires LibEvent to be loaded.")
 local LibFrame = Wheel("LibFrame")
 assert(LibFrame, "LibCast requires LibFrame to be loaded.")
 
-local LibPlayerData = Wheel("LibPlayerData")
-assert(LibPlayerData, "LibCast requires LibPlayerData to be loaded.")
+local LibSpellData = Wheel("LibSpellData")
+assert(LibSpellData, "LibCast requires LibSpellData to be loaded.")
 
 LibMessage:Embed(LibCast)
 LibEvent:Embed(LibCast)
 LibFrame:Embed(LibCast)
-LibPlayerData:Embed(LibCast)
+LibSpellData:Embed(LibCast)
 
 -- Lua API
 local _G = _G
