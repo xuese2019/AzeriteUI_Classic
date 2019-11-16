@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.70-RC] 2019-11-16
+### Added
+- Tooltips should now display when units are civilians. Gotta stay clear of those Dishonorable Kills! 
+
+### Changed
+- Adjusted nameplate raid icon position to stop it from colliding with the auras. 
+- Tooltip health values now show a percentage sign when only percentage and not the real health value is available.
+
 ## [1.0.69-RC] 2019-11-08
 ### Changed
 - The HUD castbar is now anchored to the bottom rather than the center of the screen. It has also been moved farther down, to not be as much in the way.
