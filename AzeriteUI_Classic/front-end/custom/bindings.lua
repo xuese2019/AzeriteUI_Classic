@@ -1,11 +1,10 @@
-local ADDON, Private = ...
-
+local ADDON,Private = ...
 local Core = Wheel("LibModule"):GetModule(ADDON)
 if (not Core) then 
 	return 
 end
 
-local L, Layout
+local L = Wheel("LibLocale"):GetLocale(ADDON)
 local Module = Core:NewModule("Bindings", "PLUGIN", "LibEvent", "LibMessage", "LibDB", "LibFrame", "LibSound", "LibTooltip", "LibFader", "LibSlash")
 Module:SetIncompatible("ConsolePort")
 
@@ -27,6 +26,11 @@ local IsShiftKeyDown = IsShiftKeyDown
 local LoadBindings = LoadBindings
 local AttemptToSaveBindings = AttemptToSaveBindings
 local SetBinding = SetBinding
+
+-- Private API
+local Colors = Private.Colors
+local GetFont = Private.GetFont
+local GetLayout = Private.GetLayout
 
 -- Copies of WoW constants (the originals are loaded through an addon, so not reliable as globals)
 local ACCOUNT_BINDINGS = 1
@@ -83,9 +87,7 @@ BindFrame.OnEnter = function(self)
 	tooltip:Show()
 
 	-- Let the layout do its graphical post updates
-	if Layout.BindButton_PostEnter then 
-		Layout.BindButton_PostEnter(self)
-	end
+	self.module.layout.BindButton_PostEnter(self)
 end
 
 BindFrame.OnLeave = function(self) 
@@ -101,9 +103,7 @@ BindFrame.OnLeave = function(self)
 	self.module:GetBindingsTooltip():Hide()
 
 	-- Let the layout do its graphical post updates
-	if Layout.BindButton_PostLeave then 
-		Layout.BindButton_PostLeave(self)
-	end
+	self.module.layout.BindButton_PostLeave(self)
 end
 
 BindFrame.UpdateBinding = function(self)
@@ -165,9 +165,7 @@ Module.RegisterButton = function(self, button, ...)
 	bindFrame.msg = msg
 
 	-- Run layout post creation updates
-	if Layout.BindButton_PostCreate then 
-		Layout.BindButton_PostCreate(bindFrame)
-	end 
+	self.layout.BindButton_PostCreate(bindFrame)
 
 	self.binds[button] = bindFrame
 end
@@ -427,14 +425,14 @@ Module.CreateWindow = function(self)
 	frame:EnableMouse(false)
 	frame:EnableKeyboard(false)
 	frame:EnableMouseWheel(false)
-	frame:SetSize(unpack(Layout.Size))
-	frame:Place(unpack(Layout.Place))
-	frame.border = Layout.MenuWindow_CreateBorder(frame)
+	frame:SetSize(unpack(self.layout.Size))
+	frame:Place(unpack(self.layout.Place))
+	frame.border = self.layout.MenuWindow_CreateBorder(frame)
 
 	local msg = frame:CreateFontString()
-	msg:SetFontObject(Private.GetFont(14, true))
+	msg:SetFontObject(GetFont(14, true))
 	msg:SetPoint("TOPLEFT", 40, -40)
-	msg:SetSize(Layout.Size[1] - 80, Layout.Size[2] - 80 - 30)
+	msg:SetSize(self.layout.Size[1] - 80, self.layout.Size[2] - 80 - 30)
 	msg:SetJustifyH("LEFT")
 	msg:SetJustifyV("TOP")
 	msg:SetIndentedWordWrap(false)
@@ -442,45 +440,33 @@ Module.CreateWindow = function(self)
 	msg:SetNonSpaceWrap(false)
 	frame.msg = msg
 
-	local cancel = Layout.MenuButton_PostCreate(frame:CreateFrame("Button"), CANCEL)
-	cancel:SetSize(Layout.MenuButtonSize[1]*Layout.MenuButtonSizeMod, Layout.MenuButtonSize[2]*Layout.MenuButtonSizeMod)
+	local cancel = self.layout.MenuButton_PostCreate(frame:CreateFrame("Button"), CANCEL)
+	cancel:SetSize(self.layout.MenuButtonSize[1]*self.layout.MenuButtonSizeMod, self.layout.MenuButtonSize[2]*self.layout.MenuButtonSizeMod)
 	cancel:SetPoint("BOTTOMLEFT", 20, 10)
 	frame.cancel = cancel
 
-	local apply = Layout.MenuButton_PostCreate(frame:CreateFrame("Button"), APPLY)
-	apply:SetSize(Layout.MenuButtonSize[1]*Layout.MenuButtonSizeMod, Layout.MenuButtonSize[2]*Layout.MenuButtonSizeMod)
+	local apply = self.layout.MenuButton_PostCreate(frame:CreateFrame("Button"), APPLY)
+	apply:SetSize(self.layout.MenuButtonSize[1]*self.layout.MenuButtonSizeMod, self.layout.MenuButtonSize[2]*self.layout.MenuButtonSizeMod)
 	apply:SetPoint("BOTTOMRIGHT", -20, 10)
 	frame.apply = apply
 
-	if Layout.MenuButton_PostUpdate then 
-		local PostUpdate = Layout.MenuButton_PostUpdate
+	local PostUpdate = self.layout.MenuButton_PostUpdate
 
-		frame.apply:HookScript("OnEnter", PostUpdate)
-		frame.apply:HookScript("OnLeave", PostUpdate)
-		frame.apply:HookScript("OnMouseDown", function(self) self.isDown = true; return PostUpdate(self) end)
-		frame.apply:HookScript("OnMouseUp", function(self) self.isDown = false; return PostUpdate(self) end)
-		frame.apply:HookScript("OnShow", function(self) self.isDown = false; return PostUpdate(self) end)
-		frame.apply:HookScript("OnHide", function(self) self.isDown = false; return PostUpdate(self) end)
-		PostUpdate(frame.apply)
+	frame.apply:HookScript("OnEnter", PostUpdate)
+	frame.apply:HookScript("OnLeave", PostUpdate)
+	frame.apply:HookScript("OnMouseDown", function(self) self.isDown = true; return PostUpdate(self) end)
+	frame.apply:HookScript("OnMouseUp", function(self) self.isDown = false; return PostUpdate(self) end)
+	frame.apply:HookScript("OnShow", function(self) self.isDown = false; return PostUpdate(self) end)
+	frame.apply:HookScript("OnHide", function(self) self.isDown = false; return PostUpdate(self) end)
+	PostUpdate(frame.apply)
 
-		frame.cancel:HookScript("OnEnter", PostUpdate)
-		frame.cancel:HookScript("OnLeave", PostUpdate)
-		frame.cancel:HookScript("OnMouseDown", function(self) self.isDown = true; return PostUpdate(self) end)
-		frame.cancel:HookScript("OnMouseUp", function(self) self.isDown = false; return PostUpdate(self) end)
-		frame.cancel:HookScript("OnShow", function(self) self.isDown = false; return PostUpdate(self) end)
-		frame.cancel:HookScript("OnHide", function(self) self.isDown = false; return PostUpdate(self) end)
-		PostUpdate(frame.cancel)
-	else
-		frame.apply:HookScript("OnMouseDown", function(self) self.isDown = true end)
-		frame.apply:HookScript("OnMouseUp", function(self) self.isDown = false end)
-		frame.apply:HookScript("OnShow", function(self) self.isDown = false end)
-		frame.apply:HookScript("OnHide", function(self) self.isDown = false end)
-
-		frame.cancel:HookScript("OnMouseDown", function(self) self.isDown = true end)
-		frame.cancel:HookScript("OnMouseUp", function(self) self.isDown = false end)
-		frame.cancel:HookScript("OnShow", function(self) self.isDown = false end)
-		frame.cancel:HookScript("OnHide", function(self) self.isDown = false end)
-	end 
+	frame.cancel:HookScript("OnEnter", PostUpdate)
+	frame.cancel:HookScript("OnLeave", PostUpdate)
+	frame.cancel:HookScript("OnMouseDown", function(self) self.isDown = true; return PostUpdate(self) end)
+	frame.cancel:HookScript("OnMouseUp", function(self) self.isDown = false; return PostUpdate(self) end)
+	frame.cancel:HookScript("OnShow", function(self) self.isDown = false; return PostUpdate(self) end)
+	frame.cancel:HookScript("OnHide", function(self) self.isDown = false; return PostUpdate(self) end)
+	PostUpdate(frame.cancel)
 
 	return frame
 end 
@@ -495,12 +481,12 @@ Module.GetBindingFrame = function(self)
 
 		frame.msg:ClearAllPoints()
 		frame.msg:SetPoint("TOPLEFT", 40, -60)
-		frame.msg:SetSize(Layout.Size[1] - 80, Layout.Size[2] - 80 - 50)
+		frame.msg:SetSize(self.layout.Size[1] - 80, self.layout.Size[2] - 80 - 50)
 		frame.msg:SetText(L["Hover your mouse over any actionbutton and press a key or a mouse button to bind it. Press the ESC key to clear the current actionbutton's keybinding."])
 
 		local perCharacter = frame:CreateFrame("CheckButton", nil, "OptionsCheckButtonTemplate")
 		perCharacter:SetSize(32,32)
-		perCharacter:SetHitRectInsets(-10, -(10 + Layout.Size[1] - 80 - 32 -10), -10, -10)
+		perCharacter:SetHitRectInsets(-10, -(10 + self.layout.Size[1] - 80 - 32 -10), -10, -10)
 		perCharacter:SetPoint("TOPLEFT", 34, -16)
 		
 		perCharacter:SetScript("OnShow", function(self) 
@@ -522,8 +508,8 @@ Module.GetBindingFrame = function(self)
 		perCharacter:SetScript("OnEnter", function(self)
 			local tooltip = Module:GetBindingsTooltip()
 			tooltip:SetDefaultAnchor(self)
-			tooltip:AddLine(CHARACTER_SPECIFIC_KEYBINDINGS, Private.Colors.title[1], Private.Colors.title[2], Private.Colors.title[3])
-			tooltip:AddLine(CHARACTER_SPECIFIC_KEYBINDING_TOOLTIP, Private.Colors.offwhite[1], Private.Colors.offwhite[2], Private.Colors.offwhite[3], true)
+			tooltip:AddLine(CHARACTER_SPECIFIC_KEYBINDINGS, Colors.title[1], Colors.title[2], Colors.title[3])
+			tooltip:AddLine(CHARACTER_SPECIFIC_KEYBINDING_TOOLTIP, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], true)
 			tooltip:Show()
 		end)
 
@@ -533,7 +519,7 @@ Module.GetBindingFrame = function(self)
 		end)
 		
 		local perCharacterMsg = perCharacter:CreateFontString()
-		perCharacterMsg:SetFontObject(Private.GetFont(14, true))
+		perCharacterMsg:SetFontObject(GetFont(14, true))
 		perCharacterMsg:SetPoint("LEFT", perCharacter, "RIGHT", 10, 0)
 		perCharacterMsg:SetJustifyH("CENTER")
 		perCharacterMsg:SetJustifyV("TOP")
@@ -565,7 +551,7 @@ Module.GetDiscardFrame = function(self)
 
 		frame.msg:ClearAllPoints()
 		frame.msg:SetPoint("TOPLEFT", 40 + 70, -40)
-		frame.msg:SetSize(Layout.Size[1] - 80 - 70, Layout.Size[2] - 80 - 50)
+		frame.msg:SetSize(self.layout.Size[1] - 80 - 70, self.layout.Size[2] - 80 - 50)
 
 		local texture = frame:CreateTexture()
 		texture:SetSize(60, 60)
@@ -675,13 +661,8 @@ Module.OnEvent = function(self, event, ...)
 	end
 end
 
-Module.PreInit = function(self)
-	local PREFIX = Core:GetPrefix()
-	L = Wheel("LibLocale"):GetLocale(PREFIX)
-	Layout = Wheel("LibDB"):GetDatabase(PREFIX..":[Bindings]")
-end
-
 Module.OnInit = function(self)
+	self.layout = GetLayout(self:GetName())
 	self:RegisterChatCommand("bind", "OnChatCommand") 
 
 	local ActionBarMain = Core:GetModule("ActionBarMain", true)

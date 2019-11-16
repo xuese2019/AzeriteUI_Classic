@@ -1015,31 +1015,6 @@ local ActionBars = {
 
 }
 
--- Bind Mode
-local BindMode = {
-	Colors = Colors,
-
-	-- Binding Dialogue
-	Place = { "TOP", "UICenter", "TOP", 0, -100 }, 
-	Size = { 520, 180 },
-
-	-- General border creation method
-	MenuWindow_CreateBorder = BindMode_MenuWindow_CreateBorder,
-
-	-- Binding Dialogue Buttons
-	MenuButtonSize = { MenuButtonW, MenuButtonH },
-	MenuButtonSpacing = 10, 
-	MenuButtonSizeMod = .75, 
-	MenuButton_PostCreate = BindMode_MenuButton_PostCreate,
-	MenuButton_PostUpdate = BindMode_MenuButton_PostUpdate, 
-
-	-- ActionButton Bind Overlays
-	BindButton_PostCreate = BindMode_BindButton_PostCreate, 
-	BindButton_PostUpdate = BindMode_BindButton_PostUpdate,
-	BindButton_PostEnter = BindMode_BindButton_PostEnter,
-	BindButton_PostLeave = BindMode_BindButton_PostLeave
-}
-
 -- Blizzard Chat Frames
 local BlizzardChatFrames = {
 	Colors = Colors,
@@ -1069,14 +1044,6 @@ local BlizzardChatFrames = {
 		ButtonTextureScrollDownButton = GetMedia("icon_chat_down"), 
 		ButtonTextureScrollToBottomButton = GetMedia("icon_chat_bottom"), 
 		ButtonTextureChatEmotes = GetMedia("config_button_emotes")
-}
-
--- Blizzard Floaters
-local BlizzardFloaterHUD = {
-	Colors = Colors,
-	StyleDurabilityFrame = true, DurabilityFramePlace = { "CENTER", 190, 0 },
-	StyleErrorFrame = true, ErrorFrameStrata = "LOW",
-	StyleQuestTimerFrame = true, QuestTimerFramePlace = { "CENTER", UIParent, "CENTER", 0, 220 }
 }
 
 -- Blizzard Game Menu (Esc)
@@ -1158,12 +1125,6 @@ local BlizzardPopupStyling = {
 	Colors = Colors, 
 	PostCreatePopup = BlizzardPopup_PostCreate,
 	PostUpdateAnchors = BlizzardPopup_Anchors_PostUpdate
-}
-
--- Blizzard font replacements
-local BlizzardFonts = {
-	ChatFont = GetFont(15, true),
-	ChatBubbleFont = GetFont(10, true)
 }
 
 -- Group Leader Tools
@@ -2570,10 +2531,7 @@ local UnitFrameBoss = setmetatable({
 }, { __index = Template_SmallFrameReversed_Auras })
 
 LibDB:NewDatabase(ADDON..":[ActionBarMain]", ActionBars)
-LibDB:NewDatabase(ADDON..":[Bindings]", BindMode)
 LibDB:NewDatabase(ADDON..":[BlizzardChatFrames]", BlizzardChatFrames)
-LibDB:NewDatabase(ADDON..":[BlizzardFloaterHUD]", BlizzardFloaterHUD)
-LibDB:NewDatabase(ADDON..":[BlizzardFonts]", BlizzardFonts)
 LibDB:NewDatabase(ADDON..":[BlizzardGameMenu]", BlizzardGameMenu)
 LibDB:NewDatabase(ADDON..":[BlizzardObjectivesTracker]", BlizzardObjectivesTracker)
 LibDB:NewDatabase(ADDON..":[BlizzardPopupStyling]", BlizzardPopupStyling)
@@ -2613,6 +2571,9 @@ Defaults[ADDON] = {
 	allowGuildInvites = true,
 	allowFriendInvites = true, 
 	blockCounter = {}
+}
+
+Defaults.BlizzardFloaterHUD = {
 }
 
 Defaults.NamePlates = {
@@ -2695,6 +2656,18 @@ Layouts[ADDON] = {
 		MenuButton_PostUpdate = Core_MenuButton_PostUpdate
 }
 
+-- Blizzard Floaters
+Layouts.BlizzardFloaterHUD = {
+	StyleErrorFrame = true, ErrorFrameStrata = "LOW",
+	StyleQuestTimerFrame = true, QuestTimerFramePlace = { "CENTER", UIParent, "CENTER", 0, 220 }
+}
+
+-- Blizzard font replacements
+Layouts.BlizzardFonts = {
+	ChatFont = GetFont(15, true),
+	ChatBubbleFont = GetFont(10, true)
+}
+
 -- Blizzard MicroMenu
 Layouts.BlizzardMicroMenu = {
 	Colors = Colors,
@@ -2739,6 +2712,30 @@ Layouts.BlizzardTooltips = {
 
 -- Blizzard World Map
 Layouts.BlizzardWorldMap = {}
+
+-- Bind Mode
+Layouts.Bindings = {
+
+	-- Binding Dialogue
+	Place = { "TOP", "UICenter", "TOP", 0, -100 }, 
+	Size = { 520, 180 },
+
+	-- General border creation method
+	MenuWindow_CreateBorder = BindMode_MenuWindow_CreateBorder,
+
+	-- Binding Dialogue Buttons
+	MenuButtonSize = { MenuButtonW, MenuButtonH },
+	MenuButtonSpacing = 10, 
+	MenuButtonSizeMod = .75, 
+	MenuButton_PostCreate = BindMode_MenuButton_PostCreate,
+	MenuButton_PostUpdate = BindMode_MenuButton_PostUpdate, 
+
+	-- ActionButton Bind Overlays
+	BindButton_PostCreate = BindMode_BindButton_PostCreate, 
+	BindButton_PostUpdate = BindMode_BindButton_PostUpdate,
+	BindButton_PostEnter = BindMode_BindButton_PostEnter,
+	BindButton_PostLeave = BindMode_BindButton_PostLeave
+}
 
 -- Floaters. Durability only currently. 
 Layouts.FloaterHUD = {

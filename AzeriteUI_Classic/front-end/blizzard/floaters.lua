@@ -3,23 +3,20 @@ local Core = Wheel("LibModule"):GetModule(ADDON)
 if (not Core) then 
 	return 
 end
+
 local Module = Core:NewModule("BlizzardFloaterHUD", "LibEvent", "LibFrame", "LibTooltip", "LibDB", "LibBlizzard")
 
--- Lua API
-local _G = _G
-local ipairs = ipairs
-local table_remove = table.remove
+-- Private API
+local GetConfig = Private.GetConfig
+local GetLayout = Private.GetLayout
 
-local MAPPY = Module:IsAddOnEnabled("Mappy")
+local HolderCache, StyleCache = {}, {}
 
 local mt = getmetatable(CreateFrame("Frame")).__index
 local Frame_ClearAllPoints = mt.ClearAllPoints
 local Frame_IsShown = mt.IsShown
 local Frame_SetParent = mt.SetParent
 local Frame_SetPoint = mt.SetPoint
-
-local HolderCache, StyleCache = {}, {}
-local Layout
 
 local blackList = {
 	msgTypes = {
@@ -75,16 +72,6 @@ local blackList = {
 	[ SPELL_FAILED_UNIT_NOT_BEHIND ] = true, 				-- Target needs to be behind you.
 }
 
--- Default settings
-local defaults = {}
-
-local DisableTexture = function(texture, _, loop)
-	if loop then
-		return
-	end
-	texture:SetTexture(nil, true)
-end
-
 local ResetPoint = function(object, _, anchor) 
 	local holder = object and HolderCache[object]
 	if (holder) then 
@@ -113,29 +100,6 @@ Module.CreatePointHook = function(self, object)
 	end
 end 
 
-Module.DisableMappy = function(object)
-	if MAPPY then 
-		object.Mappy_DidHook = true -- set the flag indicating its already been set up for Mappy
-		object.Mappy_SetPoint = function() end -- kill the IsVisible reference Mappy makes
-		object.Mappy_HookedSetPoint = function() end -- kill this too
-		object.SetPoint = nil -- return the SetPoint method to its original metamethod
-		object.ClearAllPoints = nil -- return the SetPoint method to its original metamethod
-	end 
-end
-
-Module.StyleDurabilityFrame = function(self)
-	if (not Layout.StyleDurabilityFrame) then 
-		return 
-	end
-
-	self:DisableMappy(DurabilityFrame)
-	self:CreateHolder(DurabilityFrame, unpack(Layout.DurabilityFramePlace))
-	self:CreatePointHook(DurabilityFrame)
-
-	-- This will prevent the durability frame size from affecting other blizzard anchors
-	DurabilityFrame.IsShown = function() return false end
-end 
-
 Module.StyleErrorFrame = function(self)
 	local frame = UIErrorsFrame
 	frame:SetFrameStrata("LOW")
@@ -151,10 +115,7 @@ Module.StyleErrorFrame = function(self)
 end 
 
 Module.StyleQuestTimerFrame = function(self)
-	if (not Layout.StyleQuestTimerFrame) then 
-		return 
-	end 
-	self:CreateHolder(QuestTimerFrame, unpack(Layout.QuestTimerFramePlace))
+	self:CreateHolder(QuestTimerFrame, unpack(self.layout.QuestTimerFramePlace))
 	self:CreatePointHook(QuestTimerFrame)
 end
 
@@ -179,17 +140,12 @@ Module.OnEvent = function(self, event, ...)
 	end
 end
 
-Module.PreInit = function(self)
-	local PREFIX = Core:GetPrefix()
-	Layout = Wheel("LibDB"):GetDatabase(PREFIX..":[BlizzardFloaterHUD]")
-end 
-
 Module.OnInit = function(self)
-	self.db = self:NewConfig("FloaterHUD", defaults, "global")
+	self.db = GetConfig(self:GetName())
+	self.layout = GetLayout(self:GetName())
 end 
 
 Module.OnEnable = function(self)
-	self:StyleDurabilityFrame()
 	self:StyleErrorFrame()
 	self:StyleQuestTimerFrame()
 end
