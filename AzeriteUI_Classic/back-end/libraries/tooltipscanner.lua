@@ -1,4 +1,4 @@
-local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 42)
+local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 43)
 if (not LibTooltipScanner) then	
 	return
 end
@@ -307,6 +307,48 @@ end
 -- *Methods can provide an optional table
 --  to be populated by the retrieved data.
 
+LibTooltipScanner.IsActionItem = function(self, actionSlot, tbl)
+	if HasAction(actionSlot) then 
+		local actionType, id = GetActionInfo(actionSlot)
+		if (actionType == "item") then 
+			return true
+
+		elseif (actionType == "macro") then 
+			ClearScanner()
+
+			Scanner:SetAction(actionSlot)
+
+			local numLines = Scanner:NumLines() 
+			for lineIndex = 2, (numLines < 4) and numLines or 4 do 
+				local line = _G[ScannerName.."TextLeft"..lineIndex]
+				if (line) then 
+					local msg = line:GetText()
+
+					-- item binds
+					local id = 1
+					while Patterns["ItemBind"..id] do 
+						if (string_find(msg, Patterns["ItemBind"..id])) then 
+							return true
+						end 
+						id = id + 1
+					end 
+
+					-- item unique stats
+					if (not isMacroItem) then
+						id = 1
+						while Patterns["ItemUnique"..id] do 
+							if (string_find(msg, Patterns["ItemUnique"..id])) then 
+								return true
+							end 
+							id = id + 1
+						end 
+					end
+				end
+			end
+		end
+	end
+end
+
 LibTooltipScanner.GetTooltipDataForAction = function(self, actionSlot, tbl)
 	ClearScanner()
 
@@ -327,8 +369,7 @@ LibTooltipScanner.GetTooltipDataForAction = function(self, actionSlot, tbl)
 	if HasAction(actionSlot) then 
 
 		-- Switch to action item function if the action contains an item
-		local actionType, id = GetActionInfo(actionSlot)
-		if (actionType == "item") then 
+		if (self:IsActionItem(actionSlot)) then 
 			return self:GetTooltipDataForActionItem(actionSlot)
 		end 
 
@@ -2103,7 +2144,8 @@ local embedMethods = {
 	GetTooltipDataForInventorySlot = true, 
 	GetTooltipDataForInboxItem = true,
 	GetTooltipDataForSpellID = true,
-	GetTooltipDataForTrackingSpell = true
+	GetTooltipDataForTrackingSpell = true,
+	IsActionItem = true
 }
 
 LibTooltipScanner.Embed = function(self, target)

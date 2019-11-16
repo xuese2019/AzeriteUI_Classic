@@ -1,4 +1,4 @@
-local LibTooltip = Wheel:Set("LibTooltip", 67)
+local LibTooltip = Wheel:Set("LibTooltip", 68)
 if (not LibTooltip) then
 	return
 end
@@ -1045,8 +1045,7 @@ Tooltip.SetAction = function(self, slot)
 	end
 
 	-- Switch to item function if the action is an item
-	local actionType, id = GetActionInfo(slot)
-	if (actionType == "item") then 
+	if (self:IsActionItem(slot)) then 
 		return self:SetActionItem(slot)
 	end 
 
