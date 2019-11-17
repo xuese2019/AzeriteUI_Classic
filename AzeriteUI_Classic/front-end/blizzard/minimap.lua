@@ -55,8 +55,9 @@ local longXPString = "%s / %s"
 local fullXPString = "%s / %s (%s)"
 local restedString = " (%s%% %s)"
 local shortLevelString = "%s %.0f"
+
+-- Constant to track player level
 local LEVEL = UnitLevel("player")
-local maxRested = select(2, UnitRace("player")) == "Pandaren" and 3 or 1.5
 
 ----------------------------------------------------
 -- Utility Functions
@@ -200,7 +201,7 @@ local Toggle_UpdateTooltip = function(toggle)
 
 		-- add rested bonus if it exists
 		if (restedLeft and (restedLeft > 0)) then
-			tooltip:AddDoubleLine(L["Rested Bonus: "], fullXPString:format(normal..short(restedLeft)..NC, normal..short(max * maxRested)..NC, highlight..math_floor(restedLeft/(max * maxRested)*100).."%"..NC), rh, gh, bh, rgg, ggg, bgg)
+			tooltip:AddDoubleLine(L["Rested Bonus: "], fullXPString:format(normal..short(restedLeft)..NC, normal..short(max * 1.5)..NC, highlight..math_floor(restedLeft/(max * 1.5)*100).."%"..NC), rh, gh, bh, rgg, ggg, bgg)
 		end
 		
 		if (restState == 1) then
