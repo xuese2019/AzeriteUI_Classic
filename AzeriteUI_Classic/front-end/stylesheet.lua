@@ -1029,153 +1029,6 @@ local SmallFrame_CastBarPostUpdate = function(element, unit)
 	end 
 end
 
-------------------------------------------------
--- Module Stylesheets
-------------------------------------------------
--- ActionBars
-local ActionBars = {
-	Colors = Colors,
-
-	-- Button Tooltips
-	-------------------------------------------------------
-	UseTooltipSettings = true, 
-		TooltipColorNameAsSpellWithUse = true, -- color item name as a spell (not by rarity) when it has a Use effect
-		TooltipHideItemLevelWithUse = true, -- hide item level when it has a Use effect 
-		TooltipHideBindsWithUse = true, -- hide item bind status when it has a Use effect
-		TooltipHideEquipTypeWithUse = false, -- hide item equip location and item type with Use effect
-		TooltipHideUniqueWithUse = true, -- hide item unique status when it has a Use effect
-		TooltipHideStatsWithUse = true, -- hide item stats when it has a Use effect
-
-	-- Bar Layout
-	-------------------------------------------------------
-	UseActionBarMenu = true, 
-
-	-- Button Layout
-	-------------------------------------------------------
-	-- Generic
-	ButtonSize = { 64, 64 },
-	ButtonHitRects = { -4, -4, -4, -4 },
-	MaskTexture = GetMedia("actionbutton_circular_mask"),
-
-	-- Icon
-	IconSize = { 44, 44 },
-	IconPlace = { "CENTER", 0, 0 },
-
-	-- Button Pushed Icon Overlay
-	PushedSize = { 44, 44 },
-	PushedPlace = { "CENTER", 0, 0 },
-	PushedColor = { 1, 1, 1, .15 },
-	PushedDrawLayer = { "ARTWORK", 1 },
-	PushedBlendMode = "ADD",
-
-	-- Checked (abilities waiting to happen)
-	CheckedSize = { 44, 44 },
-	CheckedPlace = { "CENTER", 0, 0 },
-	CheckedColor = { .9, .8, .1, .3 },
-	CheckedDrawLayer = { "ARTWORK", 2 },
-	CheckedBlendMode = "ADD",
-
-	-- Auto-Attack Flash
-	FlashSize = { 44, 44 },
-	FlashPlace = { "CENTER", 0, 0 },
-	FlashColor = { 1, 0, 0, .25 },
-	FlashTexture = [[Interface\ChatFrame\ChatFrameBackground]],
-	FlashDrawLayer = { "ARTWORK", 2 },
-
-	-- Cooldown Count Number
-	CooldownCountPlace = { "CENTER", 1, 0 },
-	CooldownCountJustifyH = "CENTER",
-	CooldownCountJustifyV = "MIDDLE",
-	CooldownCountFont = GetFont(16, true),
-	CooldownCountShadowOffset = { 0, 0 },
-	CooldownCountShadowColor = { 0, 0, 0, 1 },
-	CooldownCountColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .85 },
-
-	-- Cooldown 
-	CooldownSize = { 44, 44 },
-	CooldownPlace = { "CENTER", 0, 0 },
-	CooldownSwipeTexture = GetMedia("actionbutton_circular_mask"),
-	CooldownBlingTexture = GetMedia("blank"),
-	CooldownSwipeColor = { 0, 0, 0, .75 },
-	CooldownBlingColor = { 0, 0, 0 , 0 },
-	ShowCooldownSwipe = true,
-	ShowCooldownBling = true,
-
-	-- Charge Cooldown 
-	ChargeCooldownSize = { 44, 44 },
-	ChargeCooldownPlace = { "CENTER", 0, 0 },
-	ChargeCooldownSwipeColor = { 0, 0, 0, .5 },
-	ChargeCooldownBlingColor = { 0, 0, 0, 0 },
-	ChargeCooldownSwipeTexture = GetMedia("actionbutton_circular_mask"),
-	ChargeCooldownBlingTexture = GetMedia("blank"),
-	ShowChargeCooldownSwipe = true,
-	ShowChargeCooldownBling = false,
-
-	-- Charge Count / Stack Size Text
-	CountPlace = { "BOTTOMRIGHT", -3, 3 },
-	CountJustifyH = "CENTER",
-	CountJustifyV = "BOTTOM",
-	CountFont = GetFont(18, true),
-	CountShadowOffset = { 0, 0 },
-	CountShadowColor = { 0, 0, 0, 1 },
-	CountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
-	CountMaxDisplayed = 99,
-	CountPostUpdate = ActionButton_StackCount_PostUpdate, 
-
-	-- Keybind Text
-	KeybindPlace = { "TOPLEFT", 5, -5 },
-	KeybindJustifyH = "CENTER",
-	KeybindJustifyV = "BOTTOM",
-	KeybindFont = GetFont(15, true),
-	KeybindShadowOffset = { 0, 0 },
-	KeybindShadowColor = { 0, 0, 0, 1 },
-	KeybindColor = { Colors.quest.gray[1], Colors.quest.gray[2], Colors.quest.gray[3], .75 },
-
-	-- Spell AutoCast
-	UseSpellAutoCast = true, 
-		SpellAutoCastPlace = { "CENTER", 0, 0 },
-		SpellAutoCastSize = { 64/(122/256), 64/(122/256) },
-		SpellAutoCastAntsTexture = GetMedia("actionbutton-ants-small"),
-		SpellAutoCastAntsColor = { Colors.cast[1], Colors.cast[2], Colors.cast[3] },
-		SpellAutoCastGlowTexture = GetMedia("actionbutton-ants-small-glow"),
-		SpellAutoCastGlowColor = { Colors.cast[1], Colors.cast[2], Colors.cast[3] },
-
-	-- Backdrop 
-	UseBackdropTexture = true, 
-		BackdropPlace = { "CENTER", 0, 0 },
-		BackdropSize = { 64/(122/256), 64/(122/256) },
-		BackdropTexture = GetMedia("actionbutton-backdrop"),
-		BackdropDrawLayer = { "BACKGROUND", 1 },
-
-	-- Border 
-	UseBorderTexture = true, 
-		BorderPlace = { "CENTER", 0, 0 },
-		BorderSize = { 64/(122/256), 64/(122/256) },
-		BorderTexture = GetMedia("actionbutton-border"),
-		BorderDrawLayer = { "BORDER", 1 },
-		BorderColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3], 1 },
-
-	-- Gloss
-	UseGlow = true, 
-		GlowPlace = { "CENTER", 0, 0 },
-		GlowSize = { 44/(122/256),44/(122/256) },
-		GlowTexture = GetMedia("actionbutton-glow-white"),
-		GlowDrawLayer = { "ARTWORK", 1 },
-		GlowBlendMode = "ADD",
-		GlowColor = { 1, 1, 1, .5 },
-
-	-- Floaters
-	-------------------------------------------------------
-	UseExitButton = true, 
-		--ExitButtonPlace = { "CENTER", "Minimap", "TOPLEFT", 14,-36 }, 
-		ExitButtonPlace = { "CENTER", "Minimap", "CENTER", -math_cos(45*math_pi/180) * (213/2 + 10), math_sin(45*math_pi/180) * (213/2 + 10) }, 
-		ExitButtonSize = { 32, 32 },
-		ExitButtonTexturePlace = { "CENTER", 0, 0 }, 
-		ExitButtonTextureSize = { 80, 80 }, 
-		ExitButtonTexturePath = GetMedia("icon_exit_flight")
-
-}
-
 -- Little trick to see the layout and dimensions of the blip icons
 --local f = UIParent:CreateTexture()
 --f:SetTexture([[Interface\MiniMap\ObjectIconsAtlas.blp]]) 
@@ -2307,7 +2160,6 @@ local UnitFrameBoss = setmetatable({
 
 }, { __index = Template_SmallFrameReversed_Auras })
 
-LibDB:NewDatabase(ADDON..":[ActionBarMain]", ActionBars)
 LibDB:NewDatabase(ADDON..":[UnitFramePlayer]", UnitFramePlayer)
 LibDB:NewDatabase(ADDON..":[UnitFramePet]", UnitFramePet)
 LibDB:NewDatabase(ADDON..":[UnitFrameTarget]", UnitFrameTarget)
@@ -2344,6 +2196,36 @@ Defaults[ADDON] = {
 }
 
 Defaults.BlizzardFloaterHUD = {
+}
+
+Defaults.ActionBarMain = {
+
+	-- unlock buttons
+	buttonLock = true, 
+
+	-- Valid range is 0 to 17. anything outside will be limited to this range. 
+	extraButtonsCount = 5, -- default this to a full standard bar, just to make it slightly easier for people
+
+	-- Valid values are 'always','hover','combat'
+	extraButtonsVisibility = "combat", -- defaulting this to combat, so new users can access their full default bar
+
+	-- Whether actions are performed when pressing the button or releasing it
+	castOnDown = true,
+
+	-- TODO! 
+	-- *Options below are not yet implemented!
+
+	-- Modifier keys required to drag spells, 
+	-- if none are selected, buttons aren't locked. 
+	dragRequireAlt = true, 
+	dragRequireCtrl = true, 
+	dragRequireShift = true, 
+
+	petBarEnabled = true, 
+	petBarVisibility = "hover",
+
+	stanceBarEnabled = true, 
+	stanceBarVisibility = "hover"
 }
 
 Defaults.Minimap = {
@@ -2586,6 +2468,135 @@ Layouts.BlizzardTooltips = {
 
 -- Blizzard World Map
 Layouts.BlizzardWorldMap = {}
+
+-- ActionBars
+Layouts.ActionBarMain = {
+
+	-- Button Tooltips
+	-------------------------------------------------------
+	TooltipColorNameAsSpellWithUse = true, -- color item name as a spell (not by rarity) when it has a Use effect
+	TooltipHideItemLevelWithUse = true, -- hide item level when it has a Use effect 
+	TooltipHideBindsWithUse = true, -- hide item bind status when it has a Use effect
+	TooltipHideEquipTypeWithUse = false, -- hide item equip location and item type with Use effect
+	TooltipHideUniqueWithUse = true, -- hide item unique status when it has a Use effect
+	TooltipHideStatsWithUse = true, -- hide item stats when it has a Use effect
+
+	-- Button Layout
+	-------------------------------------------------------
+	-- Generic
+	ButtonSize = { 64, 64 },
+	ButtonHitRects = { -4, -4, -4, -4 },
+	MaskTexture = GetMedia("actionbutton_circular_mask"),
+
+	-- Icon
+	IconSize = { 44, 44 },
+	IconPlace = { "CENTER", 0, 0 },
+
+	-- Button Pushed Icon Overlay
+	PushedSize = { 44, 44 },
+	PushedPlace = { "CENTER", 0, 0 },
+	PushedColor = { 1, 1, 1, .15 },
+	PushedDrawLayer = { "ARTWORK", 1 },
+	PushedBlendMode = "ADD",
+
+	-- Checked (abilities waiting to happen)
+	CheckedSize = { 44, 44 },
+	CheckedPlace = { "CENTER", 0, 0 },
+	CheckedColor = { .9, .8, .1, .3 },
+	CheckedDrawLayer = { "ARTWORK", 2 },
+	CheckedBlendMode = "ADD",
+
+	-- Auto-Attack Flash
+	FlashSize = { 44, 44 },
+	FlashPlace = { "CENTER", 0, 0 },
+	FlashColor = { 1, 0, 0, .25 },
+	FlashTexture = [[Interface\ChatFrame\ChatFrameBackground]],
+	FlashDrawLayer = { "ARTWORK", 2 },
+
+	-- Cooldown Count Number
+	CooldownCountPlace = { "CENTER", 1, 0 },
+	CooldownCountJustifyH = "CENTER",
+	CooldownCountJustifyV = "MIDDLE",
+	CooldownCountFont = GetFont(16, true),
+	CooldownCountShadowOffset = { 0, 0 },
+	CooldownCountShadowColor = { 0, 0, 0, 1 },
+	CooldownCountColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .85 },
+
+	-- Cooldown 
+	CooldownSize = { 44, 44 },
+	CooldownPlace = { "CENTER", 0, 0 },
+	CooldownSwipeTexture = GetMedia("actionbutton_circular_mask"),
+	CooldownBlingTexture = GetMedia("blank"),
+	CooldownSwipeColor = { 0, 0, 0, .75 },
+	CooldownBlingColor = { 0, 0, 0 , 0 },
+	ShowCooldownSwipe = true,
+	ShowCooldownBling = true,
+
+	-- Charge Cooldown 
+	ChargeCooldownSize = { 44, 44 },
+	ChargeCooldownPlace = { "CENTER", 0, 0 },
+	ChargeCooldownSwipeColor = { 0, 0, 0, .5 },
+	ChargeCooldownBlingColor = { 0, 0, 0, 0 },
+	ChargeCooldownSwipeTexture = GetMedia("actionbutton_circular_mask"),
+	ChargeCooldownBlingTexture = GetMedia("blank"),
+	ShowChargeCooldownSwipe = true,
+	ShowChargeCooldownBling = false,
+
+	-- Charge Count / Stack Size Text
+	CountPlace = { "BOTTOMRIGHT", -3, 3 },
+	CountJustifyH = "CENTER",
+	CountJustifyV = "BOTTOM",
+	CountFont = GetFont(18, true),
+	CountShadowOffset = { 0, 0 },
+	CountShadowColor = { 0, 0, 0, 1 },
+	CountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
+	CountMaxDisplayed = 99,
+	CountPostUpdate = ActionButton_StackCount_PostUpdate, 
+
+	-- Keybind Text
+	KeybindPlace = { "TOPLEFT", 5, -5 },
+	KeybindJustifyH = "CENTER",
+	KeybindJustifyV = "BOTTOM",
+	KeybindFont = GetFont(15, true),
+	KeybindShadowOffset = { 0, 0 },
+	KeybindShadowColor = { 0, 0, 0, 1 },
+	KeybindColor = { Colors.quest.gray[1], Colors.quest.gray[2], Colors.quest.gray[3], .75 },
+
+	-- Spell AutoCast
+	SpellAutoCastPlace = { "CENTER", 0, 0 },
+	SpellAutoCastSize = { 64/(122/256), 64/(122/256) },
+	SpellAutoCastAntsTexture = GetMedia("actionbutton-ants-small"),
+	SpellAutoCastAntsColor = { Colors.cast[1], Colors.cast[2], Colors.cast[3] },
+	SpellAutoCastGlowTexture = GetMedia("actionbutton-ants-small-glow"),
+	SpellAutoCastGlowColor = { Colors.cast[1], Colors.cast[2], Colors.cast[3] },
+
+	-- Backdrop 
+	BackdropPlace = { "CENTER", 0, 0 },
+	BackdropSize = { 64/(122/256), 64/(122/256) },
+	BackdropTexture = GetMedia("actionbutton-backdrop"),
+	BackdropDrawLayer = { "BACKGROUND", 1 },
+
+	-- Border 
+	BorderPlace = { "CENTER", 0, 0 },
+	BorderSize = { 64/(122/256), 64/(122/256) },
+	BorderTexture = GetMedia("actionbutton-border"),
+	BorderDrawLayer = { "BORDER", 1 },
+	BorderColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3], 1 },
+
+	-- Gloss
+	GlowPlace = { "CENTER", 0, 0 },
+	GlowSize = { 44/(122/256),44/(122/256) },
+	GlowTexture = GetMedia("actionbutton-glow-white"),
+	GlowDrawLayer = { "ARTWORK", 1 },
+	GlowBlendMode = "ADD",
+	GlowColor = { 1, 1, 1, .5 },
+
+	ExitButtonPlace = { "CENTER", "Minimap", "CENTER", -math_cos(45*math_pi/180) * (213/2 + 10), math_sin(45*math_pi/180) * (213/2 + 10) }, 
+	ExitButtonSize = { 32, 32 },
+	ExitButtonTexturePlace = { "CENTER", 0, 0 }, 
+	ExitButtonTextureSize = { 80, 80 }, 
+	ExitButtonTexturePath = GetMedia("icon_exit_flight")
+}
 
 -- Bind Mode
 Layouts.Bindings = {

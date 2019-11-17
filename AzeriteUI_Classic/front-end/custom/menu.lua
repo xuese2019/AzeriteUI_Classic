@@ -756,22 +756,22 @@ Module.CreateMenuTable = function(self)
 					buttons = {
 						{
 							title = L["No Extra Buttons"], type = "SET_VALUE", 
-							configDB = "ActionBars", configKey = "extraButtonsCount", optionArgs = { 0 }, 
+							configDB = "ActionBarMain", configKey = "extraButtonsCount", optionArgs = { 0 }, 
 							proxyModule = "ActionBarMain"
 						},
 						{
 							title = L["+%.0f Buttons"]:format(5), type = "SET_VALUE", 
-							configDB = "ActionBars", configKey = "extraButtonsCount", optionArgs = { 5 }, 
+							configDB = "ActionBarMain", configKey = "extraButtonsCount", optionArgs = { 5 }, 
 							proxyModule = "ActionBarMain"
 						},
 						{
 							title = L["+%.0f Buttons"]:format(11), type = "SET_VALUE", 
-							configDB = "ActionBars", configKey = "extraButtonsCount", optionArgs = { 11 }, 
+							configDB = "ActionBarMain", configKey = "extraButtonsCount", optionArgs = { 11 }, 
 							proxyModule = "ActionBarMain"
 						},
 						{
 							title = L["+%.0f Buttons"]:format(17), type = "SET_VALUE", 
-							configDB = "ActionBars", configKey = "extraButtonsCount", optionArgs = { 17 }, 
+							configDB = "ActionBarMain", configKey = "extraButtonsCount", optionArgs = { 17 }, 
 							proxyModule = "ActionBarMain"
 						}
 					}
@@ -782,19 +782,19 @@ Module.CreateMenuTable = function(self)
 						{
 							title = L["MouseOver"], 
 							type = "SET_VALUE", 
-							configDB = "ActionBars", configKey = "extraButtonsVisibility", optionArgs = { "hover" }, 
+							configDB = "ActionBarMain", configKey = "extraButtonsVisibility", optionArgs = { "hover" }, 
 							proxyModule = "ActionBarMain"
 						},
 						{
 							title = L["MouseOver + Combat"], 
 							type = "SET_VALUE", 
-							configDB = "ActionBars", configKey = "extraButtonsVisibility", optionArgs = { "combat" }, 
+							configDB = "ActionBarMain", configKey = "extraButtonsVisibility", optionArgs = { "combat" }, 
 							proxyModule = "ActionBarMain"
 						},
 						{
 							title = L["Always Visible"], 
 							type = "SET_VALUE", 
-							configDB = "ActionBars", configKey = "extraButtonsVisibility", optionArgs = { "always" }, 
+							configDB = "ActionBarMain", configKey = "extraButtonsVisibility", optionArgs = { "always" }, 
 							proxyModule = "ActionBarMain"
 						}
 					}
@@ -803,7 +803,7 @@ Module.CreateMenuTable = function(self)
 					enabledTitle = L_ENABLED:format(L["Cast on Down"]),
 					disabledTitle = L_DISABLED:format(L["Cast on Down"]),
 					type = "TOGGLE_VALUE", hasWindow = false, 
-					configDB = "ActionBars", configKey = "castOnDown", 
+					configDB = "ActionBarMain", configKey = "castOnDown", 
 					proxyModule = "ActionBarMain"
 				}
 			}
@@ -823,7 +823,7 @@ Module.CreateMenuTable = function(self)
 			enabledTitle = L_ENABLED:format(L["Button Lock"]),
 			disabledTitle = L_DISABLED:format(L["Button Lock"]),
 			type = "TOGGLE_VALUE", hasWindow = false, 
-			configDB = "ActionBars", configKey = "buttonLock", 
+			configDB = "ActionBarMain", configKey = "buttonLock", 
 			proxyModule = "ActionBarMain"
 		})
 		table_insert(MenuTable, ActionBarMenu)
