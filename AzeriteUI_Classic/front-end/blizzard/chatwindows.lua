@@ -1,14 +1,11 @@
 local ADDON, Private = ...
-
 local Core = Wheel("LibModule"):GetModule(ADDON)
 if (not Core) then 
 	return 
 end
 
-local Module = Core:NewModule("ChatWindows", "LibMessage", "LibEvent", "LibDB", "LibFrame", "LibHook", "LibSecureHook", "LibChatWindow")
+local Module = Core:NewModule("BlizzardChatFrames", "LibMessage", "LibEvent", "LibDB", "LibFrame", "LibHook", "LibSecureHook", "LibChatWindow")
 Module:SetIncompatible("Prat-3.0")
-
-local Layout
 
 -- Lua API
 local _G = _G
@@ -30,6 +27,7 @@ local VoiceChat_IsLoggedIn = _G.C_VoiceChat and _G.C_VoiceChat.IsLoggedIn
 
 -- Private API
 local GetConfig = Private.GetConfig
+local GetLayout = Private.GetLayout
 
 local alphaLocks = {}
 local scaffolds = {}
@@ -176,15 +174,16 @@ Module.PostCreateTemporaryChatWindow = function(self, frame, ...)
 end 
 
 Module.PostCreateChatWindow = function(self, frame)
+	local layout = self.layout
 
 	-- Window
 	------------------------------
-	frame:SetFading(Layout.ChatFadeTime)
-	frame:SetTimeVisible(Layout.ChatVisibleTime)
-	frame:SetIndentedWordWrap(Layout.ChatIndentedWordWrap) 
+	frame:SetFading(layout.ChatFadeTime)
+	frame:SetTimeVisible(layout.ChatVisibleTime)
+	frame:SetIndentedWordWrap(layout.ChatIndentedWordWrap) 
 
 	-- just lock all frames away from our important objects
-	frame:SetClampRectInsets(unpack(Layout.DefaultClampRectInsets))
+	frame:SetClampRectInsets(unpack(layout.DefaultClampRectInsets))
 
 	-- Set the frame's alpha and color
 	FCF_SetWindowColor(frame, 0, 0, 0, 0)
@@ -289,10 +288,10 @@ Module.PostCreateChatWindow = function(self, frame)
 	local editBox = self:GetChatWindowEditBox(frame)
 	editBox:Hide()
 	editBox:SetAltArrowKeyMode(false) 
-	editBox:SetHeight(Layout.EditBoxHeight)
+	editBox:SetHeight(layout.EditBoxHeight)
 	editBox:ClearAllPoints()
-	editBox:SetPoint("LEFT", frame, "LEFT", -Layout.EditBoxOffsetH, 0)
-	editBox:SetPoint("RIGHT", frame, "RIGHT", Layout.EditBoxOffsetH, 0)
+	editBox:SetPoint("LEFT", frame, "LEFT", -layout.EditBoxOffsetH, 0)
+	editBox:SetPoint("RIGHT", frame, "RIGHT", layout.EditBoxOffsetH, 0)
 	editBox:SetPoint("TOP", frame, "BOTTOM", 0, -1)
 
 	-- do any editBox backdrop styling here
@@ -327,7 +326,7 @@ Module.PostCreateChatWindow = function(self, frame)
 	-- ButtonFrame
 	------------------------------
 	local buttonFrame = self:GetChatWindowButtonFrame(frame)
-	buttonFrame:SetWidth(Layout.ButtonFrameWidth)
+	buttonFrame:SetWidth(layout.ButtonFrameWidth)
 
 	for tex in self:GetChatWindowButtonFrameTextures(frame) do 
 		tex:SetTexture(nil)
@@ -422,22 +421,22 @@ Module.PostCreateChatWindow = function(self, frame)
 	------------------------------
 	local minimizeButton = self:GetChatWindowMinimizeButton(frame)
 	if minimizeButton then 
-		self:SetUpButton(minimizeButton, Layout.ButtonTextureMinimizeButton)
+		self:SetUpButton(minimizeButton, layout.ButtonTextureMinimizeButton)
 	end 
 
 	local scrollUpButton = self:GetChatWindowScrollUpButton(frame)
 	if scrollUpButton then 
-		self:SetUpButton(scrollUpButton, Layout.ButtonTextureScrollUpButton)
+		self:SetUpButton(scrollUpButton, layout.ButtonTextureScrollUpButton)
 	end 
 
 	local scrollDownButton = self:GetChatWindowScrollDownButton(frame)
 	if scrollDownButton then 
-		self:SetUpButton(scrollDownButton, Layout.ButtonTextureScrollDownButton)
+		self:SetUpButton(scrollDownButton, layout.ButtonTextureScrollDownButton)
 	end 
 
 	local scrollToBottomButton = self:GetChatWindowScrollToBottomButton(frame)
 	if scrollToBottomButton then 
-		self:SetUpButton(scrollToBottomButton, Layout.ButtonTextureScrollToBottomButton)
+		self:SetUpButton(scrollToBottomButton, layout.ButtonTextureScrollToBottomButton)
 	end 
 
 end 
@@ -514,6 +513,7 @@ Module.SetUPBNToastFrame = function(self)
 end
 
 Module.SetUpMainFrames = function(self)
+	local layout = self.layout
 
 	-- Create a holder frame for our main chat window,
 	-- which we'll use to move and size the window without 
@@ -524,8 +524,8 @@ Module.SetUpMainFrames = function(self)
 	-- and any scaling later on is applied to that pixel font, 
 	-- not to the original vector font. 
 	local frame = self:CreateFrame("Frame", nil, "UICenter")
-	frame:SetPoint(unpack(Layout.DefaultChatFramePlace))
-	frame:SetSize(unpack(Layout.DefaultChatFrameSize))
+	frame:SetPoint(unpack(layout.DefaultChatFramePlace))
+	frame:SetSize(unpack(layout.DefaultChatFrameSize))
 	self.frame = frame
 
 	self:HandleAllChatWindows()
@@ -545,49 +545,47 @@ Module.SetUpMainFrames = function(self)
 end 
 
 Module.SetUpButton = function(self, button, texture)
-	if (not Layout.UseButtonTextures) then 
-		return 
-	end 
+	local layout = self.layout
 
 	local normal = button:GetNormalTexture()
-	normal:SetTexture(texture or Layout.ButtonTextureNormal)
-	normal:SetVertexColor(unpack(Layout.ButtonTextureColor))
+	normal:SetTexture(texture or layout.ButtonTextureNormal)
+	normal:SetVertexColor(unpack(layout.ButtonTextureColor))
 	normal:ClearAllPoints()
 	normal:SetPoint("CENTER", 0, 0)
-	normal:SetSize(unpack(Layout.ButtonTextureSize))
+	normal:SetSize(unpack(layout.ButtonTextureSize))
 
 	local highlight = button:GetHighlightTexture()
-	highlight:SetTexture(texture or Layout.ButtonTextureNormal)
+	highlight:SetTexture(texture or layout.ButtonTextureNormal)
 	highlight:SetVertexColor(1,1,1,.075)
 	highlight:ClearAllPoints()
 	highlight:SetPoint("CENTER", 0, 0)
-	highlight:SetSize(unpack(Layout.ButtonTextureSize))
+	highlight:SetSize(unpack(layout.ButtonTextureSize))
 	highlight:SetBlendMode("ADD")
 
 	local pushed = button:GetPushedTexture()
-	pushed:SetTexture(texture or Layout.ButtonTextureNormal)
-	pushed:SetVertexColor(unpack(Layout.ButtonTextureColor))
+	pushed:SetTexture(texture or layout.ButtonTextureNormal)
+	pushed:SetVertexColor(unpack(layout.ButtonTextureColor))
 	pushed:ClearAllPoints()
 	pushed:SetPoint("CENTER", -1, -2)
-	pushed:SetSize(unpack(Layout.ButtonTextureSize))
+	pushed:SetSize(unpack(layout.ButtonTextureSize))
 
 	local disabled = button:GetDisabledTexture()
 	if disabled then 
-		disabled:SetTexture(texture or Layout.ButtonTextureNormal)
-		disabled:SetVertexColor(unpack(Layout.ButtonTextureColor))
+		disabled:SetTexture(texture or layout.ButtonTextureNormal)
+		disabled:SetVertexColor(unpack(layout.ButtonTextureColor))
 		disabled:SetDesaturated(true)
 		disabled:ClearAllPoints()
 		disabled:SetPoint("CENTER", 0, 0)
-		disabled:SetSize(unpack(Layout.ButtonTextureSize))
+		disabled:SetSize(unpack(layout.ButtonTextureSize))
 	end 
 
 	local flash = button.Flash
 	if flash then 
-		flash:SetTexture(texture or Layout.ButtonTextureNormal)
+		flash:SetTexture(texture or layout.ButtonTextureNormal)
 		flash:SetVertexColor(1,1,1,.075)
 		flash:ClearAllPoints()
 		flash:SetPoint("CENTER", 0, 0)
-		flash:SetSize(unpack(Layout.ButtonTextureSize))
+		flash:SetSize(unpack(layout.ButtonTextureSize))
 		flash:SetBlendMode("ADD")
 	end 
 
@@ -607,6 +605,7 @@ Module.SetUpButton = function(self, button, texture)
 end 
 
 Module.SetUpMainButtons = function(self)
+	local layout = self.layout
 	local channelButton = self:GetChatWindowChannelButton()
 	if channelButton then 
 		self:SetUpButton(channelButton)
@@ -621,20 +620,21 @@ Module.SetUpMainButtons = function(self)
 	end 
 	local menuButton = self:GetChatWindowMenuButton()
 	if menuButton then 
-		self:SetUpButton(menuButton, Layout.ButtonTextureChatEmotes)
+		self:SetUpButton(menuButton, layout.ButtonTextureChatEmotes)
 	end 
 end 
 
 Module.UpdateChatDockPosition = function(self)
+	local layout = self.layout
 	local frame = self.frame 
 	if frame then 
 		local coreDB = GetConfig(ADDON)
 		if (coreDB and coreDB.enableHealerMode) then 
 			frame:ClearAllPoints()
-			frame:SetPoint(unpack(Layout.AlternateChatFramePlace))
+			frame:SetPoint(unpack(layout.AlternateChatFramePlace))
 		else 
 			frame:ClearAllPoints()
-			frame:SetPoint(unpack(Layout.DefaultChatFramePlace))
+			frame:SetPoint(unpack(layout.DefaultChatFramePlace))
 		end
 	end
 end
@@ -654,12 +654,8 @@ Module.OnEvent = function(self, event, ...)
 	end 
 end 
 
-Module.PreInit = function(self)
-	local PREFIX = Core:GetPrefix()
-	Layout = Wheel("LibDB"):GetDatabase(PREFIX..":[BlizzardChatFrames]")
-end
-
 Module.OnInit = function(self)
+	self.layout = GetLayout(self:GetName())
 	self:SetUpAlphaScripts()
 	self:SetUpScrollScripts()
 	self:SetUpMainFrames()

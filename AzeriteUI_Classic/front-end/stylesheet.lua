@@ -1176,37 +1176,6 @@ local ActionBars = {
 
 }
 
--- Blizzard Chat Frames
-local BlizzardChatFrames = {
-	Colors = Colors,
-
-	DefaultChatFramePlace = { "BOTTOMLEFT", 85, 350 }, -- "LEFT", 85, -60
-	DefaultChatFrameSize = { 499, 176 }, -- 519, 196
-	DefaultClampRectInsets = { -54, -54, -310, -350 },
-
-	AlternateChatFramePlace = { "TOPLEFT", 85, -64 },
-	AlternateChatFrameSize = { 499, 176 }, -- 519, 196
-	AlternateClampRectInsets = { -54, -54, -310, -350 },
-
-	ChatFadeTime = 5, 
-	ChatVisibleTime = 15, 
-	ChatIndentedWordWrap = false, 
-
-	EditBoxHeight = 45, 
-	EditBoxOffsetH = 15, 
-	
-	UseButtonTextures = true,
-		ButtonFrameWidth = 48, ScrollBarWidth = 32, 
-		ButtonTextureSize = { 64, 64 }, 
-		ButtonTextureColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
-		ButtonTextureNormal = GetMedia("point_block"),
-		ButtonTextureMinimizeButton = GetMedia("icon_chat_minus"),
-		ButtonTextureScrollUpButton = GetMedia("icon_chat_up"), 
-		ButtonTextureScrollDownButton = GetMedia("icon_chat_down"), 
-		ButtonTextureScrollToBottomButton = GetMedia("icon_chat_bottom"), 
-		ButtonTextureChatEmotes = GetMedia("config_button_emotes")
-}
-
 -- Little trick to see the layout and dimensions of the blip icons
 --local f = UIParent:CreateTexture()
 --f:SetTexture([[Interface\MiniMap\ObjectIconsAtlas.blp]]) 
@@ -2339,7 +2308,6 @@ local UnitFrameBoss = setmetatable({
 }, { __index = Template_SmallFrameReversed_Auras })
 
 LibDB:NewDatabase(ADDON..":[ActionBarMain]", ActionBars)
-LibDB:NewDatabase(ADDON..":[BlizzardChatFrames]", BlizzardChatFrames)
 LibDB:NewDatabase(ADDON..":[UnitFramePlayer]", UnitFramePlayer)
 LibDB:NewDatabase(ADDON..":[UnitFramePet]", UnitFramePet)
 LibDB:NewDatabase(ADDON..":[UnitFrameTarget]", UnitFrameTarget)
@@ -2462,6 +2430,34 @@ Layouts[ADDON] = {
 		MenuButtonSizeMod = .75, 
 		MenuButton_PostCreate = Core_MenuButton_PostCreate, 
 		MenuButton_PostUpdate = Core_MenuButton_PostUpdate
+}
+
+-- Blizzard Chat Frames
+Layouts.BlizzardChatFrames = {
+	DefaultChatFramePlace = { "BOTTOMLEFT", 85, 350 }, -- "LEFT", 85, -60
+	DefaultChatFrameSize = { 499, 176 }, -- 519, 196
+	DefaultClampRectInsets = { -54, -54, -310, -350 },
+
+	AlternateChatFramePlace = { "TOPLEFT", 85, -64 },
+	AlternateChatFrameSize = { 499, 176 }, -- 519, 196
+	AlternateClampRectInsets = { -54, -54, -310, -350 },
+
+	ChatFadeTime = 5, 
+	ChatVisibleTime = 15, 
+	ChatIndentedWordWrap = false, 
+
+	EditBoxHeight = 45, 
+	EditBoxOffsetH = 15, 
+	
+	ButtonFrameWidth = 48, ScrollBarWidth = 32, 
+	ButtonTextureSize = { 64, 64 }, 
+	ButtonTextureColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
+	ButtonTextureNormal = GetMedia("point_block"),
+	ButtonTextureMinimizeButton = GetMedia("icon_chat_minus"),
+	ButtonTextureScrollUpButton = GetMedia("icon_chat_up"), 
+	ButtonTextureScrollDownButton = GetMedia("icon_chat_down"), 
+	ButtonTextureScrollToBottomButton = GetMedia("icon_chat_bottom"), 
+	ButtonTextureChatEmotes = GetMedia("config_button_emotes")
 }
 
 -- Blizzard Floaters
