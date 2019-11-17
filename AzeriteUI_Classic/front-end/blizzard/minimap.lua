@@ -1299,33 +1299,24 @@ Module.OnEvent = function(self, event, ...)
 				LEVEL = level
 			end
 		end
-	end
-
-	if (event == "PLAYER_REGEN_ENABLED") then 
+	elseif (event == "PLAYER_REGEN_ENABLED") then 
 		self:UnregisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
 		self:UpdateMinimapSize()
 		return 
-	end
-
-	if (event == "PLAYER_ENTERING_WORLD") or (event == "VARIABLES_LOADED") then 
+	elseif (event == "PLAYER_ENTERING_WORLD") or (event == "VARIABLES_LOADED") then 
 		self:UpdateMinimapSize()
 		self:UpdateMinimapMask()
 		self:UpdateTracking()
-	end
-
-	if (event == "ADDON_LOADED") then 
+	elseif (event == "ADDON_LOADED") then 
 		local addon = ...
 		if (addon == "MBB") then 
 			self:SetUpMBB()
 			self:UnregisterEvent("ADDON_LOADED", "OnEvent")
 			return 
 		end 
-	end 
-
-	if (event == "UNIT_AURA") then 
+	elseif (event == "UNIT_AURA") then 
 		self:UpdateTracking()
 	end
-
 	self:UpdateBars()
 end 
 
