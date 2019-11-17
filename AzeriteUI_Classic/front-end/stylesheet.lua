@@ -21,21 +21,24 @@ local math_max = math.max
 local math_pi = math.pi 
 local math_sin = math.sin
 local setmetatable = setmetatable
+local string_format = string.format
+local string_gsub = string.gsub
+local string_match = string.match
 local tonumber = tonumber
 local tostring = tostring
 
 -- WoW API
-local GetCVarDefault = _G.GetCVarDefault
-local UnitCanAttack = _G.UnitCanAttack
-local UnitClassification = _G.UnitClassification
-local UnitExists = _G.UnitExists
-local UnitCastingInfo = _G.CastingInfo
-local UnitChannelInfo = _G.ChannelInfo
-local UnitIsDeadOrGhost = _G.UnitIsDeadOrGhost
-local UnitIsEnemy = _G.UnitIsEnemy
-local UnitIsPlayer = _G.UnitIsPlayer
-local UnitIsUnit = _G.UnitIsUnit
-local UnitLevel = _G.UnitLevel
+local GetCVarDefault = GetCVarDefault
+local UnitCanAttack = UnitCanAttack
+local UnitClassification = UnitClassification
+local UnitExists = UnitExists
+local UnitCastingInfo = CastingInfo
+local UnitChannelInfo = ChannelInfo
+local UnitIsDeadOrGhost = UnitIsDeadOrGhost
+local UnitIsEnemy = UnitIsEnemy
+local UnitIsPlayer = UnitIsPlayer
+local UnitIsUnit = UnitIsUnit
+local UnitLevel = UnitLevel
 
 -- Private Addon API
 local GetAuraFilterFunc = Private.GetAuraFilterFunc
@@ -67,6 +70,44 @@ local spellTypeColor = setmetatable({
 local degreesToRadiansConstant = 360 * 2*math_pi
 local degreesToRadians = function(degrees)
 	return degrees/degreesToRadiansConstant
+end 
+
+local getTimeStrings = function(h, m, suffix, useStandardTime, abbreviateSuffix)
+	if (useStandardTime) then 
+		return "%.0f:%02.0f |cff888888%s|r", h, m, abbreviateSuffix and string_match(suffix, "^.") or suffix
+	else 
+		return "%02.0f:%02.0f", h, m
+	end 
+end 
+
+local short = function(value)
+	value = tonumber(value)
+	if (not value) then return "" end
+	if (value >= 1e9) then
+		return ("%.1fb"):format(value / 1e9):gsub("%.?0+([kmb])$", "%1")
+	elseif (value >= 1e6) then
+		return ("%.1fm"):format(value / 1e6):gsub("%.?0+([kmb])$", "%1")
+	elseif (value >= 1e3) or (value <= -1e3) then
+		return ("%.1fk"):format(value / 1e3):gsub("%.?0+([kmb])$", "%1")
+	else
+		return tostring(math_floor(value))
+	end	
+end
+
+-- zhCN exceptions
+local gameLocale = GetLocale()
+if (gameLocale == "zhCN") then 
+	short = function(value)
+		value = tonumber(value)
+		if (not value) then return "" end
+		if (value >= 1e8) then
+			return ("%.1f亿"):format(value / 1e8):gsub("%.?0+([km])$", "%1")
+		elseif (value >= 1e4) or (value <= -1e3) then
+			return ("%.1f万"):format(value / 1e4):gsub("%.?0+([km])$", "%1")
+		else
+			return tostring(math_floor(value))
+		end 
+	end
 end 
 
 ------------------------------------------------
@@ -488,6 +529,16 @@ local GroupTools_Window_CreateBorder = function(self)
 	return border
 end
 
+local Minimap_Clock_OverrideValue = function(element, h, m, suffix)
+	element:SetFormattedText(getTimeStrings(h, m, suffix, element.useStandardTime, true))
+end 
+
+local Minimap_Coordinates_OverrideValue = function(element, x, y)
+	local xval = string_gsub(string_format("%.1f", x*100), "%.(.+)", "|cff888888.%1|r")
+	local yval = string_gsub(string_format("%.1f", y*100), "%.(.+)", "|cff888888.%1|r")
+	element:SetFormattedText("%s %s", xval, yval) 
+end 
+
 local Minimap_RingFrame_SingleRing_ValueFunc = function(Value, Handler) 
 	Value:ClearAllPoints()
 	Value:SetPoint("BOTTOM", Handler.Toggle.Frame.Bg, "CENTER", 2, -2)
@@ -499,10 +550,6 @@ local Minimap_RingFrame_OuterRing_ValueFunc = function(Value, Handler)
 	Value:SetPoint("TOP", Handler.Toggle.Frame.Bg, "CENTER", 1, -2)
 	Value:SetFontObject(GetFont(16, true)) 
 	Value.Description:Hide()
-end
-
-local Minimap_ZoneName_PlaceFunc = function(Handler) 
-	return "BOTTOMRIGHT", Handler.Clock, "BOTTOMLEFT", -8, 0 
 end
 
 local Minimap_Performance_PlaceFunc = function(performanceFrame, Handler)
@@ -518,6 +565,111 @@ end
 local Minimap_Performance_FrameRate_PlaceFunc = function(Handler) 
 	return "BOTTOM", Handler.Clock, "TOP", 0, 6 
 end 
+
+local Minimap_Rep_OverrideValue = function(element, current, min, max, factionName, standingID, standingLabel)
+	local value = element.Value or element:IsObjectType("FontString") and element 
+	local barMax = max - min 
+	local barValue = current - min
+	if value.showDeficit then 
+		if (barMax - barValue > 0) then 
+			value:SetFormattedText(short(barMax - barValue))
+		else 
+			value:SetText("100%")
+		end 
+	else 
+		value:SetFormattedText(short(current - min))
+	end
+	local percent = value.Percent
+	if percent then 
+		if (max - min > 0) then 
+			local percValue = math_floor((current - min)/(max - min)*100)
+			if (percValue > 0) then 
+				-- removing the percentage sign
+				percent:SetFormattedText("%.0f", percValue)
+			else 
+				percent:SetText(NEW) 
+			end 
+		else 
+			percent:SetText(NEW) 
+		end 
+	end 
+	if element.colorValue then 
+		local color = element._owner.colors.reaction[standingID]
+		value:SetTextColor(color[1], color[2], color[3])
+		if percent then 
+			percent:SetTextColor(color[1], color[2], color[3])
+		end 
+	end 
+end
+
+local Minimap_Rep_PostUpdate = function(element, current, min, max, factionName, standingID, standingLabel)
+	local description = element.Value and element.Value.Description
+	if description then 
+		if (standingID == MAX_REPUTATION_REACTION) then
+			description:SetText(standingLabel)
+		else
+			local nextStanding = standingID and _G["FACTION_STANDING_LABEL"..(standingID + 1)]
+			if nextStanding then 
+				description:SetFormattedText(L["to %s"], nextStanding)
+			else
+				description:SetText("")
+			end 
+		end 
+	end 
+end
+
+local Minimap_XP_OverrideValue = function(element, min, max, restedLeft, restedTimeLeft)
+	local value = element.Value or element:IsObjectType("FontString") and element 
+	if value.showDeficit then 
+		value:SetFormattedText(short(max - min))
+	else 
+		value:SetFormattedText(short(min))
+	end
+	local percent = value.Percent
+	if percent then 
+		if (max > 0) then 
+			local percValue = math_floor(min/max*100)
+			if (percValue > 0) then 
+				-- removing the percentage sign
+				percent:SetFormattedText("%.0f", percValue)
+			else 
+				percent:SetText(NEW)
+			end 
+		else 
+			percent:SetText(NEW)
+		end 
+	end 
+	if element.colorValue then 
+		local color
+		if restedLeft then 
+			local colors = element._owner.colors
+			color = colors.restedValue or colors.rested or colors.xpValue or colors.xp
+		else 
+			local colors = element._owner.colors
+			color = colors.xpValue or colors.xp
+		end 
+		value:SetTextColor(color[1], color[2], color[3])
+		if percent then 
+			percent:SetTextColor(color[1], color[2], color[3])
+		end 
+	end 
+end 
+
+local Minimap_XP_PostUpdate = function(element, min, max, restedLeft, restedTimeLeft)
+	local description = element.Value and element.Value.Description
+	if description then 
+		local level = LEVEL or UnitLevel("player")
+		if (level and (level > 0)) then 
+			description:SetFormattedText(L["to level %s"], level + 1)
+		else 
+			description:SetText("")
+		end 
+	end 
+end
+
+local Minimap_ZoneName_PlaceFunc = function(Handler) 
+	return "BOTTOMRIGHT", Handler.Clock, "BOTTOMLEFT", -8, 0 
+end
 
 local NamePlates_RaidTarget_PostUpdate = function(element, unit)
 	local self = element._owner
@@ -1127,107 +1279,6 @@ local BlizzardPopupStyling = {
 	PostUpdateAnchors = BlizzardPopup_Anchors_PostUpdate
 }
 
--- Group Leader Tools
-local GroupTools = {
-	Colors = Colors,
-
-	MenuPlace = { "TOPLEFT", "UICenter", "TOPLEFT", 22, -42 },
-	MenuAlternatePlace = { "BOTTOMLEFT", "UICenter", "BOTTOMLEFT", 22, 350 },
-	MenuSize = { 300*.75 +30, 410 }, 
-
-	MenuToggleButtonSize = { 48, 48 }, 
-	MenuToggleButtonPlace = { "TOPLEFT", "UICenter", "TOPLEFT", -18, -40 }, 
-	MenuToggleButtonAlternatePlace = { "BOTTOMLEFT", "UICenter", "BOTTOMLEFT", -18, 348 }, 
-	MenuToggleButtonIcon = GetMedia("raidtoolsbutton"), 
-	MenuToggleButtonIconPlace = { "CENTER", 0, 0 }, 
-	MenuToggleButtonIconSize = { 64*.75, 128*.75 }, 
-	MenuToggleButtonIconColor = { 1, 1, 1 }, 
-
-	UseMemberCount = true, 
-		MemberCountNumberPlace = { "TOP", 0, -20 }, 
-		MemberCountNumberJustifyH = "CENTER",
-		MemberCountNumberJustifyV = "MIDDLE", 
-		MemberCountNumberFont = GetFont(14, true),
-		MemberCountNumberColor = { Colors.title[1], Colors.title[2], Colors.title[3] },
-
-	UseRoleCount = true, 
-		RoleCountTankPlace = { "TOP", -70, -100 }, 
-		RoleCountTankFont = GetFont(14, true),
-		RoleCountTankColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] },
-		RoleCountTankTexturePlace = { "TOP", -70, -44 },
-		RoleCountTankTextureSize = { 64, 64 },
-		RoleCountTankTexture = GetMedia("grouprole-icons-tank"),
-		
-		RoleCountHealerPlace = { "TOP", 0, -100 }, 
-		RoleCountHealerFont = GetFont(14, true),
-		RoleCountHealerColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] },
-		RoleCountHealerTexturePlace = { "TOP", 0, -44 },
-		RoleCountHealerTextureSize = { 64, 64 },
-		RoleCountHealerTexture = GetMedia("grouprole-icons-heal"),
-
-		RoleCountDPSPlace = { "TOP", 70, -100 }, 
-		RoleCountDPSFont = GetFont(14, true),
-		RoleCountDPSColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] },
-		RoleCountDPSTexturePlace = { "TOP", 70, -44 },
-		RoleCountDPSTextureSize = { 64, 64 },
-		RoleCountDPSTexture = GetMedia("grouprole-icons-dps"),
-
-	UseRaidTargetIcons = true, 
-		RaidTargetIcon1Place = { "TOP", -80, -140 },
-		RaidTargetIcon2Place = { "TOP", -28, -140 },
-		RaidTargetIcon3Place = { "TOP",  28, -140 },
-		RaidTargetIcon4Place = { "TOP",  80, -140 },
-		RaidTargetIcon5Place = { "TOP", -80, -190 },
-		RaidTargetIcon6Place = { "TOP", -28, -190 },
-		RaidTargetIcon7Place = { "TOP",  28, -190 },
-		RaidTargetIcon8Place = { "TOP",  80, -190 },
-		RaidTargetIconsSize = { 48, 48 }, 
-		RaidRoleRaidTargetTexture = GetMedia("raid_target_icons"),
-		RaidRoleCancelTexture = nil,
-
-	UseRolePollButton = true, 
-		RolePollButtonPlace = { "TOP", 0, -260 }, 
-		RolePollButtonSize = { 300*.75, 50*.75 },
-		RolePollButtonTextFont = GetFont(14, false), 
-		RolePollButtonTextColor = { 0, 0, 0 }, 
-		RolePollButtonTextShadowColor = { 1, 1, 1, .5 }, 
-		RolePollButtonTextShadowOffset = { 0, -.85 }, 
-		RolePollButtonTextureSize = { 1024 *1/3 *.75, 256 *1/3 *.75 },
-		RolePollButtonTextureNormal = GetMedia("menu_button_disabled"), 
-	
-	UseReadyCheckButton = true, 
-		ReadyCheckButtonPlace = { "TOP", -30, -310 }, 
-		ReadyCheckButtonSize = { 300*.75 - 80, 50*.75 },
-		ReadyCheckButtonTextFont = GetFont(14, false), 
-		ReadyCheckButtonTextColor = { 0, 0, 0 }, 
-		ReadyCheckButtonTextShadowColor = { 1, 1, 1, .5 }, 
-		ReadyCheckButtonTextShadowOffset = { 0, -.85 }, 
-		ReadyCheckButtonTextureSize = { 1024 *1/3 *.75, 256 *1/3 *.75 },
-		ReadyCheckButtonTextureNormal = GetMedia("menu_button_smaller"), 
-		
-	UseWorldMarkerFlag = true, 
-		WorldMarkerFlagPlace = { "TOP", 88, -310 }, 
-		WorldMarkerFlagSize = { 70*.75, 50*.75 },
-		WorldMarkerFlagContentSize = { 32, 32 }, 
-		WorldMarkerFlagBackdropSize = { 512 *1/3 *.75, 256 *1/3 *.75 },
-		WorldMarkerFlagBackdropTexture = GetMedia("menu_button_tiny"), 
-
-	UseConvertButton = true, 
-		ConvertButtonPlace = { "TOP", 0, -360 }, 
-		ConvertButtonSize = { 300*.75, 50*.75 },
-		ConvertButtonTextFont = GetFont(14, false), 
-		ConvertButtonTextColor = { 0, 0, 0 }, 
-		ConvertButtonTextShadowColor = { 1, 1, 1, .5 }, 
-		ConvertButtonTextShadowOffset = { 0, -.85 }, 
-		ConvertButtonTextureSize = { 1024 *1/3 *.75, 256 *1/3 *.75 },
-		ConvertButtonTextureNormal = GetMedia("menu_button_disabled"), 
-
-	MenuWindow_CreateBorder = GroupTools_Window_CreateBorder,
-	PostCreateButton = GroupTools_Button_PostCreate, 
-	OnButtonDisable = GroupTools_Button_OnDisable, 
-	OnButtonEnable = GroupTools_Button_OnEnable
-}
-
 -- Little trick to see the layout and dimensions of the blip icons
 --local f = UIParent:CreateTexture()
 --f:SetTexture([[Interface\MiniMap\ObjectIconsAtlas.blp]]) 
@@ -1235,177 +1286,6 @@ local GroupTools = {
 --local g = UIParent:CreateTexture()
 --g:SetColorTexture(0,.7,0,.25)
 --g:SetAllPoints(f)
-
--- Minimap
-local Minimap = {
-	Colors = Colors,
-
-	Size = { 213, 213 }, 
-	Place = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -58, 59 }, 
-	MaskTexture = GetMedia("minimap_mask_circle_transparent"),
-
-	UseBlipTextures = true, 
-		BlipScale = 1.15, 
-		BlipTextures = {
-			["1.13.2"] = GetMedia("Blip-Nandini-New-113_2"),
-			["1.13.3"] = [[Interface\Minimap\ObjectIconsAtlas.blp]] -- Blizzard Fallback
-		},
-
-	UseCompass = true, 
-		CompassTexts = { L["N"] }, -- only setting the North tag text, as we don't want a full compass ( order is NESW )
-		CompassFont = GetFont(12, true), 
-		CompassColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .75 }, 
-		CompassRadiusInset = 10, -- move the text 10 points closer to the center of the map
-
-	UseMapBorder = true, 
-		MapBorderPlace = { "CENTER", 0, 0 }, 
-		MapBorderSize = { 419, 419 }, 
-		MapBorderTexture = GetMedia("minimap-border"),
-		MapBorderColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
-	
-	UseMapBackdrop = true, 
-		MapBackdropTexture = GetMedia("minimap_mask_circle"),
-		MapBackdropColor = { 0, 0, 0, .75 }, 
-
-	UseMapOverlay = true, 
-		MapOverlayTexture = GetMedia("minimap_mask_circle"),
-		MapOverlayColor = { 0, 0, 0, .15 },
-
-	-- Put XP and XP on the minimap!
-	UseStatusRings = true, 
-		RingFrameBackdropPlace = { "CENTER", 0, 0 },
-		RingFrameBackdropSize = { 413, 413 }, 
-		
-		-- Backdrops
-		RingFrameBackdropDrawLayer = { "BACKGROUND", 1 }, 
-		RingFrameBackdropColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
-		RingFrameBackdropTexture = GetMedia("minimap-onebar-backdrop"), 
-		RingFrameBackdropDoubleTexture = GetMedia("minimap-twobars-backdrop"), 
-
-		-- Single Ring
-		RingFrameSingleRingTexture = GetMedia("minimap-bars-single"), 
-		RingFrameSingleRingSparkSize = { 6,34 * 208/256 }, 
-		RingFrameSingleRingSparkInset = { 22 * 208/256 }, 
-		RingFrameSingleRingValueFunc = Minimap_RingFrame_SingleRing_ValueFunc,
-
-		-- Outer Ring
-		RingFrameOuterRingTexture = GetMedia("minimap-bars-two-outer"), 
-		RingFrameOuterRingSparkSize = { 6,20 * 208/256 }, 
-		RingFrameOuterRingSparkInset = { 15 * 208/256 }, 
-		RingFrameOuterRingValueFunc = Minimap_RingFrame_OuterRing_ValueFunc,
-
-		-- Outer Ring
-		OuterRingPlace = { "CENTER", 0, 2 }, 
-		OuterRingSize = { 208, 208 }, 
-		OuterRingClockwise = true, 
-		OuterRingDegreeOffset = 90*3 - 14,
-		OuterRingDegreeSpan = 360 - 14*2, 
-		OuterRingShowSpark = true, 
-		OuterRingSparkBlendMode = "ADD",
-		OuterRingSparkOffset = -1/10, 
-		OuterRingSparkFlash = { nil, nil, 1, 1 }, 
-		OuterRingColorXP = true,
-		OuterRingColorStanding = true,
-		OuterRingColorPower = true,
-		OuterRingColorValue = true,
-		OuterRingBackdropMultiplier = 1, 
-		OuterRingSparkMultiplier = 1, 
-		OuterRingValuePlace = { "CENTER", 0, -9 },
-		OuterRingValueJustifyH = "CENTER",
-		OuterRingValueJustifyV = "MIDDLE",
-		OuterRingValueFont = GetFont(15, true),
-		OuterRingValueShowDeficit = true, 
-		OuterRingValueDescriptionPlace = { "CENTER", 0, -(15/2 + 2) }, 
-		OuterRingValueDescriptionWidth = 100, 
-		OuterRingValueDescriptionColor = { Colors.quest.gray[1], Colors.quest.gray[2], Colors.quest.gray[3] }, 
-		OuterRingValueDescriptionJustifyH = "CENTER", 
-		OuterRingValueDescriptionJustifyV = "MIDDLE", 
-		OuterRingValueDescriptionFont = GetFont(12, true),
-		OuterRingValuePercentFont = GetFont(16, true),
-
-		-- Inner Ring
-		InnerRingPlace = { "CENTER", 0, 2 }, 
-		InnerRingSize = { 208, 208 }, 
-		InnerRingBarTexture = GetMedia("minimap-bars-two-inner"),
-		InnerRingClockwise = true, 
-		InnerRingDegreeOffset = 90*3 - 21,
-		InnerRingDegreeSpan = 360 - 21*2, 
-		InnerRingShowSpark = true, 
-		InnerRingSparkSize = { 6, 27 * 208/256 },
-		InnerRingSparkBlendMode = "ADD",
-		InnerRingSparkOffset = -1/10,
-		InnerRingSparkInset = 46 * 208/256,  
-		InnerRingSparkFlash = { nil, nil, 1, 1 }, 
-		InnerRingColorXP = true,
-		InnerRingColorStanding = true,
-		InnerRingColorPower = true,
-		InnerRingColorValue = true,
-		InnerRingBackdropMultiplier = 1, 
-		InnerRingSparkMultiplier = 1, 
-		InnerRingValueFont = GetFont(15, true),
-		InnerRingValuePercentFont = GetFont(15, true), 
-
-	ToggleSize = { 56, 56 }, 
-	ToggleBackdropSize = { 100, 100 },
-	ToggleBackdropTexture = GetMedia("point_plate"), 
-	ToggleBackdropColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
-
-	-- Change alpha on texts based on target
-	UseTargetUpdates = true, 
-
-	UseClock = true, 
-		ClockPlace = { "BOTTOMRIGHT", -(13 + 213), -8 },
-		ClockFont = GetFont(15, true),
-		ClockColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] }, 
-
-	UseZone = true, 
-		ZonePlaceFunc = Minimap_ZoneName_PlaceFunc,
-		ZoneFont = GetFont(15, true),
-
-	UseCoordinates = true, 
-		CoordinatePlace = { "BOTTOM", 3, 23 },
-		CoordinateFont = GetFont(12, true), 
-		CoordinateColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 }, 
-
-	UsePerformance = true, 
-		PerformanceFramePlaceAdvancedFunc = Minimap_Performance_PlaceFunc,
-
-		LatencyFont = GetFont(12, true), 
-		LatencyColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .5 },
-		LatencyPlaceFunc = Minimap_Performance_Latency_PlaceFunc, 
-
-		FrameRateFont = GetFont(12, true), 
-		FrameRateColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .5 },
-		FrameRatePlaceFunc = Minimap_Performance_FrameRate_PlaceFunc, 
-
-	UseMail = true,
-		MailPlace = 
-			Wheel("LibModule"):IsAddOnEnabled("MBB") and 
-			{ "BOTTOMRIGHT", -(31 + 213 + 40), 35 } or 
-			{ "BOTTOMRIGHT", -(31 + 213), 35 },
-		MailSize = { 43, 32 },
-		MailTexture = GetMedia("icon_mail"),
-		MailTexturePlace = { "CENTER", 0, 0 }, 
-		MailTextureSize = { 66, 66 },
-		MailTextureDrawLayer = { "ARTWORK", 1 },
-		MailTextureRotation = 15 * (2*math_pi)/360,
-
-	UseMBB = true, 
-		MBBSize = { 32, 32 },
-		MBBPlace = { "BOTTOMRIGHT", -(31 + 213), 35 },
-		MBBTexture = GetMedia("plus"),
-
-	UseTrackingButton = true, 
-		TrackingButtonPlace = { "CENTER", math_cos(45*math_pi/180) * (213/2 + 10), math_sin(45*math_pi/180) * (213/2 + 10) }, 
-		TrackingButtonSize = { 56, 56 }, 
-		TrackingButtonBackdropSize = { 100, 100 },
-		TrackingButtonBackdropTexture = GetMedia("point_plate"), 
-		TrackingButtonBackdropColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
-		TrackingButtonIconSize = { 28, 28 },
-		TrackingButtonIconMask = GetMedia("hp_critter_case_glow"), -- actionbutton_circular_mask
-		TrackingButtonIconBgSize = { 32, 32 },
-		TrackingButtonIconBgTexture = GetMedia("hp_critter_case_glow"),
-}
 
 ------------------------------------------------------------------
 -- UnitFrame Config Templates
@@ -2536,8 +2416,6 @@ LibDB:NewDatabase(ADDON..":[BlizzardGameMenu]", BlizzardGameMenu)
 LibDB:NewDatabase(ADDON..":[BlizzardObjectivesTracker]", BlizzardObjectivesTracker)
 LibDB:NewDatabase(ADDON..":[BlizzardPopupStyling]", BlizzardPopupStyling)
 LibDB:NewDatabase(ADDON..":[BlizzardTimers]", BlizzardTimers)
-LibDB:NewDatabase(ADDON..":[GroupTools]", GroupTools)
-LibDB:NewDatabase(ADDON..":[Minimap]", Minimap)
 LibDB:NewDatabase(ADDON..":[UnitFramePlayer]", UnitFramePlayer)
 LibDB:NewDatabase(ADDON..":[UnitFramePet]", UnitFramePet)
 LibDB:NewDatabase(ADDON..":[UnitFrameTarget]", UnitFrameTarget)
@@ -2574,6 +2452,12 @@ Defaults[ADDON] = {
 }
 
 Defaults.BlizzardFloaterHUD = {
+}
+
+Defaults.Minimap = {
+	useStandardTime = true, -- as opposed to military/24-hour time
+	useServerTime = false, -- as opposed to your local computer time
+	stickyBars = false
 }
 
 Defaults.NamePlates = {
@@ -2740,6 +2624,259 @@ Layouts.Bindings = {
 -- Floaters. Durability only currently. 
 Layouts.FloaterHUD = {
 	Place = { "CENTER", "UICenter", "CENTER", 190, 0 }
+}
+
+-- Group Leader Tools
+Layouts.GroupTools = {
+	Colors = Colors,
+
+	MenuPlace = { "TOPLEFT", "UICenter", "TOPLEFT", 22, -42 },
+	MenuAlternatePlace = { "BOTTOMLEFT", "UICenter", "BOTTOMLEFT", 22, 350 },
+	MenuSize = { 300*.75 +30, 410 }, 
+
+	MenuToggleButtonSize = { 48, 48 }, 
+	MenuToggleButtonPlace = { "TOPLEFT", "UICenter", "TOPLEFT", -18, -40 }, 
+	MenuToggleButtonAlternatePlace = { "BOTTOMLEFT", "UICenter", "BOTTOMLEFT", -18, 348 }, 
+	MenuToggleButtonIcon = GetMedia("raidtoolsbutton"), 
+	MenuToggleButtonIconPlace = { "CENTER", 0, 0 }, 
+	MenuToggleButtonIconSize = { 64*.75, 128*.75 }, 
+	MenuToggleButtonIconColor = { 1, 1, 1 }, 
+
+	UseMemberCount = true, 
+		MemberCountNumberPlace = { "TOP", 0, -20 }, 
+		MemberCountNumberJustifyH = "CENTER",
+		MemberCountNumberJustifyV = "MIDDLE", 
+		MemberCountNumberFont = GetFont(14, true),
+		MemberCountNumberColor = { Colors.title[1], Colors.title[2], Colors.title[3] },
+
+	UseRoleCount = true, 
+		RoleCountTankPlace = { "TOP", -70, -100 }, 
+		RoleCountTankFont = GetFont(14, true),
+		RoleCountTankColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] },
+		RoleCountTankTexturePlace = { "TOP", -70, -44 },
+		RoleCountTankTextureSize = { 64, 64 },
+		RoleCountTankTexture = GetMedia("grouprole-icons-tank"),
+		
+		RoleCountHealerPlace = { "TOP", 0, -100 }, 
+		RoleCountHealerFont = GetFont(14, true),
+		RoleCountHealerColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] },
+		RoleCountHealerTexturePlace = { "TOP", 0, -44 },
+		RoleCountHealerTextureSize = { 64, 64 },
+		RoleCountHealerTexture = GetMedia("grouprole-icons-heal"),
+
+		RoleCountDPSPlace = { "TOP", 70, -100 }, 
+		RoleCountDPSFont = GetFont(14, true),
+		RoleCountDPSColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] },
+		RoleCountDPSTexturePlace = { "TOP", 70, -44 },
+		RoleCountDPSTextureSize = { 64, 64 },
+		RoleCountDPSTexture = GetMedia("grouprole-icons-dps"),
+
+	UseRaidTargetIcons = true, 
+		RaidTargetIcon1Place = { "TOP", -80, -140 },
+		RaidTargetIcon2Place = { "TOP", -28, -140 },
+		RaidTargetIcon3Place = { "TOP",  28, -140 },
+		RaidTargetIcon4Place = { "TOP",  80, -140 },
+		RaidTargetIcon5Place = { "TOP", -80, -190 },
+		RaidTargetIcon6Place = { "TOP", -28, -190 },
+		RaidTargetIcon7Place = { "TOP",  28, -190 },
+		RaidTargetIcon8Place = { "TOP",  80, -190 },
+		RaidTargetIconsSize = { 48, 48 }, 
+		RaidRoleRaidTargetTexture = GetMedia("raid_target_icons"),
+		RaidRoleCancelTexture = nil,
+
+	UseRolePollButton = true, 
+		RolePollButtonPlace = { "TOP", 0, -260 }, 
+		RolePollButtonSize = { 300*.75, 50*.75 },
+		RolePollButtonTextFont = GetFont(14, false), 
+		RolePollButtonTextColor = { 0, 0, 0 }, 
+		RolePollButtonTextShadowColor = { 1, 1, 1, .5 }, 
+		RolePollButtonTextShadowOffset = { 0, -.85 }, 
+		RolePollButtonTextureSize = { 1024 *1/3 *.75, 256 *1/3 *.75 },
+		RolePollButtonTextureNormal = GetMedia("menu_button_disabled"), 
+	
+	UseReadyCheckButton = true, 
+		ReadyCheckButtonPlace = { "TOP", -30, -310 }, 
+		ReadyCheckButtonSize = { 300*.75 - 80, 50*.75 },
+		ReadyCheckButtonTextFont = GetFont(14, false), 
+		ReadyCheckButtonTextColor = { 0, 0, 0 }, 
+		ReadyCheckButtonTextShadowColor = { 1, 1, 1, .5 }, 
+		ReadyCheckButtonTextShadowOffset = { 0, -.85 }, 
+		ReadyCheckButtonTextureSize = { 1024 *1/3 *.75, 256 *1/3 *.75 },
+		ReadyCheckButtonTextureNormal = GetMedia("menu_button_smaller"), 
+		
+	UseWorldMarkerFlag = true, 
+		WorldMarkerFlagPlace = { "TOP", 88, -310 }, 
+		WorldMarkerFlagSize = { 70*.75, 50*.75 },
+		WorldMarkerFlagContentSize = { 32, 32 }, 
+		WorldMarkerFlagBackdropSize = { 512 *1/3 *.75, 256 *1/3 *.75 },
+		WorldMarkerFlagBackdropTexture = GetMedia("menu_button_tiny"), 
+
+	UseConvertButton = true, 
+		ConvertButtonPlace = { "TOP", 0, -360 }, 
+		ConvertButtonSize = { 300*.75, 50*.75 },
+		ConvertButtonTextFont = GetFont(14, false), 
+		ConvertButtonTextColor = { 0, 0, 0 }, 
+		ConvertButtonTextShadowColor = { 1, 1, 1, .5 }, 
+		ConvertButtonTextShadowOffset = { 0, -.85 }, 
+		ConvertButtonTextureSize = { 1024 *1/3 *.75, 256 *1/3 *.75 },
+		ConvertButtonTextureNormal = GetMedia("menu_button_disabled"), 
+
+	MenuWindow_CreateBorder = GroupTools_Window_CreateBorder,
+	PostCreateButton = GroupTools_Button_PostCreate, 
+	OnButtonDisable = GroupTools_Button_OnDisable, 
+	OnButtonEnable = GroupTools_Button_OnEnable
+}
+
+-- Minimap
+Layouts.Minimap = {
+	Size = { 213, 213 }, 
+	Place = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -58, 59 }, 
+	MaskTexture = GetMedia("minimap_mask_circle_transparent"),
+
+	BlipScale = 1.15, 
+	BlipTextures = {
+		["1.13.2"] = GetMedia("Blip-Nandini-New-113_2"),
+		["1.13.3"] = [[Interface\Minimap\ObjectIconsAtlas.blp]] -- Blizzard Fallback
+	},
+
+	CompassTexts = { L["N"] }, -- only setting the North tag text, as we don't want a full compass ( order is NESW )
+	CompassFont = GetFont(12, true), 
+	CompassColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .75 }, 
+	CompassRadiusInset = 10, -- move the text 10 points closer to the center of the map
+
+	MapBorderPlace = { "CENTER", 0, 0 }, 
+	MapBorderSize = { 419, 419 }, 
+	MapBorderTexture = GetMedia("minimap-border"),
+	MapBorderColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
+	
+	MapBackdropTexture = GetMedia("minimap_mask_circle"),
+	MapBackdropColor = { 0, 0, 0, .75 }, 
+
+	MapOverlayTexture = GetMedia("minimap_mask_circle"),
+	MapOverlayColor = { 0, 0, 0, .15 },
+
+	-- Put XP and XP on the minimap!
+	RingFrameBackdropPlace = { "CENTER", 0, 0 },
+	RingFrameBackdropSize = { 413, 413 }, 
+	RingFrameBackdropDrawLayer = { "BACKGROUND", 1 }, 
+	RingFrameBackdropColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
+	RingFrameBackdropTexture = GetMedia("minimap-onebar-backdrop"), 
+	RingFrameBackdropDoubleTexture = GetMedia("minimap-twobars-backdrop"), 
+	RingFrameSingleRingTexture = GetMedia("minimap-bars-single"), 
+	RingFrameSingleRingSparkSize = { 6,34 * 208/256 }, 
+	RingFrameSingleRingSparkInset = { 22 * 208/256 }, 
+	RingFrameSingleRingValueFunc = Minimap_RingFrame_SingleRing_ValueFunc,
+	RingFrameOuterRingTexture = GetMedia("minimap-bars-two-outer"), 
+	RingFrameOuterRingSparkSize = { 6,20 * 208/256 }, 
+	RingFrameOuterRingSparkInset = { 15 * 208/256 }, 
+	RingFrameOuterRingValueFunc = Minimap_RingFrame_OuterRing_ValueFunc,
+
+	OuterRingPlace = { "CENTER", 0, 2 }, 
+	OuterRingSize = { 208, 208 }, 
+	OuterRingClockwise = true, 
+	OuterRingDegreeOffset = 90*3 - 14,
+	OuterRingDegreeSpan = 360 - 14*2, 
+	OuterRingShowSpark = true, 
+	OuterRingSparkBlendMode = "ADD",
+	OuterRingSparkOffset = -1/10, 
+	OuterRingSparkFlash = { nil, nil, 1, 1 }, 
+	OuterRingColorXP = true,
+	OuterRingColorStanding = true,
+	OuterRingColorPower = true,
+	OuterRingColorValue = true,
+	OuterRingBackdropMultiplier = 1, 
+	OuterRingSparkMultiplier = 1, 
+	OuterRingValuePlace = { "CENTER", 0, -9 },
+	OuterRingValueJustifyH = "CENTER",
+	OuterRingValueJustifyV = "MIDDLE",
+	OuterRingValueFont = GetFont(15, true),
+	OuterRingValueShowDeficit = true, 
+	OuterRingValueDescriptionPlace = { "CENTER", 0, -(15/2 + 2) }, 
+	OuterRingValueDescriptionWidth = 100, 
+	OuterRingValueDescriptionColor = { Colors.quest.gray[1], Colors.quest.gray[2], Colors.quest.gray[3] }, 
+	OuterRingValueDescriptionJustifyH = "CENTER", 
+	OuterRingValueDescriptionJustifyV = "MIDDLE", 
+	OuterRingValueDescriptionFont = GetFont(12, true),
+	OuterRingValuePercentFont = GetFont(16, true),
+
+	InnerRingPlace = { "CENTER", 0, 2 }, 
+	InnerRingSize = { 208, 208 }, 
+	InnerRingBarTexture = GetMedia("minimap-bars-two-inner"),
+	InnerRingClockwise = true, 
+	InnerRingDegreeOffset = 90*3 - 21,
+	InnerRingDegreeSpan = 360 - 21*2, 
+	InnerRingShowSpark = true, 
+	InnerRingSparkSize = { 6, 27 * 208/256 },
+	InnerRingSparkBlendMode = "ADD",
+	InnerRingSparkOffset = -1/10,
+	InnerRingSparkInset = 46 * 208/256,  
+	InnerRingSparkFlash = { nil, nil, 1, 1 }, 
+	InnerRingColorXP = true,
+	InnerRingColorStanding = true,
+	InnerRingColorPower = true,
+	InnerRingColorValue = true,
+	InnerRingBackdropMultiplier = 1, 
+	InnerRingSparkMultiplier = 1, 
+	InnerRingValueFont = GetFont(15, true),
+	InnerRingValuePercentFont = GetFont(15, true), 
+
+	ToggleSize = { 56, 56 }, 
+	ToggleBackdropSize = { 100, 100 },
+	ToggleBackdropTexture = GetMedia("point_plate"), 
+	ToggleBackdropColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
+
+	ClockPlace = { "BOTTOMRIGHT", -(13 + 213), -8 },
+	ClockFont = GetFont(15, true),
+	ClockColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] }, 
+	Clock_OverrideValue = Minimap_Clock_OverrideValue,
+
+	ZonePlaceFunc = Minimap_ZoneName_PlaceFunc,
+	ZoneFont = GetFont(15, true),
+
+	CoordinatePlace = { "BOTTOM", 3, 23 },
+	CoordinateFont = GetFont(12, true), 
+	CoordinateColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 }, 
+	Coordinates_OverrideValue = Minimap_Coordinates_OverrideValue,
+
+	PerformanceFramePlaceAdvancedFunc = Minimap_Performance_PlaceFunc,
+
+	LatencyPlaceFunc = Minimap_Performance_Latency_PlaceFunc, 
+	LatencyFont = GetFont(12, true), 
+	LatencyColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .5 },
+
+	FrameRatePlaceFunc = Minimap_Performance_FrameRate_PlaceFunc, 
+	FrameRateFont = GetFont(12, true), 
+	FrameRateColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .5 },
+
+	MailPlace = 
+		Wheel("LibModule"):IsAddOnEnabled("MBB") and 
+		{ "BOTTOMRIGHT", -(31 + 213 + 40), 35 } or 
+		{ "BOTTOMRIGHT", -(31 + 213), 35 },
+	MailSize = { 43, 32 },
+	MailTexture = GetMedia("icon_mail"),
+	MailTexturePlace = { "CENTER", 0, 0 }, 
+	MailTextureSize = { 66, 66 },
+	MailTextureDrawLayer = { "ARTWORK", 1 },
+	MailTextureRotation = 15 * (2*math_pi)/360,
+
+	MBBSize = { 32, 32 },
+	MBBPlace = { "BOTTOMRIGHT", -(31 + 213), 35 },
+	MBBTexture = GetMedia("plus"),
+
+	TrackingButtonPlace = { "CENTER", math_cos(45*math_pi/180) * (213/2 + 10), math_sin(45*math_pi/180) * (213/2 + 10) }, 
+	TrackingButtonSize = { 56, 56 }, 
+	TrackingButtonBackdropSize = { 100, 100 },
+	TrackingButtonBackdropTexture = GetMedia("point_plate"), 
+	TrackingButtonBackdropColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
+	TrackingButtonIconSize = { 28, 28 },
+	TrackingButtonIconMask = GetMedia("hp_critter_case_glow"), -- actionbutton_circular_mask
+	TrackingButtonIconBgSize = { 32, 32 },
+	TrackingButtonIconBgTexture = GetMedia("hp_critter_case_glow"),
+
+	XP_OverrideValue = Minimap_XP_OverrideValue,
+	XP_PostUpdate = Minimap_XP_PostUpdate,
+	Rep_PostUpdate = Minimap_Rep_PostUpdate,
+	Rep_OverrideValue = Minimap_Rep_OverrideValue
 }
 
 -- NamePlates

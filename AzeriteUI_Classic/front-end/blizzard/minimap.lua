@@ -1,11 +1,11 @@
-local ADDON = ...
+local ADDON,Private = ...
 local Core = Wheel("LibModule"):GetModule(ADDON)
 if (not Core) then 
 	return 
 end
 
+local L = Wheel("LibLocale"):GetLocale(ADDON)
 local Module = Core:NewModule("Minimap", "LibEvent", "LibDB", "LibMinimap", "LibTooltip", "LibTime", "LibPlayerData")
-local Layout, L
 
 -- Don't grab buttons if these are active
 local MBB = Module:IsAddOnEnabled("MBB") 
@@ -50,11 +50,17 @@ local UnitExists = _G.UnitExists
 local UnitLevel = _G.UnitLevel
 local UnitRace = _G.UnitRace
 
+-- Private API
+local Colors = Private.Colors
+local GetConfig = Private.GetConfig
+local GetLayout = Private.GetLayout
+
 -- WoW Strings
 local REPUTATION = _G.REPUTATION 
 local STANDING = _G.STANDING 
 local UNKNOWN = _G.UNKNOWN
 
+-- Custom strings & constants
 local Spinner = {}
 local NEW = [[|TInterface\OptionsFrame\UI-OptionsFrame-NewFeatureIcon:0:0:0:0|t]]
 local shortXPString = "%s%%"
@@ -65,18 +71,11 @@ local shortLevelString = "%s %.0f"
 local LEVEL = UnitLevel("player")
 local maxRested = select(2, UnitRace("player")) == "Pandaren" and 3 or 1.5
 
-local defaults = {
-	useStandardTime = true, -- as opposed to military/24-hour time
-	useServerTime = false, -- as opposed to your local computer time
-	stickyBars = false
-}
-
-local degreesToRadians = function(degrees)
-	return degrees * (2*math_pi)/180
-end 
-
+----------------------------------------------------
+-- Utility Functions
+----------------------------------------------------
 local getTimeStrings = function(h, m, suffix, useStandardTime, abbreviateSuffix)
-	if useStandardTime then 
+	if (useStandardTime) then 
 		return "%.0f:%02.0f |cff888888%s|r", h, m, abbreviateSuffix and string_match(suffix, "^.") or suffix
 	else 
 		return "%02.0f:%02.0f", h, m
@@ -88,9 +87,9 @@ local short = function(value)
 	if (not value) then return "" end
 	if (value >= 1e9) then
 		return ("%.1fb"):format(value / 1e9):gsub("%.?0+([kmb])$", "%1")
-	elseif value >= 1e6 then
+	elseif (value >= 1e6) then
 		return ("%.1fm"):format(value / 1e6):gsub("%.?0+([kmb])$", "%1")
-	elseif value >= 1e3 or value <= -1e3 then
+	elseif (value >= 1e3) or (value <= -1e3) then
 		return ("%.1fk"):format(value / 1e3):gsub("%.?0+([kmb])$", "%1")
 	else
 		return tostring(math_floor(value))
@@ -105,7 +104,7 @@ if (gameLocale == "zhCN") then
 		if (not value) then return "" end
 		if (value >= 1e8) then
 			return ("%.1f亿"):format(value / 1e8):gsub("%.?0+([km])$", "%1")
-		elseif value >= 1e4 or value <= -1e3 then
+		elseif (value >= 1e4) or (value <= -1e3) then
 			return ("%.1f万"):format(value / 1e4):gsub("%.?0+([km])$", "%1")
 		else
 			return tostring(math_floor(value))
@@ -117,18 +116,9 @@ local MouseIsOver = function(frame)
 	return (frame == GetMouseFocus())
 end
 
+----------------------------------------------------
 -- Callbacks
 ----------------------------------------------------
-local Coordinates_OverrideValue = function(element, x, y)
-	local xval = string_gsub(string_format("%.1f", x*100), "%.(.+)", "|cff888888.%1|r")
-	local yval = string_gsub(string_format("%.1f", y*100), "%.(.+)", "|cff888888.%1|r")
-	element:SetFormattedText("%s %s", xval, yval) 
-end 
-
-local Clock_OverrideValue = function(element, h, m, suffix)
-	element:SetFormattedText(getTimeStrings(h, m, suffix, element.useStandardTime, true))
-end 
-
 local FrameRate_OverrideValue = function(element, fps)
 	element:SetFormattedText("|cff888888%.0f %s|r", math_floor(fps), string_upper(string_match(FPS_ABBR, "^.")))
 end 
@@ -312,7 +302,7 @@ end
 
 local Toggle_OnUpdate = function(toggle, elapsed)
 
-	if toggle.fadeDelay > 0 then 
+	if (toggle.fadeDelay > 0) then 
 		local fadeDelay = toggle.fadeDelay - elapsed
 		if fadeDelay > 0 then 
 			toggle.fadeDelay = fadeDelay
@@ -325,9 +315,9 @@ local Toggle_OnUpdate = function(toggle, elapsed)
 
 	toggle.timeFading = toggle.timeFading + elapsed
 
-	if toggle.fadeDirection == "OUT" then 
+	if (toggle.fadeDirection == "OUT") then 
 		local alpha = 1 - (toggle.timeFading / toggle.fadeDuration)
-		if alpha > 0 then 
+		if (alpha > 0) then 
 			toggle.Frame:SetAlpha(alpha)
 		else 
 			toggle:SetScript("OnUpdate", nil)
@@ -339,9 +329,9 @@ local Toggle_OnUpdate = function(toggle, elapsed)
 			toggle.timeFading = 0
 		end 
 
-	elseif toggle.fadeDirection == "IN" then 
+	elseif (toggle.fadeDirection == "IN") then 
 		local alpha = toggle.timeFading / toggle.fadeDuration
-		if alpha < 1 then 
+		if (alpha < 1) then 
 			toggle.Frame:SetAlpha(alpha)
 		else 
 			toggle:SetScript("OnUpdate", nil)
@@ -643,111 +633,12 @@ local Zone_OnLeave = function(self)
 	Module:GetMinimapTooltip():Hide()
 end 
 
-local PostUpdate_XP = function(element, min, max, restedLeft, restedTimeLeft)
-	local description = element.Value and element.Value.Description
-	if description then 
-		local level = LEVEL or UnitLevel("player")
-		if (level and (level > 0)) then 
-			description:SetFormattedText(L["to level %s"], level + 1)
-		else 
-			description:SetText("")
-		end 
-	end 
-end
-
-local PostUpdate_Rep = function(element, current, min, max, factionName, standingID, standingLabel)
-	local description = element.Value and element.Value.Description
-	if description then 
-		if (standingID == MAX_REPUTATION_REACTION) then
-			description:SetText(standingLabel)
-		else
-			local nextStanding = standingID and _G["FACTION_STANDING_LABEL"..(standingID + 1)]
-			if nextStanding then 
-				description:SetFormattedText(L["to %s"], nextStanding)
-			else
-				description:SetText("")
-			end 
-		end 
-	end 
-end
-
-local XP_OverrideValue = function(element, min, max, restedLeft, restedTimeLeft)
-	local value = element.Value or element:IsObjectType("FontString") and element 
-	if value.showDeficit then 
-		value:SetFormattedText(short(max - min))
-	else 
-		value:SetFormattedText(short(min))
-	end
-	local percent = value.Percent
-	if percent then 
-		if (max > 0) then 
-			local percValue = math_floor(min/max*100)
-			if (percValue > 0) then 
-				-- removing the percentage sign
-				percent:SetFormattedText("%.0f", percValue)
-			else 
-				percent:SetText(NEW)
-			end 
-		else 
-			percent:SetText(NEW)
-		end 
-	end 
-	if element.colorValue then 
-		local color
-		if restedLeft then 
-			local colors = element._owner.colors
-			color = colors.restedValue or colors.rested or colors.xpValue or colors.xp
-		else 
-			local colors = element._owner.colors
-			color = colors.xpValue or colors.xp
-		end 
-		value:SetTextColor(color[1], color[2], color[3])
-		if percent then 
-			percent:SetTextColor(color[1], color[2], color[3])
-		end 
-	end 
-end 
-
-local Rep_OverrideValue = function(element, current, min, max, factionName, standingID, standingLabel)
-	local value = element.Value or element:IsObjectType("FontString") and element 
-	local barMax = max - min 
-	local barValue = current - min
-	if value.showDeficit then 
-		if (barMax - barValue > 0) then 
-			value:SetFormattedText(short(barMax - barValue))
-		else 
-			value:SetText("100%")
-		end 
-	else 
-		value:SetFormattedText(short(current - min))
-	end
-	local percent = value.Percent
-	if percent then 
-		if (max - min > 0) then 
-			local percValue = math_floor((current - min)/(max - min)*100)
-			if (percValue > 0) then 
-				-- removing the percentage sign
-				percent:SetFormattedText("%.0f", percValue)
-			else 
-				percent:SetText(NEW) 
-			end 
-		else 
-			percent:SetText(NEW) 
-		end 
-	end 
-	if element.colorValue then 
-		local color = element._owner.colors.reaction[standingID]
-		value:SetTextColor(color[1], color[2], color[3])
-		if percent then 
-			percent:SetTextColor(color[1], color[2], color[3])
-		end 
-	end 
-end
-
+----------------------------------------------------
+-- Map Setup
+----------------------------------------------------
 Module.SetUpMinimap = function(self)
-
 	local db = self.db
-
+	local layout = self.layout
 
 	-- Frame
 	----------------------------------------------------
@@ -758,19 +649,15 @@ Module.SetUpMinimap = function(self)
 
 	-- Retrieve an unique element handler for our module
 	local Handler = self:GetMinimapHandler()
-	Handler.colors = Layout.Colors
+	Handler.colors = Colors
 	
 	-- Reposition minimap tooltip 
 	local tooltip = self:GetMinimapTooltip()
 
-	if Layout.UseBlipTextures then 
-		for patch,path in pairs(Layout.BlipTextures) do 
-			self:SetMinimapBlips(path, patch)
-		end
+	for patch,path in pairs(layout.BlipTextures) do 
+		self:SetMinimapBlips(path, patch)
 	end
-	if Layout.BlipScale then 
-		self:SetMinimapScale(Layout.BlipScale)
-	end
+	self:SetMinimapScale(layout.BlipScale or 1)
 
 	-- Minimap Buttons
 	----------------------------------------------------
@@ -778,450 +665,395 @@ Module.SetUpMinimap = function(self)
 	self:SetMinimapAllowAddonButtons(self.MBB)
 
 	-- Minimap Compass
-	if Layout.UseCompass then 
-		self:SetMinimapCompassEnabled(true)
-		self:SetMinimapCompassText(unpack(Layout.CompassTexts)) 
-		self:SetMinimapCompassTextFontObject(Layout.CompassFont) 
-		self:SetMinimapCompassTextColor(unpack(Layout.CompassColor)) 
-		self:SetMinimapCompassRadiusInset(Layout.CompassRadiusInset) 
-	end 
+	self:SetMinimapCompassEnabled(true)
+	self:SetMinimapCompassText(unpack(layout.CompassTexts)) 
+	self:SetMinimapCompassTextFontObject(layout.CompassFont) 
+	self:SetMinimapCompassTextColor(unpack(layout.CompassColor)) 
+	self:SetMinimapCompassRadiusInset(layout.CompassRadiusInset) 
 	
 	-- Background
-	if Layout.UseMapBackdrop then 
-		local mapBackdrop = Handler:CreateBackdropTexture()
-		mapBackdrop:SetDrawLayer("BACKGROUND")
-		mapBackdrop:SetAllPoints()
-		mapBackdrop:SetTexture(Layout.MapBackdropTexture)
-		mapBackdrop:SetVertexColor(unpack(Layout.MapBackdropColor))
-	end 
+	local mapBackdrop = Handler:CreateBackdropTexture()
+	mapBackdrop:SetDrawLayer("BACKGROUND")
+	mapBackdrop:SetAllPoints()
+	mapBackdrop:SetTexture(layout.MapBackdropTexture)
+	mapBackdrop:SetVertexColor(unpack(layout.MapBackdropColor))
 
 	-- Overlay
-	if Layout.UseMapOverlay then 
-		local mapOverlay = Handler:CreateContentTexture()
-		mapOverlay:SetDrawLayer("BORDER")
-		mapOverlay:SetAllPoints()
-		mapOverlay:SetTexture(Layout.MapOverlayTexture)
-		mapOverlay:SetVertexColor(unpack(Layout.MapOverlayColor))
-	end 
+	local mapOverlay = Handler:CreateContentTexture()
+	mapOverlay:SetDrawLayer("BORDER")
+	mapOverlay:SetAllPoints()
+	mapOverlay:SetTexture(layout.MapOverlayTexture)
+	mapOverlay:SetVertexColor(unpack(layout.MapOverlayColor))
 	
 	-- Border
-	if Layout.UseMapBorder then 
-		local border = Handler:CreateOverlayTexture()
-		border:SetDrawLayer("BACKGROUND")
-		border:SetTexture(Layout.MapBorderTexture)
-		border:SetSize(unpack(Layout.MapBorderSize))
-		border:SetVertexColor(unpack(Layout.MapBorderColor))
-		border:SetPoint(unpack(Layout.MapBorderPlace))
-		Handler.Border = border
-	end 
+	local border = Handler:CreateOverlayTexture()
+	border:SetDrawLayer("BACKGROUND")
+	border:SetTexture(layout.MapBorderTexture)
+	border:SetSize(unpack(layout.MapBorderSize))
+	border:SetVertexColor(unpack(layout.MapBorderColor))
+	border:SetPoint(unpack(layout.MapBorderPlace))
+	Handler.Border = border
 
 	-- Mail
-	if Layout.UseMail then 
-		local mail = Handler:CreateOverlayFrame()
-		mail:SetSize(unpack(Layout.MailSize)) 
-		mail:Place(unpack(Layout.MailPlace)) 
+	local mail = Handler:CreateOverlayFrame()
+	mail:SetSize(unpack(layout.MailSize)) 
+	mail:Place(unpack(layout.MailPlace)) 
 
-		local icon = mail:CreateTexture()
-		icon:SetTexture(Layout.MailTexture)
-		icon:SetDrawLayer(unpack(Layout.MailTextureDrawLayer))
-		icon:SetPoint(unpack(Layout.MailTexturePlace))
-		icon:SetSize(unpack(Layout.MailTextureSize)) 
-
-		if Layout.MailTextureRotation then 
-			icon:SetRotation(Layout.MailTextureRotation)
-		end 
-
-		Handler.Mail = mail 
-	end 
+	local icon = mail:CreateTexture()
+	icon:SetTexture(layout.MailTexture)
+	icon:SetDrawLayer(unpack(layout.MailTextureDrawLayer))
+	icon:SetPoint(unpack(layout.MailTexturePlace))
+	icon:SetSize(unpack(layout.MailTextureSize)) 
+	icon:SetRotation(layout.MailTextureRotation)
+	Handler.Mail = mail 
 
 	-- Clock 
-	if Layout.UseClock then 
-		local clockFrame 
-		if Layout.ClockFrameInOverlay then 
-			clockFrame = Handler:CreateOverlayFrame("Button")
-		else 
-			clockFrame = Handler:CreateBorderFrame("Button")
-		end 
-		Handler.ClockFrame = clockFrame
+	local clockFrame = Handler:CreateBorderFrame("Button")
+	Handler.ClockFrame = clockFrame
 
-		local clock = Handler:CreateFontString()
-		clock:SetPoint(unpack(Layout.ClockPlace)) 
-		clock:SetDrawLayer("OVERLAY")
-		clock:SetJustifyH("RIGHT")
-		clock:SetJustifyV("BOTTOM")
-		clock:SetFontObject(Layout.ClockFont)
-		clock:SetTextColor(unpack(Layout.ClockColor))
-		clock.useStandardTime = self.db.useStandardTime -- standard (12-hour) or military (24-hour) time
-		clock.useServerTime = self.db.useServerTime -- realm time or local time
-		clock.showSeconds = false -- show seconds in the clock
-		clock.OverrideValue = Clock_OverrideValue
+	local clock = Handler:CreateFontString()
+	clock:SetPoint(unpack(layout.ClockPlace)) 
+	clock:SetDrawLayer("OVERLAY")
+	clock:SetJustifyH("RIGHT")
+	clock:SetJustifyV("BOTTOM")
+	clock:SetFontObject(layout.ClockFont)
+	clock:SetTextColor(unpack(layout.ClockColor))
+	clock.useStandardTime = db.useStandardTime -- standard (12-hour) or military (24-hour) time
+	clock.useServerTime = db.useServerTime -- realm time or local time
+	clock.showSeconds = false -- show seconds in the clock
+	clock.OverrideValue = layout.Clock_OverrideValue
 
-		-- Make the clock clickable to change time settings 
-		clockFrame:SetAllPoints(clock)
-		clockFrame:SetScript("OnEnter", Time_OnEnter)
-		clockFrame:SetScript("OnLeave", Time_OnLeave)
-		clockFrame:SetScript("OnClick", Time_OnClick)
+	-- Make the clock clickable to change time settings 
+	clockFrame:SetAllPoints(clock)
+	clockFrame:SetScript("OnEnter", Time_OnEnter)
+	clockFrame:SetScript("OnLeave", Time_OnLeave)
+	clockFrame:SetScript("OnClick", Time_OnClick)
 
-		-- Register all buttons separately, as "AnyUp" doesn't include the middle button!
-		clockFrame:RegisterForClicks("RightButtonUp", "LeftButtonUp", "MiddleButtonUp")
-		
-		clockFrame.clock = clock
-		clockFrame._owner = Handler
+	-- Register all buttons separately, as "AnyUp" doesn't include the middle button!
+	clockFrame:RegisterForClicks("RightButtonUp", "LeftButtonUp", "MiddleButtonUp")
+	clockFrame.clock = clock
+	clockFrame._owner = Handler
 
-		clock:SetParent(clockFrame)
+	clock:SetParent(clockFrame)
 
-		Handler.Clock = clock		
-	end 
+	Handler.Clock = clock
 
 	-- Zone Information
-	if Layout.UseZone then 
-		local zoneFrame = Handler:CreateBorderFrame()
-		Handler.ZoneFrame = zoneFrame
-	
-		local zone = zoneFrame:CreateFontString()
-		if Layout.ZonePlaceFunc then 
-			zone:SetPoint(Layout.ZonePlaceFunc(Handler)) 
-		else 
-			zone:SetPoint(unpack(Layout.ZonePlace)) 
-		end
-	
-		zone:SetDrawLayer("OVERLAY")
-		zone:SetJustifyH("RIGHT")
-		zone:SetJustifyV("BOTTOM")
-		zone:SetFontObject(Layout.ZoneFont)
-		zone:SetAlpha(Layout.ZoneAlpha or 1)
-		zone.colorPvP = true -- color zone names according to their PvP type 
-		zone.colorcolorDifficulty = true -- color instance names according to their difficulty
-	
-		-- Strap the frame to the text
-		zoneFrame:SetAllPoints(zone)
-		zoneFrame:SetScript("OnEnter", Zone_OnEnter)
-		zoneFrame:SetScript("OnLeave", Zone_OnLeave)
-	
-		Handler.Zone = zone	
-	end 
+	local zoneFrame = Handler:CreateBorderFrame()
+	Handler.ZoneFrame = zoneFrame
+
+	local zone = zoneFrame:CreateFontString()
+	zone:SetPoint(layout.ZonePlaceFunc(Handler)) 
+	zone:SetDrawLayer("OVERLAY")
+	zone:SetJustifyH("RIGHT")
+	zone:SetJustifyV("BOTTOM")
+	zone:SetFontObject(layout.ZoneFont)
+	zone:SetAlpha(layout.ZoneAlpha or 1)
+	zone.colorPvP = true -- color zone names according to their PvP type 
+	zone.colorcolorDifficulty = true -- color instance names according to their difficulty
+
+	-- Strap the frame to the text
+	zoneFrame:SetAllPoints(zone)
+	zoneFrame:SetScript("OnEnter", Zone_OnEnter)
+	zoneFrame:SetScript("OnLeave", Zone_OnLeave)
+	Handler.Zone = zone	
 
 	-- Coordinates
-	if Layout.UseCoordinates then 
-		local coordinates = Handler:CreateBorderText()
-
-		if Layout.CoordinatePlaceFunc then 
-			coordinates:SetPoint(Layout.CoordinatePlaceFunc(Handler)) 
-		else
-			coordinates:SetPoint(unpack(Layout.CoordinatePlace)) 
-		end 
-
-		coordinates:SetDrawLayer("OVERLAY")
-		coordinates:SetJustifyH("CENTER")
-		coordinates:SetJustifyV("BOTTOM")
-		coordinates:SetFontObject(Layout.CoordinateFont)
-		coordinates:SetTextColor(unpack(Layout.CoordinateColor)) 
-		coordinates.OverrideValue = Coordinates_OverrideValue
-
-		Handler.Coordinates = coordinates
-	end 
+	local coordinates = Handler:CreateBorderText()
+	coordinates:SetPoint(unpack(layout.CoordinatePlace)) 
+	coordinates:SetDrawLayer("OVERLAY")
+	coordinates:SetJustifyH("CENTER")
+	coordinates:SetJustifyV("BOTTOM")
+	coordinates:SetFontObject(layout.CoordinateFont)
+	coordinates:SetTextColor(unpack(layout.CoordinateColor)) 
+	coordinates.OverrideValue = layout.Coordinates_OverrideValue
+	Handler.Coordinates = coordinates
 		
 	-- Performance Information
-	if Layout.UsePerformance then 
-		local performanceFrame = Handler:CreateBorderFrame()
-		performanceFrame._owner = Handler
-		Handler.PerformanceFrame = performanceFrame
+	local performanceFrame = Handler:CreateBorderFrame()
+	performanceFrame._owner = Handler
+	Handler.PerformanceFrame = performanceFrame
+
+	local framerate = performanceFrame:CreateFontString()
+	framerate:SetDrawLayer("OVERLAY")
+	framerate:SetJustifyH("RIGHT")
+	framerate:SetJustifyV("BOTTOM")
+	framerate:SetFontObject(layout.FrameRateFont)
+	framerate:SetTextColor(unpack(layout.FrameRateColor))
+	framerate.OverrideValue = FrameRate_OverrideValue
+
+	Handler.FrameRate = framerate
+
+	local latency = performanceFrame:CreateFontString()
+	latency:SetDrawLayer("OVERLAY")
+	latency:SetJustifyH("CENTER")
+	latency:SetJustifyV("BOTTOM")
+	latency:SetFontObject(layout.LatencyFont)
+	latency:SetTextColor(unpack(layout.LatencyColor))
+	latency.OverrideValue = Latency_OverrideValue
+
+	Handler.Latency = latency
 	
-		local framerate = performanceFrame:CreateFontString()
-		framerate:SetDrawLayer("OVERLAY")
-		framerate:SetJustifyH("RIGHT")
-		framerate:SetJustifyV("BOTTOM")
-		framerate:SetFontObject(Layout.FrameRateFont)
-		framerate:SetTextColor(unpack(Layout.FrameRateColor))
-		framerate.OverrideValue = FrameRate_OverrideValue
+	-- Strap the frame to the text
+	performanceFrame:SetScript("OnEnter", Performance_OnEnter)
+	performanceFrame:SetScript("OnLeave", Performance_OnLeave)
 	
-		Handler.FrameRate = framerate
-	
-		local latency = performanceFrame:CreateFontString()
-		latency:SetDrawLayer("OVERLAY")
-		latency:SetJustifyH("CENTER")
-		latency:SetJustifyV("BOTTOM")
-		latency:SetFontObject(Layout.LatencyFont)
-		latency:SetTextColor(unpack(Layout.LatencyColor))
-		latency.OverrideValue = Latency_OverrideValue
-	
-		Handler.Latency = latency
-	
-		-- Strap the frame to the text
-		performanceFrame:SetScript("OnEnter", Performance_OnEnter)
-		performanceFrame:SetScript("OnLeave", Performance_OnLeave)
-	
-		if Layout.FrameRatePlaceFunc then
-			framerate:Place(Layout.FrameRatePlaceFunc(Handler)) 
-		else 
-			framerate:Place(unpack(Layout.FrameRatePlace)) 
+	framerate:Place(layout.FrameRatePlaceFunc(Handler)) 
+	latency:Place(layout.LatencyPlaceFunc(Handler)) 
+
+	layout.PerformanceFramePlaceAdvancedFunc(performanceFrame, Handler)
+
+	-- Ring frame
+	local ringFrame = Handler:CreateOverlayFrame()
+	ringFrame:Hide()
+	ringFrame:SetAllPoints() -- set it to cover the map
+	ringFrame:EnableMouse(true) -- make sure minimap blips and their tooltips don't punch through
+	ringFrame:SetScript("OnEnter", RingFrame_OnEnter)
+	ringFrame:SetScript("OnLeave", RingFrame_OnLeave)
+
+	ringFrame:HookScript("OnShow", function() 
+		local compassFrame = Wheel("LibMinimap"):GetCompassFrame()
+		if (compassFrame) then 
+			compassFrame.supressCompass = true
 		end 
+	end)
 
-		if Layout.LatencyPlaceFunc then
-			latency:Place(Layout.LatencyPlaceFunc(Handler)) 
-		else 
-			latency:Place(unpack(Layout.LatencyPlace)) 
+	ringFrame:HookScript("OnHide", function() 
+		local compassFrame = Wheel("LibMinimap"):GetCompassFrame()
+		if compassFrame then 
+			compassFrame.supressCompass = nil
 		end 
+	end)
 
-		if Layout.PerformanceFramePlaceAdvancedFunc then 
-			Layout.PerformanceFramePlaceAdvancedFunc(performanceFrame, Handler)
-		end 
-	end 
+	-- Wait with this until now to trigger compass visibility changes
+	ringFrame:SetShown(db.stickyBars) 
 
-	if Layout.UseStatusRings then 
+	-- ring frame backdrops
+	local ringFrameBg = ringFrame:CreateTexture()
+	ringFrameBg:SetPoint(unpack(layout.RingFrameBackdropPlace))
+	ringFrameBg:SetSize(unpack(layout.RingFrameBackdropSize))  
+	ringFrameBg:SetDrawLayer(unpack(layout.RingFrameBackdropDrawLayer))
+	ringFrameBg:SetTexture(layout.RingFrameBackdropTexture)
+	ringFrameBg:SetVertexColor(unpack(layout.RingFrameBackdropColor))
+	ringFrame.Bg = ringFrameBg
 
-		-- Ring frame
-		local ringFrame = Handler:CreateOverlayFrame()
-		ringFrame:Hide()
-		ringFrame:SetAllPoints() -- set it to cover the map
-		ringFrame:EnableMouse(true) -- make sure minimap blips and their tooltips don't punch through
-		ringFrame:SetScript("OnEnter", RingFrame_OnEnter)
-		ringFrame:SetScript("OnLeave", RingFrame_OnLeave)
+	-- Toggle button for ring frame
+	local toggle = Handler:CreateOverlayFrame()
+	toggle:SetFrameLevel(toggle:GetFrameLevel() + 10) -- need this above the ring frame and the rings
+	toggle:SetPoint("CENTER", Handler, "BOTTOM", 2, -6)
+	toggle:SetSize(unpack(layout.ToggleSize))
+	toggle:EnableMouse(true)
+	toggle:SetScript("OnEnter", Toggle_OnEnter)
+	toggle:SetScript("OnLeave", Toggle_OnLeave)
+	toggle:SetScript("OnMouseUp", Toggle_OnMouseUp)
+	toggle._owner = Handler
+	ringFrame._owner = toggle
+	toggle.Frame = ringFrame
 
-		ringFrame:HookScript("OnShow", function() 
-			local compassFrame = Wheel("LibMinimap"):GetCompassFrame()
-			if compassFrame then 
-				compassFrame.supressCompass = true
-			end 
-		end)
+	local toggleBackdrop = toggle:CreateTexture()
+	toggleBackdrop:SetDrawLayer("BACKGROUND")
+	toggleBackdrop:SetSize(unpack(layout.ToggleBackdropSize))
+	toggleBackdrop:SetPoint("CENTER", 0, 0)
+	toggleBackdrop:SetTexture(layout.ToggleBackdropTexture)
+	toggleBackdrop:SetVertexColor(unpack(layout.ToggleBackdropColor))
 
-		ringFrame:HookScript("OnHide", function() 
-			local compassFrame = Wheel("LibMinimap"):GetCompassFrame()
-			if compassFrame then 
-				compassFrame.supressCompass = nil
-			end 
-		end)
+	Handler.Toggle = toggle
+	
+	-- outer ring
+	local ring1 = ringFrame:CreateSpinBar()
+	ring1:SetPoint(unpack(layout.OuterRingPlace))
+	ring1:SetSize(unpack(layout.OuterRingSize)) 
+	ring1:SetSparkOffset(layout.OuterRingSparkOffset)
+	ring1:SetSparkFlash(unpack(layout.OuterRingSparkFlash))
+	ring1:SetSparkBlendMode(layout.OuterRingSparkBlendMode)
+	ring1:SetClockwise(layout.OuterRingClockwise) 
+	ring1:SetDegreeOffset(layout.OuterRingDegreeOffset) 
+	ring1:SetDegreeSpan(layout.OuterRingDegreeSpan)
+	ring1.showSpark = layout.OuterRingShowSpark 
+	ring1.colorXP = layout.OuterRingColorXP
+	ring1.colorPower = layout.OuterRingColorPower 
+	ring1.colorStanding = layout.OuterRingColorStanding 
+	ring1.colorValue = layout.OuterRingColorValue 
+	ring1.backdropMultiplier = layout.OuterRingBackdropMultiplier 
+	ring1.sparkMultiplier = layout.OuterRingSparkMultiplier
 
-		-- Wait with this until now to trigger compass visibility changes
-		ringFrame:SetShown(db.stickyBars) 
+	-- outer ring value text
+	local ring1Value = ring1:CreateFontString()
+	ring1Value:SetPoint(unpack(layout.OuterRingValuePlace))
+	ring1Value:SetJustifyH(layout.OuterRingValueJustifyH)
+	ring1Value:SetJustifyV(layout.OuterRingValueJustifyV)
+	ring1Value:SetFontObject(layout.OuterRingValueFont)
+	ring1Value.showDeficit = layout.OuterRingValueShowDeficit 
+	ring1.Value = ring1Value
 
-		-- ring frame backdrops
-		local ringFrameBg = ringFrame:CreateTexture()
-		ringFrameBg:SetPoint(unpack(Layout.RingFrameBackdropPlace))
-		ringFrameBg:SetSize(unpack(Layout.RingFrameBackdropSize))  
-		ringFrameBg:SetDrawLayer(unpack(Layout.RingFrameBackdropDrawLayer))
-		ringFrameBg:SetTexture(Layout.RingFrameBackdropTexture)
-		ringFrameBg:SetVertexColor(unpack(Layout.RingFrameBackdropColor))
-		ringFrame.Bg = ringFrameBg
+	-- outer ring value description text
+	local ring1ValueDescription = ring1:CreateFontString()
+	ring1ValueDescription:SetPoint(unpack(layout.OuterRingValueDescriptionPlace))
+	ring1ValueDescription:SetWidth(layout.OuterRingValueDescriptionWidth)
+	ring1ValueDescription:SetTextColor(unpack(layout.OuterRingValueDescriptionColor))
+	ring1ValueDescription:SetJustifyH(layout.OuterRingValueDescriptionJustifyH)
+	ring1ValueDescription:SetJustifyV(layout.OuterRingValueDescriptionJustifyV)
+	ring1ValueDescription:SetFontObject(layout.OuterRingValueDescriptionFont)
+	ring1ValueDescription:SetIndentedWordWrap(false)
+	ring1ValueDescription:SetWordWrap(true)
+	ring1ValueDescription:SetNonSpaceWrap(false)
+	ring1.Value.Description = ring1ValueDescription
 
-		-- Toggle button for ring frame
-		local toggle = Handler:CreateOverlayFrame()
-		toggle:SetFrameLevel(toggle:GetFrameLevel() + 10) -- need this above the ring frame and the rings
-		toggle:SetPoint("CENTER", Handler, "BOTTOM", 2, -6)
-		toggle:SetSize(unpack(Layout.ToggleSize))
-		toggle:EnableMouse(true)
-		toggle:SetScript("OnEnter", Toggle_OnEnter)
-		toggle:SetScript("OnLeave", Toggle_OnLeave)
-		toggle:SetScript("OnMouseUp", Toggle_OnMouseUp)
-		toggle._owner = Handler
-		ringFrame._owner = toggle
-		toggle.Frame = ringFrame
+	local outerPercent = toggle:CreateFontString()
+	outerPercent:SetDrawLayer("OVERLAY")
+	outerPercent:SetJustifyH("CENTER")
+	outerPercent:SetJustifyV("MIDDLE")
+	outerPercent:SetFontObject(layout.OuterRingValuePercentFont)
+	outerPercent:SetShadowOffset(0, 0)
+	outerPercent:SetShadowColor(0, 0, 0, 0)
+	outerPercent:SetPoint("CENTER", 1, -1)
+	ring1.Value.Percent = outerPercent
 
-		local toggleBackdrop = toggle:CreateTexture()
-		toggleBackdrop:SetDrawLayer("BACKGROUND")
-		toggleBackdrop:SetSize(unpack(Layout.ToggleBackdropSize))
-		toggleBackdrop:SetPoint("CENTER", 0, 0)
-		toggleBackdrop:SetTexture(Layout.ToggleBackdropTexture)
-		toggleBackdrop:SetVertexColor(unpack(Layout.ToggleBackdropColor))
+	-- inner ring 
+	local ring2 = ringFrame:CreateSpinBar()
+	ring2:SetPoint(unpack(layout.InnerRingPlace))
+	ring2:SetSize(unpack(layout.InnerRingSize)) 
+	ring2:SetSparkSize(unpack(layout.InnerRingSparkSize))
+	ring2:SetSparkInset(layout.InnerRingSparkInset)
+	ring2:SetSparkOffset(layout.InnerRingSparkOffset)
+	ring2:SetSparkFlash(unpack(layout.InnerRingSparkFlash))
+	ring2:SetSparkBlendMode(layout.InnerRingSparkBlendMode)
+	ring2:SetClockwise(layout.InnerRingClockwise) 
+	ring2:SetDegreeOffset(layout.InnerRingDegreeOffset) 
+	ring2:SetDegreeSpan(layout.InnerRingDegreeSpan)
+	ring2:SetStatusBarTexture(layout.InnerRingBarTexture)
+	ring2.showSpark = layout.InnerRingShowSpark 
+	ring2.colorXP = layout.InnerRingColorXP
+	ring2.colorPower = layout.InnerRingColorPower 
+	ring2.colorStanding = layout.InnerRingColorStanding 
+	ring2.colorValue = layout.InnerRingColorValue 
+	ring2.backdropMultiplier = layout.InnerRingBackdropMultiplier 
+	ring2.sparkMultiplier = layout.InnerRingSparkMultiplier
 
-		Handler.Toggle = toggle
-		
-		-- outer ring
-		local ring1 = ringFrame:CreateSpinBar()
-		ring1:SetPoint(unpack(Layout.OuterRingPlace))
-		ring1:SetSize(unpack(Layout.OuterRingSize)) 
-		ring1:SetSparkOffset(Layout.OuterRingSparkOffset)
-		ring1:SetSparkFlash(unpack(Layout.OuterRingSparkFlash))
-		ring1:SetSparkBlendMode(Layout.OuterRingSparkBlendMode)
-		ring1:SetClockwise(Layout.OuterRingClockwise) 
-		ring1:SetDegreeOffset(Layout.OuterRingDegreeOffset) 
-		ring1:SetDegreeSpan(Layout.OuterRingDegreeSpan)
-		ring1.showSpark = Layout.OuterRingShowSpark 
-		ring1.colorXP = Layout.OuterRingColorXP
-		ring1.colorPower = Layout.OuterRingColorPower 
-		ring1.colorStanding = Layout.OuterRingColorStanding 
-		ring1.colorValue = Layout.OuterRingColorValue 
-		ring1.backdropMultiplier = Layout.OuterRingBackdropMultiplier 
-		ring1.sparkMultiplier = Layout.OuterRingSparkMultiplier
+	-- inner ring value text
+	local ring2Value = ring2:CreateFontString()
+	ring2Value:SetPoint("BOTTOM", ringFrameBg, "CENTER", 0, 2)
+	ring2Value:SetJustifyH("CENTER")
+	ring2Value:SetJustifyV("TOP")
+	ring2Value:SetFontObject(layout.InnerRingValueFont)
+	ring2Value.showDeficit = true  
+	ring2.Value = ring2Value
 
-		-- outer ring value text
-		local ring1Value = ring1:CreateFontString()
-		ring1Value:SetPoint(unpack(Layout.OuterRingValuePlace))
-		ring1Value:SetJustifyH(Layout.OuterRingValueJustifyH)
-		ring1Value:SetJustifyV(Layout.OuterRingValueJustifyV)
-		ring1Value:SetFontObject(Layout.OuterRingValueFont)
-		ring1Value.showDeficit = Layout.OuterRingValueShowDeficit 
-		ring1.Value = ring1Value
+	local innerPercent = ringFrame:CreateFontString()
+	innerPercent:SetDrawLayer("OVERLAY")
+	innerPercent:SetJustifyH("CENTER")
+	innerPercent:SetJustifyV("MIDDLE")
+	innerPercent:SetFontObject(layout.InnerRingValuePercentFont)
+	innerPercent:SetShadowOffset(0, 0)
+	innerPercent:SetShadowColor(0, 0, 0, 0)
+	innerPercent:SetPoint("CENTER", ringFrameBg, "CENTER", 2, -64)
+	ring2.Value.Percent = innerPercent
 
-		-- outer ring value description text
-		local ring1ValueDescription = ring1:CreateFontString()
-		ring1ValueDescription:SetPoint(unpack(Layout.OuterRingValueDescriptionPlace))
-		ring1ValueDescription:SetWidth(Layout.OuterRingValueDescriptionWidth)
-		ring1ValueDescription:SetTextColor(unpack(Layout.OuterRingValueDescriptionColor))
-		ring1ValueDescription:SetJustifyH(Layout.OuterRingValueDescriptionJustifyH)
-		ring1ValueDescription:SetJustifyV(Layout.OuterRingValueDescriptionJustifyV)
-		ring1ValueDescription:SetFontObject(Layout.OuterRingValueDescriptionFont)
-		ring1ValueDescription:SetIndentedWordWrap(false)
-		ring1ValueDescription:SetWordWrap(true)
-		ring1ValueDescription:SetNonSpaceWrap(false)
-		ring1.Value.Description = ring1ValueDescription
+	-- Store the bars locally
+	Spinner[1] = ring1
+	Spinner[2] = ring2
 
-		local outerPercent = toggle:CreateFontString()
-		outerPercent:SetDrawLayer("OVERLAY")
-		outerPercent:SetJustifyH("CENTER")
-		outerPercent:SetJustifyV("MIDDLE")
-		outerPercent:SetFontObject(Layout.OuterRingValuePercentFont)
-		outerPercent:SetShadowOffset(0, 0)
-		outerPercent:SetShadowColor(0, 0, 0, 0)
-		outerPercent:SetPoint("CENTER", 1, -1)
-		ring1.Value.Percent = outerPercent
+	-- Tracking button
+	local tracking = Handler:CreateOverlayFrame("Button")
+	tracking:SetFrameLevel(tracking:GetFrameLevel() + 10) -- need this above the ring frame and the rings
+	tracking:SetPoint(unpack(layout.TrackingButtonPlace))
+	tracking:SetSize(unpack(layout.TrackingButtonSize))
+	tracking:EnableMouse(true)
+	tracking:RegisterForClicks("AnyUp")
+	tracking._owner = Handler
 
-		-- inner ring 
-		local ring2 = ringFrame:CreateSpinBar()
-		ring2:SetPoint(unpack(Layout.InnerRingPlace))
-		ring2:SetSize(unpack(Layout.InnerRingSize)) 
-		ring2:SetSparkSize(unpack(Layout.InnerRingSparkSize))
-		ring2:SetSparkInset(Layout.InnerRingSparkInset)
-		ring2:SetSparkOffset(Layout.InnerRingSparkOffset)
-		ring2:SetSparkFlash(unpack(Layout.InnerRingSparkFlash))
-		ring2:SetSparkBlendMode(Layout.InnerRingSparkBlendMode)
-		ring2:SetClockwise(Layout.InnerRingClockwise) 
-		ring2:SetDegreeOffset(Layout.InnerRingDegreeOffset) 
-		ring2:SetDegreeSpan(Layout.InnerRingDegreeSpan)
-		ring2:SetStatusBarTexture(Layout.InnerRingBarTexture)
-		ring2.showSpark = Layout.InnerRingShowSpark 
-		ring2.colorXP = Layout.InnerRingColorXP
-		ring2.colorPower = Layout.InnerRingColorPower 
-		ring2.colorStanding = Layout.InnerRingColorStanding 
-		ring2.colorValue = Layout.InnerRingColorValue 
-		ring2.backdropMultiplier = Layout.InnerRingBackdropMultiplier 
-		ring2.sparkMultiplier = Layout.InnerRingSparkMultiplier
+	local trackingBackdrop = tracking:CreateTexture()
+	trackingBackdrop:SetDrawLayer("BACKGROUND")
+	trackingBackdrop:SetSize(unpack(layout.TrackingButtonBackdropSize))
+	trackingBackdrop:SetPoint("CENTER", 0, 0)
+	trackingBackdrop:SetTexture(layout.TrackingButtonBackdropTexture)
+	trackingBackdrop:SetVertexColor(unpack(layout.TrackingButtonBackdropColor))
 
-		-- inner ring value text
-		local ring2Value = ring2:CreateFontString()
-		ring2Value:SetPoint("BOTTOM", ringFrameBg, "CENTER", 0, 2)
-		ring2Value:SetJustifyH("CENTER")
-		ring2Value:SetJustifyV("TOP")
-		ring2Value:SetFontObject(Layout.InnerRingValueFont)
-		ring2Value.showDeficit = true  
-		ring2.Value = ring2Value
+	local trackingTextureBg = tracking:CreateTexture()
+	trackingTextureBg:SetDrawLayer("ARTWORK", 0)
+	trackingTextureBg:SetPoint("CENTER")
+	trackingTextureBg:SetSize(unpack(layout.TrackingButtonIconBgSize))
+	trackingTextureBg:SetTexture(layout.TrackingButtonIconBgTexture)
+	trackingTextureBg:SetVertexColor(0,0,0,1)
 
-		local innerPercent = ringFrame:CreateFontString()
-		innerPercent:SetDrawLayer("OVERLAY")
-		innerPercent:SetJustifyH("CENTER")
-		innerPercent:SetJustifyV("MIDDLE")
-		innerPercent:SetFontObject(Layout.InnerRingValuePercentFont)
-		innerPercent:SetShadowOffset(0, 0)
-		innerPercent:SetShadowColor(0, 0, 0, 0)
-		innerPercent:SetPoint("CENTER", ringFrameBg, "CENTER", 2, -64)
-		ring2.Value.Percent = innerPercent
+	local trackingTexture = tracking:CreateTexture()
+	trackingTexture:SetDrawLayer("ARTWORK", 1)
+	trackingTexture:SetPoint("CENTER")
+	trackingTexture:SetSize(unpack(layout.TrackingButtonIconSize))
+	trackingTexture:SetMask(layout.TrackingButtonIconMask)
+	trackingTexture:SetTexture(GetTrackingTexture())
+	tracking.Texture = trackingTexture
 
-		-- Store the bars locally
-		Spinner[1] = ring1
-		Spinner[2] = ring2
-	end 
+	local trackingMenuFrame = CreateFrame("Frame", ADDON.."MinimapTrackingButtonMenu", tracking, "UIDropDownMenuTemplate")
 
-	if Layout.UseTrackingButton then 
-		-- Tracking button
-		local tracking = Handler:CreateOverlayFrame("Button")
-		tracking:SetFrameLevel(tracking:GetFrameLevel() + 10) -- need this above the ring frame and the rings
-		tracking:SetPoint(unpack(Layout.TrackingButtonPlace))
-		tracking:SetSize(unpack(Layout.TrackingButtonSize))
-		tracking:EnableMouse(true)
-		tracking:RegisterForClicks("AnyUp")
-		tracking._owner = Handler
-
-		local trackingBackdrop = tracking:CreateTexture()
-		trackingBackdrop:SetDrawLayer("BACKGROUND")
-		trackingBackdrop:SetSize(unpack(Layout.TrackingButtonBackdropSize))
-		trackingBackdrop:SetPoint("CENTER", 0, 0)
-		trackingBackdrop:SetTexture(Layout.TrackingButtonBackdropTexture)
-		trackingBackdrop:SetVertexColor(unpack(Layout.TrackingButtonBackdropColor))
-
-		local trackingTextureBg = tracking:CreateTexture()
-		trackingTextureBg:SetDrawLayer("ARTWORK", 0)
-		trackingTextureBg:SetPoint("CENTER")
-		trackingTextureBg:SetSize(unpack(Layout.TrackingButtonIconBgSize))
-		trackingTextureBg:SetTexture(Layout.TrackingButtonIconBgTexture)
-		trackingTextureBg:SetVertexColor(0,0,0,1)
-
-		local trackingTexture = tracking:CreateTexture()
-		trackingTexture:SetDrawLayer("ARTWORK", 1)
-		trackingTexture:SetPoint("CENTER")
-		trackingTexture:SetSize(unpack(Layout.TrackingButtonIconSize))
-		trackingTexture:SetMask(Layout.TrackingButtonIconMask)
-		trackingTexture:SetTexture(GetTrackingTexture())
-		tracking.Texture = trackingTexture
-
-		local trackingMenuFrame = CreateFrame("Frame", ADDON.."MinimapTrackingButtonMenu", tracking, "UIDropDownMenuTemplate")
-
-		tracking.ShowMenu = function(self)
-			local hasTracking
-			local trackingMenu = { { text = "Select Tracking", isTitle = true } }
-			for _,spellID in ipairs({
-				 1494, --Track Beasts
-				19883, --Track Humanoids
-				19884, --Track Undead
-				19885, --Track Hidden
-				19880, --Track Elementals
-				19878, --Track Demons
-				19882, --Track Giants
-				19879, --Track Dragonkin
-				 5225, --Track Humanoids: Druid
-				 5500, --Sense Demons
-				 5502, --Sense Undead
-				 2383, --Find Herbs
-				 2580, --Find Minerals
-				 2481  --Find Treasure
-			}) do
-				if (IsPlayerSpell(spellID)) then
-					hasTracking = true
-					local spellName = GetSpellInfo(spellID)
-					local spellTexture = GetSpellTexture(spellID)
-					table_insert(trackingMenu, {
-						text = spellName,
-						icon = spellTexture,
-						func = function() CastSpellByID(spellID) end
-					})
-				end
+	tracking.ShowMenu = function(self)
+		local hasTracking
+		local trackingMenu = { { text = "Select Tracking", isTitle = true } }
+		for _,spellID in ipairs({
+			 1494, --Track Beasts
+			19883, --Track Humanoids
+			19884, --Track Undead
+			19885, --Track Hidden
+			19880, --Track Elementals
+			19878, --Track Demons
+			19882, --Track Giants
+			19879, --Track Dragonkin
+				5225, --Track Humanoids: Druid
+				5500, --Sense Demons
+				5502, --Sense Undead
+				2383, --Find Herbs
+				2580, --Find Minerals
+				2481  --Find Treasure
+		}) do
+			if (IsPlayerSpell(spellID)) then
+				hasTracking = true
+				local spellName = GetSpellInfo(spellID)
+				local spellTexture = GetSpellTexture(spellID)
+				table_insert(trackingMenu, {
+					text = spellName,
+					icon = spellTexture,
+					func = function() CastSpellByID(spellID) end
+				})
 			end
-			if hasTracking then 
-				EasyMenu(trackingMenu, trackingMenuFrame, "cursor", 0 , 0, "MENU")
-			end 
 		end
-
-		tracking:SetScript("OnClick", Tracking_OnClick)
-		tracking:SetScript("OnEnter", Tracking_OnEnter)
-		tracking:SetScript("OnLeave", Tracking_OnLeave)
-
-		Minimap:SetScript("OnMouseUp", function(_, button)
-			if (button == "RightButton") then
-				tracking:ShowMenu()
-			else
-				Minimap_OnClick(Minimap)
-			end
-		end)
-
-		self:RegisterEvent("UNIT_AURA", "OnEvent")
-
-		Handler.Tracking = tracking
+		if hasTracking then 
+			EasyMenu(trackingMenu, trackingMenuFrame, "cursor", 0 , 0, "MENU")
+		end 
 	end
+
+	tracking:SetScript("OnClick", Tracking_OnClick)
+	tracking:SetScript("OnEnter", Tracking_OnEnter)
+	tracking:SetScript("OnLeave", Tracking_OnLeave)
+
+	Minimap:SetScript("OnMouseUp", function(_, button)
+		if (button == "RightButton") then
+			tracking:ShowMenu()
+		else
+			Minimap_OnClick(Minimap)
+		end
+	end)
+
+	self:RegisterEvent("UNIT_AURA", "OnEvent")
+
+	Handler.Tracking = tracking
 end 
 
 -- Set up the MBB (MinimapButtonBag) integration
 Module.SetUpMBB = function(self)
+	local layout = self.layout
 
 	local Handler = self:GetMinimapHandler()
+
 	local button = Handler:CreateOverlayFrame()
 	button:SetFrameLevel(button:GetFrameLevel() + 10) 
-	button:Place(unpack(Layout.MBBPlace))
-	button:SetSize(unpack(Layout.MBBSize))
+	button:Place(unpack(layout.MBBPlace))
+	button:SetSize(unpack(layout.MBBSize))
 	button:SetFrameStrata("MEDIUM") 
 
 	local mbbFrame = _G.MBB_MinimapButtonFrame
 	mbbFrame:SetParent(button)
 	mbbFrame:RegisterForDrag()
-	mbbFrame:SetSize(unpack(Layout.MBBSize)) 
+	mbbFrame:SetSize(unpack(layout.MBBSize)) 
 	mbbFrame:ClearAllPoints()
 	mbbFrame:SetFrameStrata("MEDIUM") 
 	mbbFrame:SetPoint("CENTER", 0, 0)
@@ -1235,8 +1067,8 @@ Module.SetUpMBB = function(self)
 	local mbbIcon = _G.MBB_MinimapButtonFrame_Texture
 	mbbIcon:ClearAllPoints()
 	mbbIcon:SetPoint("CENTER", 0, 0)
-	mbbIcon:SetSize(unpack(Layout.MBBSize))
-	mbbIcon:SetTexture(Layout.MBBTexture)
+	mbbIcon:SetSize(unpack(layout.MBBSize))
+	mbbIcon:SetTexture(layout.MBBTexture)
 	mbbIcon:SetTexCoord(0,1,0,1)
 	mbbIcon:SetAlpha(.85)
 	
@@ -1293,11 +1125,14 @@ Module.EnableAllElements = function(self)
 	Handler:EnableAllElements()
 end 
 
+----------------------------------------------------
+-- Map Post Updates
+----------------------------------------------------
 -- Set the mask texture
 Module.UpdateMinimapMask = function(self)
 	-- Transparency in these textures also affect the indoors opacity 
 	-- of the minimap, something changing the map alpha directly does not. 
-	self:SetMinimapMaskTexture(Layout.MaskTexture)
+	self:SetMinimapMaskTexture(self.layout.MaskTexture)
 end 
 
 -- Set the size and position 
@@ -1307,21 +1142,19 @@ Module.UpdateMinimapSize = function(self)
 		return self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
 	end
 
-	self:SetMinimapSize(unpack(Layout.Size)) 
-	self:SetMinimapPosition(unpack(Layout.Place)) 
+	local layout = self.layout
+
+	self:SetMinimapSize(unpack(layout.Size)) 
+	self:SetMinimapPosition(unpack(layout.Place)) 
 end 
 
 Module.UpdateBars = function(self, event, ...)
-	if (not Layout.UseStatusRings) then 
-		return 
-	end 
+	local layout = self.layout
 
 	local Handler = self:GetMinimapHandler()
-	local hasXP = Module.PlayerHasXP()
-	local hasRep = Module.PlayerHasRep()
-	local first = hasXP and "XP"
+	local hasXP = self:PlayerHasXP()
+	local hasRep = self:PlayerHasRep()
 
-	-- Will include choices later on
 	local first, second 
 	if (hasXP) then 
 		first = "XP"
@@ -1329,6 +1162,7 @@ Module.UpdateBars = function(self, event, ...)
 	elseif (hasRep) then 
 		first = "Reputation"
 	end 
+
 	if (first or second) then
 		if (not Handler.Toggle:IsShown()) then  
 			Handler.Toggle:Show()
@@ -1341,16 +1175,15 @@ Module.UpdateBars = function(self, event, ...)
 			if self.spinnerMode ~= "Dual" then 
 
 				-- Set the backdrop to the two bar backdrop
-				Handler.Toggle.Frame.Bg:SetTexture(Layout.RingFrameBackdropDoubleTexture)
+				Handler.Toggle.Frame.Bg:SetTexture(layout.RingFrameBackdropDoubleTexture)
 
 				-- Update the look of the outer spinner
-				Spinner[1]:SetStatusBarTexture(Layout.RingFrameOuterRingTexture)
-				Spinner[1]:SetSparkSize(unpack(Layout.RingFrameOuterRingSparkSize))
-				Spinner[1]:SetSparkInset(unpack(Layout.RingFrameOuterRingSparkInset))
+				Spinner[1]:SetStatusBarTexture(layout.RingFrameOuterRingTexture)
+				Spinner[1]:SetSparkSize(unpack(layout.RingFrameOuterRingSparkSize))
+				Spinner[1]:SetSparkInset(unpack(layout.RingFrameOuterRingSparkInset))
 
-				if Layout.RingFrameOuterRingValueFunc then 
-					Layout.RingFrameOuterRingValueFunc(Spinner[1].Value, Handler)
-				end 
+				layout.RingFrameOuterRingValueFunc(Spinner[1].Value, Handler)
+
 				Spinner[1].PostUpdate = nil
 			end
 
@@ -1365,10 +1198,10 @@ Module.UpdateBars = function(self, event, ...)
 
 				-- Assign the correct post updates
 				if (first == "XP") then 
-					Handler[first].OverrideValue = XP_OverrideValue
+					Handler[first].OverrideValue = layout.XP_OverrideValue
 	
 				elseif (first == "Reputation") then 
-					Handler[first].OverrideValue = Rep_OverrideValue
+					Handler[first].OverrideValue = layout.Rep_OverrideValue
 				end 
 
 				-- Enable the updated element 
@@ -1377,6 +1210,7 @@ Module.UpdateBars = function(self, event, ...)
 				-- Run an update
 				Handler[first]:ForceUpdate()
 			end
+
 			if (self.spinner2 ~= second) then 
 
 				-- Disable the old element 
@@ -1387,10 +1221,10 @@ Module.UpdateBars = function(self, event, ...)
 
 				-- Assign the correct post updates
 				if (second == "XP") then 
-					Handler[second].OverrideValue = XP_OverrideValue
+					Handler[second].OverrideValue = layout.XP_OverrideValue
 	
 				elseif (second == "Reputation") then 
-					Handler[second].OverrideValue = Rep_OverrideValue
+					Handler[second].OverrideValue = layout.Rep_OverrideValue
 				end 
 
 				-- Enable the updated element 
@@ -1411,16 +1245,14 @@ Module.UpdateBars = function(self, event, ...)
 			if (self.spinnerMode ~= "Single") then 
 
 				-- Set the backdrop to the single thick bar backdrop
-				Handler.Toggle.Frame.Bg:SetTexture(Layout.RingFrameBackdropTexture)
+				Handler.Toggle.Frame.Bg:SetTexture(layout.RingFrameBackdropTexture)
 
 				-- Update the look of the outer spinner to the big single bar look
-				Spinner[1]:SetStatusBarTexture(Layout.RingFrameSingleRingTexture)
-				Spinner[1]:SetSparkSize(unpack(Layout.RingFrameSingleRingSparkSize))
-				Spinner[1]:SetSparkInset(unpack(Layout.RingFrameSingleRingSparkInset))
+				Spinner[1]:SetStatusBarTexture(layout.RingFrameSingleRingTexture)
+				Spinner[1]:SetSparkSize(unpack(layout.RingFrameSingleRingSparkSize))
+				Spinner[1]:SetSparkInset(unpack(layout.RingFrameSingleRingSparkInset))
 
-				if Layout.RingFrameSingleRingValueFunc then 
-					Layout.RingFrameSingleRingValueFunc(Spinner[1].Value, Handler)
-				end 
+				layout.RingFrameSingleRingValueFunc(Spinner[1].Value, Handler)
 
 				-- Hide 2nd spinner values
 				Spinner[2].Value:SetText("")
@@ -1438,8 +1270,8 @@ Module.UpdateBars = function(self, event, ...)
 
 				-- Update pointers and callbacks to the active element
 				Handler[first] = Spinner[1]
-				Handler[first].OverrideValue = hasXP and XP_OverrideValue or hasRep and Rep_OverrideValue
-				Handler[first].PostUpdate = hasXP and PostUpdate_XP or hasRep and PostUpdate_Rep
+				Handler[first].OverrideValue = hasXP and layout.XP_OverrideValue or hasRep and layout.Rep_OverrideValue
+				Handler[first].PostUpdate = hasXP and layout.XP_PostUpdate or hasRep and layout.Rep_PostUpdate
 
 				-- Enable the active element
 				self:EnableMinimapElement(first)
@@ -1459,6 +1291,7 @@ Module.UpdateBars = function(self, event, ...)
 			self.spinner1 = first
 			self.spinner2 = nil
 		end 
+
 		-- Post update the frame, could be sticky
 		Toggle_UpdateFrame(Handler.Toggle)
 	else 
@@ -1478,6 +1311,9 @@ Module.UpdateTracking = function(self)
 	end
 end
 
+----------------------------------------------------
+-- Module Initialization
+----------------------------------------------------
 Module.OnEvent = function(self, event, ...)
 	if (event == "PLAYER_LEVEL_UP") then 
 		local level = ...
@@ -1512,27 +1348,21 @@ Module.OnEvent = function(self, event, ...)
 		end 
 	end 
 
-	if Layout.UseTrackingButton then 
-		if (event == "UNIT_AURA") then 
-			self:UpdateTracking()
-		end
-	end 
+	if (event == "UNIT_AURA") then 
+		self:UpdateTracking()
+	end
 
-	if Layout.UseStatusRings then 
-		self:UpdateBars()
-	end 
-end 
-
-Module.PreInit = function(self)
-	local PREFIX = Core:GetPrefix()
-	Layout = Wheel("LibDB"):GetDatabase(PREFIX..":[Minimap]")
-	L = Wheel("LibLocale"):GetLocale(PREFIX)
+	self:UpdateBars()
 end 
 
 Module.OnInit = function(self)
-	self.db = self:NewConfig("Minimap", defaults, "global")
-	self.MBB = Layout.UseMBB and self:IsAddOnEnabled("MBB")
+	self.db = GetConfig(self:GetName())
+	self.layout = GetLayout(self:GetName())
+
+	self.MBB = self:IsAddOnEnabled("MBB")
+	
 	self:SetUpMinimap()
+
 	if self.MBB then 
 		if IsAddOnLoaded("MBB") then 
 			self:SetUpMBB()
@@ -1540,20 +1370,17 @@ Module.OnInit = function(self)
 			self:RegisterEvent("ADDON_LOADED", "OnEvent")
 		end 
 	end 
-	if Layout.UseStatusRings then 
-		self:UpdateBars()
-	end
+
+	self:UpdateBars()
 end 
 
 Module.OnEnable = function(self)
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
 	self:RegisterEvent("VARIABLES_LOADED", "OnEvent") -- size and mask must be updated after this
-	if Layout.UseStatusRings then 
-		self:RegisterEvent("PLAYER_ALIVE", "OnEvent")
-		self:RegisterEvent("PLAYER_FLAGS_CHANGED", "OnEvent")
-		self:RegisterEvent("PLAYER_LEVEL_UP", "OnEvent")
-		self:RegisterEvent("PLAYER_XP_UPDATE", "OnEvent")
-		self:RegisterEvent("UPDATE_FACTION", "OnEvent")
-	end 
+	self:RegisterEvent("PLAYER_ALIVE", "OnEvent")
+	self:RegisterEvent("PLAYER_FLAGS_CHANGED", "OnEvent")
+	self:RegisterEvent("PLAYER_LEVEL_UP", "OnEvent")
+	self:RegisterEvent("PLAYER_XP_UPDATE", "OnEvent")
+	self:RegisterEvent("UPDATE_FACTION", "OnEvent")
 	self:EnableAllElements()
 end 
