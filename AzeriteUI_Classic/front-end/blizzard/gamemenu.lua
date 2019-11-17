@@ -1,13 +1,11 @@
-local ADDON = ...
-
+local ADDON, Private = ...
 local Core = Wheel("LibModule"):GetModule(ADDON)
 if (not Core) then 
 	return 
 end
 
+local L = Wheel("LibLocale"):GetLocale(ADDON)
 local Module = Core:NewModule("BlizzardGameMenu", "LibEvent", "LibDB", "LibTooltip", "LibFrame")
-local Layout, L
-
 Module:SetIncompatible("ConsolePort")
 
 -- Lua API
@@ -17,8 +15,11 @@ local table_remove = table.remove
 local type = type 
 
 -- WoW API
-local InCombatLockdown = _G.InCombatLockdown
-local IsMacClient = _G.IsMacClient
+local InCombatLockdown = InCombatLockdown
+local IsMacClient = IsMacClient
+
+-- Private API
+local GetLayout = Private.GetLayout
 
 local BLANK_TEXTURE = [[Interface\ChatFrame\ChatFrameBackground]]
 local buttonWidth, buttonHeight, buttonSpacing, sizeMod = 300, 50, 10, 3/4
@@ -66,6 +67,7 @@ Module.UpdateButtonLayout = function(self)
 end
 
 Module.StyleButtons = function(self)
+	local layout = self.layout
 	local UICenter = self:GetFrame("UICenter")
 
 	local need_addon_watch
@@ -80,14 +82,14 @@ Module.StyleButtons = function(self)
 		end
 		
 		-- style it unless we've already done it
-		if not v.styled then
+		if (not v.styled) then
 			
-			if button then
+			if (button) then
 				-- Ignore hidden buttons, because that means Blizzard aren't using them.
 				-- An example of this is the mac options button which is hidden on windows/linux.
 
 				local label
-				if type(v.label) == "function" then
+				if (type(v.label) == "function") then
 					label = v.label()
 				else
 					label = v.label
@@ -95,7 +97,7 @@ Module.StyleButtons = function(self)
 				local anchor = v.anchor
 				
 				-- run custom scripts on the button, if any
-				if v.run then
+				if (v.run) then
 					v.run(button)
 				end
 
@@ -122,27 +124,17 @@ Module.StyleButtons = function(self)
 					fontstring:SetAlpha(0) -- this is compatible with the Shop button
 				end
 				
-				button:SetSize(Layout.MenuButtonSize[1]*Layout.MenuButtonSizeMod, Layout.MenuButtonSize[2]*Layout.MenuButtonSizeMod) 
+				button:SetSize(layout.MenuButtonSize[1]*layout.MenuButtonSizeMod, layout.MenuButtonSize[2]*layout.MenuButtonSizeMod) 
+				layout.MenuButton_PostCreate(button, label)
 
-				if Layout.MenuButton_PostCreate then 
-					Layout.MenuButton_PostCreate(button, label)
-				end
-
-				if Layout.MenuButton_PostUpdate then 
-					local PostUpdate = Layout.MenuButton_PostUpdate
-					button:HookScript("OnEnter", PostUpdate)
-					button:HookScript("OnLeave", PostUpdate)
-					button:HookScript("OnMouseDown", function(self) self.isDown = true; return PostUpdate(self) end)
-					button:HookScript("OnMouseUp", function(self) self.isDown = false; return PostUpdate(self) end)
-					button:HookScript("OnShow", function(self) self.isDown = false; return PostUpdate(self) end)
-					button:HookScript("OnHide", function(self) self.isDown = false; return PostUpdate(self) end)
-					PostUpdate(button)
-				else
-					button:HookScript("OnMouseDown", function(self) self.isDown = true end)
-					button:HookScript("OnMouseUp", function(self) self.isDown = false end)
-					button:HookScript("OnShow", function(self) self.isDown = false end)
-					button:HookScript("OnHide", function(self) self.isDown = false end)
-				end 
+				local PostUpdate = layout.MenuButton_PostUpdate
+				button:HookScript("OnEnter", PostUpdate)
+				button:HookScript("OnLeave", PostUpdate)
+				button:HookScript("OnMouseDown", function(self) self.isDown = true; return PostUpdate(self) end)
+				button:HookScript("OnMouseUp", function(self) self.isDown = false; return PostUpdate(self) end)
+				button:HookScript("OnShow", function(self) self.isDown = false; return PostUpdate(self) end)
+				button:HookScript("OnHide", function(self) self.isDown = false; return PostUpdate(self) end)
+				PostUpdate(button)
 			
 				v.button = button -- add a reference to the frame handle for the layout function
 				v.styled = true -- avoid double styling
@@ -208,13 +200,8 @@ Module.StyleWindow = function(self, frame)
 
 end
 
-Module.PreInit = function(self)
-	local PREFIX = Core:GetPrefix()
-	L = Wheel("LibLocale"):GetLocale(PREFIX)
-	Layout = Wheel("LibDB"):GetDatabase(PREFIX..":[BlizzardGameMenu]")
-end
-
 Module.OnInit = function(self)
+	self.layout = GetLayout(self:GetName())
 	self.frame = GameMenuFrame
 
 	-- does this taint? :/

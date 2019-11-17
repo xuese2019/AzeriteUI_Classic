@@ -1,17 +1,16 @@
-local ADDON = ...
+local ADDON, Private = ...
 local Core = Wheel("LibModule"):GetModule(ADDON)
 if (not Core) then 
 	return 
 end
 
 local Module = Core:NewModule("BlizzardPopupStyling", "LibEvent")
-local Layout
-
--- Lua API
-local _G = _G
 
 -- WoW API
 local InCombatLockdown = _G.InCombatLockdown
+
+-- Private API
+local GetLayout = Private.GetLayout
 
 Module.StylePopUp = function(self, popup)
 	if (self.styled and self.styled[popup]) then 
@@ -20,9 +19,7 @@ Module.StylePopUp = function(self, popup)
 	if (not self.styled) then
 		self.styled = {}
 	end
-	if Layout.PostCreatePopup then 
-		Layout.PostCreatePopup(self, popup)
-	end 
+	self.layout.PostCreatePopup(self, popup)
 	self.styled[popup] = true
 end
 
@@ -32,9 +29,7 @@ Module.PostUpdateAnchors = function(self)
 	if InCombatLockdown() then 
 		return self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
 	end 
-	if Layout.PostUpdateAnchors then 
-		Layout.PostUpdateAnchors(self)
-	end 
+	self.layout.PostUpdateAnchors(self)
 end
 
 Module.StylePopUps = function(self)
@@ -53,11 +48,8 @@ Module.OnEvent = function(self, event, ...)
 	end 
 end 
 
-Module.PreInit = function(self)
-	Layout = Wheel("LibDB"):GetDatabase(Core:GetPrefix()..":[BlizzardPopupStyling]")
-end 
-
 Module.OnInit = function(self)
+	self.layout = GetLayout(self:GetName())
 	self:StylePopUps() 
 	self:PostUpdateAnchors() 
 

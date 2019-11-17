@@ -1207,87 +1207,6 @@ local BlizzardChatFrames = {
 		ButtonTextureChatEmotes = GetMedia("config_button_emotes")
 }
 
--- Blizzard Game Menu (Esc)
-local BlizzardGameMenu = {
-	MenuButtonSize = { MenuButtonW, MenuButtonH },
-	MenuButtonSpacing = 10, 
-	MenuButtonSizeMod = .75, 
-	MenuButton_PostCreate = Blizzard_GameMenu_Button_PostCreate,
-	MenuButton_PostUpdate = Blizzard_GameMenu_Button_PostUpdate
-}
-
--- Blizzard Objectives Tracker
-local BlizzardObjectivesTracker = {
-	Colors = Colors,
-
-	--Place = { "TOPRIGHT", -60, -260 },
-	Place = { "BOTTOMRIGHT", -60, 380 },
-	Width = 255, -- 280 classic default
-	Scale = 1.0, 
-	SpaceTop = 260, 
-	SpaceBottom = 380, 
-	MaxHeight = 1080 - (260 + 380),
-	HideInCombat = false, 
-	HideInBossFights = true,
-
-	FontObject = GetFont(13, true),
-	FontObjectTitle = GetFont(15, true)
-
-}
-
--- Blizzard Instance Countdown Timers
-local BlizzardTimers = {
-	Colors = Colors,
-
-	Size = { 111, 14 },
-		Anchor = Wheel("LibFrame"):GetFrame(),
-		AnchorPoint = "TOP",
-		AnchorOffsetX = 0,
-		AnchorOffsetY = -370, -- -220
-		Growth = -50, 
-
-	BlankTexture = GetMedia("blank"), 
-
-	BarPlace = { "CENTER", 0, 0 },
-		BarSize = { 111, 12 }, 
-		BarTexture = GetMedia("cast_bar"), 
-		BarColor = { Colors.quest.red[1], Colors.quest.red[2], Colors.quest.red[3] }, 
-		BarSparkMap = {
-			top = {
-				{ keyPercent =   0/128, offset = -16/32 }, 
-				{ keyPercent =  10/128, offset =   0/32 }, 
-				{ keyPercent = 119/128, offset =   0/32 }, 
-				{ keyPercent = 128/128, offset = -16/32 }
-			},
-			bottom = {
-				{ keyPercent =   0/128, offset = -16/32 }, 
-				{ keyPercent =  10/128, offset =   0/32 }, 
-				{ keyPercent = 119/128, offset =   0/32 }, 
-				{ keyPercent = 128/128, offset = -16/32 }
-			}
-		},
-
-	UseBarValue = true, 
-		BarValuePlace = { "CENTER", 0, 0 }, 
-		BarValueFont = GetFont(14, true),
-		BarValueColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .7 },
-
-	UseBackdrop = true, 
-		BackdropPlace = { "CENTER", 1, -2 }, 
-		BackdropSize = { 193,93 }, 
-		BackdropTexture = GetMedia("cast_back"),
-		BackdropDrawLayer = { "BACKGROUND", -5 },
-		BackdropColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }
-
-}
-
--- Blizzard Popup Styling
-local BlizzardPopupStyling = {
-	Colors = Colors, 
-	PostCreatePopup = BlizzardPopup_PostCreate,
-	PostUpdateAnchors = BlizzardPopup_Anchors_PostUpdate
-}
-
 -- Little trick to see the layout and dimensions of the blip icons
 --local f = UIParent:CreateTexture()
 --f:SetTexture([[Interface\MiniMap\ObjectIconsAtlas.blp]]) 
@@ -2421,10 +2340,6 @@ local UnitFrameBoss = setmetatable({
 
 LibDB:NewDatabase(ADDON..":[ActionBarMain]", ActionBars)
 LibDB:NewDatabase(ADDON..":[BlizzardChatFrames]", BlizzardChatFrames)
-LibDB:NewDatabase(ADDON..":[BlizzardGameMenu]", BlizzardGameMenu)
-LibDB:NewDatabase(ADDON..":[BlizzardObjectivesTracker]", BlizzardObjectivesTracker)
-LibDB:NewDatabase(ADDON..":[BlizzardPopupStyling]", BlizzardPopupStyling)
-LibDB:NewDatabase(ADDON..":[BlizzardTimers]", BlizzardTimers)
 LibDB:NewDatabase(ADDON..":[UnitFramePlayer]", UnitFramePlayer)
 LibDB:NewDatabase(ADDON..":[UnitFramePet]", UnitFramePet)
 LibDB:NewDatabase(ADDON..":[UnitFrameTarget]", UnitFrameTarget)
@@ -2561,6 +2476,15 @@ Layouts.BlizzardFonts = {
 	ChatBubbleFont = GetFont(10, true)
 }
 
+-- Blizzard Game Menu (Esc)
+Layouts.BlizzardGameMenu = {
+	MenuButtonSize = { MenuButtonW, MenuButtonH },
+	MenuButtonSpacing = 10, 
+	MenuButtonSizeMod = .75, 
+	MenuButton_PostCreate = Blizzard_GameMenu_Button_PostCreate,
+	MenuButton_PostUpdate = Blizzard_GameMenu_Button_PostUpdate
+}
+
 -- Blizzard MicroMenu
 Layouts.BlizzardMicroMenu = {
 	Colors = Colors,
@@ -2589,6 +2513,67 @@ Layouts.BlizzardMicroMenu = {
 	MenuButton_PostCreate = BlizzardMicroMenu_Button_PostCreate,
 	MenuButton_PostUpdate = BlizzardMicroMenu_Button_PostUpdate, 
 	MenuWindow_CreateBorder = Core_Window_CreateBorder
+}
+
+-- Blizzard Instance Countdown Timers
+Layouts.BlizzardMirrorTimers = {
+	Size = { 111, 14 }, Anchor = Wheel("LibFrame"):GetFrame(),
+	AnchorPoint = "TOP",
+	AnchorOffsetX = 0,
+	AnchorOffsetY = -370, 
+	Growth = -50, 
+
+	BlankTexture = GetMedia("blank"), 
+
+	BarPlace = { "CENTER", 0, 0 },
+	BarSize = { 111, 12 }, 
+	BarTexture = GetMedia("cast_bar"), 
+	BarColor = { Colors.quest.red[1], Colors.quest.red[2], Colors.quest.red[3] }, 
+	BarSparkMap = {
+		top = {
+			{ keyPercent =   0/128, offset = -16/32 }, 
+			{ keyPercent =  10/128, offset =   0/32 }, 
+			{ keyPercent = 119/128, offset =   0/32 }, 
+			{ keyPercent = 128/128, offset = -16/32 }
+		},
+		bottom = {
+			{ keyPercent =   0/128, offset = -16/32 }, 
+			{ keyPercent =  10/128, offset =   0/32 }, 
+			{ keyPercent = 119/128, offset =   0/32 }, 
+			{ keyPercent = 128/128, offset = -16/32 }
+		}
+	},
+
+	BarValuePlace = { "CENTER", 0, 0 }, 
+	BarValueFont = GetFont(14, true),
+	BarValueColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .7 },
+
+	BackdropPlace = { "CENTER", 1, -2 }, 
+	BackdropSize = { 193,93 }, 
+	BackdropTexture = GetMedia("cast_back"),
+	BackdropDrawLayer = { "BACKGROUND", -5 },
+	BackdropColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }
+
+}
+
+-- Blizzard Objectives Tracker
+Layouts.BlizzardObjectivesTracker = {
+	FontObject = GetFont(13, true),
+	FontObjectTitle = GetFont(15, true),
+	HideInCombat = false, 
+	HideInBossFights = true,
+	MaxHeight = 1080 - (260 + 380),
+	Place = { "BOTTOMRIGHT", -60, 380 },
+	Scale = 1.0, 
+	SpaceBottom = 380, 
+	SpaceTop = 260, 
+	Width = 255, -- 280 classic default
+}
+
+-- Blizzard Popup Styling
+Layouts.BlizzardPopupStyling = {
+	PostCreatePopup = BlizzardPopup_PostCreate,
+	PostUpdateAnchors = BlizzardPopup_Anchors_PostUpdate
 }
 
 -- Blizzard Tooltips

@@ -1,10 +1,9 @@
-local ADDON = ...
+local ADDON, Private = ...
 local Core = Wheel("LibModule"):GetModule(ADDON)
 if (not Core) then 
 	return 
 end
 local Module = Core:NewModule("BlizzardMirrorTimers", "LibMessage", "LibEvent", "LibSecureHook", "LibFrame", "LibStatusBar")
-local Layout
 
 -- Lua API
 local _G = _G
@@ -14,7 +13,11 @@ local table_sort = table.sort
 local table_wipe = table.wipe
 local unpack = unpack
 
--- Utility Functions
+-- Private API
+local GetLayout = Private.GetLayout
+
+-----------------------------------------------------------------
+-- Utility
 -----------------------------------------------------------------
 local sort = function(a, b)
 	if (a.type and b.type and (a.type == b.type)) then
@@ -24,7 +27,11 @@ local sort = function(a, b)
 	end
 end
 
+-----------------------------------------------------------------
+-- Styling
+-----------------------------------------------------------------
 Module.StyleTimer = function(self, frame, ignoreTextureFix)
+	local layout = self.layout
 	local timer = self.timers[frame.bar]
 	local bar = timer.bar
 
@@ -43,22 +50,20 @@ Module.StyleTimer = function(self, frame, ignoreTextureFix)
 		end 
 	end
 
-	frame:SetSize(unpack(Layout.Size))
+	frame:SetSize(unpack(layout.Size))
 
 	bar:ClearAllPoints()
-	bar:SetPoint(unpack(Layout.BarPlace))
-	bar:SetSize(unpack(Layout.BarSize))
-	bar:SetStatusBarTexture(Layout.BarTexture)
+	bar:SetPoint(unpack(layout.BarPlace))
+	bar:SetSize(unpack(layout.BarSize))
+	bar:SetStatusBarTexture(layout.BarTexture)
 	bar:SetFrameLevel(frame:GetFrameLevel() + 5)
 
-	if Layout.UseBackdrop then 
-		local backdrop = bar:CreateTexture()
-		backdrop:SetPoint(unpack(Layout.BackdropPlace))
-		backdrop:SetSize(unpack(Layout.BackdropSize))
-		backdrop:SetDrawLayer(unpack(Layout.BackdropDrawLayer))
-		backdrop:SetTexture(Layout.BackdropTexture)
-		backdrop:SetVertexColor(unpack(Layout.BackdropColor))
-	end
+	local backdrop = bar:CreateTexture()
+	backdrop:SetPoint(unpack(layout.BackdropPlace))
+	backdrop:SetSize(unpack(layout.BackdropSize))
+	backdrop:SetDrawLayer(unpack(layout.BackdropDrawLayer))
+	backdrop:SetTexture(layout.BackdropTexture)
+	backdrop:SetVertexColor(unpack(layout.BackdropColor))
 
 	if (not ignoreTextureFix) then 
 		-- just hide the spark for now
@@ -67,7 +72,7 @@ Module.StyleTimer = function(self, frame, ignoreTextureFix)
 			spark:SetDrawLayer("OVERLAY") -- needs to be OVERLAY, as ARTWORK will sometimes be behind the bars
 			spark:SetPoint("CENTER", bar:GetStatusBarTexture(), "RIGHT", 0, 0)
 			spark:SetSize(.001,.001)
-			spark:SetTexture(Layout.BlankTexture) 
+			spark:SetTexture(layout.BlankTexture) 
 			spark:SetVertexColor(0,0,0,0)
 		end 
 
@@ -77,24 +82,21 @@ Module.StyleTimer = function(self, frame, ignoreTextureFix)
 			border:ClearAllPoints()
 			border:SetPoint("CENTER", 0, 0)
 			border:SetSize(.001, .001)
-			border:SetTexture(Layout.BlankTexture)
+			border:SetTexture(layout.BlankTexture)
 			border:SetVertexColor(0,0,0,0)
 		end 
 	end 
 
-	if Layout.UseBarValue then 
-		local msg = timer.msg
-		if msg then 
-			msg:SetParent(bar)
-			msg:ClearAllPoints()
-			msg:SetPoint(unpack(Layout.BarValuePlace))
-			msg:SetDrawLayer("OVERLAY", 1)
-			msg:SetJustifyH("CENTER")
-			msg:SetJustifyV("MIDDLE")
-			msg:SetFontObject(Layout.BarValueFont)
-			msg:SetTextColor(unpack(Layout.BarValueColor))
-		end 
-
+	local msg = timer.msg
+	if msg then 
+		msg:SetParent(bar)
+		msg:ClearAllPoints()
+		msg:SetPoint(unpack(layout.BarValuePlace))
+		msg:SetDrawLayer("OVERLAY", 1)
+		msg:SetJustifyH("CENTER")
+		msg:SetJustifyV("MIDDLE")
+		msg:SetFontObject(layout.BarValueFont)
+		msg:SetTextColor(unpack(layout.BarValueColor))
 	end 
 
 	if (not ignoreTextureFix) then 
@@ -103,6 +105,9 @@ Module.StyleTimer = function(self, frame, ignoreTextureFix)
 	end 
 end
 
+-----------------------------------------------------------------
+-- Callbacks
+-----------------------------------------------------------------
 Module.UpdateBarTexture = function(self, event, bar)
 	local min, max = bar:GetMinMaxValues()
 	local value = bar:GetValue()
@@ -118,6 +123,7 @@ Module.UpdateBarTexture = function(self, event, bar)
 end
 
 Module.UpdateAnchors = function(self, event, ...)
+	local layout = self.layout
 	local timers = self.timers
 	local order = self.order or {}
 
@@ -128,7 +134,7 @@ Module.UpdateAnchors = function(self, event, ...)
 	
 	-- Release the points of all timers
 	for bar,timer in pairs(timers) do
-		timer.frame:SetParent(Layout.Anchor)
+		timer.frame:SetParent(layout.Anchor)
 		timer.frame:ClearAllPoints() 
 		if (timer.frame:IsShown()) then
 			order[#order + 1] = timer
@@ -142,17 +148,17 @@ Module.UpdateAnchors = function(self, event, ...)
 		table_sort(order, sort) 
 
 		-- Figure out the start offset
-		local offsetY = Layout.AnchorOffsetY 
+		local offsetY = layout.AnchorOffsetY 
 
 		-- Add space for capturebars, if visible
 		if self.captureBarVisible then 
-			offsetY = offsetY + Layout.Growth
+			offsetY = offsetY + layout.Growth
 		end 
 
 		-- Position the bars
 		for i = 1, #order do
-			order[i].frame:SetPoint(Layout.AnchorPoint, Layout.Anchor, Layout.AnchorPoint, Layout.AnchorOffsetX, offsetY)
-			offsetY = offsetY + Layout.Growth
+			order[i].frame:SetPoint(layout.AnchorPoint, layout.Anchor, layout.AnchorPoint, layout.AnchorOffsetX, offsetY)
+			offsetY = offsetY + layout.Growth
 		end
 	end
 end
@@ -183,17 +189,16 @@ Module.UpdateMirrorTimers = function(self)
 	end 
 end
 
-Module.ForceUpdate = function(self)
+Module.UpdateAll = function(self)
 	self:UpdateMirrorTimers("ForceUpdate")
 	self:UpdateAnchors()
 end
 
-Module.PreInit = function(self)
-	local PREFIX = Core:GetPrefix()
-	Layout = Wheel("LibDB"):GetDatabase(PREFIX..":[BlizzardTimers]")
-end 
-
+-----------------------------------------------------------------
+-- Startup
+-----------------------------------------------------------------
 Module.OnInit = function(self)
+	self.layout = GetLayout(self:GetName())
 	self.timers = {} -- all timer data, hashed by bar objects
 	self.buffTimers = {} -- all buff timer frames, indexed
 	self.buffTimersByAuraID = {} -- all active buff timers, hashed by auraID
@@ -202,5 +207,5 @@ Module.OnInit = function(self)
 	self:SetSecureHook("MirrorTimer_Show", "UpdateMirrorTimers")
 
 	-- Update all on world entering
-	self:RegisterEvent("PLAYER_ENTERING_WORLD", "ForceUpdate")
+	self:RegisterEvent("PLAYER_ENTERING_WORLD", "UpdateAll")
 end

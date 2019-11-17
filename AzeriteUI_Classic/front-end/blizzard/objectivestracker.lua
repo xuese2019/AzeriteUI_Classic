@@ -1,14 +1,12 @@
 local ADDON, Private = ...
-
 local Core = Wheel("LibModule"):GetModule(ADDON)
 if (not Core) then 
 	return 
 end
 
+local L = Wheel("LibLocale"):GetLocale(ADDON)
 local Module = Core:NewModule("BlizzardObjectivesTracker", "LibEvent", "LibFrame")
 Module:SetIncompatible("!KalielsTracker")
-
-local L, Layout
 
 -- Lua API
 local _G = _G
@@ -35,7 +33,11 @@ local IsUnitOnQuest = IsUnitOnQuest
 -- Private API
 local Colors = Private.Colors
 local GetFont = Private.GetFont
+local GetLayout = Private.GetLayout
 
+-----------------------------------------------------------------
+-- Utility
+-----------------------------------------------------------------
 -- Returns the correct difficulty color compared to the player
 local GetQuestDifficultyColor = function(level, playerLevel)
 	level = level - (playerLevel or UnitLevel("player"))
@@ -52,6 +54,9 @@ local GetQuestDifficultyColor = function(level, playerLevel)
 	end
 end
 
+-----------------------------------------------------------------
+-- Callbacks
+-----------------------------------------------------------------
 local QuestLogTitleButton_OnEnter = function(self)
 	self.Text:SetTextColor(Colors.highlight[1], Colors.highlight[2], Colors.highlight[3])
 	_G[self:GetName().."Tag"]:SetTextColor(Colors.highlight[1], Colors.highlight[2], Colors.highlight[3])
@@ -176,6 +181,9 @@ local QuestLog_Update = function(self)
 	end
 end
 
+-----------------------------------------------------------------
+-- Styling
+-----------------------------------------------------------------
 Module.StyleLog = function(self)
 	-- Just hook the global functions as far as possible
 	hooksecurefunc("QuestLog_Update", QuestLog_Update)
@@ -189,10 +197,12 @@ Module.StyleLog = function(self)
 end
 
 Module.StyleTracker = function(self)
+	local layout = self.layout
+
 	local scaffold = self:CreateFrame("Frame", nil, "UICenter")
-	scaffold:SetWidth(Layout.Width)
+	scaffold:SetWidth(layout.Width)
 	scaffold:SetHeight(22)
-	scaffold:Place(unpack(Layout.Place))
+	scaffold:Place(unpack(layout.Place))
 	
 	QuestWatchFrame:SetParent(self.frame)
 	QuestWatchFrame:ClearAllPoints()
@@ -216,19 +226,12 @@ Module.StyleTracker = function(self)
 	local top = QuestWatchFrame:GetTop() or 0
 	local bottom = QuestWatchFrame:GetBottom() or 0
 	local screenHeight = GetScreenHeight()
-	local maxHeight = screenHeight - (Layout.SpaceBottom + Layout.SpaceTop)
-	local objectiveFrameHeight = math_min(maxHeight, Layout.MaxHeight)
+	local maxHeight = screenHeight - (layout.SpaceBottom + layout.SpaceTop)
+	local objectiveFrameHeight = math_min(maxHeight, layout.MaxHeight)
 
-	if Layout.Scale then 
-		QuestWatchFrame:SetScale(Layout.Scale)
-		QuestWatchFrame:SetWidth(Layout.Width / Layout.Scale)
-		QuestWatchFrame:SetHeight(objectiveFrameHeight / Layout.Scale)
-	else
-		QuestWatchFrame:SetScale(1)
-		QuestWatchFrame:SetWidth(Layout.Width)
-		QuestWatchFrame:SetHeight(objectiveFrameHeight)
-	end	
-
+	QuestWatchFrame:SetScale(layout.Scale or 1)
+	QuestWatchFrame:SetWidth(layout.Width / (layout.Scale or 1))
+	QuestWatchFrame:SetHeight(objectiveFrameHeight / (layout.Scale or 1))
 	QuestWatchFrame:SetClampedToScreen(false)
 	QuestWatchFrame:SetAlpha(.9)
 
@@ -241,8 +244,8 @@ Module.StyleTracker = function(self)
 	hooksecurefunc(QuestWatchFrame,"SetPoint", QuestWatchFrame_SetPosition)
 
 	local dummyLine = QuestWatchFrame:CreateFontString()
-	dummyLine:SetFontObject(Layout.FontObject)
-	dummyLine:SetWidth(Layout.Width)
+	dummyLine:SetFontObject(layout.FontObject)
+	dummyLine:SetWidth(layout.Width)
 	dummyLine:SetJustifyH("RIGHT")
 	dummyLine:SetJustifyV("BOTTOM") 
 	dummyLine:SetIndentedWordWrap(false)
@@ -255,8 +258,6 @@ Module.StyleTracker = function(self)
 
 	-- Hook line styling
 	hooksecurefunc("QuestWatch_Update", function() 
-		local Colors = Layout.Colors
-
 		local questIndex
 		local numObjectives
 		local watchText
@@ -358,7 +359,7 @@ Module.StyleTracker = function(self)
 			if (line:IsShown()) then 
 				line:SetShadowOffset(0,0)
 				line:SetShadowColor(0,0,0,0)
-				line:SetFontObject(line.isTitle and Layout.FontObjectTitle or Layout.FontObject)
+				line:SetFontObject(line.isTitle and layout.FontObjectTitle or layout.FontObject)
 				local _,size = line:GetFont()
 				local spacing = size*.2 - size*.2%1
 
@@ -373,7 +374,7 @@ Module.StyleTracker = function(self)
 				dummyLine:SetText(line:GetText() or "")
 				dummyLine:SetSpacing(spacing)
 
-				line:SetWidth(Layout.Width)
+				line:SetWidth(layout.Width)
 				line:SetHeight(dummyLine:GetHeight())
 
 				bottom = line:GetBottom()
@@ -392,8 +393,13 @@ Module.StyleTracker = function(self)
 	end)
 end
 
+-----------------------------------------------------------------
+-- Startup
+-----------------------------------------------------------------
 Module.CreateDriver = function(self)
-	if (Layout.HideInCombat or Layout.HideInBossFights) then 
+	local layout = self.layout
+
+	if (layout.HideInCombat or layout.HideInBossFights) then 
 		local driverFrame = self:CreateFrame("Frame", nil, _G.UIParent, "SecureHandlerAttributeTemplate")
 		driverFrame:HookScript("OnShow", function() 
 			if _G.QuestWatchFrame then 
@@ -421,23 +427,18 @@ Module.CreateDriver = function(self)
 			end
 		]=])
 		local driver = "hide;show"
-		if Layout.HideInBossFights then 
+		if layout.HideInBossFights then 
 			driver = "[@boss1,exists][@boss2,exists][@boss3,exists][@boss4,exists]" .. driver
 		end 
-		if Layout.HideInCombat then 
+		if layout.HideInCombat then 
 			driver = "[combat]" .. driver
 		end 
 		RegisterAttributeDriver(driverFrame, "state-vis", driver)
 	end 
 end 
 
-Module.PreInit = function(self)
-	local PREFIX = Core:GetPrefix()
-	Layout = Wheel("LibDB"):GetDatabase(PREFIX..":[BlizzardObjectivesTracker]")
-	L = Wheel("LibLocale"):GetLocale(PREFIX)
-end
-
 Module.OnInit = function(self)
+	self.layout = GetLayout(self:GetName())
 	self.frame = self:CreateFrame("Frame", nil, "UICenter")
 	self:StyleLog()
 	self:StyleTracker()
