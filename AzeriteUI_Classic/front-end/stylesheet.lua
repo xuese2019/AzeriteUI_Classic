@@ -24,6 +24,7 @@ local setmetatable = setmetatable
 local string_format = string.format
 local string_gsub = string.gsub
 local string_match = string.match
+local string_upper = string.upper
 local tonumber = tonumber
 local tostring = tostring
 
@@ -537,6 +538,14 @@ local Minimap_Coordinates_OverrideValue = function(element, x, y)
 	local xval = string_gsub(string_format("%.1f", x*100), "%.(.+)", "|cff888888.%1|r")
 	local yval = string_gsub(string_format("%.1f", y*100), "%.(.+)", "|cff888888.%1|r")
 	element:SetFormattedText("%s %s", xval, yval) 
+end 
+
+local Minimap_FrameRate_OverrideValue = function(element, fps)
+	element:SetFormattedText("|cff888888%.0f %s|r", math_floor(fps), string_upper(string_match(FPS_ABBR, "^.")))
+end 
+
+local Minimap_Latency_OverrideValue = function(element, home, world)
+	element:SetFormattedText("|cff888888%s|r %.0f - |cff888888%s|r %.0f", string_upper(string_match(HOME, "^.")), math_floor(home), string_upper(string_match(WORLD, "^.")), math_floor(world))
 end 
 
 local Minimap_RingFrame_SingleRing_ValueFunc = function(Value, Handler) 
@@ -2843,10 +2852,12 @@ Layouts.Minimap = {
 	LatencyPlaceFunc = Minimap_Performance_Latency_PlaceFunc, 
 	LatencyFont = GetFont(12, true), 
 	LatencyColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .5 },
+	Latency_OverrideValue = Minimap_Latency_OverrideValue,
 
 	FrameRatePlaceFunc = Minimap_Performance_FrameRate_PlaceFunc, 
 	FrameRateFont = GetFont(12, true), 
 	FrameRateColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .5 },
+	FrameRate_OverrideValue = Minimap_FrameRate_OverrideValue,
 
 	MailPlace = 
 		Wheel("LibModule"):IsAddOnEnabled("MBB") and 
