@@ -15,40 +15,27 @@ local MBF = Module:IsAddOnEnabled("MinimapButtonFrame")
 local _G = _G
 local ipairs = ipairs
 local math_floor = math.floor
-local math_pi = math.pi
 local select = select
 local string_format = string.format
-local string_gsub = string.gsub
 local string_match = string.match
-local string_upper = string.upper
 local table_insert = table.insert
 local tonumber = tonumber
 local unpack = unpack
 
 -- WoW API
-local CancelTrackingBuff = _G.CancelTrackingBuff
-local CastSpellByID = _G.CastSpellByID
-local FindActiveAzeriteItem = C_AzeriteItem and C_AzeriteItem.FindActiveAzeriteItem
-local GetAzeriteItemXPInfo = C_AzeriteItem and C_AzeriteItem.GetAzeriteItemXPInfo
-local GetFactionInfo = _G.GetFactionInfo
-local GetFactionParagonInfo = C_Reputation and C_Reputation.GetFactionParagonInfo
-local GetFramerate = _G.GetFramerate
-local GetFriendshipReputation = _G.GetFriendshipReputation
-local GetNetStats = _G.GetNetStats
-local GetNumFactions = _G.GetNumFactions
-local GetPowerLevel = C_AzeriteItem and C_AzeriteItem.GetPowerLevel
-local GetSpellInfo = _G.GetSpellInfo
-local GetSpellTexture = _G.GetSpellTexture
-local GetTrackingTexture = _G.GetTrackingTexture
-local GetWatchedFactionInfo = _G.GetWatchedFactionInfo
-local IsFactionParagon = C_Reputation and C_Reputation.IsFactionParagon
-local IsPlayerSpell = _G.IsPlayerSpell
-local IsXPUserDisabled = _G.IsXPUserDisabled
-local SetCursor = _G.SetCursor
-local ToggleCalendar = _G.ToggleCalendar
-local UnitExists = _G.UnitExists
-local UnitLevel = _G.UnitLevel
-local UnitRace = _G.UnitRace
+local CancelTrackingBuff = CancelTrackingBuff
+local CastSpellByID = CastSpellByID
+local GetFactionInfo = GetFactionInfo
+local GetFramerate = GetFramerate
+local GetNetStats = GetNetStats
+local GetNumFactions = GetNumFactions
+local GetSpellInfo = GetSpellInfo
+local GetSpellTexture = GetSpellTexture
+local GetTrackingTexture = GetTrackingTexture
+local GetWatchedFactionInfo = GetWatchedFactionInfo
+local IsPlayerSpell = IsPlayerSpell
+local UnitLevel = UnitLevel
+local UnitRace = UnitRace
 
 -- Private API
 local Colors = Private.Colors
@@ -56,9 +43,9 @@ local GetConfig = Private.GetConfig
 local GetLayout = Private.GetLayout
 
 -- WoW Strings
-local REPUTATION = _G.REPUTATION 
-local STANDING = _G.STANDING 
-local UNKNOWN = _G.UNKNOWN
+local REPUTATION = REPUTATION 
+local STANDING = STANDING 
+local UNKNOWN = UNKNOWN
 
 -- Custom strings & constants
 local Spinner = {}
@@ -119,14 +106,6 @@ end
 ----------------------------------------------------
 -- Callbacks
 ----------------------------------------------------
-local FrameRate_OverrideValue = function(element, fps)
-	element:SetFormattedText("|cff888888%.0f %s|r", math_floor(fps), string_upper(string_match(FPS_ABBR, "^.")))
-end 
-
-local Latency_OverrideValue = function(element, home, world)
-	element:SetFormattedText("|cff888888%s|r %.0f - |cff888888%s|r %.0f", string_upper(string_match(HOME, "^.")), math_floor(home), string_upper(string_match(WORLD, "^.")), math_floor(world))
-end 
-
 local Performance_UpdateTooltip = function(self)
 	local tooltip = Module:GetMinimapTooltip()
 
@@ -585,12 +564,7 @@ local Time_OnLeave = function(self)
 end 
 
 local Time_OnClick = function(self, mouseButton)
-	if (mouseButton == "LeftButton") then
-		if (ToggleCalendar) then 
-			ToggleCalendar()
-		end 
-
-	elseif (mouseButton == "MiddleButton") then 
+	if (mouseButton == "MiddleButton") then 
 		Module.db.useServerTime = not Module.db.useServerTime
 
 		self.clock.useServerTime = Module.db.useServerTime
@@ -780,7 +754,7 @@ Module.SetUpMinimap = function(self)
 	framerate:SetJustifyV("BOTTOM")
 	framerate:SetFontObject(layout.FrameRateFont)
 	framerate:SetTextColor(unpack(layout.FrameRateColor))
-	framerate.OverrideValue = FrameRate_OverrideValue
+	framerate.OverrideValue = layout.FrameRate_OverrideValue
 
 	Handler.FrameRate = framerate
 
@@ -790,7 +764,7 @@ Module.SetUpMinimap = function(self)
 	latency:SetJustifyV("BOTTOM")
 	latency:SetFontObject(layout.LatencyFont)
 	latency:SetTextColor(unpack(layout.LatencyColor))
-	latency.OverrideValue = Latency_OverrideValue
+	latency.OverrideValue = layout.Latency_OverrideValue
 
 	Handler.Latency = latency
 	
