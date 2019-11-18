@@ -26,6 +26,7 @@ local SetNamePlateFriendlyClickThrough = _G.C_NamePlate.SetNamePlateFriendlyClic
 local SetNamePlateSelfClickThrough = _G.C_NamePlate.SetNamePlateSelfClickThrough
 
 -- Private API
+local Colors = Private.Colors
 local GetConfig = Private.GetConfig
 local GetLayout = Private.GetLayout
 
