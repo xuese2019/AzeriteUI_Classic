@@ -107,6 +107,34 @@ end
 ----------------------------------------------------
 -- Callbacks
 ----------------------------------------------------
+local XP_PostUpdate = function(element, min, max, restedLeft, restedTimeLeft)
+	local description = element.Value and element.Value.Description
+	if description then 
+		local level = LEVEL or UnitLevel("player")
+		if (level and (level > 0)) then 
+			description:SetFormattedText(L["to level %s"], level + 1)
+		else 
+			description:SetText("")
+		end 
+	end 
+end
+
+local Rep_PostUpdate = function(element, current, min, max, factionName, standingID, standingLabel)
+	local description = element.Value and element.Value.Description
+	if description then 
+		if (standingID == MAX_REPUTATION_REACTION) then
+			description:SetText(standingLabel)
+		else
+			local nextStanding = standingID and _G["FACTION_STANDING_LABEL"..(standingID + 1)]
+			if nextStanding then 
+				description:SetFormattedText(L["to %s"], nextStanding)
+			else
+				description:SetText("")
+			end 
+		end 
+	end 
+end
+
 local Performance_UpdateTooltip = function(self)
 	local tooltip = Module:GetMinimapTooltip()
 
@@ -1246,7 +1274,7 @@ Module.UpdateBars = function(self, event, ...)
 				-- Update pointers and callbacks to the active element
 				Handler[first] = Spinner[1]
 				Handler[first].OverrideValue = hasXP and layout.XP_OverrideValue or hasRep and layout.Rep_OverrideValue
-				Handler[first].PostUpdate = hasXP and layout.XP_PostUpdate or hasRep and layout.Rep_PostUpdate
+				Handler[first].PostUpdate = hasXP and XP_PostUpdate or hasRep and Rep_PostUpdate
 
 				-- Enable the active element
 				self:EnableMinimapElement(first)

@@ -611,22 +611,6 @@ local Minimap_Rep_OverrideValue = function(element, current, min, max, factionNa
 	end 
 end
 
-local Minimap_Rep_PostUpdate = function(element, current, min, max, factionName, standingID, standingLabel)
-	local description = element.Value and element.Value.Description
-	if description then 
-		if (standingID == MAX_REPUTATION_REACTION) then
-			description:SetText(standingLabel)
-		else
-			local nextStanding = standingID and _G["FACTION_STANDING_LABEL"..(standingID + 1)]
-			if nextStanding then 
-				description:SetFormattedText(L["to %s"], nextStanding)
-			else
-				description:SetText("")
-			end 
-		end 
-	end 
-end
-
 local Minimap_XP_OverrideValue = function(element, min, max, restedLeft, restedTimeLeft)
 	local value = element.Value or element:IsObjectType("FontString") and element 
 	if value.showDeficit then 
@@ -663,18 +647,6 @@ local Minimap_XP_OverrideValue = function(element, min, max, restedLeft, restedT
 		end 
 	end 
 end 
-
-local Minimap_XP_PostUpdate = function(element, min, max, restedLeft, restedTimeLeft)
-	local description = element.Value and element.Value.Description
-	if description then 
-		local level = LEVEL or UnitLevel("player")
-		if (level and (level > 0)) then 
-			description:SetFormattedText(L["to level %s"], level + 1)
-		else 
-			description:SetText("")
-		end 
-	end 
-end
 
 local Minimap_ZoneName_PlaceFunc = function(Handler) 
 	return "BOTTOMRIGHT", Handler.Clock, "BOTTOMLEFT", -8, 0 
@@ -2172,8 +2144,10 @@ LibDB:NewDatabase(ADDON..":[UnitFrameBoss]", UnitFrameBoss)
 ------------------------------------------------
 -- The purpose of this is to supply all the front-end modules
 -- with default settings for all the user configurable choices.
--- Note that changing these won't change anything for existing
--- characters in-game, they only affect new characters or the first install.
+-- 
+-- Note that changing these won't change anything for existing characters,
+-- they only affect new characters or the first install.
+-- I generally advice tinkerers to leave these as they are. 
 local Defaults = {}
 
 Defaults[ADDON] = {
@@ -2259,6 +2233,17 @@ Defaults.UnitFrameRaid = {
 ------------------------------------------------
 -- The purpose of this is to supply all the front-end modules
 -- with static layout data used during the setup phase.
+-- 
+-- I advice tinkerers to be careful when changing these,
+-- as most modules assume that other modules have the settings I gave them.
+-- This means that if you change somethng like let's say the position
+-- of the minimap, you'll also have to change a variety of other things
+-- like which way tooltips grow, where the default position of all tooltips are,
+-- where the integrated MBB button is placed, and so on. 
+-- Not all of those can be changed through the layout, some things are in the modules.
+-- 
+-- I know you like to tinker, but regardless of what some of you think, 
+-- it's never enough "just to change a few lines of code" to modify the layouts.
 local Layouts = {}
 
 -- Addon Core
@@ -2877,8 +2862,6 @@ Layouts.Minimap = {
 	TrackingButtonIconBgTexture = GetMedia("hp_critter_case_glow"),
 
 	XP_OverrideValue = Minimap_XP_OverrideValue,
-	XP_PostUpdate = Minimap_XP_PostUpdate,
-	Rep_PostUpdate = Minimap_Rep_PostUpdate,
 	Rep_OverrideValue = Minimap_Rep_OverrideValue
 }
 
