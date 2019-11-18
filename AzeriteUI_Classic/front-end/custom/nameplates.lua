@@ -17,13 +17,13 @@ Module:SetIncompatible("TidyPlatesContinued")
 local _G = _G
 
 -- WoW API
-local GetQuestGreenRange = _G.GetQuestGreenRange
-local InCombatLockdown = _G.InCombatLockdown
-local IsInInstance = _G.IsInInstance 
-local SetCVar = _G.SetCVar
-local SetNamePlateEnemyClickThrough = _G.C_NamePlate.SetNamePlateEnemyClickThrough
-local SetNamePlateFriendlyClickThrough = _G.C_NamePlate.SetNamePlateFriendlyClickThrough
-local SetNamePlateSelfClickThrough = _G.C_NamePlate.SetNamePlateSelfClickThrough
+local GetQuestGreenRange = GetQuestGreenRange
+local InCombatLockdown = InCombatLockdown
+local IsInInstance = IsInInstance 
+local SetCVar = SetCVar
+local SetNamePlateEnemyClickThrough = C_NamePlate.SetNamePlateEnemyClickThrough
+local SetNamePlateFriendlyClickThrough = C_NamePlate.SetNamePlateFriendlyClickThrough
+local SetNamePlateSelfClickThrough = C_NamePlate.SetNamePlateSelfClickThrough
 
 -- Private API
 local Colors = Private.Colors
