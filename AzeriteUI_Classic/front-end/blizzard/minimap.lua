@@ -1352,13 +1352,12 @@ end
 Module.OnInit = function(self)
 	self.db = GetConfig(self:GetName())
 	self.layout = GetLayout(self:GetName())
-
 	self.MBB = self:IsAddOnEnabled("MBB")
 	
 	self:SetUpMinimap()
 
-	if self.MBB then 
-		if IsAddOnLoaded("MBB") then 
+	if (self.MBB) then 
+		if (IsAddOnLoaded("MBB")) then 
 			self:SetUpMBB()
 		else 
 			self:RegisterEvent("ADDON_LOADED", "OnEvent")
