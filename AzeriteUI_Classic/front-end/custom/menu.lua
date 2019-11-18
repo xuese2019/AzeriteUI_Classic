@@ -28,6 +28,7 @@ local table_insert = table.insert
 
 -- Private API
 local Colors = Private.Colors
+local GetConfig = Private.GetConfig
 local GetLayout = Private.GetLayout
 
 local Layout = GetLayout(ADDON)
@@ -433,12 +434,12 @@ Button.Update = function(self)
 			return Layout.MenuButton_PostUpdate(self)
 
 		elseif (self.updateType == "SET_VALUE") then 
-			local db = Module:GetConfig(self.optionDB, defaults, "global")
+			local db = GetConfig(self.optionDB)
 			local option = db[self.optionName]
 			return Layout.MenuButton_PostUpdate(self, self.updateType, db, option, option == self.optionArg1)
 
 		elseif (self.updateType == "TOGGLE_VALUE") then 
-			local db = Module:GetConfig(self.optionDB, defaults, "global")
+			local db = GetConfig(self.optionDB)
 			local option = db[self.optionName]
 			return Layout.MenuButton_PostUpdate(self, self.updateType, db, option)
 
@@ -455,18 +456,17 @@ end
 
 Button.FeedToDB = function(self)
 	if (self.updateType == "SET_VALUE") then 
-		Module:GetConfig(self.optionDB, defaults, "global")[self.optionName] = self:GetAttribute("optionValue")
+		GetConfig(self.optionDB)[self.optionName] = self:GetAttribute("optionValue")
 
 	elseif (self.updateType == "TOGGLE_VALUE") then 
-		Module:GetConfig(self.optionDB, defaults, "global")[self.optionName] = self:GetAttribute("optionValue")
+		GetConfig(self.optionDB)[self.optionName] = self:GetAttribute("optionValue")
 	end 
 end 
 
 Button.CreateWindow = function(self, level)
 	local window = Module:CreateConfigWindowLevel(level, self)
-	--window:SetPoint("BOTTOM", Module:GetConfigWindow(), "BOTTOM", 0, 0) -- relative to parent button's window
 	window:ClearAllPoints()
-	window:SetPoint("BOTTOM", self, "BOTTOM", 0, -Layout.MenuButtonSpacing) -- relative to parent button
+	window:SetPoint("BOTTOM", self, "BOTTOM", 0, -Layout.MenuButtonSpacing) 
 	window:SetPoint("RIGHT", self, "LEFT", -Layout.MenuButtonSpacing*2, 0)
 
 	if Layout.MenuWindow_CreateBorder then 
@@ -646,10 +646,10 @@ Module.PostUpdateOptions = function(self, event, ...)
 	if (event) then 
 		self:UnregisterEvent(event, "PostUpdateOptions")
 	end
-	if self.optionCallbacks then 
+	if (self.optionCallbacks) then 
 		for option,window in pairs(self.optionCallbacks) do 
 			if (option.updateType == "SET_VALUE") then
-				local db = self:GetConfig(option.optionDB, defaults, "global")
+				local db = GetConfig(option.optionDB)
 				local value = db[option.optionName]
 
 				if option.proxyModule then 
@@ -662,7 +662,7 @@ Module.PostUpdateOptions = function(self, event, ...)
 				option:Update()
 
 			elseif (option.updateType == "TOGGLE_VALUE") then
-				local db = self:GetConfig(option.optionDB, defaults, "global")
+				local db = GetConfig(option.optionDB)
 				local value = db[option.optionName]
 
 				if option.proxyModule then 
@@ -690,7 +690,7 @@ Module.PostUpdateOptions = function(self, event, ...)
 			end 
 			if (option.isSlave) then 
 				local attributeName = "DB_"..option.slaveDB.."_"..option.slaveKey
-				local db = self:GetConfig(option.slaveDB, defaults, "global")
+				local db = GetConfig(option.slaveDB)
 				local value = db[option.slaveKey]
 
 				window:SetAttribute(attributeName, value)
