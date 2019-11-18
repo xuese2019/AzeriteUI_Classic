@@ -14,7 +14,6 @@ Remove most of the callbacks, and put them in the stylesheet file.
 --]]--
 
 local ADDON, Private = ...
-
 local Core = Wheel("LibModule"):GetModule(ADDON)
 if (not Core) then 
 	return 
@@ -63,6 +62,7 @@ local UnitIsUnit = UnitIsUnit
 local UnitLevel = UnitLevel
 
 -- Private API
+local Colors = Private.Colors
 local GetConfig = Private.GetConfig
 local GetDefaults = Private.GetDefaults
 local GetLayout = Private.GetLayout
@@ -834,7 +834,7 @@ local StyleSmallFrame = function(self, unit, id, Layout, ...)
 		self:SetHitRectInsets(0, 0, 0, 0)
 	end 
 
-	self.colors = Layout.Colors or self.colors
+	self.colors = Colors
 	self.layout = Layout
 
 	-- Scaffolds
@@ -1176,7 +1176,7 @@ local StylePartyFrame = function(self, unit, id, layout, ...)
 	self:SetHitRectInsets(0, 0, 0, 0)
 
 	-- Assign our own global custom colors
-	self.colors = layout.Colors or self.colors
+	self.colors = Colors
 	self.layout = layout
 
 	-- Scaffolds
@@ -1442,7 +1442,7 @@ end
 local StyleRaidFrame = function(self, unit, id, layout, ...)
 
 	self.layout = layout
-	self.colors = layout.Colors or self.colors
+	self.colors = Colors
 	self:SetSize(unpack(layout.Size)) 
 	self:SetHitRectInsets(0, 0, 0, 0)
 
@@ -1662,7 +1662,7 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, Layout, ...)
 
 	-- Frame
 	-----------------------------------------------------------
-	self.colors = Layout.Colors or self.colors
+	self.colors = Colors
 	self.layout = Layout
 	self:SetSize(unpack(Layout.Size)) 
 	self:Place(unpack(Layout.Place)) 
@@ -2149,7 +2149,7 @@ UnitStyles.StylePlayerHUDFrame = function(self, unit, id, layout, ...)
 	self.ignoreMouseOver = layout.IgnoreMouseOver
 
 	-- Assign our own global custom colors
-	self.colors = layout.Colors or self.colors
+	self.colors = Colors
 	self.layout = layout
 
 	-- Scaffolds
@@ -2297,7 +2297,7 @@ end
 UnitStyles.StyleTargetFrame = function(self, unit, id, layout, ...)
 
 	self.layout = layout
-	self.colors = layout.Colors or self.colors
+	self.colors = Colors
 
 	self:SetSize(unpack(layout.Size)) 
 	self:Place(unpack(layout.Place)) 

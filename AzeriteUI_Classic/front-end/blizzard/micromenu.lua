@@ -23,6 +23,7 @@ local GetMovieDownloadProgress = _G.GetMovieDownloadProgress
 local GetNetStats = _G.GetNetStats
 
 -- Private API
+local Colors = Private.Colors
 local GetLayout = Private.GetLayout
 
 local BLANK_TEXTURE = [[Interface\ChatFrame\ChatFrameBackground]]
@@ -136,13 +137,13 @@ local microButtonScripts = {
 	
 			if (not self:IsEnabled()) then
 				if (self.factionGroup == "Neutral") then
-					tooltip:AddLine(FEATURE_NOT_AVAILBLE_PANDAREN, Layout.Colors.quest.red[1], Layout.Colors.quest.red[2], Layout.Colors.quest.red[3], true)
+					tooltip:AddLine(FEATURE_NOT_AVAILBLE_PANDAREN, Colors.quest.red[1], Colors.quest.red[2], Colors.quest.red[3], true)
 	
 				elseif ( self.minLevel ) then
-					tooltip:AddLine(string_format(FEATURE_BECOMES_AVAILABLE_AT_LEVEL, self.minLevel), Layout.Colors.quest.red[1], Layout.Colors.quest.red[2], Layout.Colors.quest.red[3], true)
+					tooltip:AddLine(string_format(FEATURE_BECOMES_AVAILABLE_AT_LEVEL, self.minLevel), Colors.quest.red[1], Colors.quest.red[2], Colors.quest.red[3], true)
 	
 				elseif ( self.disabledTooltip ) then
-					tooltip:AddLine(self.disabledTooltip, Layout.Colors.quest.red[1], Layout.Colors.quest.red[2], Layout.Colors.quest.red[3], true)
+					tooltip:AddLine(self.disabledTooltip, Colors.quest.red[1], Colors.quest.red[2], Colors.quest.red[3], true)
 				end
 			end
 

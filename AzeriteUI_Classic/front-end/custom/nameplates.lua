@@ -99,7 +99,7 @@ Module.PostCreateNamePlate = function(self, plate, baseFrame)
 	local layout = self.layout
 	
 	plate:SetSize(unpack(layout.Size))
-	plate.colors = layout.Colors or plate.colors
+	plate.colors = Colors
 	plate.layout = layout
 
 	-- Health bar

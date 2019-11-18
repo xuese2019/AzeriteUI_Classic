@@ -114,6 +114,9 @@ end
 ------------------------------------------------
 -- Module Callbacks
 ------------------------------------------------
+-- Not really following any plan here,
+-- except trying to keep anything related to
+-- styling out of the module front-end code.
 local Core_Window_CreateBorder = function(self)
 	local mod = 1 -- .75
 	local border = self:CreateFrame("Frame")
@@ -1028,8 +1031,6 @@ local Constant = {
 }
 
 local Template_SmallFrame = {
-	Colors = Colors,
-
 	Size = Constant.SmallFrame,
 	FrameLevel = 20, 
 	
@@ -1194,7 +1195,6 @@ local Template_SmallFrameReversed_Auras = setmetatable({
 }, { __index = Template_SmallFrame_Auras })
 
 local Template_TinyFrame = {
-	Colors = Colors,
 	Size = Constant.TinyFrame,
 
 	RangeOutsideAlpha = .6, -- was .35, but that's too hard to see
@@ -1263,8 +1263,6 @@ local Template_TinyFrame = {
 ------------------------------------------------------------------
 -- Player
 local UnitFramePlayer = { 
-	Colors = Colors,
-
 	Place = { "BOTTOMLEFT", 167, 100 },
 	Size = { 439, 93 },
 	HitRectInsets = { 0, 0, 0, 6 }, 
@@ -1597,8 +1595,6 @@ local UnitFramePlayer = {
 
 -- Target
 local UnitFrameTarget = { 
-	Colors = Colors,
-
 	Place = { "TOPRIGHT", -153, -79 },
 	Size = { 439, 93 },
 	HitRectInsets = { 0, -80, -30, 0 }, 
@@ -2248,8 +2244,6 @@ local Layouts = {}
 
 -- Addon Core
 Layouts[ADDON] = {
-	Colors = Colors,
-
 	FadeInUI = true, 
 		FadeInSpeed = .75,
 		FadeInDelay = 1.5,
@@ -2350,8 +2344,6 @@ Layouts.BlizzardGameMenu = {
 
 -- Blizzard MicroMenu
 Layouts.BlizzardMicroMenu = {
-	Colors = Colors,
-
 	ButtonFont = GetFont(MenuButtonFontSize, false),
 	ButtonFontColor = { 0, 0, 0 }, 
 	ButtonFontShadowOffset = { 0, -.85 },
@@ -2614,8 +2606,6 @@ Layouts.FloaterHUD = {
 
 -- Group Leader Tools
 Layouts.GroupTools = {
-	Colors = Colors,
-
 	MenuPlace = { "TOPLEFT", "UICenter", "TOPLEFT", 22, -42 },
 	MenuAlternatePlace = { "BOTTOMLEFT", "UICenter", "BOTTOMLEFT", 22, 350 },
 	MenuSize = { 300*.75 +30, 410 }, 
@@ -2867,8 +2857,6 @@ Layouts.Minimap = {
 
 -- NamePlates
 Layouts.NamePlates = {
-	Colors = Colors,
-
 	UseNamePlates = true, 
 		Size = { 80, 32 }, 
 	
@@ -3060,8 +3048,6 @@ Layouts.NamePlates = {
 
 -- Custom Tooltips
 Layouts.Tooltips = {
-	Colors = Colors,
-
 	-- Going with full positioning after 8.2.0. 
 	TooltipPlace = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -(48 + 58 + 213), (107 + 59) }, 
 	--TooltipPlace = { "BOTTOMRIGHT", "Minimap", "BOTTOMLEFT", -48, 107 }, 
@@ -3082,8 +3068,6 @@ Layouts.Tooltips = {
 
 -- PlayerHUD (combo points and castbar)
 Layouts.UnitFramePlayerHUD = {
-	Colors = Colors,
-
 	Size = { 103, 103 }, 
 	Place = { "BOTTOMLEFT", 75, 127 },
 	IgnoreMouseOver = true, 

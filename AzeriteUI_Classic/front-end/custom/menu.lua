@@ -27,6 +27,7 @@ local math_min = math.min
 local table_insert = table.insert
 
 -- Private API
+local Colors = Private.Colors
 local GetLayout = Private.GetLayout
 
 local Layout = GetLayout(ADDON)
@@ -244,7 +245,7 @@ Toggle.OnEnter = function(self)
 		end 
 		return 
 	end 
-	local r,g,b = Layout.Colors.quest.green[1], Layout.Colors.quest.green[2], Layout.Colors.quest.green[3]
+	local r,g,b = Colors.quest.green[1], Colors.quest.green[2], Colors.quest.green[3]
 	tooltip:SetDefaultAnchor(self)
 
 	if (self.leftButtonTooltip) then
