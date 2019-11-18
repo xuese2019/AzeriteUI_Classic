@@ -1,4 +1,4 @@
-local Version = 41 -- This library's version 
+local Version = 42 -- This library's version 
 local MapVersion = Version -- Minimap library version the minimap created by this is compatible with
 local LibMinimap, OldVersion = Wheel:Set("LibMinimap", Version)
 if (not LibMinimap) then
@@ -807,7 +807,22 @@ LibMinimap.OnUpdate = function(_, elapsed)
 
 		-- Don't really need to check for this very often
 		-- It's not a problem that the user see the buttons disappear
-		self.longTimer = 5
+		if (self.enableLongTimerCount) then 
+			self.longTimer = 5
+		else 
+			-- Add a little system to check frequently for the first 5 seconds, 
+			-- then activate the throttled system to save resources. 
+			self.longTimer = .1
+			if (not self.longTimerCount) then 
+				self.longTimerCount = 1
+			else 
+				self.longTimerCount = self.longTimerCount + 1
+			end 
+			if (self.longTimerCount > 50) then 
+				self.enableLongTimerCount = true
+				self.longTimerCount = nil
+			end
+		end
 	end 
 end
 
