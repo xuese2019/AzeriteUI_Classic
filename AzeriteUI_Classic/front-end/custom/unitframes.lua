@@ -2451,7 +2451,7 @@ end
 -- Player
 -----------------------------------------------------------
 UnitFramePlayer.OnInit = function(self)
-	self.layout = Wheel("LibDB"):GetDatabase(Core:GetPrefix()..":[UnitFramePlayer]", true)
+	self.layout = GetLayout(self:GetName())
 	self.frame = self:SpawnUnitFrame("player", "UICenter", function(frame, unit, id, _, ...)
 		return UnitStyles.StylePlayerFrame(frame, unit, id, self.layout, ...)
 	end)

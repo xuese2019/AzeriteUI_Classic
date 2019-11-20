@@ -1346,305 +1346,6 @@ local Template_TinyFrame = {
 ------------------------------------------------------------------
 -- Singular Units
 ------------------------------------------------------------------
--- Player
-local UnitFramePlayer = { 
-	Place = { "BOTTOMLEFT", 167, 100 },
-	Size = { 439, 93 },
-	HitRectInsets = { 0, 0, 0, 6 }, 
-	ExplorerHitRects = { 60, 0, -140, 0 },
-		
-	HealthPlace = { "BOTTOMLEFT", 27, 27 },
-		HealthSize = nil, 
-		HealthType = "StatusBar", -- health type
-		HealthBarTexture = nil, -- only called when non-progressive frames are used
-		HealthBarOrientation = "RIGHT", -- bar orientation
-		HealthBarSparkMap = {
-			{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
-			{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-			{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-			{ keyPercent = 478/512, topOffset =   0/64, bottomOffset =   0/64 }, 
-			{ keyPercent = 483/512, topOffset =   0/64, bottomOffset =  -3/64 }, 
-			{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
-			{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
-		},
-		HealthBarSetFlippedHorizontally = false, 
-		HealthSmoothingMode = "bezier-fast-in-slow-out", -- smoothing method
-		HealthSmoothingFrequency = 3, -- .2, -- speed of the smoothing method
-		HealthColorTapped = false, -- color tap denied units 
-		HealthColorDisconnected = false, -- color disconnected units
-		HealthColorClass = false, -- color players by class 
-		HealthColorReaction = false, -- color NPCs by their reaction standing with us
-		HealthColorHealth = true, -- color anything else in the default health color
-		HealthFrequentUpdates = true, -- listen to frequent health events for more accurate updates
-
-		HealthBackdropPlace = { "CENTER", 1, -.5 },
-		HealthBackdropSize = { 716, 188 },
-		HealthBackdropDrawLayer = { "BACKGROUND", -1 },
-
-		HealthValuePlace = { "LEFT", 27, 4 },
-		HealthValueDrawLayer = { "OVERLAY", 1 },
-		HealthValueJustifyH = "LEFT", 
-		HealthValueJustifyV = "MIDDLE", 
-		HealthValueFont = GetFont(18, true),
-		HealthValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-
-		PowerPlace = { "BOTTOMLEFT", -101, 38 },
-		PowerSize = { 120, 140 },
-		PowerType = "StatusBar", 
-		PowerBarTexture = GetMedia("power_crystal_front"),
-		PowerBarTexCoord = { 50/255, 206/255, 37/255, 219/255 },
-		PowerBarOrientation = "UP",
-		PowerBarSmoothingMode = "bezier-fast-in-slow-out",
-		PowerBarSmoothingFrequency = .45,
-		PowerColorSuffix = "_CRYSTAL", 
-		PowerIgnoredResource = "MANA",
-	
-		PowerBackgroundPlace = { "CENTER", 0, 0 },
-		PowerBackgroundSize = { 120/(206-50)*255, 140/(219-37)*255 },
-		PowerBackgroundTexture = GetMedia("power_crystal_back"),
-		PowerBackgroundDrawLayer = { "BACKGROUND", -2 },
-		PowerBackgroundColor = { 1, 1, 1, .95 },
-		PowerBarSparkMap = {
-			top = {
-				{ keyPercent =   0/256, offset =  -65/256 }, 
-				{ keyPercent =  72/256, offset =    0/256 }, 
-				{ keyPercent = 116/256, offset =  -16/256 }, 
-				{ keyPercent = 128/256, offset =  -28/256 }, 
-				{ keyPercent = 256/256, offset =  -84/256 }, 
-			},
-			bottom = {
-				{ keyPercent =   0/256, offset =  -47/256 }, 
-				{ keyPercent =  84/256, offset =    0/256 }, 
-				{ keyPercent = 135/256, offset =  -24/256 }, 
-				{ keyPercent = 142/256, offset =  -32/256 }, 
-				{ keyPercent = 225/256, offset =  -79/256 }, 
-				{ keyPercent = 256/256, offset = -168/256 }, 
-			}
-		},
-	
-		PowerForegroundPlace = { "BOTTOM", 7, -51 }, 
-		PowerForegroundSize = { 198,98 }, 
-		PowerForegroundTexture = GetMedia("pw_crystal_case"), 
-		PowerForegroundDrawLayer = { "ARTWORK", 1 },
-
-		PowerValuePlace = { "CENTER", 0, -16 },
-		PowerValueDrawLayer = { "OVERLAY", 1 },
-		PowerValueJustifyH = "CENTER", 
-		PowerValueJustifyV = "MIDDLE", 
-		PowerValueFont = GetFont(18, true),
-		PowerValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .4 },
-
-		WinterVeilPowerSize = { 120 / ((255-50*2)/255), 140 / ((255-37*2)/255) },
-		WinterVeilPowerPlace = { "CENTER", -2, 24 },
-		WinterVeilPowerTexture = GetMedia("seasonal_winterveil_crystal"), 
-		WinterVeilPowerDrawLayer = { "OVERLAY", 0 },
-		WinterVeilPowerColor = { 1, 1, 1 }, 
-
-		ManaTextParent = "Power", 
-		ManaTextPlace = { "CENTER", 1, -32 },
-		ManaTextDrawLayer = { "OVERLAY", 1 },
-		ManaTextJustifyH = "CENTER", 
-		ManaTextJustifyV = "MIDDLE", 
-		ManaTextFont = GetFont(14, true),
-		ManaTextColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-		ManaTextOverride = function(element, unit, min, max)
-			if (not min) or (not max) or (min == 0) or (max == 0) or (min == max) then
-				element:SetText("")
-			else
-				local perc = min/max
-				if (perc < .25) then
-					element:SetTextColor(Colors.quest.red[1], Colors.quest.red[2], Colors.quest.red[3], .85)
-				else 
-					element:SetTextColor(Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5)
-				end 
-				element:SetFormattedText("%.0f", math_floor(min/max * 100))
-			end 
-		end,
-
-		CastBarPlace = { "BOTTOMLEFT", 27, 27 },
-		CastBarSize = { 385, 40 },
-		CastBarOrientation = "RIGHT",
-		CastBarTexture = nil, 
-		CastBarColor = { 1, 1, 1, .25 }, 
-		CastBarSparkMap = {
-			{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
-			{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-			{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-			{ keyPercent = 478/512, topOffset =   0/64, bottomOffset =   0/64 }, 
-			{ keyPercent = 483/512, topOffset =   0/64, bottomOffset =  -3/64 }, 
-			{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
-			{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
-		},
-		CastBarPostUpdate = PlayerFrame_CastBarPostUpdate,
-
-		CastBarNameParent = "Health",
-		CastBarNamePlace = { "LEFT", 27, 4 },
-		CastBarNameSize = { 250, 40 }, 
-		CastBarNameFont = GetFont(16, true),
-		CastBarNameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-		CastBarNameDrawLayer = { "OVERLAY", 1 }, 
-		CastBarNameJustifyH = "LEFT", 
-		CastBarNameJustifyV = "MIDDLE",
-
-		CastBarValueParent = "Health",
-		CastBarValuePlace = { "RIGHT", -27, 4 },
-		CastBarValueDrawLayer = { "OVERLAY", 1 },
-		CastBarValueJustifyH = "CENTER",
-		CastBarValueJustifyV = "MIDDLE",
-		CastBarValueFont = GetFont(18, true),
-		CastBarValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-
-		CombatIndicatorPlace = { "BOTTOMLEFT", -(41 + 80/2), (22 - 80/2) },
-		CombatIndicatorSize = { 80,80 },
-		CombatIndicatorTexture = GetMedia("icon-combat"),
-		CombatIndicatorDrawLayer = {"OVERLAY", -2 },
-		CombatIndicatorColor = { Colors.ui.stone[1] *.75, Colors.ui.stone[2] *.75, Colors.ui.stone[3] *.75 }, 
-
-		LoveCombatIndicatorPlace = { "BOTTOMLEFT", -(41 + 48/2 -4), (22 - 48/2 +4) },
-		LoveCombatIndicatorSize = { 48,48 },
-		LoveCombatIndicatorTexture = GetMedia("icon-heart-red"),
-		LoveCombatIndicatorDrawLayer = {"OVERLAY", -2 },
-		LoveCombatIndicatorColor = { Colors.ui.stone[1] *.75, Colors.ui.stone[2] *.75, Colors.ui.stone[3] *.75 }, 
-		
-		ClassificationPlace ={ "BOTTOMLEFT", -(41 + 80/2), (22 - 80/2) },
-		ClassificationSize = { 84, 84 },
-		ClassificationColor = { 1, 1, 1 },
-		ClassificationIndicatorAllianceTexture = GetMedia("icon_badges_alliance"),
-		ClassificationIndicatorHordeTexture = GetMedia("icon_badges_horde"),
-
-		ManaExclusiveResource = "MANA", 
-		ManaPlace = { "BOTTOMLEFT", -97 +5, 22 + 5 }, 
-		ManaSize = { 103, 103 },
-		ManaOrbTextures = { GetMedia("pw_orb_bar4"), GetMedia("pw_orb_bar3"), GetMedia("pw_orb_bar3") },
-		ManaColorSuffix = "_ORB", 
-
-		ManaBackgroundPlace = { "CENTER", 0, 0 }, 
-		ManaBackgroundSize = { 113, 113 }, 
-		ManaBackgroundTexture = GetMedia("pw_orb_bar3"),
-		ManaBackgroundDrawLayer = { "BACKGROUND", -2 }, 
-		ManaBackgroundColor = { 22/255, 26/255, 22/255, .82 },
-
-		ManaShadePlace = { "CENTER", 0, 0 }, 
-		ManaShadeSize = { 127, 127 }, 
-		ManaShadeTexture = GetMedia("shade_circle"), 
-		ManaShadeDrawLayer = { "BORDER", -1 }, 
-		ManaShadeColor = { 1, 1, 1, 1 }, 
-
-		ManaForegroundPlace = { "CENTER", 0, 0 }, 
-		ManaForegroundSize = { 188, 188 }, 
-		ManaForegroundDrawLayer = { "BORDER", 1 },
-
-		ManaValuePlace = { "CENTER", 3, 0 },
-		ManaValueDrawLayer = { "OVERLAY", 1 },
-		ManaValueJustifyH = "CENTER", 
-		ManaValueJustifyV = "MIDDLE", 
-		ManaValueFont = GetFont(18, true),
-		ManaValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .4 },
-
-		WinterVeilManaSize = { 188, 188 },
-		WinterVeilManaPlace = { "CENTER", 0, 0 },
-		WinterVeilManaTexture = GetMedia("seasonal_winterveil_orb"), 
-		WinterVeilManaDrawLayer = { "OVERLAY", 0 },
-		WinterVeilManaColor = { 1, 1, 1 }, 
-
-		AuraProperties = {
-			growthX = "RIGHT", 
-			growthY = "UP", 
-			spacingH = 6, 
-			spacingV = 6, 
-			auraSize = 40, auraWidth = nil, auraHeight = nil, 
-			maxVisible = 16, maxBuffs = nil, maxDebuffs = nil, 
-			filter = nil, filterBuffs = "HELPFUL", filterDebuffs = "HARMFUL", 
-			func = nil, funcBuffs = GetAuraFilterFunc("player"), funcDebuffs = GetAuraFilterFunc("player"), 
-			debuffsFirst = true, 
-			disableMouse = false, 
-			showSpirals = false, 
-			showDurations = true, 
-			showLongDurations = true,
-			tooltipDefaultPosition = false, 
-			tooltipPoint = "BOTTOMLEFT",
-			tooltipAnchor = nil,
-			tooltipRelPoint = "TOPLEFT",
-			tooltipOffsetX = 8,
-			tooltipOffsetY = 16
-		},
-		AuraFrameSize = { 40*8 + 6*7, 40 },
-		AuraFramePlace = { "BOTTOMLEFT", 27 + 10, 27 + 24 + 40 },
-		AuraIconPlace = { "CENTER", 0, 0 },
-		AuraIconSize = { 40 - 6, 40 - 6 },
-		AuraIconTexCoord = { 5/64, 59/64, 5/64, 59/64 }, -- aura icon tex coords
-		AuraCountPlace = { "BOTTOMRIGHT", 9, -6 },
-		AuraCountFont = GetFont(14, true),
-		AuraCountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
-		AuraTimePlace = { "TOPLEFT", -6, 6 }, -- { "CENTER", 0, 0 },
-		AuraTimeFont = GetFont(14, true),
-		AuraBorderFramePlace = { "CENTER", 0, 0 }, 
-		AuraBorderFrameSize = { 40 + 14, 40 + 14 },
-		AuraBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 16 },
-		AuraBorderBackdropColor = { 0, 0, 0, 0 },
-		AuraBorderBackdropBorderColor = { Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3 },
-
-		SeasonedHealthSize = { 385, 40 },
-		SeasonedHealthTexture = GetMedia("hp_cap_bar"),
-		SeasonedHealthSparkMap = {
-			{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
-			{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-			{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-			{ keyPercent = 478/512, topOffset =   0/64, bottomOffset =   0/64 }, 
-			{ keyPercent = 483/512, topOffset =   0/64, bottomOffset =  -3/64 }, 
-			{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
-			{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
-		},
-		SeasonedHealthBackdropTexture = GetMedia("hp_cap_case"),
-		SeasonedHealthBackdropColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
-		SeasonedPowerForegroundTexture = GetMedia("pw_crystal_case"),
-		SeasonedPowerForegroundColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
-		SeasonedCastSize = { 385, 40 },
-		SeasonedCastTexture = GetMedia("hp_cap_bar_highlight"),
-		SeasonedManaOrbTexture = GetMedia("orb_case_hi"),
-		SeasonedManaOrbColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
-		
-		HardenedLevel = 40,
-		HardenedHealthSize = { 385, 37 },
-		HardenedHealthTexture = GetMedia("hp_lowmid_bar"),
-		HardenedHealthSparkMap = {
-			{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
-			{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-			{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-			{ keyPercent = 478/512, topOffset =   0/64, bottomOffset =   0/64 }, 
-			{ keyPercent = 483/512, topOffset =   0/64, bottomOffset =  -3/64 }, 
-			{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
-			{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
-		},
-		HardenedHealthBackdropTexture = GetMedia("hp_mid_case"),
-		HardenedHealthBackdropColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
-		HardenedPowerForegroundTexture = GetMedia("pw_crystal_case"),
-		HardenedPowerForegroundColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
-		HardenedCastSize = { 385, 37 },
-		HardenedCastTexture = GetMedia("hp_lowmid_bar"),
-		HardenedManaOrbTexture = GetMedia("orb_case_hi"),
-		HardenedManaOrbColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
-
-		NoviceHealthSize = { 385, 37 },
-		NoviceHealthTexture = GetMedia("hp_lowmid_bar"),
-		NoviceHealthSparkMap = {
-			{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
-			{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-			{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-			{ keyPercent = 478/512, topOffset =   0/64, bottomOffset =   0/64 }, 
-			{ keyPercent = 483/512, topOffset =   0/64, bottomOffset =  -3/64 }, 
-			{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
-			{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
-		},
-		NoviceHealthBackdropTexture = GetMedia("hp_low_case"),
-		NoviceHealthBackdropColor = { Colors.ui.wood[1], Colors.ui.wood[2], Colors.ui.wood[3] },
-		NovicePowerForegroundTexture = GetMedia("pw_crystal_case_low"),
-		NovicePowerForegroundColor = { Colors.ui.wood[1], Colors.ui.wood[2], Colors.ui.wood[3] },
-		NoviceCastSize = { 385, 37 },
-		NoviceCastTexture = GetMedia("hp_lowmid_bar"),
-		NoviceManaOrbTexture = GetMedia("orb_case_low"),
-		NoviceManaOrbColor = { Colors.ui.wood[1], Colors.ui.wood[2], Colors.ui.wood[3] },
-}
 
 -- Target
 local UnitFrameTarget = { 
@@ -2181,7 +1882,6 @@ local UnitFrameBoss = setmetatable({
 
 }, { __index = Template_SmallFrameReversed_Auras })
 
-LibDB:NewDatabase(ADDON..":[UnitFramePlayer]", UnitFramePlayer)
 LibDB:NewDatabase(ADDON..":[UnitFramePet]", UnitFramePet)
 LibDB:NewDatabase(ADDON..":[UnitFrameTarget]", UnitFrameTarget)
 LibDB:NewDatabase(ADDON..":[UnitFrameToT]", UnitFrameToT)
@@ -2976,6 +2676,306 @@ Layouts.Tooltips = {
 	TooltipBackdropColor = { .05, .05, .05, .85 },
 	TooltipPlace = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -(48 + 58 + 213), (107 + 59) }, 
 	TooltipStatusBarTexture = GetMedia("statusbar_normal")
+}
+
+-- Player
+Layouts.UnitFramePlayer = { 
+	Place = { "BOTTOMLEFT", 167, 100 },
+	Size = { 439, 93 },
+	HitRectInsets = { 0, 0, 0, 6 }, 
+	ExplorerHitRects = { 60, 0, -140, 0 },
+		
+	HealthPlace = { "BOTTOMLEFT", 27, 27 },
+		HealthSize = nil, 
+		HealthType = "StatusBar", -- health type
+		HealthBarTexture = nil, -- only called when non-progressive frames are used
+		HealthBarOrientation = "RIGHT", -- bar orientation
+		HealthBarSparkMap = {
+			{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
+			{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
+			{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
+			{ keyPercent = 478/512, topOffset =   0/64, bottomOffset =   0/64 }, 
+			{ keyPercent = 483/512, topOffset =   0/64, bottomOffset =  -3/64 }, 
+			{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
+			{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
+		},
+		HealthBarSetFlippedHorizontally = false, 
+		HealthSmoothingMode = "bezier-fast-in-slow-out", -- smoothing method
+		HealthSmoothingFrequency = 3, -- .2, -- speed of the smoothing method
+		HealthColorTapped = false, -- color tap denied units 
+		HealthColorDisconnected = false, -- color disconnected units
+		HealthColorClass = false, -- color players by class 
+		HealthColorReaction = false, -- color NPCs by their reaction standing with us
+		HealthColorHealth = true, -- color anything else in the default health color
+		HealthFrequentUpdates = true, -- listen to frequent health events for more accurate updates
+
+		HealthBackdropPlace = { "CENTER", 1, -.5 },
+		HealthBackdropSize = { 716, 188 },
+		HealthBackdropDrawLayer = { "BACKGROUND", -1 },
+
+		HealthValuePlace = { "LEFT", 27, 4 },
+		HealthValueDrawLayer = { "OVERLAY", 1 },
+		HealthValueJustifyH = "LEFT", 
+		HealthValueJustifyV = "MIDDLE", 
+		HealthValueFont = GetFont(18, true),
+		HealthValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+
+		PowerPlace = { "BOTTOMLEFT", -101, 38 },
+		PowerSize = { 120, 140 },
+		PowerType = "StatusBar", 
+		PowerBarTexture = GetMedia("power_crystal_front"),
+		PowerBarTexCoord = { 50/255, 206/255, 37/255, 219/255 },
+		PowerBarOrientation = "UP",
+		PowerBarSmoothingMode = "bezier-fast-in-slow-out",
+		PowerBarSmoothingFrequency = .45,
+		PowerColorSuffix = "_CRYSTAL", 
+		PowerIgnoredResource = "MANA",
+	
+		PowerBackgroundPlace = { "CENTER", 0, 0 },
+		PowerBackgroundSize = { 120/(206-50)*255, 140/(219-37)*255 },
+		PowerBackgroundTexture = GetMedia("power_crystal_back"),
+		PowerBackgroundDrawLayer = { "BACKGROUND", -2 },
+		PowerBackgroundColor = { 1, 1, 1, .95 },
+		PowerBarSparkMap = {
+			top = {
+				{ keyPercent =   0/256, offset =  -65/256 }, 
+				{ keyPercent =  72/256, offset =    0/256 }, 
+				{ keyPercent = 116/256, offset =  -16/256 }, 
+				{ keyPercent = 128/256, offset =  -28/256 }, 
+				{ keyPercent = 256/256, offset =  -84/256 }, 
+			},
+			bottom = {
+				{ keyPercent =   0/256, offset =  -47/256 }, 
+				{ keyPercent =  84/256, offset =    0/256 }, 
+				{ keyPercent = 135/256, offset =  -24/256 }, 
+				{ keyPercent = 142/256, offset =  -32/256 }, 
+				{ keyPercent = 225/256, offset =  -79/256 }, 
+				{ keyPercent = 256/256, offset = -168/256 }, 
+			}
+		},
+	
+		PowerForegroundPlace = { "BOTTOM", 7, -51 }, 
+		PowerForegroundSize = { 198,98 }, 
+		PowerForegroundTexture = GetMedia("pw_crystal_case"), 
+		PowerForegroundDrawLayer = { "ARTWORK", 1 },
+
+		PowerValuePlace = { "CENTER", 0, -16 },
+		PowerValueDrawLayer = { "OVERLAY", 1 },
+		PowerValueJustifyH = "CENTER", 
+		PowerValueJustifyV = "MIDDLE", 
+		PowerValueFont = GetFont(18, true),
+		PowerValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .4 },
+
+		WinterVeilPowerSize = { 120 / ((255-50*2)/255), 140 / ((255-37*2)/255) },
+		WinterVeilPowerPlace = { "CENTER", -2, 24 },
+		WinterVeilPowerTexture = GetMedia("seasonal_winterveil_crystal"), 
+		WinterVeilPowerDrawLayer = { "OVERLAY", 0 },
+		WinterVeilPowerColor = { 1, 1, 1 }, 
+
+		ManaTextParent = "Power", 
+		ManaTextPlace = { "CENTER", 1, -32 },
+		ManaTextDrawLayer = { "OVERLAY", 1 },
+		ManaTextJustifyH = "CENTER", 
+		ManaTextJustifyV = "MIDDLE", 
+		ManaTextFont = GetFont(14, true),
+		ManaTextColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+		ManaTextOverride = function(element, unit, min, max)
+			if (not min) or (not max) or (min == 0) or (max == 0) or (min == max) then
+				element:SetText("")
+			else
+				local perc = min/max
+				if (perc < .25) then
+					element:SetTextColor(Colors.quest.red[1], Colors.quest.red[2], Colors.quest.red[3], .85)
+				else 
+					element:SetTextColor(Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5)
+				end 
+				element:SetFormattedText("%.0f", math_floor(min/max * 100))
+			end 
+		end,
+
+		CastBarPlace = { "BOTTOMLEFT", 27, 27 },
+		CastBarSize = { 385, 40 },
+		CastBarOrientation = "RIGHT",
+		CastBarTexture = nil, 
+		CastBarColor = { 1, 1, 1, .25 }, 
+		CastBarSparkMap = {
+			{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
+			{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
+			{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
+			{ keyPercent = 478/512, topOffset =   0/64, bottomOffset =   0/64 }, 
+			{ keyPercent = 483/512, topOffset =   0/64, bottomOffset =  -3/64 }, 
+			{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
+			{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
+		},
+		CastBarPostUpdate = PlayerFrame_CastBarPostUpdate,
+
+		CastBarNameParent = "Health",
+		CastBarNamePlace = { "LEFT", 27, 4 },
+		CastBarNameSize = { 250, 40 }, 
+		CastBarNameFont = GetFont(16, true),
+		CastBarNameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+		CastBarNameDrawLayer = { "OVERLAY", 1 }, 
+		CastBarNameJustifyH = "LEFT", 
+		CastBarNameJustifyV = "MIDDLE",
+
+		CastBarValueParent = "Health",
+		CastBarValuePlace = { "RIGHT", -27, 4 },
+		CastBarValueDrawLayer = { "OVERLAY", 1 },
+		CastBarValueJustifyH = "CENTER",
+		CastBarValueJustifyV = "MIDDLE",
+		CastBarValueFont = GetFont(18, true),
+		CastBarValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+
+		CombatIndicatorPlace = { "BOTTOMLEFT", -(41 + 80/2), (22 - 80/2) },
+		CombatIndicatorSize = { 80,80 },
+		CombatIndicatorTexture = GetMedia("icon-combat"),
+		CombatIndicatorDrawLayer = {"OVERLAY", -2 },
+		CombatIndicatorColor = { Colors.ui.stone[1] *.75, Colors.ui.stone[2] *.75, Colors.ui.stone[3] *.75 }, 
+
+		LoveCombatIndicatorPlace = { "BOTTOMLEFT", -(41 + 48/2 -4), (22 - 48/2 +4) },
+		LoveCombatIndicatorSize = { 48,48 },
+		LoveCombatIndicatorTexture = GetMedia("icon-heart-red"),
+		LoveCombatIndicatorDrawLayer = {"OVERLAY", -2 },
+		LoveCombatIndicatorColor = { Colors.ui.stone[1] *.75, Colors.ui.stone[2] *.75, Colors.ui.stone[3] *.75 }, 
+		
+		ClassificationPlace ={ "BOTTOMLEFT", -(41 + 80/2), (22 - 80/2) },
+		ClassificationSize = { 84, 84 },
+		ClassificationColor = { 1, 1, 1 },
+		ClassificationIndicatorAllianceTexture = GetMedia("icon_badges_alliance"),
+		ClassificationIndicatorHordeTexture = GetMedia("icon_badges_horde"),
+
+		ManaExclusiveResource = "MANA", 
+		ManaPlace = { "BOTTOMLEFT", -97 +5, 22 + 5 }, 
+		ManaSize = { 103, 103 },
+		ManaOrbTextures = { GetMedia("pw_orb_bar4"), GetMedia("pw_orb_bar3"), GetMedia("pw_orb_bar3") },
+		ManaColorSuffix = "_ORB", 
+
+		ManaBackgroundPlace = { "CENTER", 0, 0 }, 
+		ManaBackgroundSize = { 113, 113 }, 
+		ManaBackgroundTexture = GetMedia("pw_orb_bar3"),
+		ManaBackgroundDrawLayer = { "BACKGROUND", -2 }, 
+		ManaBackgroundColor = { 22/255, 26/255, 22/255, .82 },
+
+		ManaShadePlace = { "CENTER", 0, 0 }, 
+		ManaShadeSize = { 127, 127 }, 
+		ManaShadeTexture = GetMedia("shade_circle"), 
+		ManaShadeDrawLayer = { "BORDER", -1 }, 
+		ManaShadeColor = { 1, 1, 1, 1 }, 
+
+		ManaForegroundPlace = { "CENTER", 0, 0 }, 
+		ManaForegroundSize = { 188, 188 }, 
+		ManaForegroundDrawLayer = { "BORDER", 1 },
+
+		ManaValuePlace = { "CENTER", 3, 0 },
+		ManaValueDrawLayer = { "OVERLAY", 1 },
+		ManaValueJustifyH = "CENTER", 
+		ManaValueJustifyV = "MIDDLE", 
+		ManaValueFont = GetFont(18, true),
+		ManaValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .4 },
+
+		WinterVeilManaSize = { 188, 188 },
+		WinterVeilManaPlace = { "CENTER", 0, 0 },
+		WinterVeilManaTexture = GetMedia("seasonal_winterveil_orb"), 
+		WinterVeilManaDrawLayer = { "OVERLAY", 0 },
+		WinterVeilManaColor = { 1, 1, 1 }, 
+
+		AuraProperties = {
+			growthX = "RIGHT", 
+			growthY = "UP", 
+			spacingH = 6, 
+			spacingV = 6, 
+			auraSize = 40, auraWidth = nil, auraHeight = nil, 
+			maxVisible = 16, maxBuffs = nil, maxDebuffs = nil, 
+			filter = nil, filterBuffs = "HELPFUL", filterDebuffs = "HARMFUL", 
+			func = nil, funcBuffs = GetAuraFilterFunc("player"), funcDebuffs = GetAuraFilterFunc("player"), 
+			debuffsFirst = true, 
+			disableMouse = false, 
+			showSpirals = false, 
+			showDurations = true, 
+			showLongDurations = true,
+			tooltipDefaultPosition = false, 
+			tooltipPoint = "BOTTOMLEFT",
+			tooltipAnchor = nil,
+			tooltipRelPoint = "TOPLEFT",
+			tooltipOffsetX = 8,
+			tooltipOffsetY = 16
+		},
+		AuraFrameSize = { 40*8 + 6*7, 40 },
+		AuraFramePlace = { "BOTTOMLEFT", 27 + 10, 27 + 24 + 40 },
+		AuraIconPlace = { "CENTER", 0, 0 },
+		AuraIconSize = { 40 - 6, 40 - 6 },
+		AuraIconTexCoord = { 5/64, 59/64, 5/64, 59/64 }, -- aura icon tex coords
+		AuraCountPlace = { "BOTTOMRIGHT", 9, -6 },
+		AuraCountFont = GetFont(14, true),
+		AuraCountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
+		AuraTimePlace = { "TOPLEFT", -6, 6 }, -- { "CENTER", 0, 0 },
+		AuraTimeFont = GetFont(14, true),
+		AuraBorderFramePlace = { "CENTER", 0, 0 }, 
+		AuraBorderFrameSize = { 40 + 14, 40 + 14 },
+		AuraBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 16 },
+		AuraBorderBackdropColor = { 0, 0, 0, 0 },
+		AuraBorderBackdropBorderColor = { Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3 },
+
+		SeasonedHealthSize = { 385, 40 },
+		SeasonedHealthTexture = GetMedia("hp_cap_bar"),
+		SeasonedHealthSparkMap = {
+			{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
+			{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
+			{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
+			{ keyPercent = 478/512, topOffset =   0/64, bottomOffset =   0/64 }, 
+			{ keyPercent = 483/512, topOffset =   0/64, bottomOffset =  -3/64 }, 
+			{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
+			{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
+		},
+		SeasonedHealthBackdropTexture = GetMedia("hp_cap_case"),
+		SeasonedHealthBackdropColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
+		SeasonedPowerForegroundTexture = GetMedia("pw_crystal_case"),
+		SeasonedPowerForegroundColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
+		SeasonedCastSize = { 385, 40 },
+		SeasonedCastTexture = GetMedia("hp_cap_bar_highlight"),
+		SeasonedManaOrbTexture = GetMedia("orb_case_hi"),
+		SeasonedManaOrbColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
+		
+		HardenedLevel = 40,
+		HardenedHealthSize = { 385, 37 },
+		HardenedHealthTexture = GetMedia("hp_lowmid_bar"),
+		HardenedHealthSparkMap = {
+			{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
+			{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
+			{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
+			{ keyPercent = 478/512, topOffset =   0/64, bottomOffset =   0/64 }, 
+			{ keyPercent = 483/512, topOffset =   0/64, bottomOffset =  -3/64 }, 
+			{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
+			{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
+		},
+		HardenedHealthBackdropTexture = GetMedia("hp_mid_case"),
+		HardenedHealthBackdropColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
+		HardenedPowerForegroundTexture = GetMedia("pw_crystal_case"),
+		HardenedPowerForegroundColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
+		HardenedCastSize = { 385, 37 },
+		HardenedCastTexture = GetMedia("hp_lowmid_bar"),
+		HardenedManaOrbTexture = GetMedia("orb_case_hi"),
+		HardenedManaOrbColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
+
+		NoviceHealthSize = { 385, 37 },
+		NoviceHealthTexture = GetMedia("hp_lowmid_bar"),
+		NoviceHealthSparkMap = {
+			{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
+			{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
+			{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
+			{ keyPercent = 478/512, topOffset =   0/64, bottomOffset =   0/64 }, 
+			{ keyPercent = 483/512, topOffset =   0/64, bottomOffset =  -3/64 }, 
+			{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
+			{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
+		},
+		NoviceHealthBackdropTexture = GetMedia("hp_low_case"),
+		NoviceHealthBackdropColor = { Colors.ui.wood[1], Colors.ui.wood[2], Colors.ui.wood[3] },
+		NovicePowerForegroundTexture = GetMedia("pw_crystal_case_low"),
+		NovicePowerForegroundColor = { Colors.ui.wood[1], Colors.ui.wood[2], Colors.ui.wood[3] },
+		NoviceCastSize = { 385, 37 },
+		NoviceCastTexture = GetMedia("hp_lowmid_bar"),
+		NoviceManaOrbTexture = GetMedia("orb_case_low"),
+		NoviceManaOrbColor = { Colors.ui.wood[1], Colors.ui.wood[2], Colors.ui.wood[3] },
 }
 
 -- PlayerHUD (combo points and castbar)
