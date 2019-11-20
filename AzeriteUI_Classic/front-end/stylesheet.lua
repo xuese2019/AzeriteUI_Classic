@@ -2217,7 +2217,6 @@ LibDB:NewDatabase(ADDON..":[UnitFramePlayer]", UnitFramePlayer)
 LibDB:NewDatabase(ADDON..":[UnitFramePet]", UnitFramePet)
 LibDB:NewDatabase(ADDON..":[UnitFrameTarget]", UnitFrameTarget)
 LibDB:NewDatabase(ADDON..":[UnitFrameToT]", UnitFrameToT)
-LibDB:NewDatabase(ADDON..":[UnitFrameFocus]", UnitFrameFocus)
 LibDB:NewDatabase(ADDON..":[UnitFrameBoss]", UnitFrameBoss)
 
 ------------------------------------------------
