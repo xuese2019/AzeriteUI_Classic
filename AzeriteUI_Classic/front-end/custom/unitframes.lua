@@ -559,92 +559,47 @@ local Player_OverrideExtraPowerColor = function(element, unit, min, max, powerTy
 end 
 
 local Player_PostUpdateTextures = function(self, overrideLevel)
-	local Layout = self.layout
+	local layout = self.layout
 	local playerLevel = overrideLevel or UnitLevel("player")
 	if (playerLevel >= 60) then 
-		self.Health:SetSize(unpack(Layout.SeasonedHealthSize))
-		self.Health:SetStatusBarTexture(Layout.SeasonedHealthTexture)
-
-		if Layout.UseHealthBackdrop then 
-			self.Health.Bg:SetTexture(Layout.SeasonedHealthBackdropTexture)
-			self.Health.Bg:SetVertexColor(unpack(Layout.SeasonedHealthBackdropColor))
+		self.Health:SetSize(unpack(layout.SeasonedHealthSize))
+		self.Health:SetStatusBarTexture(layout.SeasonedHealthTexture)
+		self.Health.Bg:SetTexture(layout.SeasonedHealthBackdropTexture)
+		self.Health.Bg:SetVertexColor(unpack(layout.SeasonedHealthBackdropColor))
+		self.Power.Fg:SetTexture(layout.SeasonedPowerForegroundTexture)
+		self.Power.Fg:SetVertexColor(unpack(layout.SeasonedPowerForegroundColor))
+		self.Cast:SetSize(unpack(layout.SeasonedCastSize))
+		self.Cast:SetStatusBarTexture(layout.SeasonedCastTexture)
+		if (self.ExtraPower) then
+			self.ExtraPower.Fg:SetTexture(layout.SeasonedManaOrbTexture)
+			self.ExtraPower.Fg:SetVertexColor(unpack(layout.SeasonedManaOrbColor)) 
 		end 
-
-		if Layout.UsePowerBar then 
-			if Layout.UsePowerForeground then 
-				self.Power.Fg:SetTexture(Layout.SeasonedPowerForegroundTexture)
-				self.Power.Fg:SetVertexColor(unpack(Layout.SeasonedPowerForegroundColor))
-			end
-		end
-
-		if Layout.UseCastBar then 
-			self.Cast:SetSize(unpack(Layout.SeasonedCastSize))
-			self.Cast:SetStatusBarTexture(Layout.SeasonedCastTexture)
-		end
-
-		if Layout.UseMana then 
-			if self.ExtraPower and Layout.UseProgressiveManaForeground then
-				self.ExtraPower.Fg:SetTexture(Layout.SeasonedManaOrbTexture)
-				self.ExtraPower.Fg:SetVertexColor(unpack(Layout.SeasonedManaOrbColor)) 
-			end 
+	elseif (playerLevel >= layout.HardenedLevel) then 
+		self.Health:SetSize(unpack(layout.HardenedHealthSize))
+		self.Health:SetStatusBarTexture(layout.HardenedHealthTexture)
+		self.Health.Bg:SetTexture(layout.HardenedHealthBackdropTexture)
+		self.Health.Bg:SetVertexColor(unpack(layout.HardenedHealthBackdropColor))
+		self.Power.Fg:SetTexture(layout.HardenedPowerForegroundTexture)
+		self.Power.Fg:SetVertexColor(unpack(layout.HardenedPowerForegroundColor))
+		self.Cast:SetSize(unpack(layout.HardenedCastSize))
+		self.Cast:SetStatusBarTexture(layout.HardenedCastTexture)
+		if (self.ExtraPower) then 
+			self.ExtraPower.Fg:SetTexture(layout.HardenedManaOrbTexture)
+			self.ExtraPower.Fg:SetVertexColor(unpack(layout.HardenedManaOrbColor)) 
 		end 
-
-	elseif (playerLevel >= Layout.HardenedLevel) then 
-		self.Health:SetSize(unpack(Layout.HardenedHealthSize))
-		self.Health:SetStatusBarTexture(Layout.HardenedHealthTexture)
-
-		if Layout.UseHealthBackdrop then 
-			self.Health.Bg:SetTexture(Layout.HardenedHealthBackdropTexture)
-			self.Health.Bg:SetVertexColor(unpack(Layout.HardenedHealthBackdropColor))
-		end
-
-		if Layout.UsePowerBar then 
-			if Layout.UsePowerForeground then 
-				self.Power.Fg:SetTexture(Layout.HardenedPowerForegroundTexture)
-				self.Power.Fg:SetVertexColor(unpack(Layout.HardenedPowerForegroundColor))
-			end
-		end
-
-		if Layout.UseCastBar then 
-			self.Cast:SetSize(unpack(Layout.HardenedCastSize))
-			self.Cast:SetStatusBarTexture(Layout.HardenedCastTexture)
-		end
-
-		if Layout.UseMana then 
-			if self.ExtraPower and Layout.UseProgressiveManaForeground then 
-				self.ExtraPower.Fg:SetTexture(Layout.HardenedManaOrbTexture)
-				self.ExtraPower.Fg:SetVertexColor(unpack(Layout.HardenedManaOrbColor)) 
-			end 
-		end 
-
 	else 
-		self.Health:SetSize(unpack(Layout.NoviceHealthSize))
-		self.Health:SetStatusBarTexture(Layout.NoviceHealthTexture)
-
-		if Layout.UseHealthBackdrop then 
-			self.Health.Bg:SetTexture(Layout.NoviceHealthBackdropTexture)
-			self.Health.Bg:SetVertexColor(unpack(Layout.NoviceHealthBackdropColor))
+		self.Health:SetSize(unpack(layout.NoviceHealthSize))
+		self.Health:SetStatusBarTexture(layout.NoviceHealthTexture)
+		self.Health.Bg:SetTexture(layout.NoviceHealthBackdropTexture)
+		self.Health.Bg:SetVertexColor(unpack(layout.NoviceHealthBackdropColor))
+		self.Power.Fg:SetTexture(layout.NovicePowerForegroundTexture)
+		self.Power.Fg:SetVertexColor(unpack(layout.NovicePowerForegroundColor))
+		self.Cast:SetSize(unpack(layout.NoviceCastSize))
+		self.Cast:SetStatusBarTexture(layout.NoviceCastTexture)
+		if (self.ExtraPower) then 
+			self.ExtraPower.Fg:SetTexture(layout.NoviceManaOrbTexture)
+			self.ExtraPower.Fg:SetVertexColor(unpack(layout.NoviceManaOrbColor)) 
 		end
-
-		if Layout.UsePowerBar then 
-			if Layout.UsePowerForeground then 
-				self.Power.Fg:SetTexture(Layout.NovicePowerForegroundTexture)
-				self.Power.Fg:SetVertexColor(unpack(Layout.NovicePowerForegroundColor))
-			end
-		end
-
-		if Layout.UseCastBar then 
-			self.Cast:SetSize(unpack(Layout.NoviceCastSize))
-			self.Cast:SetStatusBarTexture(Layout.NoviceCastTexture)
-		end 
-
-		if Layout.UseMana then 
-			if self.ExtraPower and Layout.UseProgressiveManaForeground then 
-				self.ExtraPower.Fg:SetTexture(Layout.NoviceManaOrbTexture)
-				self.ExtraPower.Fg:SetVertexColor(unpack(Layout.NoviceManaOrbColor)) 
-			end
-		end 
-
 	end 
 end 
 
@@ -1658,17 +1613,17 @@ end
 -----------------------------------------------------------
 -- Singular Unit Styling
 -----------------------------------------------------------
-UnitStyles.StylePlayerFrame = function(self, unit, id, Layout, ...)
+UnitStyles.StylePlayerFrame = function(self, unit, id, layout, ...)
 
 	-- Frame
 	-----------------------------------------------------------
 	self.colors = Colors
-	self.layout = Layout
-	self:SetSize(unpack(Layout.Size)) 
-	self:Place(unpack(Layout.Place)) 
-	self:SetHitRectInsets(unpack(Layout.HitRectInsets))
+	self.layout = layout
+	self:SetSize(unpack(layout.Size)) 
+	self:Place(unpack(layout.Place)) 
+	self:SetHitRectInsets(unpack(layout.HitRectInsets))
 
-	local topOffset, bottomOffset, leftOffset, rightOffset = unpack(Layout.ExplorerHitRects)
+	local topOffset, bottomOffset, leftOffset, rightOffset = unpack(layout.ExplorerHitRects)
 
 	self.GetExplorerHitRects = function(self)
 		return topOffset, bottomOffset, leftOffset, rightOffset
@@ -1693,102 +1648,97 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, Layout, ...)
 
 	-- Health Bar
 	-----------------------------------------------------------	
-	local health 
-
-	if (Layout.HealthType == "Orb") then 
-		health = content:CreateOrb()
-
-	elseif (Layout.HealthType == "SpinBar") then 
-		health = content:CreateSpinBar()
-
-	else 
-		health = content:CreateStatusBar()
-		health:SetOrientation(Layout.HealthBarOrientation or "RIGHT") 
-		if Layout.HealthBarSparkMap then 
-			health:SetSparkMap(Layout.HealthBarSparkMap) -- set the map the spark follows along the bar.
-		end 
-	end 
-
+	local health = content:CreateStatusBar()
+	health:SetOrientation(layout.HealthBarOrientation or "RIGHT") 
+	health:SetSparkMap(layout.HealthBarSparkMap)
 	health:SetFrameLevel(health:GetFrameLevel() + 2)
-	health:Place(unpack(Layout.HealthPlace))
+	health:Place(unpack(layout.HealthPlace))
 	health:SetSmartSmoothing(true)
-	health.colorTapped = Layout.HealthColorTapped  -- color tap denied units 
-	health.colorDisconnected = Layout.HealthColorDisconnected -- color disconnected units
-	health.colorClass = Layout.HealthColorClass -- color players by class 
-	health.colorReaction = Layout.HealthColorReaction -- color NPCs by their reaction standing with us
-	health.colorHealth = Layout.HealthColorHealth -- color anything else in the default health color
-	health.frequent = Layout.HealthFrequentUpdates -- listen to frequent health events for more accurate updates
+	health.colorTapped = layout.HealthColorTapped  -- color tap denied units 
+	health.colorDisconnected = layout.HealthColorDisconnected -- color disconnected units
+	health.colorClass = layout.HealthColorClass -- color players by class 
+	health.colorReaction = layout.HealthColorReaction -- color NPCs by their reaction standing with us
+	health.colorHealth = layout.HealthColorHealth -- color anything else in the default health color
+	health.frequent = layout.HealthFrequentUpdates -- listen to frequent health events for more accurate updates
 	health.predictThreshold = .01
 	self.Health = health
-	self.Health.PostUpdate = Layout.CastBarPostUpdate
+	self.Health.PostUpdate = layout.CastBarPostUpdate
 	
-	if Layout.UseHealthBackdrop then 
-		local healthBgHolder = health:CreateFrame("Frame")
-		healthBgHolder:SetAllPoints()
-		healthBgHolder:SetFrameLevel(health:GetFrameLevel()-2)
+	local healthBgHolder = health:CreateFrame("Frame")
+	healthBgHolder:SetAllPoints()
+	healthBgHolder:SetFrameLevel(health:GetFrameLevel()-2)
 
-		local healthBg = healthBgHolder:CreateTexture()
-		healthBg:SetDrawLayer(unpack(Layout.HealthBackdropDrawLayer))
-		healthBg:SetSize(unpack(Layout.HealthBackdropSize))
-		healthBg:SetPoint(unpack(Layout.HealthBackdropPlace))
-		self.Health.Bg = healthBg
-	end 
+	local healthBg = healthBgHolder:CreateTexture()
+	healthBg:SetDrawLayer(unpack(layout.HealthBackdropDrawLayer))
+	healthBg:SetSize(unpack(layout.HealthBackdropSize))
+	healthBg:SetPoint(unpack(layout.HealthBackdropPlace))
+	self.Health.Bg = healthBg
+
+	-- Health Value
+	local healthValHolder = overlay:CreateFrame("Frame")
+	healthValHolder:SetAllPoints(health)
+
+	local healthVal = healthValHolder:CreateFontString()
+	healthVal:SetPoint(unpack(layout.HealthValuePlace))
+	healthVal:SetDrawLayer(unpack(layout.HealthValueDrawLayer))
+	healthVal:SetJustifyH(layout.HealthValueJustifyH)
+	healthVal:SetJustifyV(layout.HealthValueJustifyV)
+	healthVal:SetFontObject(layout.HealthValueFont)
+	healthVal:SetTextColor(unpack(layout.HealthValueColor))
+	self.Health.Value = healthVal
 
 	-- Power 
 	-----------------------------------------------------------
-	if Layout.UsePowerBar then 
-		local power = backdrop:CreateStatusBar()
-		power:SetSize(unpack(Layout.PowerSize))
-		power:Place(unpack(Layout.PowerPlace))
-		power:SetStatusBarTexture(Layout.PowerBarTexture)
-		power:SetTexCoord(unpack(Layout.PowerBarTexCoord))
-		power:SetOrientation(Layout.PowerBarOrientation or "RIGHT") -- set the bar to grow towards the top.
-		power:SetSmoothingMode(Layout.PowerBarSmoothingMode) -- set the smoothing mode.
-		power:SetSmoothingFrequency(Layout.PowerBarSmoothingFrequency or .5) -- set the duration of the smoothing.
-		power.frequent = true
+	local power = backdrop:CreateStatusBar()
+	power:SetSize(unpack(layout.PowerSize))
+	power:Place(unpack(layout.PowerPlace))
+	power:SetStatusBarTexture(layout.PowerBarTexture)
+	power:SetTexCoord(unpack(layout.PowerBarTexCoord))
+	power:SetOrientation(layout.PowerBarOrientation or "RIGHT") -- set the bar to grow towards the top.
+	power:SetSmoothingMode(layout.PowerBarSmoothingMode) -- set the smoothing mode.
+	power:SetSmoothingFrequency(layout.PowerBarSmoothingFrequency or .5) -- set the duration of the smoothing.
+	power:SetSparkMap(layout.PowerBarSparkMap) -- set the map the spark follows along the bar.
+	power.frequent = true
+	power.ignoredResource = layout.PowerIgnoredResource -- make the bar hide when MANA is the primary resource. 
+	self.Power = power
+	self.Power.OverrideColor = Player_OverridePowerColor
 
-		if Layout.PowerBarSparkMap then 
-			power:SetSparkMap(Layout.PowerBarSparkMap) -- set the map the spark follows along the bar.
-		end 
+	local powerBg = power:CreateTexture()
+	powerBg:SetDrawLayer(unpack(layout.PowerBackgroundDrawLayer))
+	powerBg:SetSize(unpack(layout.PowerBackgroundSize))
+	powerBg:SetPoint(unpack(layout.PowerBackgroundPlace))
+	powerBg:SetTexture(layout.PowerBackgroundTexture)
+	powerBg:SetVertexColor(unpack(layout.PowerBackgroundColor)) 
+	self.Power.Bg = powerBg
 
-		power.ignoredResource = Layout.PowerIgnoredResource -- make the bar hide when MANA is the primary resource. 
+	local powerFg = power:CreateTexture()
+	powerFg:SetSize(unpack(layout.PowerForegroundSize))
+	powerFg:SetPoint(unpack(layout.PowerForegroundPlace))
+	powerFg:SetDrawLayer(unpack(layout.PowerForegroundDrawLayer))
+	powerFg:SetTexture(layout.PowerForegroundTexture)
+	self.Power.Fg = powerFg
 
-		self.Power = power
-		self.Power.OverrideColor = Player_OverridePowerColor
+	-- Power Value
+	local powerVal = self.Power:CreateFontString()
+	powerVal:SetPoint(unpack(layout.PowerValuePlace))
+	powerVal:SetDrawLayer(unpack(layout.PowerValueDrawLayer))
+	powerVal:SetJustifyH(layout.PowerValueJustifyH)
+	powerVal:SetJustifyV(layout.PowerValueJustifyV)
+	powerVal:SetFontObject(layout.PowerValueFont)
+	powerVal:SetTextColor(unpack(layout.PowerValueColor))
+	self.Power.Value = powerVal
 
-		if Layout.UsePowerBackground then 
-			local powerBg = power:CreateTexture()
-			powerBg:SetDrawLayer(unpack(Layout.PowerBackgroundDrawLayer))
-			powerBg:SetSize(unpack(Layout.PowerBackgroundSize))
-			powerBg:SetPoint(unpack(Layout.PowerBackgroundPlace))
-			powerBg:SetTexture(Layout.PowerBackgroundTexture)
-			powerBg:SetVertexColor(unpack(Layout.PowerBackgroundColor)) 
-			self.Power.Bg = powerBg
-		end
-
-		if Layout.UsePowerForeground then 
-			local powerFg = power:CreateTexture()
-			powerFg:SetSize(unpack(Layout.PowerForegroundSize))
-			powerFg:SetPoint(unpack(Layout.PowerForegroundPlace))
-			powerFg:SetDrawLayer(unpack(Layout.PowerForegroundDrawLayer))
-			powerFg:SetTexture(Layout.PowerForegroundTexture)
-			self.Power.Fg = powerFg
-		end
-
-		if Layout.UseWinterVeilPower then 
-			local day = tonumber(date("%d"))
-			local month = tonumber(date("%m"))
-			if ((month >= 12) and (day >=16 )) or ((month <= 1) and (day <= 2)) then 
-				local winterVeilPower = power:CreateTexture()
-				winterVeilPower:SetSize(unpack(Layout.WinterVeilPowerSize))
-				winterVeilPower:SetPoint(unpack(Layout.WinterVeilPowerPlace))
-				winterVeilPower:SetDrawLayer(unpack(Layout.WinterVeilPowerDrawLayer))
-				winterVeilPower:SetTexture(Layout.WinterVeilPowerTexture)
-				winterVeilPower:SetVertexColor(unpack(Layout.WinterVeilPowerColor))
-				self.Power.WinterVeil = winterVeilPower
-			end
-		end 
-	end 
+	local day = tonumber(date("%d"))
+	local month = tonumber(date("%m"))
+	if ((month >= 12) and (day >=16 )) or ((month <= 1) and (day <= 2)) then 
+		local winterVeilPower = power:CreateTexture()
+		winterVeilPower:SetSize(unpack(layout.WinterVeilPowerSize))
+		winterVeilPower:SetPoint(unpack(layout.WinterVeilPowerPlace))
+		winterVeilPower:SetDrawLayer(unpack(layout.WinterVeilPowerDrawLayer))
+		winterVeilPower:SetTexture(layout.WinterVeilPowerTexture)
+		winterVeilPower:SetVertexColor(unpack(layout.WinterVeilPowerColor))
+		self.Power.WinterVeil = winterVeilPower
+	end
 
 	-- Mana Orb
 	-----------------------------------------------------------
@@ -1797,342 +1747,157 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, Layout, ...)
 				 or (PlayerClass == "PALADIN") or (PlayerClass == "SHAMAN")
 				 or (PlayerClass == "MAGE") or (PlayerClass == "PRIEST") or (PlayerClass == "WARLOCK") 
 
-	if Layout.UseMana then 
-		if hasMana then 
+	if hasMana then 
 
-			local extraPower 
-			if (Layout.ManaType == "Orb") then 
-				extraPower = backdrop:CreateOrb()
-				extraPower:SetStatusBarTexture(unpack(Layout.ManaOrbTextures)) 
-
-			elseif (Layout.ManaType == "SpinBar") then 
-				extraPower = backdrop:CreateSpinBar()
-				extraPower:SetStatusBarTexture(Layout.ManaSpinBarTexture)
-			else
-				extraPower = backdrop:CreateStatusBar()
-				extraPower:SetStatusBarTexture(Layout.ManaTexture)
-			end
-
-			extraPower:Place(unpack(Layout.ManaPlace))  
-			extraPower:SetSize(unpack(Layout.ManaSize)) 
-			extraPower.frequent = true
-			extraPower.exclusiveResource = Layout.ManaExclusiveResource or "MANA" 
-			self.ExtraPower = extraPower
-			self.ExtraPower.OverrideColor = Player_OverrideExtraPowerColor
-		
-			if Layout.UseManaBackground then 
-				local extraPowerBg = extraPower:CreateBackdropTexture()
-				extraPowerBg:SetPoint(unpack(Layout.ManaBackgroundPlace))
-				extraPowerBg:SetSize(unpack(Layout.ManaBackgroundSize))
-				extraPowerBg:SetTexture(Layout.ManaBackgroundTexture)
-				extraPowerBg:SetDrawLayer(unpack(Layout.ManaBackgroundDrawLayer))
-				extraPowerBg:SetVertexColor(unpack(Layout.ManaBackgroundColor)) 
-				self.ExtraPower.bg = extraPowerBg
-			end 
-
-			if Layout.UseManaShade then 
-				local extraPowerShade = extraPower:CreateTexture()
-				extraPowerShade:SetPoint(unpack(Layout.ManaShadePlace))
-				extraPowerShade:SetSize(unpack(Layout.ManaShadeSize)) 
-				extraPowerShade:SetTexture(Layout.ManaShadeTexture)
-				extraPowerShade:SetDrawLayer(unpack(Layout.ManaShadeDrawLayer))
-				extraPowerShade:SetVertexColor(unpack(Layout.ManaShadeColor)) 
-				self.ExtraPower.Shade = extraPowerShade
-			end 
-
-			if Layout.UseManaForeground then 
-				local extraPowerFg = extraPower:CreateTexture()
-				extraPowerFg:SetPoint(unpack(Layout.ManaForegroundPlace))
-				extraPowerFg:SetSize(unpack(Layout.ManaForegroundSize))
-				extraPowerFg:SetDrawLayer(unpack(Layout.ManaForegroundDrawLayer))
-
-				if (not Layout.UseProgressiveManaForeground) then 
-					extraPowerFg:SetTexture(Layout.ManaForegroundTexture)
-				end 
-
-				self.ExtraPower.Fg = extraPowerFg
-			end 
-
-			if Layout.UseWinterVeilMana then 
-				local day = tonumber(date("%d"))
-				local month = tonumber(date("%m"))
-				if ((month >= 12) and (day >=16 )) or ((month <= 1) and (day <= 2)) then 
-					local winterVeilMana = extraPower:CreateTexture()
-					winterVeilMana:SetSize(unpack(Layout.WinterVeilManaSize))
-					winterVeilMana:SetPoint(unpack(Layout.WinterVeilManaPlace))
-					winterVeilMana:SetDrawLayer(unpack(Layout.WinterVeilManaDrawLayer))
-					winterVeilMana:SetTexture(Layout.WinterVeilManaTexture)
-					winterVeilMana:SetVertexColor(unpack(Layout.WinterVeilManaColor))
-					self.ExtraPower.WinterVeil = winterVeilMana
-				end 
-			end 
+		local extraPower = backdrop:CreateOrb()
+		extraPower:SetStatusBarTexture(unpack(layout.ManaOrbTextures)) 
+		extraPower:Place(unpack(layout.ManaPlace))  
+		extraPower:SetSize(unpack(layout.ManaSize)) 
+		extraPower.frequent = true
+		extraPower.exclusiveResource = layout.ManaExclusiveResource or "MANA" 
+		self.ExtraPower = extraPower
+		self.ExtraPower.OverrideColor = Player_OverrideExtraPowerColor
 	
+		local extraPowerBg = extraPower:CreateBackdropTexture()
+		extraPowerBg:SetPoint(unpack(layout.ManaBackgroundPlace))
+		extraPowerBg:SetSize(unpack(layout.ManaBackgroundSize))
+		extraPowerBg:SetTexture(layout.ManaBackgroundTexture)
+		extraPowerBg:SetDrawLayer(unpack(layout.ManaBackgroundDrawLayer))
+		extraPowerBg:SetVertexColor(unpack(layout.ManaBackgroundColor)) 
+		self.ExtraPower.bg = extraPowerBg
+
+		local extraPowerShade = extraPower:CreateTexture()
+		extraPowerShade:SetPoint(unpack(layout.ManaShadePlace))
+		extraPowerShade:SetSize(unpack(layout.ManaShadeSize)) 
+		extraPowerShade:SetTexture(layout.ManaShadeTexture)
+		extraPowerShade:SetDrawLayer(unpack(layout.ManaShadeDrawLayer))
+		extraPowerShade:SetVertexColor(unpack(layout.ManaShadeColor)) 
+		self.ExtraPower.Shade = extraPowerShade
+
+		local extraPowerFg = extraPower:CreateTexture()
+		extraPowerFg:SetPoint(unpack(layout.ManaForegroundPlace))
+		extraPowerFg:SetSize(unpack(layout.ManaForegroundSize))
+		extraPowerFg:SetDrawLayer(unpack(layout.ManaForegroundDrawLayer))
+		self.ExtraPower.Fg = extraPowerFg
+
+		-- Mana Value
+		local extraPowerVal = self.ExtraPower:CreateFontString()
+		extraPowerVal:SetPoint(unpack(layout.ManaValuePlace))
+		extraPowerVal:SetDrawLayer(unpack(layout.ManaValueDrawLayer))
+		extraPowerVal:SetJustifyH(layout.ManaValueJustifyH)
+		extraPowerVal:SetJustifyV(layout.ManaValueJustifyV)
+		extraPowerVal:SetFontObject(layout.ManaValueFont)
+		extraPowerVal:SetTextColor(unpack(layout.ManaValueColor))
+		self.ExtraPower.Value = extraPowerVal
+		
+		local day = tonumber(date("%d"))
+		local month = tonumber(date("%m"))
+		if ((month >= 12) and (day >=16 )) or ((month <= 1) and (day <= 2)) then 
+			local winterVeilMana = extraPower:CreateTexture()
+			winterVeilMana:SetSize(unpack(layout.WinterVeilManaSize))
+			winterVeilMana:SetPoint(unpack(layout.WinterVeilManaPlace))
+			winterVeilMana:SetDrawLayer(unpack(layout.WinterVeilManaDrawLayer))
+			winterVeilMana:SetTexture(layout.WinterVeilManaTexture)
+			winterVeilMana:SetVertexColor(unpack(layout.WinterVeilManaColor))
+			self.ExtraPower.WinterVeil = winterVeilMana
 		end 
 
 	end 
 
 	-- Cast Bar
 	-----------------------------------------------------------
-	if Layout.UseCastBar then
-		local cast = content:CreateStatusBar()
-		cast:SetSize(unpack(Layout.CastBarSize))
-		cast:SetFrameLevel(health:GetFrameLevel() + 1)
-		cast:Place(unpack(Layout.CastBarPlace))
-		cast:SetOrientation(Layout.CastBarOrientation)
-		if Layout.CastBarDisableSmoothing then 
-			cast:DisableSmoothing()
-		else 
-			cast:SetSmoothingMode(Layout.CastBarSmoothingMode) .
-			cast:SetSmoothingFrequency(Layout.CastBarSmoothingFrequency)
-		end
-		cast:SetStatusBarColor(unpack(Layout.CastBarColor))  
+	local cast = content:CreateStatusBar()
+	cast:SetSize(unpack(layout.CastBarSize))
+	cast:SetFrameLevel(health:GetFrameLevel() + 1)
+	cast:Place(unpack(layout.CastBarPlace))
+	cast:SetOrientation(layout.CastBarOrientation)
+	cast:DisableSmoothing()
+	cast:SetStatusBarColor(unpack(layout.CastBarColor))  
+	cast:SetSparkMap(layout.CastBarSparkMap) 
 
-		if Layout.CastBarSparkMap then 
-			cast:SetSparkMap(Layout.CastBarSparkMap) -- set the map the spark follows along the bar.
-		end
+	local name = (layout.CastBarNameParent and self[layout.CastBarNameParent] or overlay):CreateFontString()
+	name:SetPoint(unpack(layout.CastBarNamePlace))
+	name:SetFontObject(layout.CastBarNameFont)
+	name:SetDrawLayer(unpack(layout.CastBarNameDrawLayer))
+	name:SetJustifyH(layout.CastBarNameJustifyH)
+	name:SetJustifyV(layout.CastBarNameJustifyV)
+	name:SetTextColor(unpack(layout.CastBarNameColor))
+	name:SetSize(unpack(layout.CastBarNameSize))
+	cast.Name = name
 
-		if Layout.UseCastBarName then 
-			local name, parent 
-			if Layout.CastBarNameParent then 
-				parent = self[Layout.CastBarNameParent]
-			end 
-			local name = (parent or overlay):CreateFontString()
-			name:SetPoint(unpack(Layout.CastBarNamePlace))
-			name:SetFontObject(Layout.CastBarNameFont)
-			name:SetDrawLayer(unpack(Layout.CastBarNameDrawLayer))
-			name:SetJustifyH(Layout.CastBarNameJustifyH)
-			name:SetJustifyV(Layout.CastBarNameJustifyV)
-			name:SetTextColor(unpack(Layout.CastBarNameColor))
-			if Layout.CastBarNameSize then 
-				name:SetSize(unpack(Layout.CastBarNameSize))
-			end 
-			cast.Name = name
-		end 
+	local value = (layout.CastBarValueParent and self[layout.CastBarValueParent] or overlay):CreateFontString()
+	value:SetPoint(unpack(layout.CastBarValuePlace))
+	value:SetFontObject(layout.CastBarValueFont)
+	value:SetDrawLayer(unpack(layout.CastBarValueDrawLayer))
+	value:SetJustifyH(layout.CastBarValueJustifyH)
+	value:SetJustifyV(layout.CastBarValueJustifyV)
+	value:SetTextColor(unpack(layout.CastBarValueColor))
+	cast.Value = value
 
-		if Layout.UseCastBarValue then 
-			local value, parent 
-			if Layout.CastBarValueParent then 
-				parent = self[Layout.CastBarValueParent]
-			end 
-			local value = (parent or overlay):CreateFontString()
-			value:SetPoint(unpack(Layout.CastBarValuePlace))
-			value:SetFontObject(Layout.CastBarValueFont)
-			value:SetDrawLayer(unpack(Layout.CastBarValueDrawLayer))
-			value:SetJustifyH(Layout.CastBarValueJustifyH)
-			value:SetJustifyV(Layout.CastBarValueJustifyV)
-			value:SetTextColor(unpack(Layout.CastBarValueColor))
-			if Layout.CastBarValueSize then 
-				value:SetSize(unpack(Layout.CastBarValueSize))
-			end 
-			cast.Value = value
-		end 
-
-		self.Cast = cast
-		self.Cast.PostUpdate = Layout.CastBarPostUpdate
-	end 
+	self.Cast = cast
+	self.Cast.PostUpdate = layout.CastBarPostUpdate
 
 	-- Combat Indicator
 	-----------------------------------------------------------
-	if Layout.UseCombatIndicator then 
-		local combat = overlay:CreateTexture()
+	local combat = overlay:CreateTexture()
 
-		local prefix = "CombatIndicator"
-		if Layout.UseLoveCombatIndicator then 
-			local day = tonumber(date("%d"))
-			local month = tonumber(date("%m"))
-			if ((month == 2) and (day >= 12) and (day <= 26)) then 
-				prefix = "Love"..prefix
-			end
-		end
-		combat:SetSize(unpack(Layout[prefix.."Size"]))
-		combat:SetPoint(unpack(Layout[prefix.."Place"])) 
-		combat:SetTexture(Layout[prefix.."Texture"])
-		combat:SetDrawLayer(unpack(Layout[prefix.."DrawLayer"]))
-		self.Combat = combat
-		
-		if Layout.UseCombatIndicatorGlow then 
-			local combatGlow = overlay:CreateTexture()
-			combatGlow:SetSize(unpack(Layout.CombatIndicatorGlowSize))
-			combatGlow:SetPoint(unpack(Layout.CombatIndicatorGlowPlace)) 
-			combatGlow:SetTexture(Layout.CombatIndicatorGlowTexture)
-			combatGlow:SetDrawLayer(unpack(Layout.CombatIndicatorGlowDrawLayer))
-			combatGlow:SetVertexColor(unpack(Layout.CombatIndicatorGlowColor))
-			self.Combat.Glow = combatGlow
-		end
-	end 
+	local prefix = "CombatIndicator"
+	local day = tonumber(date("%d"))
+	local month = tonumber(date("%m"))
+	if ((month == 2) and (day >= 12) and (day <= 26)) then 
+		prefix = "Love"..prefix
+	end
+	combat:SetSize(unpack(layout[prefix.."Size"]))
+	combat:SetPoint(unpack(layout[prefix.."Place"])) 
+	combat:SetTexture(layout[prefix.."Texture"])
+	combat:SetDrawLayer(unpack(layout[prefix.."DrawLayer"]))
+	self.Combat = combat
 
 	-- Unit Classification (PvP Status)
-	if Layout.UseClassificationIndicator then 
+	local classification = overlay:CreateFrame("Frame")
+	classification:SetPoint(unpack(layout.ClassificationPlace))
+	classification:SetSize(unpack(layout.ClassificationSize))
+	classification.hideInCombat = true
+	self.Classification = classification
 
-		local classification = overlay:CreateFrame("Frame")
-		classification:SetPoint(unpack(Layout.ClassificationPlace))
-		classification:SetSize(unpack(Layout.ClassificationSize))
-		classification.hideInCombat = true
-		self.Classification = classification
+	local alliance = classification:CreateTexture()
+	alliance:SetPoint("CENTER", 0, 0)
+	alliance:SetSize(unpack(layout.ClassificationSize))
+	alliance:SetTexture(layout.ClassificationIndicatorAllianceTexture)
+	alliance:SetVertexColor(unpack(layout.ClassificationColor))
+	self.Classification.Alliance = alliance
 
-		local alliance = classification:CreateTexture()
-		alliance:SetPoint("CENTER", 0, 0)
-		alliance:SetSize(unpack(Layout.ClassificationSize))
-		alliance:SetTexture(Layout.ClassificationIndicatorAllianceTexture)
-		alliance:SetVertexColor(unpack(Layout.ClassificationColor))
-		self.Classification.Alliance = alliance
-
-		local horde = classification:CreateTexture()
-		horde:SetPoint("CENTER", 0, 0)
-		horde:SetSize(unpack(Layout.ClassificationSize))
-		horde:SetTexture(Layout.ClassificationIndicatorHordeTexture)
-		horde:SetVertexColor(unpack(Layout.ClassificationColor))
-		self.Classification.Horde = horde
-	end
+	local horde = classification:CreateTexture()
+	horde:SetPoint("CENTER", 0, 0)
+	horde:SetSize(unpack(layout.ClassificationSize))
+	horde:SetTexture(layout.ClassificationIndicatorHordeTexture)
+	horde:SetVertexColor(unpack(layout.ClassificationColor))
+	self.Classification.Horde = horde
 
 	-- Auras
 	-----------------------------------------------------------
-	if Layout.UseAuras then 
-		local auras = content:CreateFrame("Frame")
-		auras:Place(unpack(Layout.AuraFramePlace))
-		auras:SetSize(unpack(Layout.AuraFrameSize)) -- auras will be aligned in the available space, this size gives us 8x1 auras
-		for property,value in pairs(Layout.AuraProperties) do 
-			auras[property] = value
-		end
-		self.Auras = auras
-		self.Auras.PostCreateButton = PostCreateAuraButton -- post creation styling
-		self.Auras.PostUpdateButton = PostUpdateAuraButton -- post updates when something changes (even timers)
-	end 
-
-	if Layout.UseBuffs then 
-		local buffs = content:CreateFrame("Frame")
-		buffs:Place(unpack(Layout.BuffFramePlace))
-		buffs:SetSize(unpack(Layout.BuffFrameSize)) -- auras will be aligned in the available space, this size gives us 8x1 auras
-		buffs.auraSize = Layout.BuffSize -- size of the aura. assuming squares. 
-		buffs.spacingH = Layout.BuffSpaceH -- horizontal/column spacing between buttons
-		buffs.spacingV = Layout.BuffSpaceV -- vertical/row spacing between aura buttons
-		buffs.growthX = Layout.BuffGrowthX -- auras grow to the left
-		buffs.growthY = Layout.BuffGrowthY -- rows grow downwards (we just have a single row, though)
-		buffs.maxVisible = Layout.BuffMax -- when set will limit the number of buttons regardless of space available
-		buffs.showCooldownSpiral = Layout.ShowBuffCooldownSpirals -- don't show the spiral as a timer
-		buffs.showCooldownTime = Layout.ShowBuffCooldownTime -- show timer numbers
-		buffs.buffFilterString = Layout.buffFilterFunc -- buff specific filter passed to blizzard API calls
-		buffs.buffFilterFunc = Layout.buffFilterFuncFunc -- buff specific filter function
-		buffs.tooltipDefaultPosition = Layout.BuffTooltipDefaultPosition
-		buffs.tooltipPoint = Layout.BuffTooltipPoint
-		buffs.tooltipAnchor = Layout.BuffTooltipAnchor
-		buffs.tooltipRelPoint = Layout.BuffTooltipRelPoint
-		buffs.tooltipOffsetX = Layout.BuffTooltipOffsetX
-		buffs.tooltipOffsetY = Layout.BuffTooltipOffsetY
-			
-		--local test = debuffs:CreateTexture()
-		--test:SetColorTexture(.7, 0, 0, .5)
-		--test:SetAllPoints()
-
-		self.Buffs = buffs
-		self.Buffs.PostCreateButton = PostCreateAuraButton -- post creation styling
-		self.Buffs.PostUpdateButton = PostUpdateAuraButton -- post updates when something changes (even timers)
-	end 
-
-	if Layout.UseDebuffs then 
-		local debuffs = content:CreateFrame("Frame")
-		debuffs:Place(unpack(Layout.DebuffFramePlace))
-		debuffs:SetSize(unpack(Layout.DebuffFrameSize)) -- auras will be aligned in the available space, this size gives us 8x1 auras
-		debuffs.auraSize = Layout.DebuffSize -- size of the aura. assuming squares. 
-		debuffs.spacingH = Layout.DebuffSpaceH -- horizontal/column spacing between buttons
-		debuffs.spacingV = Layout.DebuffSpaceV -- vertical/row spacing between aura buttons
-		debuffs.growthX = Layout.DebuffGrowthX -- auras grow to the left
-		debuffs.growthY = Layout.DebuffGrowthY -- rows grow downwards (we just have a single row, though)
-		debuffs.maxVisible = Layout.DebuffMax -- when set will limit the number of buttons regardless of space available
-		debuffs.showCooldownSpiral = Layout.ShowDebuffCooldownSpirals -- don't show the spiral as a timer
-		debuffs.showCooldownTime = Layout.ShowDebuffCooldownTime -- show timer numbers
-		debuffs.debuffFilterString = Layout.debuffFilterFunc -- debuff specific filter passed to blizzard API calls
-		debuffs.debuffFilterFunc = Layout.debuffFilterFuncFunc -- debuff specific filter function
-		debuffs.tooltipDefaultPosition = Layout.DebuffTooltipDefaultPosition
-		debuffs.tooltipPoint = Layout.DebuffTooltipPoint
-		debuffs.tooltipAnchor = Layout.DebuffTooltipAnchor
-		debuffs.tooltipRelPoint = Layout.DebuffTooltipRelPoint
-		debuffs.tooltipOffsetX = Layout.DebuffTooltipOffsetX
-		debuffs.tooltipOffsetY = Layout.DebuffTooltipOffsetY
-		
-		--local test = debuffs:CreateTexture()
-		--test:SetColorTexture(.7, 0, 0, .5)
-		--test:SetAllPoints()
-
-		self.Debuffs = debuffs
-		self.Debuffs.PostCreateButton = PostCreateAuraButton -- post creation styling
-		self.Debuffs.PostUpdateButton = PostUpdateAuraButton -- post updates when something changes (even timers)
-	end 
-
-	-- Texts
-	-----------------------------------------------------------
-	-- Unit Name
-	if Layout.UseName then 
-		local name = overlay:CreateFontString()
-		name:SetPoint(unpack(Layout.NamePlace))
-		name:SetDrawLayer(unpack(Layout.NameDrawLayer))
-		name:SetJustifyH(Layout.NameJustifyH)
-		name:SetJustifyV(Layout.NameJustifyV)
-		name:SetFontObject(Layout.NameFont)
-		name:SetTextColor(unpack(Layout.NameColor))
-		if Layout.NameSize then 
-			name:SetSize(unpack(Layout.NameSize))
-		end 
-		self.Name = name
-	end 
-
-	-- Health Value
-	if Layout.UseHealthValue then 
-		local healthValHolder = overlay:CreateFrame("Frame")
-		healthValHolder:SetAllPoints(health)
-
-		local healthVal = healthValHolder:CreateFontString()
-		healthVal:SetPoint(unpack(Layout.HealthValuePlace))
-		healthVal:SetDrawLayer(unpack(Layout.HealthValueDrawLayer))
-		healthVal:SetJustifyH(Layout.HealthValueJustifyH)
-		healthVal:SetJustifyV(Layout.HealthValueJustifyV)
-		healthVal:SetFontObject(Layout.HealthValueFont)
-		healthVal:SetTextColor(unpack(Layout.HealthValueColor))
-		self.Health.Value = healthVal
-	end 
-
-	-- Power Value
-	if Layout.UsePowerBar then 
-		if Layout.UsePowerValue then 
-			local powerVal = self.Power:CreateFontString()
-			powerVal:SetPoint(unpack(Layout.PowerValuePlace))
-			powerVal:SetDrawLayer(unpack(Layout.PowerValueDrawLayer))
-			powerVal:SetJustifyH(Layout.PowerValueJustifyH)
-			powerVal:SetJustifyV(Layout.PowerValueJustifyV)
-			powerVal:SetFontObject(Layout.PowerValueFont)
-			powerVal:SetTextColor(unpack(Layout.PowerValueColor))
-			self.Power.Value = powerVal
-		end 
+	local auras = content:CreateFrame("Frame")
+	auras:Place(unpack(layout.AuraFramePlace))
+	auras:SetSize(unpack(layout.AuraFrameSize)) -- auras will be aligned in the available space, this size gives us 8x1 auras
+	for property,value in pairs(layout.AuraProperties) do 
+		auras[property] = value
 	end
-
-	-- Mana Value
-	if Layout.UseMana then 
-		if hasMana and Layout.UseManaValue then 
-			local extraPowerVal = self.ExtraPower:CreateFontString()
-			extraPowerVal:SetPoint(unpack(Layout.ManaValuePlace))
-			extraPowerVal:SetDrawLayer(unpack(Layout.ManaValueDrawLayer))
-			extraPowerVal:SetJustifyH(Layout.ManaValueJustifyH)
-			extraPowerVal:SetJustifyV(Layout.ManaValueJustifyV)
-			extraPowerVal:SetFontObject(Layout.ManaValueFont)
-			extraPowerVal:SetTextColor(unpack(Layout.ManaValueColor))
-			self.ExtraPower.Value = extraPowerVal
-		end 
-	end 
+	self.Auras = auras
+	self.Auras.PostCreateButton = PostCreateAuraButton -- post creation styling
+	self.Auras.PostUpdateButton = PostUpdateAuraButton -- post updates when something changes (even timers)
 
 	-- Mana Value when Mana isn't visible  
-	if Layout.UseManaText then 
-		local parent = self[Layout.ManaTextParent or self.Power and "Power" or "Health"]
-		local manaText = parent:CreateFontString()
-		manaText:SetPoint(unpack(Layout.ManaTextPlace))
-		manaText:SetDrawLayer(unpack(Layout.ManaTextDrawLayer))
-		manaText:SetJustifyH(Layout.ManaTextJustifyH)
-		manaText:SetJustifyV(Layout.ManaTextJustifyV)
-		manaText:SetFontObject(Layout.ManaTextFont)
-		manaText:SetTextColor(unpack(Layout.ManaTextColor))
-		manaText.frequent = true
-		self.ManaText = manaText
-		self.ManaText.OverrideValue = Layout.ManaTextOverride
-	end
+	local parent = self[layout.ManaTextParent or self.Power and "Power" or "Health"]
+	local manaText = parent:CreateFontString()
+	manaText:SetPoint(unpack(layout.ManaTextPlace))
+	manaText:SetDrawLayer(unpack(layout.ManaTextDrawLayer))
+	manaText:SetJustifyH(layout.ManaTextJustifyH)
+	manaText:SetJustifyV(layout.ManaTextJustifyV)
+	manaText:SetFontObject(layout.ManaTextFont)
+	manaText:SetTextColor(unpack(layout.ManaTextColor))
+	manaText.frequent = true
+	self.ManaText = manaText
+	self.ManaText.OverrideValue = layout.ManaTextOverride
 
 	-- Update textures according to player level
 	self.PostUpdateTextures = Player_PostUpdateTextures
