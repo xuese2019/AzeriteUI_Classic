@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.71-RC] 2019-11-20
+### Fixed
+- The blizzard durability frame should once again be hidden, preventing double up when our own is shown. 
+
 ## [1.0.70-RC] 2019-11-16
 ### Added
 - Tooltips should now display when units are civilians. Gotta stay clear of those Dishonorable Kills! 
