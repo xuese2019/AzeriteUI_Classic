@@ -1042,6 +1042,31 @@ local TargetFrame_CastBarPostUpdate = function(element, unit)
 	end 
 end
 
+local TargetFrame_LevelVisibilityFilter = function(element, unit) 
+	if UnitIsDeadOrGhost(unit) then 
+		return true 
+	else 
+		return false
+	end 
+end
+
+local TargetFrame_PowerValueOverride = function(element, unit, min, max, powerType, powerID, disconnected, dead, tapped)
+	local value = element.Value
+	if (min == 0 or max == 0) and (not value.showAtZero) then
+		value:SetText("")
+	else
+		value:SetFormattedText("%.0f", math_floor(min/max * 100))
+	end 
+end
+
+local TargetFrame_PowerVisibilityFilter = function(element, unit) 
+	if UnitIsDeadOrGhost(unit) then 
+		return false 
+	else 
+		return true
+	end 
+end
+
 local SmallFrame_CastBarPostUpdate = function(element, unit)
 	local self = element._owner
 	local cast = self.Cast
@@ -3037,298 +3062,52 @@ Layouts.UnitFramePlayerHUD = {
 
 -- Target
 Layouts.UnitFrameTarget = { 
-
-
-
-	Place = { "TOPRIGHT", -153, -79 },
-	Size = { 439, 93 },
-	HitRectInsets = { 0, -80, -30, 0 }, 
-	
-	HealthPlace = { "TOPRIGHT", 27, 27 },
-	HealthBarOrientation = "LEFT",
-	HealthBarSetFlippedHorizontally = true, 
-	HealthSmoothingMode = "bezier-fast-in-slow-out", 
-	HealthSmoothingFrequency = .2, -- speed of the smoothing method
-	HealthColorTapped = true, -- color tap denied units 
-	HealthColorDisconnected = true, -- color disconnected units
-	HealthColorClass = true, -- color players by class 
-	HealthColorReaction = true, -- color NPCs by their reaction standing with us
-	HealthColorHealth = false, -- color anything else in the default health color
-	HealthFrequentUpdates = true, -- listen to frequent health events for more accurate updates
-
-	HealthBackdropPlace = { "CENTER", 1, -.5 },
-	HealthBackdropSize = { 716, 188 },
-	HealthBackdropTexCoord = { 1, 0, 0, 1 }, 
-	HealthBackdropDrawLayer = { "BACKGROUND", -1 },
-
-	HealthValuePlace = { "RIGHT", -27, 4 },
-	HealthValueDrawLayer = { "OVERLAY", 1 },
-	HealthValueJustifyH = "RIGHT", 
-	HealthValueJustifyV = "MIDDLE", 
-	HealthValueFont = GetFont(18, true),
-	HealthValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-		
-	HealthPercentPlace = { "LEFT", 27, 4 },
-	HealthPercentDrawLayer = { "OVERLAY", 1 },
-	HealthPercentJustifyH = "LEFT",
-	HealthPercentJustifyV = "MIDDLE",
-	HealthPercentFont = GetFont(18, true),
-	HealthPercentColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-
-	PowerVisibilityFilter = function(element, unit) 
-		if UnitIsDeadOrGhost(unit) then 
-			return false 
-		else 
-			return true
-		end 
-	end,
-
-	-- Show the badge for dead units (dead skull)
-	LevelVisibilityFilter = function(element, unit) 
-		if UnitIsDeadOrGhost(unit) then 
-			return true 
-		else 
-			return false
-		end 
-	end,
-
-	PowerPlace ={ "CENTER", 439/2 + 79 +2, -6+ 93/2 -62 + 4 +6 }, 
-	PowerSize = { 68 +12, 68 +12 },
-	PowerType = "StatusBar", 
-	PowerBarSparkTexture = GetMedia("blank"),
-	PowerBarTexture = GetMedia("power_crystal_small_front"),
-	PowerBarTexCoord = { 0, 1, 0, 1 },
-	PowerBarOrientation = "UP",
-	PowerBarSetFlippedHorizontally = false, 
-	PowerBarSmoothingMode = "bezier-fast-in-slow-out",
-	PowerBarSmoothingFrequency = .5,
-	PowerColorSuffix = "_CRYSTAL", 
-	PowerHideWhenEmpty = true,
-	PowerHideWhenDead = true,  
-	PowerIgnoredResource = nil,
-	PowerShowAlternate = true, 
-	
-	PowerValueOverride = function(element, unit, min, max, powerType, powerID, disconnected, dead, tapped)
-		local value = element.Value
-		if (min == 0 or max == 0) and (not value.showAtZero) then
-			value:SetText("")
-		else
-			value:SetFormattedText("%.0f", math_floor(min/max * 100))
-		end 
-	end,
-
-	PowerValuePlace = { "CENTER", 0, -5 },
-	PowerValueDrawLayer = { "OVERLAY", 1 },
-	PowerValueJustifyH = "CENTER", 
-	PowerValueJustifyV = "MIDDLE", 
-	PowerValueFont = GetFont(14, true),
-	PowerValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-
-	PowerBackgroundPlace = { "CENTER", 0, 0 },
-	PowerBackgroundSize = { 68 +12, 68 +12 },
-	PowerBackgroundTexture = GetMedia("power_crystal_small_back"),
-	PowerBackgroundTexCoord = { 0, 1, 0, 1 },
-	PowerBackgroundDrawLayer = { "BACKGROUND", -2 },
-	PowerBackgroundColor = { 1, 1, 1, .85 },
-
-	PortraitPlace = { "TOPRIGHT", 73, 8 },
-	PortraitSize = { 85, 85 }, 
-	PortraitAlpha = .85, 
-	PortraitDistanceScale = 1,
-	PortraitPositionX = 0,
-	PortraitPositionY = 0,
-	PortraitPositionZ = 0,
-	PortraitRotation = 0, -- in degrees
-	PortraitShowFallback2D = true, -- display 2D portraits when unit is out of range of 3D models
-
-	PortraitBackgroundPlace = { "TOPRIGHT", 116, 55 },
-	PortraitBackgroundSize = { 173, 173 },
-	PortraitBackgroundTexture = GetMedia("party_portrait_back"), 
-	PortraitBackgroundDrawLayer = { "BACKGROUND", 0 }, 
-	PortraitBackgroundColor = { .5, .5, .5 }, 
-
-	PortraitShadePlace = { "TOPRIGHT", 83, 21 },
-	PortraitShadeSize = { 107, 107 }, 
-	PortraitShadeTexture = GetMedia("shade_circle"),
-	PortraitShadeDrawLayer = { "BACKGROUND", -1 },
-
-	PortraitForegroundPlace = { "TOPRIGHT", 123, 61 },
-	PortraitForegroundSize = { 187, 187 },
-	PortraitForegroundDrawLayer = { "BACKGROUND", 0 },
-
-	TargetIndicatorYouByFriendPlace = { "TOPRIGHT", -10 + 96/2, 12 + 48/2 },
-	TargetIndicatorYouByFriendSize = { 96, 48 },
-	TargetIndicatorYouByFriendTexture = GetMedia("icon_target_green"),
-	TargetIndicatorYouByFriendColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
-
-	TargetIndicatorYouByEnemyPlace = { "TOPRIGHT", -10 + 96/2, 12 + 48/2 },
-	TargetIndicatorYouByEnemySize = { 96, 48 },
-	TargetIndicatorYouByEnemyTexture = GetMedia("icon_target_red"),
-	TargetIndicatorYouByEnemyColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
-
-	TargetIndicatorPetByEnemyPlace = { "TOPRIGHT", -10 + 96/2, 12 + 48/2 },
-	TargetIndicatorPetByEnemySize = { 96, 48 },
-	TargetIndicatorPetByEnemyTexture = GetMedia("icon_target_blue"),
-	TargetIndicatorPetByEnemyColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
-
-	LoveTargetIndicatorYouByFriendPlace = { "TOPRIGHT", -10 + 50/2 + 4, 12 + 50/2 -4 },
-	LoveTargetIndicatorYouByFriendSize = { 48,48 },
-	LoveTargetIndicatorYouByFriendTexture = GetMedia("icon-heart-green"),
-	LoveTargetIndicatorYouByFriendColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
-
-	LoveTargetIndicatorYouByEnemyPlace = { "TOPRIGHT", -10 + 50/2 + 4, 12 + 50/2 -4 },
-	LoveTargetIndicatorYouByEnemySize = { 48,48 },
-	LoveTargetIndicatorYouByEnemyTexture = GetMedia("icon-heart-red"),
-	LoveTargetIndicatorYouByEnemyColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
-
-	LoveTargetIndicatorPetByEnemyPlace = { "TOPRIGHT", -10 + 50/2 + 4, 12 + 50/2 -4 },
-	LoveTargetIndicatorPetByEnemySize = { 48,48 },
-	LoveTargetIndicatorPetByEnemyTexture = GetMedia("icon-heart-blue"),
-	LoveTargetIndicatorPetByEnemyColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
-
-	ClassificationPlace = { "BOTTOMRIGHT", 72, -43 },
-	ClassificationSize = { 84, 84 },
-	ClassificationColor = { 1, 1, 1 },
-	ClassificationIndicatorAllianceTexture = GetMedia("icon_badges_alliance"),
-	ClassificationIndicatorHordeTexture = GetMedia("icon_badges_horde"),
-	ClassificationIndicatorBossTexture = GetMedia("icon_badges_boss"),
-	ClassificationIndicatorEliteTexture = GetMedia("icon_classification_elite"),
-	ClassificationIndicatorRareTexture = GetMedia("icon_classification_rare"),
-
-	LevelPlace = { "CENTER", 298, -15 }, 
-	LevelDrawLayer = { "BORDER", 1 },
-	LevelJustifyH = "CENTER",
-	LevelJustifyV = "MIDDLE", 
-	LevelFont = GetFont(13, true),
-	LevelHideCapped = true, 
-	LevelHideFloored = true, 
-	LevelColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3] },
-	LevelAlpha = .7,
-
-	LevelBadgeSize = { 86, 86 }, 
-	LevelBadgeTexture = GetMedia("point_plate"),
-	LevelBadgeDrawLayer = { "BACKGROUND", 1 },
-	LevelBadgeColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
-
-	LevelSkullSize = { 64, 64 }, 
-	LevelSkullTexture = GetMedia("icon_skull"),
-	LevelSkullDrawLayer = { "BORDER", 2 }, 
-	LevelSkullColor = { 1, 1, 1, 1 }, 
-
-	LevelDeadSkullSize = { 64, 64 }, 
-	LevelDeadSkullTexture = GetMedia("icon_skull_dead"),
-	LevelDeadSkullDrawLayer = { "BORDER", 2 }, 
-	LevelDeadSkullColor = { 1, 1, 1, 1 }, 
-
-	CastBarPlace = { "BOTTOMLEFT", 27, 27 },
-	CastBarSize = { 385, 40 },
-	CastBarOrientation = "LEFT", 
-	CastBarSetFlippedHorizontally = true, 
-	CastBarSmoothingMode = "bezier-fast-in-slow-out", 
-	CastBarSmoothingFrequency = .15,
-	CastBarTexture = nil, 
-	CastBarColor = { 1, 1, 1, .25 }, 
-	CastBarSparkMap = {
-		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
-		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 478/512, topOffset =   0/64, bottomOffset =   0/64 }, 
-		{ keyPercent = 483/512, topOffset =   0/64, bottomOffset =  -3/64 }, 
-		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
-		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
-	},
-	CastBarPostUpdate = TargetFrame_CastBarPostUpdate,
-
-	CastBarNamePlace = { "RIGHT", -27, 4 },
-	CastBarNameSize = { 250, 40 }, 
-	CastBarNameFont = GetFont(16, true),
-	CastBarNameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-	CastBarNameDrawLayer = { "OVERLAY", 1 }, 
-	CastBarNameJustifyH = "RIGHT", 
-	CastBarNameJustifyV = "MIDDLE",
-
-	CastBarValuePlace = { "LEFT", 27, 4 },
-	CastBarValueDrawLayer = { "OVERLAY", 1 },
-	CastBarValueJustifyH = "CENTER",
-	CastBarValueJustifyV = "MIDDLE",
-	CastBarValueFont = GetFont(18, true),
-	CastBarValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-
-	AuraProperties = {
-		growthX = "LEFT", 
-		growthY = "DOWN", 
-		spacingH = 6, 
-		spacingV = 6, 
-		auraSize = 40, auraWidth = nil, auraHeight = nil, 
-		maxVisible = 14, maxBuffs = nil, maxDebuffs = nil, 
-		filter = nil, filterBuffs = "HELPFUL", filterDebuffs = "HARMFUL", 
-		func = nil, funcBuffs = GetAuraFilterFunc("target"), funcDebuffs = GetAuraFilterFunc("target"), 
-		debuffsFirst = true, 
-		disableMouse = false, 
-		showSpirals = false, 
-		showDurations = true, 
-		showLongDurations = true,
-		tooltipDefaultPosition = false, 
-		tooltipPoint = "TOPRIGHT",
-		tooltipAnchor = nil,
-		tooltipRelPoint = "BOTTOMRIGHT",
-		tooltipOffsetX = -8,
-		tooltipOffsetY = -16
-	},
-	AuraFrameSize = { 40*7 + 6*(7 -1), 40 },
-	AuraFramePlace = { "TOPRIGHT", -(27 + 10), -(27 + 40 + 20) },
-	AuraIconPlace = { "CENTER", 0, 0 },
-	AuraIconSize = { 40 - 6, 40 - 6 },
-	AuraIconTexCoord = { 5/64, 59/64, 5/64, 59/64 }, -- aura icon tex coords
-	AuraCountPlace = { "BOTTOMRIGHT", 9, -6 },
-	AuraCountFont = GetFont(14, true),
-	AuraCountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
-	AuraTimePlace = { "TOPLEFT", -6, 6 }, -- { "CENTER", 0, 0 },
-	AuraTimeFont = GetFont(14, true),
-	AuraBorderFramePlace = { "CENTER", 0, 0 }, 
-	AuraBorderFrameSize = { 40 + 14, 40 + 14 },
 	AuraBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 16 },
 	AuraBorderBackdropColor = { 0, 0, 0, 0 },
 	AuraBorderBackdropBorderColor = { Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3 }, 
-
-	NamePlace = { "TOPRIGHT", -40, 18 },
-	NameSize = { 250, 18 },
-	NameFont = GetFont(18, true),
-	NameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .75 },
-	NameDrawLayer = { "OVERLAY", 1 }, 
-	NameJustifyH = "RIGHT", 
-	NameJustifyV = "TOP",
-
-	BossHealthPlace = { "TOPRIGHT", -27, -27 }, 
-	BossHealthSize = { 533, 40 },
-	BossHealthTexture = GetMedia("hp_boss_bar"),
-	BossHealthSparkMap = {
-		top = {
-			{ keyPercent =    0/1024, offset = -24/64 }, 
-			{ keyPercent =   13/1024, offset =   0/64 }, 
-			{ keyPercent = 1018/1024, offset =   0/64 }, 
-			{ keyPercent = 1024/1024, offset = -10/64 }
-		},
-		bottom = {
-			{ keyPercent =    0/1024, offset = -39/64 }, 
-			{ keyPercent =   13/1024, offset = -16/64 }, 
-			{ keyPercent =  949/1024, offset = -16/64 }, 
-			{ keyPercent =  977/1024, offset =  -1/64 }, 
-			{ keyPercent =  984/1024, offset =  -2/64 }, 
-			{ keyPercent = 1024/1024, offset = -52/64 }
-		}
+	AuraBorderFramePlace = { "CENTER", 0, 0 }, 
+	AuraBorderFrameSize = { 40 + 14, 40 + 14 },
+	AuraCountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
+	AuraCountFont = GetFont(14, true),
+	AuraCountPlace = { "BOTTOMRIGHT", 9, -6 },
+	AuraFramePlace = { "TOPRIGHT", -(27 + 10), -(27 + 40 + 20) },
+	AuraFrameSize = { 40*7 + 6*(7 -1), 40 },
+	AuraIconPlace = { "CENTER", 0, 0 },
+	AuraIconSize = { 40 - 6, 40 - 6 },
+	AuraIconTexCoord = { 5/64, 59/64, 5/64, 59/64 }, 
+	AuraProperties = {
+		auraHeight = nil, 
+		auraSize = 40, 
+		auraWidth = nil, 
+		debuffsFirst = true, 
+		disableMouse = false, 
+		filter = nil, 
+		filterBuffs = "HELPFUL", 
+		filterDebuffs = "HARMFUL", 
+		func = nil, 
+		funcBuffs = GetAuraFilterFunc("target"), 
+		funcDebuffs = GetAuraFilterFunc("target"), 
+		growthX = "LEFT", 
+		growthY = "DOWN", 
+		maxBuffs = nil, 
+		maxDebuffs = nil, 
+		maxVisible = 14, 
+		showDurations = true, 
+		showLongDurations = true,
+		showSpirals = false, 
+		spacingH = 6, 
+		spacingV = 6, 
+		tooltipAnchor = nil,
+		tooltipDefaultPosition = false, 
+		tooltipOffsetX = -8,
+		tooltipOffsetY = -16,
+		tooltipPoint = "TOPRIGHT",
+		tooltipRelPoint = "BOTTOMRIGHT"
 	},
-	BossHealthValueVisible = true, 
-	BossHealthPercentVisible = true, 
-	BossHealthBackdropPlace = { "CENTER", -.5, 1 }, 
-	BossHealthBackdropSize = { 694, 190 }, 
-	BossHealthBackdropTexture = GetMedia("hp_boss_case"),
-	BossHealthBackdropColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
-	BossPowerForegroundTexture = GetMedia("pw_crystal_case"),
-	BossPowerForegroundColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
+	AuraTimeFont = GetFont(14, true),
+	AuraTimePlace = { "TOPLEFT", -6, 6 }, 
 	BossCastPlace = { "TOPRIGHT", -27, -27 }, 
 	BossCastSize = { 533, 40 },
-	BossCastTexture = GetMedia("hp_boss_bar"),
 	BossCastSparkMap = {
 		top = {
 			{ keyPercent =    0/1024, offset = -24/64 }, 
@@ -3345,144 +3124,76 @@ Layouts.UnitFrameTarget = {
 			{ keyPercent = 1024/1024, offset = -52/64 }
 		}
 	},
-	BossPortraitForegroundTexture = GetMedia("portrait_frame_hi"),
-	BossPortraitForegroundColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
-
-	SeasonedHealthPlace = { "TOPRIGHT", -27, -27 }, 
-	SeasonedHealthSize = { 385, 40 },
-	SeasonedHealthTexture = GetMedia("hp_cap_bar"),
-	SeasonedHealthSparkMap = {
-		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
-		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 478/512, topOffset =   0/64, bottomOffset =   0/64 }, 
-		{ keyPercent = 483/512, topOffset =   0/64, bottomOffset =  -3/64 }, 
-		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
-		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
-	},
-	SeasonedHealthValueVisible = true, 
-	SeasonedHealthPercentVisible = true, 
-	SeasonedHealthBackdropPlace = { "CENTER", -1, .5 }, 
-	SeasonedHealthBackdropSize = { 716, 188 },
-	SeasonedHealthBackdropTexture = GetMedia("hp_cap_case"),
-	SeasonedHealthBackdropColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
-	SeasonedPowerForegroundTexture = GetMedia("pw_crystal_case"),
-	SeasonedPowerForegroundColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
-	SeasonedCastPlace = { "TOPRIGHT", -27, -27 }, 
-	SeasonedCastSize = { 385, 40 },
-	SeasonedCastTexture = GetMedia("hp_cap_bar"),
-	SeasonedCastSparkMap = {
-		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
-		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 478/512, topOffset =   0/64, bottomOffset =   0/64 }, 
-		{ keyPercent = 483/512, topOffset =   0/64, bottomOffset =  -3/64 }, 
-		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
-		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
-	},
-	SeasonedPortraitForegroundTexture = GetMedia("portrait_frame_hi"),
-	SeasonedPortraitForegroundColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
-	
-	HardenedLevel = 40,
-	HardenedHealthPlace = { "TOPRIGHT", -27, -27 }, 
-	HardenedHealthSize = { 385, 37 },
-	HardenedHealthTexture = GetMedia("hp_lowmid_bar"),
-	HardenedHealthSparkMap = {
-		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
-		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 478/512, topOffset =   0/64, bottomOffset =   0/64 }, 
-		{ keyPercent = 483/512, topOffset =   0/64, bottomOffset =  -3/64 }, 
-		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
-		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
-	},
-	HardenedHealthValueVisible = true, 
-	HardenedHealthPercentVisible = true, 
-	HardenedHealthBackdropPlace = { "CENTER", -1, -.5 }, 
-	HardenedHealthBackdropSize = { 716, 188 }, 
-	HardenedHealthBackdropTexture = GetMedia("hp_mid_case"),
-	HardenedHealthBackdropColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
-	HardenedPowerForegroundTexture = GetMedia("pw_crystal_case"),
-	HardenedPowerForegroundColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
-	HardenedCastPlace = { "TOPRIGHT", -27, -27 }, 
-	HardenedCastSize = { 385, 37 },
-	HardenedCastTexture = GetMedia("hp_lowmid_bar"),
-	HardenedCastSparkMap = {
-		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
-		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 478/512, topOffset =   0/64, bottomOffset =   0/64 }, 
-		{ keyPercent = 483/512, topOffset =   0/64, bottomOffset =  -3/64 }, 
-		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
-		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
-	},
-	HardenedPortraitForegroundTexture = GetMedia("portrait_frame_hi"),
-	HardenedPortraitForegroundColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
-
-	NoviceHealthPlace = { "TOPRIGHT", -27, -27 }, 
-	NoviceHealthSize = { 385, 37 },
-	NoviceHealthTexture = GetMedia("hp_lowmid_bar"),
-	NoviceHealthSparkMap = {
-		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
-		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 478/512, topOffset =   0/64, bottomOffset =   0/64 }, 
-		{ keyPercent = 483/512, topOffset =   0/64, bottomOffset =  -3/64 }, 
-		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
-		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
-	},
-	NoviceHealthValueVisible = true, 
-	NoviceHealthPercentVisible = true, 
-	NoviceHealthBackdropPlace = { "CENTER", -1, -.5 }, 
-	NoviceHealthBackdropSize = { 716, 188 }, 
-	NoviceHealthBackdropTexture = GetMedia("hp_low_case"),
-	NoviceHealthBackdropColor = { Colors.ui.wood[1], Colors.ui.wood[2], Colors.ui.wood[3] },
-	NovicePowerForegroundTexture = GetMedia("pw_crystal_case_low"),
-	NovicePowerForegroundColor = { Colors.ui.wood[1], Colors.ui.wood[2], Colors.ui.wood[3] },
-	NoviceCastPlace = { "TOPRIGHT", -27, -27 }, 
-	NoviceCastSize = { 385, 37 },
-	NoviceCastTexture = GetMedia("hp_lowmid_bar"),
-	NoviceCastSparkMap = {
-		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
-		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 478/512, topOffset =   0/64, bottomOffset =   0/64 }, 
-		{ keyPercent = 483/512, topOffset =   0/64, bottomOffset =  -3/64 }, 
-		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
-		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
-	},
-	NovicePortraitForegroundTexture = GetMedia("portrait_frame_lo"),
-	NovicePortraitForegroundColor = { Colors.ui.wood[1], Colors.ui.wood[2], Colors.ui.wood[3] }, 
-
-	CritterHealthPlace = { "TOPRIGHT", -24, -24 }, 
-	CritterHealthSize = { 40, 36 },
-	CritterHealthTexture = GetMedia("hp_critter_bar"),
-	CritterHealthSparkMap = {
+	BossCastTexture = GetMedia("hp_boss_bar"),
+	BossHealthBackdropColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
+	BossHealthBackdropPlace = { "CENTER", -.5, 1 }, 
+	BossHealthBackdropSize = { 694, 190 }, 
+	BossHealthBackdropTexture = GetMedia("hp_boss_case"),
+	BossHealthPercentVisible = true, 
+	BossHealthPlace = { "TOPRIGHT", -27, -27 }, 
+	BossHealthSize = { 533, 40 },
+	BossHealthSparkMap = {
 		top = {
-			{ keyPercent =  0/64, offset = -30/64 }, 
-			{ keyPercent = 14/64, offset =  -1/64 }, 
-			{ keyPercent = 49/64, offset =  -1/64 }, 
-			{ keyPercent = 64/64, offset = -34/64 }
+			{ keyPercent =    0/1024, offset = -24/64 }, 
+			{ keyPercent =   13/1024, offset =   0/64 }, 
+			{ keyPercent = 1018/1024, offset =   0/64 }, 
+			{ keyPercent = 1024/1024, offset = -10/64 }
 		},
 		bottom = {
-			{ keyPercent =  0/64, offset = -30/64 }, 
-			{ keyPercent = 15/64, offset =   0/64 }, 
-			{ keyPercent = 32/64, offset =  -1/64 }, 
-			{ keyPercent = 50/64, offset =  -4/64 }, 
-			{ keyPercent = 64/64, offset = -27/64 }
+			{ keyPercent =    0/1024, offset = -39/64 }, 
+			{ keyPercent =   13/1024, offset = -16/64 }, 
+			{ keyPercent =  949/1024, offset = -16/64 }, 
+			{ keyPercent =  977/1024, offset =  -1/64 }, 
+			{ keyPercent =  984/1024, offset =  -2/64 }, 
+			{ keyPercent = 1024/1024, offset = -52/64 }
 		}
 	},
-	CritterHealthValueVisible = false, 
-	CritterHealthPercentVisible = false, 
-	CritterHealthBackdropPlace = { "CENTER", 0, 1 }, 
-	CritterHealthBackdropSize = { 98,96 }, 
-	CritterHealthBackdropTexture = GetMedia("hp_critter_case"),
-	CritterHealthBackdropColor = { Colors.ui.wood[1], Colors.ui.wood[2], Colors.ui.wood[3] },
-	CritterPowerForegroundTexture = GetMedia("pw_crystal_case_low"),
-	CritterPowerForegroundColor = { Colors.ui.wood[1], Colors.ui.wood[2], Colors.ui.wood[3] },
+	BossHealthTexture = GetMedia("hp_boss_bar"),
+	BossHealthValueVisible = true, 
+	BossPortraitForegroundColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
+	BossPortraitForegroundTexture = GetMedia("portrait_frame_hi"),
+	BossPowerForegroundColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
+	BossPowerForegroundTexture = GetMedia("pw_crystal_case"),
+	CastBarColor = { 1, 1, 1, .25 }, 
+	CastBarNameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+	CastBarNameDrawLayer = { "OVERLAY", 1 }, 
+	CastBarNameFont = GetFont(16, true),
+	CastBarNameJustifyH = "RIGHT", 
+	CastBarNameJustifyV = "MIDDLE",
+	CastBarNamePlace = { "RIGHT", -27, 4 },
+	CastBarNameSize = { 250, 40 }, 
+	CastBarOrientation = "LEFT", 
+	CastBarPlace = { "BOTTOMLEFT", 27, 27 },
+	CastBarPostUpdate = TargetFrame_CastBarPostUpdate,
+	CastBarSetFlippedHorizontally = true, 
+	CastBarSmoothingMode = "bezier-fast-in-slow-out", 
+	CastBarSmoothingFrequency = .15,
+	CastBarSize = { 385, 40 },
+	CastBarSparkMap = {
+		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
+		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
+		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
+		{ keyPercent = 478/512, topOffset =   0/64, bottomOffset =   0/64 }, 
+		{ keyPercent = 483/512, topOffset =   0/64, bottomOffset =  -3/64 }, 
+		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
+		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
+	},
+	CastBarValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+	CastBarValueDrawLayer = { "OVERLAY", 1 },
+	CastBarValueFont = GetFont(18, true),
+	CastBarValueJustifyH = "CENTER",
+	CastBarValueJustifyV = "MIDDLE",
+	CastBarValuePlace = { "LEFT", 27, 4 },
+	ClassificationColor = { 1, 1, 1 },
+	ClassificationIndicatorAllianceTexture = GetMedia("icon_badges_alliance"),
+	ClassificationIndicatorBossTexture = GetMedia("icon_badges_boss"),
+	ClassificationIndicatorEliteTexture = GetMedia("icon_classification_elite"),
+	ClassificationIndicatorHordeTexture = GetMedia("icon_badges_horde"),
+	ClassificationIndicatorRareTexture = GetMedia("icon_classification_rare"),
+	ClassificationPlace = { "BOTTOMRIGHT", 72, -43 },
+	ClassificationSize = { 84, 84 },
 	CritterCastPlace = { "TOPRIGHT", -24, -24 },
 	CritterCastSize = { 40, 36 },
-	CritterCastTexture = GetMedia("hp_critter_bar"),
 	CritterCastSparkMap = {
 		top = {
 			{ keyPercent =  0/64, offset = -30/64 }, 
@@ -3498,9 +3209,270 @@ Layouts.UnitFrameTarget = {
 			{ keyPercent = 64/64, offset = -27/64 }
 		}
 	},
-	CritterPortraitForegroundTexture = GetMedia("portrait_frame_lo"),
+	CritterCastTexture = GetMedia("hp_critter_bar"),
+	CritterHealthBackdropColor = { Colors.ui.wood[1], Colors.ui.wood[2], Colors.ui.wood[3] },
+	CritterHealthBackdropPlace = { "CENTER", 0, 1 }, 
+	CritterHealthBackdropSize = { 98,96 }, 
+	CritterHealthBackdropTexture = GetMedia("hp_critter_case"),
+	CritterHealthPercentVisible = false, 
+	CritterHealthPlace = { "TOPRIGHT", -24, -24 }, 
+	CritterHealthSize = { 40, 36 },
+	CritterHealthSparkMap = {
+		top = {
+			{ keyPercent =  0/64, offset = -30/64 }, 
+			{ keyPercent = 14/64, offset =  -1/64 }, 
+			{ keyPercent = 49/64, offset =  -1/64 }, 
+			{ keyPercent = 64/64, offset = -34/64 }
+		},
+		bottom = {
+			{ keyPercent =  0/64, offset = -30/64 }, 
+			{ keyPercent = 15/64, offset =   0/64 }, 
+			{ keyPercent = 32/64, offset =  -1/64 }, 
+			{ keyPercent = 50/64, offset =  -4/64 }, 
+			{ keyPercent = 64/64, offset = -27/64 }
+		}
+	},
+	CritterHealthTexture = GetMedia("hp_critter_bar"),
+	CritterHealthValueVisible = false, 
 	CritterPortraitForegroundColor = { Colors.ui.wood[1], Colors.ui.wood[2], Colors.ui.wood[3] }, 
-
+	CritterPortraitForegroundTexture = GetMedia("portrait_frame_lo"),
+	CritterPowerForegroundColor = { Colors.ui.wood[1], Colors.ui.wood[2], Colors.ui.wood[3] },
+	CritterPowerForegroundTexture = GetMedia("pw_crystal_case_low"),
+	HardenedCastPlace = { "TOPRIGHT", -27, -27 }, 
+	HardenedCastSize = { 385, 37 },
+	HardenedCastSparkMap = {
+		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
+		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
+		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
+		{ keyPercent = 478/512, topOffset =   0/64, bottomOffset =   0/64 }, 
+		{ keyPercent = 483/512, topOffset =   0/64, bottomOffset =  -3/64 }, 
+		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
+		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
+	},
+	HardenedCastTexture = GetMedia("hp_lowmid_bar"),
+	HardenedHealthBackdropColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
+	HardenedHealthBackdropPlace = { "CENTER", -1, -.5 }, 
+	HardenedHealthBackdropSize = { 716, 188 }, 
+	HardenedHealthBackdropTexture = GetMedia("hp_mid_case"),
+	HardenedHealthPercentVisible = true, 
+	HardenedHealthPlace = { "TOPRIGHT", -27, -27 }, 
+	HardenedHealthSize = { 385, 37 },
+	HardenedHealthSparkMap = {
+		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
+		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
+		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
+		{ keyPercent = 478/512, topOffset =   0/64, bottomOffset =   0/64 }, 
+		{ keyPercent = 483/512, topOffset =   0/64, bottomOffset =  -3/64 }, 
+		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
+		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
+	},
+	HardenedHealthTexture = GetMedia("hp_lowmid_bar"),
+	HardenedHealthValueVisible = true, 
+	HardenedLevel = 40,
+	HardenedPortraitForegroundColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
+	HardenedPortraitForegroundTexture = GetMedia("portrait_frame_hi"),
+	HardenedPowerForegroundColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
+	HardenedPowerForegroundTexture = GetMedia("pw_crystal_case"),
+	HealthBackdropDrawLayer = { "BACKGROUND", -1 },
+	HealthBackdropPlace = { "CENTER", 1, -.5 },
+	HealthBackdropSize = { 716, 188 },
+	HealthBackdropTexCoord = { 1, 0, 0, 1 }, 
+	HealthBarOrientation = "LEFT",
+	HealthBarSetFlippedHorizontally = true, 
+	HealthColorClass = true, -- color players by class 
+	HealthColorDisconnected = true, -- color disconnected units
+	HealthColorHealth = false, -- color anything else in the default health color
+	HealthColorReaction = true, -- color NPCs by their reaction standing with us
+	HealthColorTapped = true, -- color tap denied units 
+	HealthFrequentUpdates = true, -- listen to frequent health events for more accurate updates
+	HealthPercentColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+	HealthPercentDrawLayer = { "OVERLAY", 1 },
+	HealthPercentFont = GetFont(18, true),
+	HealthPercentJustifyH = "LEFT",
+	HealthPercentJustifyV = "MIDDLE",
+	HealthPercentPlace = { "LEFT", 27, 4 },
+	HealthPlace = { "TOPRIGHT", 27, 27 },
+	HealthSmoothingFrequency = .2, -- speed of the smoothing method
+	HealthSmoothingMode = "bezier-fast-in-slow-out", 
+	HealthValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+	HealthValueFont = GetFont(18, true),
+	HealthValueDrawLayer = { "OVERLAY", 1 },
+	HealthValueJustifyH = "RIGHT", 
+	HealthValueJustifyV = "MIDDLE", 
+	HealthValuePlace = { "RIGHT", -27, 4 },
+	HitRectInsets = { 0, -80, -30, 0 }, 
+	LevelAlpha = .7,
+	LevelBadgeColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
+	LevelBadgeDrawLayer = { "BACKGROUND", 1 },
+	LevelBadgeSize = { 86, 86 }, 
+	LevelBadgeTexture = GetMedia("point_plate"),
+	LevelColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3] },
+	LevelDeadSkullColor = { 1, 1, 1, 1 }, 
+	LevelDeadSkullDrawLayer = { "BORDER", 2 }, 
+	LevelDeadSkullSize = { 64, 64 }, 
+	LevelDeadSkullTexture = GetMedia("icon_skull_dead"),
+	LevelDrawLayer = { "BORDER", 1 },
+	LevelFont = GetFont(13, true),
+	LevelHideCapped = true, 
+	LevelHideFloored = true, 
+	LevelJustifyH = "CENTER",
+	LevelJustifyV = "MIDDLE", 
+	LevelPlace = { "CENTER", 298, -15 }, 
+	LevelSkullColor = { 1, 1, 1, 1 }, 
+	LevelSkullDrawLayer = { "BORDER", 2 }, 
+	LevelSkullSize = { 64, 64 }, 
+	LevelSkullTexture = GetMedia("icon_skull"),
+	LevelVisibilityFilter = TargetFrame_LevelVisibilityFilter,
+	LoveTargetIndicatorPetByEnemyColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
+	LoveTargetIndicatorPetByEnemyPlace = { "TOPRIGHT", -10 + 50/2 + 4, 12 + 50/2 -4 },
+	LoveTargetIndicatorPetByEnemySize = { 48,48 },
+	LoveTargetIndicatorPetByEnemyTexture = GetMedia("icon-heart-blue"),
+	LoveTargetIndicatorYouByEnemyColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
+	LoveTargetIndicatorYouByEnemyPlace = { "TOPRIGHT", -10 + 50/2 + 4, 12 + 50/2 -4 },
+	LoveTargetIndicatorYouByEnemySize = { 48,48 },
+	LoveTargetIndicatorYouByEnemyTexture = GetMedia("icon-heart-red"),
+	LoveTargetIndicatorYouByFriendColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
+	LoveTargetIndicatorYouByFriendPlace = { "TOPRIGHT", -10 + 50/2 + 4, 12 + 50/2 -4 },
+	LoveTargetIndicatorYouByFriendSize = { 48,48 },
+	LoveTargetIndicatorYouByFriendTexture = GetMedia("icon-heart-green"),
+	NameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .75 },
+	NameDrawLayer = { "OVERLAY", 1 }, 
+	NameFont = GetFont(18, true),
+	NameJustifyH = "RIGHT", 
+	NameJustifyV = "TOP",
+	NamePlace = { "TOPRIGHT", -40, 18 },
+	NameSize = { 250, 18 },
+	NoviceCastPlace = { "TOPRIGHT", -27, -27 }, 
+	NoviceCastSize = { 385, 37 },
+	NoviceCastSparkMap = {
+		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
+		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
+		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
+		{ keyPercent = 478/512, topOffset =   0/64, bottomOffset =   0/64 }, 
+		{ keyPercent = 483/512, topOffset =   0/64, bottomOffset =  -3/64 }, 
+		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
+		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
+	},
+	NoviceCastTexture = GetMedia("hp_lowmid_bar"),
+	NoviceHealthBackdropColor = { Colors.ui.wood[1], Colors.ui.wood[2], Colors.ui.wood[3] },
+	NoviceHealthBackdropPlace = { "CENTER", -1, -.5 }, 
+	NoviceHealthBackdropSize = { 716, 188 }, 
+	NoviceHealthBackdropTexture = GetMedia("hp_low_case"),
+	NoviceHealthPercentVisible = true, 
+	NoviceHealthPlace = { "TOPRIGHT", -27, -27 }, 
+	NoviceHealthSize = { 385, 37 },
+	NoviceHealthSparkMap = {
+		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
+		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
+		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
+		{ keyPercent = 478/512, topOffset =   0/64, bottomOffset =   0/64 }, 
+		{ keyPercent = 483/512, topOffset =   0/64, bottomOffset =  -3/64 }, 
+		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
+		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
+	},
+	NoviceHealthTexture = GetMedia("hp_lowmid_bar"),
+	NoviceHealthValueVisible = true, 
+	NovicePortraitForegroundColor = { Colors.ui.wood[1], Colors.ui.wood[2], Colors.ui.wood[3] }, 
+	NovicePortraitForegroundTexture = GetMedia("portrait_frame_lo"),
+	NovicePowerForegroundColor = { Colors.ui.wood[1], Colors.ui.wood[2], Colors.ui.wood[3] },
+	NovicePowerForegroundTexture = GetMedia("pw_crystal_case_low"),
+	Place = { "TOPRIGHT", -153, -79 },
+	PortraitAlpha = .85, 
+	PortraitBackgroundColor = { .5, .5, .5 }, 
+	PortraitBackgroundDrawLayer = { "BACKGROUND", 0 }, 
+	PortraitBackgroundPlace = { "TOPRIGHT", 116, 55 },
+	PortraitBackgroundSize = { 173, 173 },
+	PortraitBackgroundTexture = GetMedia("party_portrait_back"), 
+	PortraitDistanceScale = 1,
+	PortraitForegroundDrawLayer = { "BACKGROUND", 0 },
+	PortraitForegroundPlace = { "TOPRIGHT", 123, 61 },
+	PortraitForegroundSize = { 187, 187 },
+	PortraitPlace = { "TOPRIGHT", 73, 8 },
+	PortraitPositionX = 0,
+	PortraitPositionY = 0,
+	PortraitPositionZ = 0,
+	PortraitRotation = 0, 
+	PortraitShowFallback2D = true, 
+	PortraitShadeDrawLayer = { "BACKGROUND", -1 },
+	PortraitShadePlace = { "TOPRIGHT", 83, 21 },
+	PortraitShadeSize = { 107, 107 }, 
+	PortraitShadeTexture = GetMedia("shade_circle"),
+	PortraitSize = { 85, 85 }, 
+	PowerBackgroundColor = { 1, 1, 1, .85 },
+	PowerBackgroundDrawLayer = { "BACKGROUND", -2 },
+	PowerBackgroundPlace = { "CENTER", 0, 0 },
+	PowerBackgroundSize = { 68 +12, 68 +12 },
+	PowerBackgroundTexCoord = { 0, 1, 0, 1 },
+	PowerBackgroundTexture = GetMedia("power_crystal_small_back"),
+	PowerBarOrientation = "UP",
+	PowerBarSetFlippedHorizontally = false, 
+	PowerBarSmoothingFrequency = .5,
+	PowerBarSmoothingMode = "bezier-fast-in-slow-out",
+	PowerBarSparkTexture = GetMedia("blank"),
+	PowerBarTexCoord = { 0, 1, 0, 1 },
+	PowerBarTexture = GetMedia("power_crystal_small_front"),
+	PowerColorSuffix = "_CRYSTAL", 
+	PowerHideWhenDead = true,  
+	PowerHideWhenEmpty = true,
+	PowerIgnoredResource = nil,
+	PowerPlace ={ "CENTER", 439/2 + 79 +2, -6+ 93/2 -62 + 4 +6 }, 
+	PowerSize = { 68 +12, 68 +12 },
+	PowerShowAlternate = true, 
+	PowerValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+	PowerValueDrawLayer = { "OVERLAY", 1 },
+	PowerValueFont = GetFont(14, true),
+	PowerValueJustifyH = "CENTER", 
+	PowerValueJustifyV = "MIDDLE", 
+	PowerValuePlace = { "CENTER", 0, -5 },
+	PowerValueOverride = TargetFrame_PowerValueOverride,
+	PowerVisibilityFilter = TargetFrame_PowerVisibilityFilter,
+	SeasonedCastPlace = { "TOPRIGHT", -27, -27 }, 
+	SeasonedCastSize = { 385, 40 },
+	SeasonedCastSparkMap = {
+		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
+		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
+		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
+		{ keyPercent = 478/512, topOffset =   0/64, bottomOffset =   0/64 }, 
+		{ keyPercent = 483/512, topOffset =   0/64, bottomOffset =  -3/64 }, 
+		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
+		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
+	},
+	SeasonedCastTexture = GetMedia("hp_cap_bar"),
+	SeasonedHealthBackdropColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
+	SeasonedHealthBackdropPlace = { "CENTER", -1, .5 }, 
+	SeasonedHealthBackdropSize = { 716, 188 },
+	SeasonedHealthBackdropTexture = GetMedia("hp_cap_case"),
+	SeasonedHealthPercentVisible = true, 
+	SeasonedHealthPlace = { "TOPRIGHT", -27, -27 }, 
+	SeasonedHealthSize = { 385, 40 },
+	SeasonedHealthSparkMap = {
+		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
+		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
+		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
+		{ keyPercent = 478/512, topOffset =   0/64, bottomOffset =   0/64 }, 
+		{ keyPercent = 483/512, topOffset =   0/64, bottomOffset =  -3/64 }, 
+		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
+		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
+	},
+	SeasonedHealthTexture = GetMedia("hp_cap_bar"),
+	SeasonedHealthValueVisible = true, 
+	SeasonedPortraitForegroundColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
+	SeasonedPortraitForegroundTexture = GetMedia("portrait_frame_hi"),
+	SeasonedPowerForegroundColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
+	SeasonedPowerForegroundTexture = GetMedia("pw_crystal_case"),
+	Size = { 439, 93 },
+	TargetIndicatorPetByEnemyColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
+	TargetIndicatorPetByEnemyPlace = { "TOPRIGHT", -10 + 96/2, 12 + 48/2 },
+	TargetIndicatorPetByEnemySize = { 96, 48 },
+	TargetIndicatorPetByEnemyTexture = GetMedia("icon_target_blue"),
+	TargetIndicatorYouByEnemyColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
+	TargetIndicatorYouByEnemyPlace = { "TOPRIGHT", -10 + 96/2, 12 + 48/2 },
+	TargetIndicatorYouByEnemySize = { 96, 48 },
+	TargetIndicatorYouByEnemyTexture = GetMedia("icon_target_red"),
+	TargetIndicatorYouByFriendColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
+	TargetIndicatorYouByFriendPlace = { "TOPRIGHT", -10 + 96/2, 12 + 48/2 },
+	TargetIndicatorYouByFriendSize = { 96, 48 },
+	TargetIndicatorYouByFriendTexture = GetMedia("icon_target_green")
 }
 
 ------------------------------------------------
