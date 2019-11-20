@@ -368,25 +368,25 @@ end
 -- Callbacks
 -----------------------------------------------------------
 local PostCreateAuraButton = function(element, button)
-	local Layout = element._owner.layout
+	local layout = element._owner.layout
 
-	button.Icon:SetTexCoord(unpack(Layout.AuraIconTexCoord))
-	button.Icon:SetSize(unpack(Layout.AuraIconSize))
+	button.Icon:SetTexCoord(unpack(layout.AuraIconTexCoord))
+	button.Icon:SetSize(unpack(layout.AuraIconSize))
 	button.Icon:ClearAllPoints()
-	button.Icon:SetPoint(unpack(Layout.AuraIconPlace))
+	button.Icon:SetPoint(unpack(layout.AuraIconPlace))
 
-	button.Count:SetFontObject(Layout.AuraCountFont)
+	button.Count:SetFontObject(layout.AuraCountFont)
 	button.Count:SetJustifyH("CENTER")
 	button.Count:SetJustifyV("MIDDLE")
 	button.Count:ClearAllPoints()
-	button.Count:SetPoint(unpack(Layout.AuraCountPlace))
-	if Layout.AuraCountColor then 
-		button.Count:SetTextColor(unpack(Layout.AuraCountColor))
+	button.Count:SetPoint(unpack(layout.AuraCountPlace))
+	if layout.AuraCountColor then 
+		button.Count:SetTextColor(unpack(layout.AuraCountColor))
 	end 
 
-	button.Time:SetFontObject(Layout.AuraTimeFont)
+	button.Time:SetFontObject(layout.AuraTimeFont)
 	button.Time:ClearAllPoints()
-	button.Time:SetPoint(unpack(Layout.AuraTimePlace))
+	button.Time:SetPoint(unpack(layout.AuraTimePlace))
 
 	local layer, level = button.Icon:GetDrawLayer()
 
@@ -404,41 +404,41 @@ local PostCreateAuraButton = function(element, button)
 	button.Border = button.Border or button.Overlay:CreateFrame("Frame", nil, button.Overlay)
 	button.Border:SetFrameLevel(button.Overlay:GetFrameLevel() - 5)
 	button.Border:ClearAllPoints()
-	button.Border:SetPoint(unpack(Layout.AuraBorderFramePlace))
-	button.Border:SetSize(unpack(Layout.AuraBorderFrameSize))
-	button.Border:SetBackdrop(Layout.AuraBorderBackdrop)
-	button.Border:SetBackdropColor(unpack(Layout.AuraBorderBackdropColor))
-	button.Border:SetBackdropBorderColor(unpack(Layout.AuraBorderBackdropBorderColor))
+	button.Border:SetPoint(unpack(layout.AuraBorderFramePlace))
+	button.Border:SetSize(unpack(layout.AuraBorderFrameSize))
+	button.Border:SetBackdrop(layout.AuraBorderBackdrop)
+	button.Border:SetBackdropColor(unpack(layout.AuraBorderBackdropColor))
+	button.Border:SetBackdropBorderColor(unpack(layout.AuraBorderBackdropBorderColor))
 end
 
 local PostUpdateAuraButton = function(element, button)
 	local colors = element._owner.colors
-	local Layout = element._owner.layout
+	local layout = element._owner.layout
 	if UnitIsFriend("player", button.unit) then 
 		if button.isBuff then 
-			local color = Layout.AuraBorderBackdropBorderColor
+			local color = layout.AuraBorderBackdropBorderColor
 			if color then 
 				button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
 			end 
 		else
-			local color = colors.debuff[button.debuffType or "none"] or Layout.AuraBorderBackdropBorderColor
+			local color = colors.debuff[button.debuffType or "none"] or layout.AuraBorderBackdropBorderColor
 			if color then 
 				button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
 			end 
 		end
 	else 
 		if button.isStealable then 
-			local color = colors.power.ARCANE_CHARGES or Layout.AuraBorderBackdropBorderColor
+			local color = colors.power.ARCANE_CHARGES or layout.AuraBorderBackdropBorderColor
 			if color then 
 				button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
 			end 
 		elseif button.isBuff then 
-			local color = colors.quest.green or Layout.AuraBorderBackdropBorderColor
+			local color = colors.quest.green or layout.AuraBorderBackdropBorderColor
 			if color then 
 				button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
 			end 
 		else
-			local color = colors.debuff[button.debuffType or "none"] or Layout.AuraBorderBackdropBorderColor
+			local color = colors.debuff[button.debuffType or "none"] or layout.AuraBorderBackdropBorderColor
 			if color then 
 				button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
 			end 
@@ -520,7 +520,7 @@ end
 
 local Player_OverridePowerColor = function(element, unit, min, max, powerType, powerID, disconnected, dead, tapped)
 	local self = element._owner
-	local Layout = self.layout
+	local layout = self.layout
 	local r, g, b
 	if disconnected then
 		r, g, b = unpack(self.colors.disconnected)
@@ -529,8 +529,8 @@ local Player_OverridePowerColor = function(element, unit, min, max, powerType, p
 	elseif tapped then
 		r, g, b = unpack(self.colors.tapped)
 	else
-		if Layout.PowerColorSuffix then 
-			r, g, b = unpack(powerType and self.colors.power[powerType .. Layout.PowerColorSuffix] or self.colors.power[powerType] or self.colors.power.UNUSED)
+		if layout.PowerColorSuffix then 
+			r, g, b = unpack(powerType and self.colors.power[powerType .. layout.PowerColorSuffix] or self.colors.power[powerType] or self.colors.power.UNUSED)
 		else 
 			r, g, b = unpack(powerType and self.colors.power[powerType] or self.colors.power.UNUSED)
 		end 
@@ -540,7 +540,7 @@ end
 
 local Player_OverrideExtraPowerColor = function(element, unit, min, max, powerType, powerID, disconnected, dead, tapped)
 	local self = element._owner
-	local Layout = self.layout
+	local layout = self.layout
 	local r, g, b
 	if disconnected then
 		r, g, b = unpack(self.colors.disconnected)
@@ -549,8 +549,8 @@ local Player_OverrideExtraPowerColor = function(element, unit, min, max, powerTy
 	elseif tapped then
 		r, g, b = unpack(self.colors.tapped)
 	else
-		if Layout.ManaColorSuffix then 
-			r, g, b = unpack(powerType and self.colors.power[powerType .. Layout.ManaColorSuffix] or self.colors.power[powerType] or self.colors.power.UNUSED)
+		if layout.ManaColorSuffix then 
+			r, g, b = unpack(powerType and self.colors.power[powerType .. layout.ManaColorSuffix] or self.colors.power[powerType] or self.colors.power.UNUSED)
 		else 
 			r, g, b = unpack(powerType and self.colors.power[powerType] or self.colors.power.UNUSED)
 		end 
@@ -743,13 +743,13 @@ end
 -- Templates
 -----------------------------------------------------------
 -- Boss
-local positionHeaderFrame = function(self, unit, id, Layout)
+local positionHeaderFrame = function(self, unit, id, layout)
 	-- Todo: iterate on this for a grid layout
 	local id = tonumber(id)
 	if id then 
-		local place = { unpack(Layout.Place) }
-		local growthX = Layout.GrowthX
-		local growthY = Layout.GrowthY
+		local place = { unpack(layout.Place) }
+		local growthX = layout.GrowthX
+		local growthY = layout.GrowthY
 
 		if (growthX and growthY) then 
 			if (type(place[#place]) == "number") then 
@@ -762,7 +762,7 @@ local positionHeaderFrame = function(self, unit, id, Layout)
 		end 
 		self:Place(unpack(place))
 	else 
-		self:Place(unpack(Layout.Place)) 
+		self:Place(unpack(layout.Place)) 
 	end
 end
 
@@ -2506,7 +2506,7 @@ end
 -- Target
 -----------------------------------------------------------
 UnitFrameTarget.OnInit = function(self)
-	self.layout = Wheel("LibDB"):GetDatabase(Core:GetPrefix()..":[UnitFrameTarget]", true)
+	self.layout = GetLayout(self:GetName())
 	self.frame = self:SpawnUnitFrame("target", "UICenter", function(frame, unit, id, _, ...)
 		return UnitStyles.StyleTargetFrame(frame, unit, id, self.layout, ...)
 	end)
