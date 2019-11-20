@@ -2244,10 +2244,6 @@ local Layouts = {}
 
 -- Addon Core
 Layouts[ADDON] = {
-	FadeInUI = true, 
-		FadeInSpeed = .75,
-		FadeInDelay = 1.5,
-
 	DisableUIWidgets = {
 		ActionBars = true, 
 		Auras = true,
@@ -2270,56 +2266,51 @@ Layouts[ADDON] = {
 		{ ID = 5, Name = "InterfaceOptionsActionBarsPanel" },
 		--{ ID = 10, Name = "CompactUnitFrameProfiles" }
 	},
-	UseMenu = true, 
-		MenuPlace = { "BOTTOMRIGHT", -41, 32 },
-		MenuSize = { 320 -10, 70 }, 
-
-		MenuToggleButtonSize = { 48, 48 }, 
-		MenuToggleButtonPlace = { "BOTTOMRIGHT", -4, 4 }, 
-		MenuToggleButtonIcon = GetMedia("config_button"), 
-		MenuToggleButtonIconPlace = { "CENTER", 0, 0 }, 
-		MenuToggleButtonIconSize = { 96, 96 }, 
-		MenuToggleButtonIconColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
-
-		MenuBorderBackdropColor = { .05, .05, .05, .85 },
-		MenuBorderBackdropBorderColor = { 1, 1, 1, 1 },
-		MenuWindow_CreateBorder = Core_Window_CreateBorder,
-		MenuWindow_OnHide = Core_Window_OnHide, 
-		MenuWindow_OnShow = Core_Window_OnShow,
-
-		MenuButtonSize = { MenuButtonW, MenuButtonH },
-		MenuButtonSpacing = 10, 
-		MenuButtonSizeMod = .75, 
-		MenuButton_PostCreate = Core_MenuButton_PostCreate, 
-		MenuButton_PostUpdate = Core_MenuButton_PostUpdate
+	FadeInDelay = 1.5,
+	FadeInSpeed = .75,
+	FadeInUI = true, 
+	MenuBorderBackdropBorderColor = { 1, 1, 1, 1 },
+	MenuBorderBackdropColor = { .05, .05, .05, .85 },
+	MenuButton_PostCreate = Core_MenuButton_PostCreate, 
+	MenuButton_PostUpdate = Core_MenuButton_PostUpdate,
+	MenuButtonSize = { MenuButtonW, MenuButtonH },
+	MenuButtonSizeMod = .75, 
+	MenuButtonSpacing = 10, 
+	MenuPlace = { "BOTTOMRIGHT", -41, 32 },
+	MenuSize = { 320 -10, 70 }, 
+	MenuToggleButtonSize = { 48, 48 }, 
+	MenuToggleButtonPlace = { "BOTTOMRIGHT", -4, 4 }, 
+	MenuToggleButtonIcon = GetMedia("config_button"), 
+	MenuToggleButtonIconPlace = { "CENTER", 0, 0 }, 
+	MenuToggleButtonIconSize = { 96, 96 }, 
+	MenuToggleButtonIconColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
+	MenuWindow_CreateBorder = Core_Window_CreateBorder,
+	MenuWindow_OnHide = Core_Window_OnHide, 
+	MenuWindow_OnShow = Core_Window_OnShow
 }
 
 -- Blizzard Chat Frames
 Layouts.BlizzardChatFrames = {
-	DefaultChatFramePlace = { "BOTTOMLEFT", 85, 350 }, -- "LEFT", 85, -60
-	DefaultChatFrameSize = { 499, 176 }, -- 519, 196
-	DefaultClampRectInsets = { -54, -54, -310, -350 },
-
 	AlternateChatFramePlace = { "TOPLEFT", 85, -64 },
-	AlternateChatFrameSize = { 499, 176 }, -- 519, 196
+	AlternateChatFrameSize = { 499, 176 }, 
 	AlternateClampRectInsets = { -54, -54, -310, -350 },
-
-	ChatFadeTime = 5, 
-	ChatVisibleTime = 15, 
-	ChatIndentedWordWrap = false, 
-
-	EditBoxHeight = 45, 
-	EditBoxOffsetH = 15, 
-	
 	ButtonFrameWidth = 48, ScrollBarWidth = 32, 
-	ButtonTextureSize = { 64, 64 }, 
+	ButtonTextureChatEmotes = GetMedia("config_button_emotes"),
 	ButtonTextureColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
-	ButtonTextureNormal = GetMedia("point_block"),
 	ButtonTextureMinimizeButton = GetMedia("icon_chat_minus"),
+	ButtonTextureNormal = GetMedia("point_block"),
 	ButtonTextureScrollUpButton = GetMedia("icon_chat_up"), 
 	ButtonTextureScrollDownButton = GetMedia("icon_chat_down"), 
 	ButtonTextureScrollToBottomButton = GetMedia("icon_chat_bottom"), 
-	ButtonTextureChatEmotes = GetMedia("config_button_emotes")
+	ButtonTextureSize = { 64, 64 },
+	ChatFadeTime = 5, 
+	ChatIndentedWordWrap = false, 
+	ChatVisibleTime = 15, 
+	DefaultChatFramePlace = { "BOTTOMLEFT", 85, 350 }, 
+	DefaultChatFrameSize = { 499, 176 }, 
+	DefaultClampRectInsets = { -54, -54, -310, -350 },
+	EditBoxHeight = 45, 
+	EditBoxOffsetH = 15
 }
 
 -- Blizzard Floaters
@@ -2330,25 +2321,25 @@ Layouts.BlizzardFloaterHUD = {
 
 -- Blizzard font replacements
 Layouts.BlizzardFonts = {
-	ChatFont = GetFont(15, true),
-	ChatBubbleFont = GetFont(10, true)
+	ChatBubbleFont = GetFont(10, true),
+	ChatFont = GetFont(15, true)
 }
 
 -- Blizzard Game Menu (Esc)
 Layouts.BlizzardGameMenu = {
-	MenuButtonSize = { MenuButtonW, MenuButtonH },
-	MenuButtonSpacing = 10, 
-	MenuButtonSizeMod = .75, 
 	MenuButton_PostCreate = Blizzard_GameMenu_Button_PostCreate,
-	MenuButton_PostUpdate = Blizzard_GameMenu_Button_PostUpdate
+	MenuButton_PostUpdate = Blizzard_GameMenu_Button_PostUpdate,
+	MenuButtonSize = { MenuButtonW, MenuButtonH },
+	MenuButtonSizeMod = .75, 
+	MenuButtonSpacing = 10
 }
 
 -- Blizzard MicroMenu
 Layouts.BlizzardMicroMenu = {
 	ButtonFont = GetFont(MenuButtonFontSize, false),
 	ButtonFontColor = { 0, 0, 0 }, 
-	ButtonFontShadowOffset = { 0, -.85 },
 	ButtonFontShadowColor = { 1, 1, 1, .5 },
+	ButtonFontShadowOffset = { 0, -.85 },
 	ConfigWindowBackdrop = {
 		bgFile = [[Interface\ChatFrame\ChatFrameBackground]],
 		edgeFile = GetMedia("tooltip_border"),
@@ -2360,31 +2351,30 @@ Layouts.BlizzardMicroMenu = {
 			right = 23 *.75 
 		}
 	},
-
-	MenuButtonSize = { MenuButtonW, MenuButtonH },
-	MenuButtonSpacing = 10, 
-	MenuButtonSizeMod = .75, 
-	MenuButtonTitleColor = { Colors.title[1], Colors.title[2], Colors.title[3] },
-	MenuButtonNormalColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] }, 
 	MenuButton_PostCreate = BlizzardMicroMenu_Button_PostCreate,
 	MenuButton_PostUpdate = BlizzardMicroMenu_Button_PostUpdate, 
+	MenuButtonNormalColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] }, 
+	MenuButtonSize = { MenuButtonW, MenuButtonH },
+	MenuButtonSizeMod = .75, 
+	MenuButtonSpacing = 10, 
+	MenuButtonTitleColor = { Colors.title[1], Colors.title[2], Colors.title[3] },
 	MenuWindow_CreateBorder = Core_Window_CreateBorder
 }
 
 -- Blizzard Instance Countdown Timers
 Layouts.BlizzardMirrorTimers = {
-	Size = { 111, 14 }, Anchor = Wheel("LibFrame"):GetFrame(),
-	AnchorPoint = "TOP",
+	Anchor = Wheel("LibFrame"):GetFrame(),
 	AnchorOffsetX = 0,
 	AnchorOffsetY = -370, 
-	Growth = -50, 
-
-	BlankTexture = GetMedia("blank"), 
-
+	AnchorPoint = "TOP",
+	BackdropColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
+	BackdropDrawLayer = { "BACKGROUND", -5 },
+	BackdropPlace = { "CENTER", 1, -2 }, 
+	BackdropSize = { 193,93 }, 
+	BackdropTexture = GetMedia("cast_back"),
+	BarColor = { Colors.quest.red[1], Colors.quest.red[2], Colors.quest.red[3] }, 
 	BarPlace = { "CENTER", 0, 0 },
 	BarSize = { 111, 12 }, 
-	BarTexture = GetMedia("cast_bar"), 
-	BarColor = { Colors.quest.red[1], Colors.quest.red[2], Colors.quest.red[3] }, 
 	BarSparkMap = {
 		top = {
 			{ keyPercent =   0/128, offset = -16/32 }, 
@@ -2399,31 +2389,27 @@ Layouts.BlizzardMirrorTimers = {
 			{ keyPercent = 128/128, offset = -16/32 }
 		}
 	},
-
-	BarValuePlace = { "CENTER", 0, 0 }, 
-	BarValueFont = GetFont(14, true),
+	BarTexture = GetMedia("cast_bar"), 
 	BarValueColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .7 },
-
-	BackdropPlace = { "CENTER", 1, -2 }, 
-	BackdropSize = { 193,93 }, 
-	BackdropTexture = GetMedia("cast_back"),
-	BackdropDrawLayer = { "BACKGROUND", -5 },
-	BackdropColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }
-
+	BarValueFont = GetFont(14, true),
+	BarValuePlace = { "CENTER", 0, 0 }, 
+	BlankTexture = GetMedia("blank"), 
+	Growth = -50, 
+	Size = { 111, 14 }
 }
 
 -- Blizzard Objectives Tracker
 Layouts.BlizzardObjectivesTracker = {
 	FontObject = GetFont(13, true),
 	FontObjectTitle = GetFont(15, true),
-	HideInCombat = false, 
 	HideInBossFights = true,
+	HideInCombat = false, 
 	MaxHeight = 1080 - (260 + 380),
 	Place = { "BOTTOMRIGHT", -60, 380 },
 	Scale = 1.0, 
 	SpaceBottom = 380, 
 	SpaceTop = 260, 
-	Width = 255, -- 280 classic default
+	Width = 255 -- 280 is classic default
 }
 
 -- Blizzard Popup Styling
@@ -2434,14 +2420,14 @@ Layouts.BlizzardPopupStyling = {
 
 -- Blizzard Tooltips
 Layouts.BlizzardTooltips = {
-	TooltipStatusBarTexture = GetMedia("statusbar_normal"), 
 	TooltipBackdrop = {
 		bgFile = [[Interface\ChatFrame\ChatFrameBackground]], tile = false, 
 		edgeFile = GetMedia("tooltip_border_blizzcompatible"), edgeSize = 32, 
 		insets = { top = 2.5, bottom = 2.5, left = 2.5, right = 2.5 }
 	},
+	TooltipBackdropBorderColor = { 1, 1, 1, 1 },
 	TooltipBackdropColor = { .05, .05, .05, .85 },
-	TooltipBackdropBorderColor = { 1, 1, 1, 1 }
+	TooltipStatusBarTexture = GetMedia("statusbar_normal")
 }
 
 -- Blizzard World Map
@@ -2449,155 +2435,113 @@ Layouts.BlizzardWorldMap = {}
 
 -- ActionBars
 Layouts.ActionBarMain = {
-
-	-- Button Tooltips
-	-------------------------------------------------------
-	TooltipColorNameAsSpellWithUse = true, -- color item name as a spell (not by rarity) when it has a Use effect
-	TooltipHideItemLevelWithUse = true, -- hide item level when it has a Use effect 
-	TooltipHideBindsWithUse = true, -- hide item bind status when it has a Use effect
-	TooltipHideEquipTypeWithUse = false, -- hide item equip location and item type with Use effect
-	TooltipHideUniqueWithUse = true, -- hide item unique status when it has a Use effect
-	TooltipHideStatsWithUse = true, -- hide item stats when it has a Use effect
-
-	-- Button Layout
-	-------------------------------------------------------
-	-- Generic
-	ButtonSize = { 64, 64 },
-	ButtonHitRects = { -4, -4, -4, -4 },
-	MaskTexture = GetMedia("actionbutton_circular_mask"),
-
-	-- Icon
-	IconSize = { 44, 44 },
-	IconPlace = { "CENTER", 0, 0 },
-
-	-- Button Pushed Icon Overlay
-	PushedSize = { 44, 44 },
-	PushedPlace = { "CENTER", 0, 0 },
-	PushedColor = { 1, 1, 1, .15 },
-	PushedDrawLayer = { "ARTWORK", 1 },
-	PushedBlendMode = "ADD",
-
-	-- Checked (abilities waiting to happen)
-	CheckedSize = { 44, 44 },
-	CheckedPlace = { "CENTER", 0, 0 },
-	CheckedColor = { .9, .8, .1, .3 },
-	CheckedDrawLayer = { "ARTWORK", 2 },
-	CheckedBlendMode = "ADD",
-
-	-- Auto-Attack Flash
-	FlashSize = { 44, 44 },
-	FlashPlace = { "CENTER", 0, 0 },
-	FlashColor = { 1, 0, 0, .25 },
-	FlashTexture = [[Interface\ChatFrame\ChatFrameBackground]],
-	FlashDrawLayer = { "ARTWORK", 2 },
-
-	-- Cooldown Count Number
-	CooldownCountPlace = { "CENTER", 1, 0 },
-	CooldownCountJustifyH = "CENTER",
-	CooldownCountJustifyV = "MIDDLE",
-	CooldownCountFont = GetFont(16, true),
-	CooldownCountShadowOffset = { 0, 0 },
-	CooldownCountShadowColor = { 0, 0, 0, 1 },
-	CooldownCountColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .85 },
-
-	-- Cooldown 
-	CooldownSize = { 44, 44 },
-	CooldownPlace = { "CENTER", 0, 0 },
-	CooldownSwipeTexture = GetMedia("actionbutton_circular_mask"),
-	CooldownBlingTexture = GetMedia("blank"),
-	CooldownSwipeColor = { 0, 0, 0, .75 },
-	CooldownBlingColor = { 0, 0, 0 , 0 },
-	ShowCooldownSwipe = true,
-	ShowCooldownBling = true,
-
-	-- Charge Cooldown 
-	ChargeCooldownSize = { 44, 44 },
-	ChargeCooldownPlace = { "CENTER", 0, 0 },
-	ChargeCooldownSwipeColor = { 0, 0, 0, .5 },
-	ChargeCooldownBlingColor = { 0, 0, 0, 0 },
-	ChargeCooldownSwipeTexture = GetMedia("actionbutton_circular_mask"),
-	ChargeCooldownBlingTexture = GetMedia("blank"),
-	ShowChargeCooldownSwipe = true,
-	ShowChargeCooldownBling = false,
-
-	-- Charge Count / Stack Size Text
-	CountPlace = { "BOTTOMRIGHT", -3, 3 },
-	CountJustifyH = "CENTER",
-	CountJustifyV = "BOTTOM",
-	CountFont = GetFont(18, true),
-	CountShadowOffset = { 0, 0 },
-	CountShadowColor = { 0, 0, 0, 1 },
-	CountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
-	CountMaxDisplayed = 99,
-	CountPostUpdate = ActionButton_StackCount_PostUpdate, 
-
-	-- Keybind Text
-	KeybindPlace = { "TOPLEFT", 5, -5 },
-	KeybindJustifyH = "CENTER",
-	KeybindJustifyV = "BOTTOM",
-	KeybindFont = GetFont(15, true),
-	KeybindShadowOffset = { 0, 0 },
-	KeybindShadowColor = { 0, 0, 0, 1 },
-	KeybindColor = { Colors.quest.gray[1], Colors.quest.gray[2], Colors.quest.gray[3], .75 },
-
-	-- Spell AutoCast
-	SpellAutoCastPlace = { "CENTER", 0, 0 },
-	SpellAutoCastSize = { 64/(122/256), 64/(122/256) },
-	SpellAutoCastAntsTexture = GetMedia("actionbutton-ants-small"),
-	SpellAutoCastAntsColor = { Colors.cast[1], Colors.cast[2], Colors.cast[3] },
-	SpellAutoCastGlowTexture = GetMedia("actionbutton-ants-small-glow"),
-	SpellAutoCastGlowColor = { Colors.cast[1], Colors.cast[2], Colors.cast[3] },
-
-	-- Backdrop 
+	BackdropDrawLayer = { "BACKGROUND", 1 },
 	BackdropPlace = { "CENTER", 0, 0 },
 	BackdropSize = { 64/(122/256), 64/(122/256) },
 	BackdropTexture = GetMedia("actionbutton-backdrop"),
-	BackdropDrawLayer = { "BACKGROUND", 1 },
-
-	-- Border 
+	BorderColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3], 1 },
+	BorderDrawLayer = { "BORDER", 1 },
 	BorderPlace = { "CENTER", 0, 0 },
 	BorderSize = { 64/(122/256), 64/(122/256) },
 	BorderTexture = GetMedia("actionbutton-border"),
-	BorderDrawLayer = { "BORDER", 1 },
-	BorderColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3], 1 },
-
-	-- Gloss
+	ButtonHitRects = { -4, -4, -4, -4 },
+	ButtonSize = { 64, 64 },
+	ChargeCooldownBlingColor = { 0, 0, 0, 0 },
+	ChargeCooldownBlingTexture = GetMedia("blank"),
+	ChargeCooldownPlace = { "CENTER", 0, 0 },
+	ChargeCooldownSize = { 44, 44 },
+	ChargeCooldownSwipeColor = { 0, 0, 0, .5 },
+	ChargeCooldownSwipeTexture = GetMedia("actionbutton_circular_mask"),
+	CheckedBlendMode = "ADD",
+	CheckedColor = { .9, .8, .1, .3 },
+	CheckedDrawLayer = { "ARTWORK", 2 },
+	CheckedPlace = { "CENTER", 0, 0 },
+	CheckedSize = { 44, 44 },
+	CooldownBlingColor = { 0, 0, 0 , 0 },
+	CooldownBlingTexture = GetMedia("blank"),
+	CooldownCountColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .85 },
+	CooldownCountFont = GetFont(16, true),
+	CooldownCountJustifyH = "CENTER",
+	CooldownCountJustifyV = "MIDDLE",
+	CooldownCountPlace = { "CENTER", 1, 0 },
+	CooldownCountShadowOffset = { 0, 0 },
+	CooldownCountShadowColor = { 0, 0, 0, 1 },
+	CooldownPlace = { "CENTER", 0, 0 },
+	CooldownSize = { 44, 44 },
+	CooldownSwipeColor = { 0, 0, 0, .75 },
+	CooldownSwipeTexture = GetMedia("actionbutton_circular_mask"),
+	CountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
+	CountFont = GetFont(18, true),
+	CountJustifyH = "CENTER",
+	CountJustifyV = "BOTTOM",
+	CountMaxDisplayed = 99,
+	CountPlace = { "BOTTOMRIGHT", -3, 3 },
+	CountPostUpdate = ActionButton_StackCount_PostUpdate, 
+	CountShadowColor = { 0, 0, 0, 1 },
+	CountShadowOffset = { 0, 0 },
+	ExitButtonPlace = { "CENTER", "Minimap", "CENTER", -math_cos(45*math_pi/180) * (213/2 + 10), math_sin(45*math_pi/180) * (213/2 + 10) }, 
+	ExitButtonSize = { 32, 32 },
+	ExitButtonTexturePath = GetMedia("icon_exit_flight"),
+	ExitButtonTexturePlace = { "CENTER", 0, 0 }, 
+	ExitButtonTextureSize = { 80, 80 }, 
+	FlashColor = { 1, 0, 0, .25 },
+	FlashDrawLayer = { "ARTWORK", 2 },
+	FlashPlace = { "CENTER", 0, 0 },
+	FlashSize = { 44, 44 },
+	FlashTexture = [[Interface\ChatFrame\ChatFrameBackground]],
+	GlowBlendMode = "ADD",
+	GlowColor = { 1, 1, 1, .5 },
+	GlowDrawLayer = { "ARTWORK", 1 },
 	GlowPlace = { "CENTER", 0, 0 },
 	GlowSize = { 44/(122/256),44/(122/256) },
 	GlowTexture = GetMedia("actionbutton-glow-white"),
-	GlowDrawLayer = { "ARTWORK", 1 },
-	GlowBlendMode = "ADD",
-	GlowColor = { 1, 1, 1, .5 },
-
-	ExitButtonPlace = { "CENTER", "Minimap", "CENTER", -math_cos(45*math_pi/180) * (213/2 + 10), math_sin(45*math_pi/180) * (213/2 + 10) }, 
-	ExitButtonSize = { 32, 32 },
-	ExitButtonTexturePlace = { "CENTER", 0, 0 }, 
-	ExitButtonTextureSize = { 80, 80 }, 
-	ExitButtonTexturePath = GetMedia("icon_exit_flight")
+	IconPlace = { "CENTER", 0, 0 },
+	IconSize = { 44, 44 },
+	KeybindColor = { Colors.quest.gray[1], Colors.quest.gray[2], Colors.quest.gray[3], .75 },
+	KeybindFont = GetFont(15, true),
+	KeybindJustifyH = "CENTER",
+	KeybindJustifyV = "BOTTOM",
+	KeybindPlace = { "TOPLEFT", 5, -5 },
+	KeybindShadowColor = { 0, 0, 0, 1 },
+	KeybindShadowOffset = { 0, 0 },
+	MaskTexture = GetMedia("actionbutton_circular_mask"),
+	PushedBlendMode = "ADD",
+	PushedColor = { 1, 1, 1, .15 },
+	PushedDrawLayer = { "ARTWORK", 1 },
+	PushedPlace = { "CENTER", 0, 0 },
+	PushedSize = { 44, 44 },
+	ShowChargeCooldownBling = false,
+	ShowChargeCooldownSwipe = true,
+	ShowCooldownSwipe = true,
+	ShowCooldownBling = true,
+	SpellAutoCastAntsColor = { Colors.cast[1], Colors.cast[2], Colors.cast[3] },
+	SpellAutoCastAntsTexture = GetMedia("actionbutton-ants-small"),
+	SpellAutoCastGlowColor = { Colors.cast[1], Colors.cast[2], Colors.cast[3] },
+	SpellAutoCastGlowTexture = GetMedia("actionbutton-ants-small-glow"),
+	SpellAutoCastPlace = { "CENTER", 0, 0 },
+	SpellAutoCastSize = { 64/(122/256), 64/(122/256) },
+	TooltipColorNameAsSpellWithUse = true, -- color item name as a spell (not by rarity) when it has a Use effect
+	TooltipHideBindsWithUse = true, -- hide item bind status when it has a Use effect
+	TooltipHideEquipTypeWithUse = false, -- hide item equip location and item type with Use effect
+	TooltipHideItemLevelWithUse = true, -- hide item level when it has a Use effect 
+	TooltipHideStatsWithUse = true, -- hide item stats when it has a Use effect
+	TooltipHideUniqueWithUse = true -- hide item unique status when it has a Use effect
 }
 
 -- Bind Mode
 Layouts.Bindings = {
-
-	-- Binding Dialogue
-	Place = { "TOP", "UICenter", "TOP", 0, -100 }, 
-	Size = { 520, 180 },
-
-	-- General border creation method
-	MenuWindow_CreateBorder = BindMode_MenuWindow_CreateBorder,
-
-	-- Binding Dialogue Buttons
-	MenuButtonSize = { MenuButtonW, MenuButtonH },
-	MenuButtonSpacing = 10, 
-	MenuButtonSizeMod = .75, 
+	BindButton_PostCreate = BindMode_BindButton_PostCreate,
+	BindButton_PostEnter = BindMode_BindButton_PostEnter,
+	BindButton_PostLeave = BindMode_BindButton_PostLeave,
+	BindButton_PostUpdate = BindMode_BindButton_PostUpdate,
 	MenuButton_PostCreate = BindMode_MenuButton_PostCreate,
 	MenuButton_PostUpdate = BindMode_MenuButton_PostUpdate, 
-
-	-- ActionButton Bind Overlays
-	BindButton_PostCreate = BindMode_BindButton_PostCreate, 
-	BindButton_PostUpdate = BindMode_BindButton_PostUpdate,
-	BindButton_PostEnter = BindMode_BindButton_PostEnter,
-	BindButton_PostLeave = BindMode_BindButton_PostLeave
+	MenuButtonSize = { MenuButtonW, MenuButtonH },
+	MenuButtonSizeMod = .75, 
+	MenuButtonSpacing = 10, 
+	MenuWindow_CreateBorder = BindMode_MenuWindow_CreateBorder,
+	Place = { "TOP", "UICenter", "TOP", 0, -100 }, 
+	Size = { 520, 180 }
 }
 
 -- Floaters. Durability only currently. 
@@ -2607,10 +2551,22 @@ Layouts.FloaterHUD = {
 
 -- Group Leader Tools
 Layouts.GroupTools = {
-	MenuPlace = { "TOPLEFT", "UICenter", "TOPLEFT", 22, -42 },
+	ConvertButtonPlace = { "TOP", 0, -360 + 140 }, 
+	ConvertButtonSize = { 300*.75, 50*.75 },
+	ConvertButtonTextColor = { 0, 0, 0 }, 
+	ConvertButtonTextFont = GetFont(14, false), 
+	ConvertButtonTextShadowColor = { 1, 1, 1, .5 }, 
+	ConvertButtonTextShadowOffset = { 0, -.85 }, 
+	ConvertButtonTextureNormal = GetMedia("menu_button_disabled"), 
+	ConvertButtonTextureSize = { 1024 *1/3 *.75, 256 *1/3 *.75 },
+	MemberCountNumberColor = { Colors.title[1], Colors.title[2], Colors.title[3] },
+	MemberCountNumberFont = GetFont(14, true),
+	MemberCountNumberJustifyH = "CENTER",
+	MemberCountNumberJustifyV = "MIDDLE", 
+	MemberCountNumberPlace = { "TOP", 0, -20 }, 
 	MenuAlternatePlace = { "BOTTOMLEFT", "UICenter", "BOTTOMLEFT", 22, 350 },
-	MenuSize = { 300*.75 +30, 410 }, 
-
+	MenuPlace = { "TOPLEFT", "UICenter", "TOPLEFT", 22, -42 },
+	MenuSize = { 300*.75 +30, 410 - 140 }, 
 	MenuToggleButtonSize = { 48, 48 }, 
 	MenuToggleButtonPlace = { "TOPLEFT", "UICenter", "TOPLEFT", -18, -40 }, 
 	MenuToggleButtonAlternatePlace = { "BOTTOMLEFT", "UICenter", "BOTTOMLEFT", -18, 348 }, 
@@ -2618,90 +2574,28 @@ Layouts.GroupTools = {
 	MenuToggleButtonIconPlace = { "CENTER", 0, 0 }, 
 	MenuToggleButtonIconSize = { 64*.75, 128*.75 }, 
 	MenuToggleButtonIconColor = { 1, 1, 1 }, 
-
-	UseMemberCount = true, 
-		MemberCountNumberPlace = { "TOP", 0, -20 }, 
-		MemberCountNumberJustifyH = "CENTER",
-		MemberCountNumberJustifyV = "MIDDLE", 
-		MemberCountNumberFont = GetFont(14, true),
-		MemberCountNumberColor = { Colors.title[1], Colors.title[2], Colors.title[3] },
-
-	UseRoleCount = true, 
-		RoleCountTankPlace = { "TOP", -70, -100 }, 
-		RoleCountTankFont = GetFont(14, true),
-		RoleCountTankColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] },
-		RoleCountTankTexturePlace = { "TOP", -70, -44 },
-		RoleCountTankTextureSize = { 64, 64 },
-		RoleCountTankTexture = GetMedia("grouprole-icons-tank"),
-		
-		RoleCountHealerPlace = { "TOP", 0, -100 }, 
-		RoleCountHealerFont = GetFont(14, true),
-		RoleCountHealerColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] },
-		RoleCountHealerTexturePlace = { "TOP", 0, -44 },
-		RoleCountHealerTextureSize = { 64, 64 },
-		RoleCountHealerTexture = GetMedia("grouprole-icons-heal"),
-
-		RoleCountDPSPlace = { "TOP", 70, -100 }, 
-		RoleCountDPSFont = GetFont(14, true),
-		RoleCountDPSColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] },
-		RoleCountDPSTexturePlace = { "TOP", 70, -44 },
-		RoleCountDPSTextureSize = { 64, 64 },
-		RoleCountDPSTexture = GetMedia("grouprole-icons-dps"),
-
-	UseRaidTargetIcons = true, 
-		RaidTargetIcon1Place = { "TOP", -80, -140 },
-		RaidTargetIcon2Place = { "TOP", -28, -140 },
-		RaidTargetIcon3Place = { "TOP",  28, -140 },
-		RaidTargetIcon4Place = { "TOP",  80, -140 },
-		RaidTargetIcon5Place = { "TOP", -80, -190 },
-		RaidTargetIcon6Place = { "TOP", -28, -190 },
-		RaidTargetIcon7Place = { "TOP",  28, -190 },
-		RaidTargetIcon8Place = { "TOP",  80, -190 },
-		RaidTargetIconsSize = { 48, 48 }, 
-		RaidRoleRaidTargetTexture = GetMedia("raid_target_icons"),
-		RaidRoleCancelTexture = nil,
-
-	UseRolePollButton = true, 
-		RolePollButtonPlace = { "TOP", 0, -260 }, 
-		RolePollButtonSize = { 300*.75, 50*.75 },
-		RolePollButtonTextFont = GetFont(14, false), 
-		RolePollButtonTextColor = { 0, 0, 0 }, 
-		RolePollButtonTextShadowColor = { 1, 1, 1, .5 }, 
-		RolePollButtonTextShadowOffset = { 0, -.85 }, 
-		RolePollButtonTextureSize = { 1024 *1/3 *.75, 256 *1/3 *.75 },
-		RolePollButtonTextureNormal = GetMedia("menu_button_disabled"), 
-	
-	UseReadyCheckButton = true, 
-		ReadyCheckButtonPlace = { "TOP", -30, -310 }, 
-		ReadyCheckButtonSize = { 300*.75 - 80, 50*.75 },
-		ReadyCheckButtonTextFont = GetFont(14, false), 
-		ReadyCheckButtonTextColor = { 0, 0, 0 }, 
-		ReadyCheckButtonTextShadowColor = { 1, 1, 1, .5 }, 
-		ReadyCheckButtonTextShadowOffset = { 0, -.85 }, 
-		ReadyCheckButtonTextureSize = { 1024 *1/3 *.75, 256 *1/3 *.75 },
-		ReadyCheckButtonTextureNormal = GetMedia("menu_button_smaller"), 
-		
-	UseWorldMarkerFlag = true, 
-		WorldMarkerFlagPlace = { "TOP", 88, -310 }, 
-		WorldMarkerFlagSize = { 70*.75, 50*.75 },
-		WorldMarkerFlagContentSize = { 32, 32 }, 
-		WorldMarkerFlagBackdropSize = { 512 *1/3 *.75, 256 *1/3 *.75 },
-		WorldMarkerFlagBackdropTexture = GetMedia("menu_button_tiny"), 
-
-	UseConvertButton = true, 
-		ConvertButtonPlace = { "TOP", 0, -360 }, 
-		ConvertButtonSize = { 300*.75, 50*.75 },
-		ConvertButtonTextFont = GetFont(14, false), 
-		ConvertButtonTextColor = { 0, 0, 0 }, 
-		ConvertButtonTextShadowColor = { 1, 1, 1, .5 }, 
-		ConvertButtonTextShadowOffset = { 0, -.85 }, 
-		ConvertButtonTextureSize = { 1024 *1/3 *.75, 256 *1/3 *.75 },
-		ConvertButtonTextureNormal = GetMedia("menu_button_disabled"), 
-
 	MenuWindow_CreateBorder = GroupTools_Window_CreateBorder,
-	PostCreateButton = GroupTools_Button_PostCreate, 
 	OnButtonDisable = GroupTools_Button_OnDisable, 
-	OnButtonEnable = GroupTools_Button_OnEnable
+	OnButtonEnable = GroupTools_Button_OnEnable,
+	PostCreateButton = GroupTools_Button_PostCreate, 
+	RaidRoleRaidTargetTexture = GetMedia("raid_target_icons"),
+	RaidTargetIcon1Place = { "TOP", -80, -140 + 86 },
+	RaidTargetIcon2Place = { "TOP", -28, -140 + 86 },
+	RaidTargetIcon3Place = { "TOP",  28, -140 + 86 },
+	RaidTargetIcon4Place = { "TOP",  80, -140 + 86 },
+	RaidTargetIcon5Place = { "TOP", -80, -190 + 86 },
+	RaidTargetIcon6Place = { "TOP", -28, -190 + 86 },
+	RaidTargetIcon7Place = { "TOP",  28, -190 + 86 },
+	RaidTargetIcon8Place = { "TOP",  80, -190 + 86 },
+	RaidTargetIconsSize = { 48, 48 }, 
+	ReadyCheckButtonPlace = { "TOP", -30, -310 + 140 }, 
+	ReadyCheckButtonSize = { 300*.75 - 80, 50*.75 },
+	ReadyCheckButtonTextColor = { 0, 0, 0 }, 
+	ReadyCheckButtonTextFont = GetFont(14, false), 
+	ReadyCheckButtonTextShadowColor = { 1, 1, 1, .5 }, 
+	ReadyCheckButtonTextShadowOffset = { 0, -.85 }, 
+	ReadyCheckButtonTextureNormal = GetMedia("menu_button_smaller"), 
+	ReadyCheckButtonTextureSize = { 1024 *1/3 *.75, 256 *1/3 *.75 },
 }
 
 -- Minimap
