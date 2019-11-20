@@ -1,4 +1,4 @@
-local LibTooltip = Wheel:Set("LibTooltip", 68)
+local LibTooltip = Wheel:Set("LibTooltip", 69)
 if (not LibTooltip) then
 	return
 end
@@ -1423,6 +1423,9 @@ Tooltip.SetUnit = function(self, unit)
 							displayName = FFA_TEXTURE .. " " .. displayName
 						end
 					end
+				end
+				if (data.pvpRankName) then 
+					displayName = displayName .. colors.quest.gray.colorCode.. " (" .. data.pvpRankName .. ")|r"
 				end
 			else 
 				if data.isBoss then

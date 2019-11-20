@@ -1,4 +1,4 @@
-local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 43)
+local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 44)
 if (not LibTooltipScanner) then	
 	return
 end
@@ -42,7 +42,6 @@ local GetSpellInfo = _G.GetSpellInfo
 local GetTrackingTexture = _G.GetTrackingTexture
 local HasAction = _G.HasAction
 local IsActionInRange = _G.IsActionInRange
-local UnitBattlePetLevel = _G.UnitBattlePetLevel
 local UnitClass = _G.UnitClass 
 local UnitClassification = _G.UnitClassification
 local UnitCreatureFamily = _G.UnitCreatureFamily
@@ -50,11 +49,9 @@ local UnitCreatureType = _G.UnitCreatureType
 local UnitExists = _G.UnitExists
 local UnitEffectiveLevel = _G.UnitEffectiveLevel
 local UnitFactionGroup = _G.UnitFactionGroup
-local UnitIsBattlePetCompanion = _G.UnitIsBattlePetCompanion
 local UnitIsDead = _G.UnitIsDead
 local UnitIsGhost = _G.UnitIsGhost
 local UnitIsPlayer = _G.UnitIsPlayer
-local UnitIsWildBattlePet = _G.UnitIsWildBattlePet
 local UnitLevel = _G.UnitLevel
 local UnitName = _G.UnitName
 local UnitRace = _G.UnitRace
@@ -288,16 +285,6 @@ local ClearScanner = function()
 	Scanner:Hide()
 	Scanner.owner = UIParent
 	Scanner:SetOwner(UIParent, "ANCHOR_NONE")
-end
-
--- Check if a given itemLink is a caged battle pet
-local GetBattlePetInfo = function(itemLink)
-	if (not string_find(itemLink, "battlepet")) then
-		return
-	end
-	local data, name = string_match(itemLink, "|H(.-)|h(.-)|h")
-	local  _, _, level, rarity = string_match(data, "(%w+):(%d+):(%d+):(%d+)")
-	return true, level or 1, tonumber(rarity) or 0
 end
 
 -- Library API
@@ -777,7 +764,6 @@ LibTooltipScanner.GetTooltipDataForActionItem = function(self, actionSlot, tbl)
 		local itemName, _itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, iconFileDataID, itemSellPrice, itemClassID, itemSubClassID, bindType, expacID, itemSetID, isCraftingReagent = GetItemInfo(itemLink)
 
 		local effectiveLevel, previewLevel, origLevel = GetDetailedItemLevelInfo(itemLink)
-		local isBattlePet, battlePetLevel, battlePetRarity = GetBattlePetInfo and GetBattlePetInfo(itemLink)
 
 		local itemStats = GetItemStats(itemLink)
 
@@ -799,7 +785,6 @@ LibTooltipScanner.GetTooltipDataForActionItem = function(self, actionSlot, tbl)
 		tbl.itemSubClassID = itemSubClassID
 		tbl.itemBindType = bindType 
 		tbl.itemSetID = itemSetID
-		tbl.isBattlePet = isBattlePet
 		tbl.isCraftingReagent = isCraftingReagent
 		tbl.itemArmor = itemStats and tonumber(itemStats.RESISTANCE0_NAME)
 		tbl.itemStamina = itemStats and tonumber(itemStats.ITEM_MOD_STRENGTH_SHORT)
@@ -1515,8 +1500,6 @@ LibTooltipScanner.GetTooltipDataForUnit = function(self, unit, tbl)
 
 		-- Retrieve generic data
 		local isPlayer = UnitIsPlayer(unit)
-		local isBattlePet = UnitIsBattlePetCompanion and UnitIsBattlePetCompanion(unit)
-		local isWildPet = UnitIsWildBattlePet and UnitIsWildBattlePet(unit)
 		local unitLevel = UnitLevel(unit)
 		local unitName, unitRealm = UnitName(unit)
 		local isDead = UnitIsDead(unit)
@@ -1542,6 +1525,7 @@ LibTooltipScanner.GetTooltipDataForUnit = function(self, unit, tbl)
 			local isPVP = UnitIsPVP(unit)
 			local isFFA = UnitIsPVPFreeForAll(unit)
 			local pvpName = UnitPVPName(unit)
+			local pvpRankName, pvpRankNumber = GetPVPRankInfo(UnitPVPRank(unit))
 
 			tbl.playerFaction = englishFaction
 			tbl.englishFaction = englishFaction
@@ -1562,37 +1546,9 @@ LibTooltipScanner.GetTooltipDataForUnit = function(self, unit, tbl)
 			tbl.isPVP = isPVP
 			tbl.isFFA = isFFA
 			tbl.pvpName = pvpName
+			tbl.pvpRankName = pvpRankName
+			tbl.pvpRankNumber = pvpRankNumber
 	
-		-- Vanity-, wild- and battle pets
-		elseif (isWildPet or isBattlePet) then 
-
-			local battlePetLevel = UnitBattlePetLevel(unit)
-			local reaction = UnitReaction(unit, "player")
-
-			tbl.isPet = true
-			tbl.level = battlePetLevel
-			tbl.effectiveLevel = battlePetLevel
-
-			local line = _G[ScannerName.."TextLeft1"]
-			if line then 
-				msg = line:GetText()
-				if msg then 
-					msg = string_lower(msg)
-					if string_find(msg, "^|cff") then 
-						local color = string_sub(msg, 3, 10)
-						if color then 
-							for i,colors in ipairs(ITEM_QUALITY_COLORS) do 
-								if (colors.color:GenerateHexColor() == color) then 
-									tbl.petRarity = i + 1
-									tbl.rarity = i
-									break
-								end 
-							end 
-						end 
-					end 
-				end 
-			end 
-
 		-- NPCs
 		else 
 
@@ -1710,13 +1666,11 @@ LibTooltipScanner.GetTooltipDataForItemLink = function(self, itemLink, tbl)
 
 		-- Get some blizzard info about the current item
 		local effectiveLevel, previewLevel, origLevel = GetDetailedItemLevelInfo(itemLink)
-		local isBattlePet, battlePetLevel, battlePetRarity = GetBattlePetInfo(itemLink)
 
 		tbl.itemID = tonumber(string_match(itemLink, "item:(%d+)"))
 		tbl.itemString = string_match(itemLink, "item[%-?%d:]+")
 		tbl.itemName = itemName
 		tbl.itemRarity = itemRarity
-		tbl.isBattlePet = isBattlePet
 		tbl.itemSellPrice = itemSellPrice
 		tbl.itemStackCount = itemStackCount
 
