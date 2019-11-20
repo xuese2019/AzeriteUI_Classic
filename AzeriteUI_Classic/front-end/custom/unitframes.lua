@@ -2403,12 +2403,12 @@ UnitStyles.StyleTargetFrame = function(self, unit, id, layout, ...)
 	self:RegisterMessage("GP_UNITFRAME_TOT_HIDDEN", Target_PostUpdateName)
 end
 
-UnitStyles.StyleToTFrame = function(self, unit, id, Layout, ...)
-	return StyleSmallFrame(self, unit, id, Layout, ...)
+UnitStyles.StyleToTFrame = function(self, unit, id, layout, ...)
+	return StyleSmallFrame(self, unit, id, layout, ...)
 end
 
-UnitStyles.StylePetFrame = function(self, unit, id, Layout, ...)
-	return StyleSmallFrame(self, unit, id, Layout, ...)
+UnitStyles.StylePetFrame = function(self, unit, id, layout, ...)
+	return StyleSmallFrame(self, unit, id, layout, ...)
 end
 
 -----------------------------------------------------------
