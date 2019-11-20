@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.72-RC] 2019-11-20
+### Added
+- Added in group tools with raid icon assignment, ready check and raid/party conversion buttons.
+- Added player PvP titles to unit tooltips.
+
 ## [1.0.71-RC] 2019-11-20
 ### Fixed
 - The blizzard durability frame should once again be hidden, preventing double up when our own is shown. 
