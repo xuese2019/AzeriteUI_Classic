@@ -2253,6 +2253,7 @@ Layouts[ADDON] = {
 		Auras = true,
 		CaptureBar = true,
 		CastBars = true,
+		Durability = true,
 		Minimap = true,
 		--QuestWatchFrame = true, 
 		UnitFramePlayer = true,
