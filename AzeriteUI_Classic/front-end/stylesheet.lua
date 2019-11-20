@@ -927,6 +927,91 @@ local PlayerFrame_CastBarPostUpdate = function(element, unit)
 	end 
 end
 
+local PlayerHUD_ClassPowerPostCreatePoint = function(element, id, point)
+	point.case = point:CreateTexture()
+	point.case:SetDrawLayer("BACKGROUND", -2)
+	point.case:SetVertexColor(211/255, 200/255, 169/255)
+
+	point.slotTexture:SetPoint("TOPLEFT", -1.5, 1.5)
+	point.slotTexture:SetPoint("BOTTOMRIGHT", 1.5, -1.5)
+	point.slotTexture:SetVertexColor(130/255 *.3, 133/255 *.3, 130/255 *.3, 2/3)
+
+	point:SetOrientation("UP") -- set the bars to grow from bottom to top.
+	point:SetSparkTexture(GetMedia("blank")) -- this will be too tricky to rotate and map
+	
+end
+
+local PlayerHUD_ClassPowerPostUpdate = function(element, unit, min, max, newMax, powerType)
+	local style
+	if (powerType == "COMBO_POINTS") then 
+		style = "ComboPoints"
+	end 
+	if (style ~= element.powerStyle) then 
+		local posMod = element.flipSide and -1 or 1
+		if (style == "ComboPoints") then
+			local point1, point2, point3, point4, point5 = element[1], element[2], element[3], element[4], element[5]
+
+			point1:SetPoint("CENTER", -203*posMod,-137)
+			point1:SetSize(13,13)
+			point1:SetStatusBarTexture(GetMedia("point_crystal"))
+			point1:GetStatusBarTexture():SetRotation(degreesToRadians(6*posMod))
+			point1.slotTexture:SetTexture(GetMedia("point_crystal"))
+			point1.slotTexture:SetRotation(degreesToRadians(6*posMod))
+			point1.case:SetPoint("CENTER", 0, 0)
+			point1.case:SetSize(58,58)
+			point1.case:SetRotation(degreesToRadians(6*posMod))
+			point1.case:SetTexture(GetMedia("point_plate"))
+
+			point2:SetPoint("CENTER", -221*posMod,-111)
+			point2:SetSize(13,13)
+			point2:SetStatusBarTexture(GetMedia("point_crystal"))
+			point2:GetStatusBarTexture():SetRotation(degreesToRadians(5*posMod))
+			point2.slotTexture:SetTexture(GetMedia("point_crystal"))
+			point2.slotTexture:SetRotation(degreesToRadians(5*posMod))
+			point2.case:SetPoint("CENTER", 0, 0)
+			point2.case:SetSize(60,60)
+			point2.case:SetRotation(degreesToRadians(5*posMod))
+			point2.case:SetTexture(GetMedia("point_plate"))
+
+			point3:SetPoint("CENTER", -231*posMod,-79)
+			point3:SetSize(13,13)
+			point3:SetStatusBarTexture(GetMedia("point_crystal"))
+			point3:GetStatusBarTexture():SetRotation(degreesToRadians(4*posMod))
+			point3.slotTexture:SetTexture(GetMedia("point_crystal"))
+			point3.slotTexture:SetRotation(degreesToRadians(4*posMod))
+			point3.case:SetPoint("CENTER", 0,0)
+			point3.case:SetSize(60,60)
+			point3.case:SetRotation(degreesToRadians(4*posMod))
+			point3.case:SetTexture(GetMedia("point_plate"))
+		
+			point4:SetPoint("CENTER", -225*posMod,-44)
+			point4:SetSize(13,13)
+			point4:SetStatusBarTexture(GetMedia("point_crystal"))
+			point4:GetStatusBarTexture():SetRotation(degreesToRadians(3*posMod))
+			point4.slotTexture:SetTexture(GetMedia("point_crystal"))
+			point4.slotTexture:SetRotation(degreesToRadians(3*posMod))
+			point4.case:SetPoint("CENTER", 0, 0)
+			point4.case:SetSize(60,60)
+			point4.case:SetRotation(0)
+			point4.case:SetTexture(GetMedia("point_plate"))
+		
+			point5:SetPoint("CENTER", -203*posMod,-11)
+			point5:SetSize(14,21)
+			point5:SetStatusBarTexture(GetMedia("point_crystal"))
+			point5:GetStatusBarTexture():SetRotation(degreesToRadians(1*posMod))
+			point5.slotTexture:SetTexture(GetMedia("point_crystal"))
+			point5.slotTexture:SetRotation(degreesToRadians(1*posMod))
+			point5.case:SetRotation(degreesToRadians(1*posMod))
+			point5.case:SetPoint("CENTER",0,0)
+			point5.case:SetSize(82,96)
+			point5.case:SetRotation(degreesToRadians(1*posMod))
+			point5.case:SetTexture(GetMedia("point_diamond"))
+
+		end 
+		element.powerStyle = style
+	end 
+end
+
 local TargetFrame_CastBarPostUpdate = function(element, unit)
 	local self = element._owner
 	local layout = self.layout
@@ -2600,247 +2685,152 @@ Layouts.GroupTools = {
 
 -- Minimap
 Layouts.Minimap = {
-	Size = { 213, 213 }, 
-	Place = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -58, 59 }, 
-	MaskTexture = GetMedia("minimap_mask_circle_transparent"),
-
 	BlipScale = 1.15, 
 	BlipTextures = {
 		["1.13.2"] = GetMedia("Blip-Nandini-New-113_2"),
 		["1.13.3"] = [[Interface\Minimap\ObjectIconsAtlas.blp]] -- Blizzard Fallback
 	},
-
-	CompassTexts = { L["N"] }, -- only setting the North tag text, as we don't want a full compass ( order is NESW )
-	CompassFont = GetFont(12, true), 
+	Clock_OverrideValue = Minimap_Clock_OverrideValue,
+	ClockColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] }, 
+	ClockFont = GetFont(15, true),
+	ClockPlace = { "BOTTOMRIGHT", -(13 + 213), -8 },
 	CompassColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .75 }, 
+	CompassFont = GetFont(12, true), 
 	CompassRadiusInset = 10, -- move the text 10 points closer to the center of the map
-
+	CompassTexts = { L["N"] }, -- only setting the North tag text, as we don't want a full compass ( order is NESW )
+	CoordinateColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 }, 
+	CoordinateFont = GetFont(12, true), 
+	CoordinatePlace = { "BOTTOM", 3, 23 },
+	Coordinates_OverrideValue = Minimap_Coordinates_OverrideValue,
+	FrameRate_OverrideValue = Minimap_FrameRate_OverrideValue,
+	FrameRateColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .5 },
+	FrameRateFont = GetFont(12, true), 
+	FrameRatePlaceFunc = Minimap_Performance_FrameRate_PlaceFunc, 
+	InnerRingBackdropMultiplier = 1, 
+	InnerRingBarTexture = GetMedia("minimap-bars-two-inner"),
+	InnerRingClockwise = true, 
+	InnerRingColorPower = true,
+	InnerRingColorStanding = true,
+	InnerRingColorValue = true,
+	InnerRingColorXP = true,
+	InnerRingDegreeOffset = 90*3 - 21,
+	InnerRingDegreeSpan = 360 - 21*2, 
+	InnerRingPlace = { "CENTER", 0, 2 }, 
+	InnerRingShowSpark = true, 
+	InnerRingSize = { 208, 208 }, 
+	InnerRingSparkBlendMode = "ADD",
+	InnerRingSparkFlash = { nil, nil, 1, 1 }, 
+	InnerRingSparkInset = 46 * 208/256,  
+	InnerRingSparkMultiplier = 1, 
+	InnerRingSparkOffset = -1/10,
+	InnerRingSparkSize = { 6, 27 * 208/256 },
+	InnerRingValueFont = GetFont(15, true),
+	InnerRingValuePercentFont = GetFont(15, true), 
+	Latency_OverrideValue = Minimap_Latency_OverrideValue,
+	LatencyColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .5 },
+	LatencyFont = GetFont(12, true), 
+	LatencyPlaceFunc = Minimap_Performance_Latency_PlaceFunc, 
+	MailPlace = Wheel("LibModule"):IsAddOnEnabled("MBB") and { "BOTTOMRIGHT", -(31 + 213 + 40), 35 } or { "BOTTOMRIGHT", -(31 + 213), 35 },
+	MailSize = { 43, 32 },
+	MailTexture = GetMedia("icon_mail"),
+	MailTextureDrawLayer = { "ARTWORK", 1 },
+	MailTexturePlace = { "CENTER", 0, 0 }, 
+	MailTextureRotation = 15 * (2*math_pi)/360,
+	MailTextureSize = { 66, 66 },
+	MapBackdropColor = { 0, 0, 0, .75 }, 
+	MapBackdropTexture = GetMedia("minimap_mask_circle"),
+	MapBorderColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
 	MapBorderPlace = { "CENTER", 0, 0 }, 
 	MapBorderSize = { 419, 419 }, 
 	MapBorderTexture = GetMedia("minimap-border"),
-	MapBorderColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
-	
-	MapBackdropTexture = GetMedia("minimap_mask_circle"),
-	MapBackdropColor = { 0, 0, 0, .75 }, 
-
-	MapOverlayTexture = GetMedia("minimap_mask_circle"),
 	MapOverlayColor = { 0, 0, 0, .15 },
-
-	-- Put XP and XP on the minimap!
-	RingFrameBackdropPlace = { "CENTER", 0, 0 },
-	RingFrameBackdropSize = { 413, 413 }, 
-	RingFrameBackdropDrawLayer = { "BACKGROUND", 1 }, 
-	RingFrameBackdropColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
-	RingFrameBackdropTexture = GetMedia("minimap-onebar-backdrop"), 
-	RingFrameBackdropDoubleTexture = GetMedia("minimap-twobars-backdrop"), 
-	RingFrameSingleRingTexture = GetMedia("minimap-bars-single"), 
-	RingFrameSingleRingSparkSize = { 6,34 * 208/256 }, 
-	RingFrameSingleRingSparkInset = { 22 * 208/256 }, 
-	RingFrameSingleRingValueFunc = Minimap_RingFrame_SingleRing_ValueFunc,
-	RingFrameOuterRingTexture = GetMedia("minimap-bars-two-outer"), 
-	RingFrameOuterRingSparkSize = { 6,20 * 208/256 }, 
-	RingFrameOuterRingSparkInset = { 15 * 208/256 }, 
-	RingFrameOuterRingValueFunc = Minimap_RingFrame_OuterRing_ValueFunc,
-
-	OuterRingPlace = { "CENTER", 0, 2 }, 
-	OuterRingSize = { 208, 208 }, 
+	MapOverlayTexture = GetMedia("minimap_mask_circle"),
+	MaskTexture = GetMedia("minimap_mask_circle_transparent"),
+	MBBPlace = { "BOTTOMRIGHT", -(31 + 213), 35 },
+	MBBSize = { 32, 32 },
+	MBBTexture = GetMedia("plus"),
+	OuterRingBackdropMultiplier = 1, 
 	OuterRingClockwise = true, 
+	OuterRingColorPower = true,
+	OuterRingColorStanding = true,
+	OuterRingColorValue = true,
+	OuterRingColorXP = true,
 	OuterRingDegreeOffset = 90*3 - 14,
 	OuterRingDegreeSpan = 360 - 14*2, 
+	OuterRingPlace = { "CENTER", 0, 2 }, 
+	OuterRingSize = { 208, 208 }, 
 	OuterRingShowSpark = true, 
 	OuterRingSparkBlendMode = "ADD",
-	OuterRingSparkOffset = -1/10, 
 	OuterRingSparkFlash = { nil, nil, 1, 1 }, 
-	OuterRingColorXP = true,
-	OuterRingColorStanding = true,
-	OuterRingColorPower = true,
-	OuterRingColorValue = true,
-	OuterRingBackdropMultiplier = 1, 
+	OuterRingSparkOffset = -1/10, 
 	OuterRingSparkMultiplier = 1, 
+	OuterRingValueFont = GetFont(15, true),
 	OuterRingValuePlace = { "CENTER", 0, -9 },
 	OuterRingValueJustifyH = "CENTER",
 	OuterRingValueJustifyV = "MIDDLE",
-	OuterRingValueFont = GetFont(15, true),
 	OuterRingValueShowDeficit = true, 
-	OuterRingValueDescriptionPlace = { "CENTER", 0, -(15/2 + 2) }, 
-	OuterRingValueDescriptionWidth = 100, 
 	OuterRingValueDescriptionColor = { Colors.quest.gray[1], Colors.quest.gray[2], Colors.quest.gray[3] }, 
+	OuterRingValueDescriptionFont = GetFont(12, true),
 	OuterRingValueDescriptionJustifyH = "CENTER", 
 	OuterRingValueDescriptionJustifyV = "MIDDLE", 
-	OuterRingValueDescriptionFont = GetFont(12, true),
+	OuterRingValueDescriptionPlace = { "CENTER", 0, -(15/2 + 2) }, 
+	OuterRingValueDescriptionWidth = 100, 
 	OuterRingValuePercentFont = GetFont(16, true),
-
-	InnerRingPlace = { "CENTER", 0, 2 }, 
-	InnerRingSize = { 208, 208 }, 
-	InnerRingBarTexture = GetMedia("minimap-bars-two-inner"),
-	InnerRingClockwise = true, 
-	InnerRingDegreeOffset = 90*3 - 21,
-	InnerRingDegreeSpan = 360 - 21*2, 
-	InnerRingShowSpark = true, 
-	InnerRingSparkSize = { 6, 27 * 208/256 },
-	InnerRingSparkBlendMode = "ADD",
-	InnerRingSparkOffset = -1/10,
-	InnerRingSparkInset = 46 * 208/256,  
-	InnerRingSparkFlash = { nil, nil, 1, 1 }, 
-	InnerRingColorXP = true,
-	InnerRingColorStanding = true,
-	InnerRingColorPower = true,
-	InnerRingColorValue = true,
-	InnerRingBackdropMultiplier = 1, 
-	InnerRingSparkMultiplier = 1, 
-	InnerRingValueFont = GetFont(15, true),
-	InnerRingValuePercentFont = GetFont(15, true), 
-
-	ToggleSize = { 56, 56 }, 
-	ToggleBackdropSize = { 100, 100 },
-	ToggleBackdropTexture = GetMedia("point_plate"), 
-	ToggleBackdropColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
-
-	ClockPlace = { "BOTTOMRIGHT", -(13 + 213), -8 },
-	ClockFont = GetFont(15, true),
-	ClockColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] }, 
-	Clock_OverrideValue = Minimap_Clock_OverrideValue,
-
-	ZonePlaceFunc = Minimap_ZoneName_PlaceFunc,
-	ZoneFont = GetFont(15, true),
-
-	CoordinatePlace = { "BOTTOM", 3, 23 },
-	CoordinateFont = GetFont(12, true), 
-	CoordinateColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 }, 
-	Coordinates_OverrideValue = Minimap_Coordinates_OverrideValue,
-
 	PerformanceFramePlaceAdvancedFunc = Minimap_Performance_PlaceFunc,
-
-	LatencyPlaceFunc = Minimap_Performance_Latency_PlaceFunc, 
-	LatencyFont = GetFont(12, true), 
-	LatencyColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .5 },
-	Latency_OverrideValue = Minimap_Latency_OverrideValue,
-
-	FrameRatePlaceFunc = Minimap_Performance_FrameRate_PlaceFunc, 
-	FrameRateFont = GetFont(12, true), 
-	FrameRateColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .5 },
-	FrameRate_OverrideValue = Minimap_FrameRate_OverrideValue,
-
-	MailPlace = 
-		Wheel("LibModule"):IsAddOnEnabled("MBB") and 
-		{ "BOTTOMRIGHT", -(31 + 213 + 40), 35 } or 
-		{ "BOTTOMRIGHT", -(31 + 213), 35 },
-	MailSize = { 43, 32 },
-	MailTexture = GetMedia("icon_mail"),
-	MailTexturePlace = { "CENTER", 0, 0 }, 
-	MailTextureSize = { 66, 66 },
-	MailTextureDrawLayer = { "ARTWORK", 1 },
-	MailTextureRotation = 15 * (2*math_pi)/360,
-
-	MBBSize = { 32, 32 },
-	MBBPlace = { "BOTTOMRIGHT", -(31 + 213), 35 },
-	MBBTexture = GetMedia("plus"),
-
-	TrackingButtonPlace = { "CENTER", math_cos(45*math_pi/180) * (213/2 + 10), math_sin(45*math_pi/180) * (213/2 + 10) }, 
-	TrackingButtonSize = { 56, 56 }, 
+	Place = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -58, 59 }, 
+	Rep_OverrideValue = Minimap_Rep_OverrideValue,
+	RingFrameBackdropColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
+	RingFrameBackdropDoubleTexture = GetMedia("minimap-twobars-backdrop"), 
+	RingFrameBackdropDrawLayer = { "BACKGROUND", 1 }, 
+	RingFrameBackdropPlace = { "CENTER", 0, 0 },
+	RingFrameBackdropSize = { 413, 413 }, 
+	RingFrameBackdropTexture = GetMedia("minimap-onebar-backdrop"), 
+	RingFrameOuterRingSparkInset = { 15 * 208/256 }, 
+	RingFrameOuterRingSparkSize = { 6,20 * 208/256 }, 
+	RingFrameOuterRingTexture = GetMedia("minimap-bars-two-outer"), 
+	RingFrameOuterRingValueFunc = Minimap_RingFrame_OuterRing_ValueFunc,
+	RingFrameSingleRingSparkInset = { 22 * 208/256 }, 
+	RingFrameSingleRingSparkSize = { 6,34 * 208/256 }, 
+	RingFrameSingleRingValueFunc = Minimap_RingFrame_SingleRing_ValueFunc,
+	RingFrameSingleRingTexture = GetMedia("minimap-bars-single"), 
+	Size = { 213, 213 }, 
+	ToggleBackdropColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
+	ToggleBackdropTexture = GetMedia("point_plate"), 
+	ToggleBackdropSize = { 100, 100 },
+	ToggleSize = { 56, 56 }, 
+	TrackingButtonBackdropColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
 	TrackingButtonBackdropSize = { 100, 100 },
 	TrackingButtonBackdropTexture = GetMedia("point_plate"), 
-	TrackingButtonBackdropColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
-	TrackingButtonIconSize = { 28, 28 },
-	TrackingButtonIconMask = GetMedia("hp_critter_case_glow"), -- actionbutton_circular_mask
 	TrackingButtonIconBgSize = { 32, 32 },
 	TrackingButtonIconBgTexture = GetMedia("hp_critter_case_glow"),
-
+	TrackingButtonIconMask = GetMedia("hp_critter_case_glow"), -- actionbutton_circular_mask
+	TrackingButtonIconSize = { 28, 28 },
+	TrackingButtonPlace = { "CENTER", math_cos(45*math_pi/180) * (213/2 + 10), math_sin(45*math_pi/180) * (213/2 + 10) }, 
+	TrackingButtonSize = { 56, 56 }, 
 	XP_OverrideValue = Minimap_XP_OverrideValue,
-	Rep_OverrideValue = Minimap_Rep_OverrideValue
+	ZonePlaceFunc = Minimap_ZoneName_PlaceFunc,
+	ZoneFont = GetFont(15, true)
 }
 
 -- NamePlates
 Layouts.NamePlates = {
-	UseNamePlates = true, 
-		Size = { 80, 32 }, 
-	
-	HealthPlace = { "TOP", 0, -2 },
-	HealthSize = { 84, 14 }, 
-	HealthBarOrientation = "LEFT", 
-	HealthTexture = GetMedia("nameplate_bar"),
-	HealthTexCoord = { 14/256,(256-14)/256,14/64,(64-14)/64 },
-	HealthSparkMap = {
-		top = {
-			{ keyPercent =   0/256, offset = -16/32 }, 
-			{ keyPercent =   4/256, offset = -16/32 }, 
-			{ keyPercent =  19/256, offset =   0/32 }, 
-			{ keyPercent = 236/256, offset =   0/32 }, 
-			{ keyPercent = 256/256, offset = -16/32 }
-		},
-		bottom = {
-			{ keyPercent =   0/256, offset = -16/32 }, 
-			{ keyPercent =   4/256, offset = -16/32 }, 
-			{ keyPercent =  19/256, offset =   0/32 }, 
-			{ keyPercent = 236/256, offset =   0/32 }, 
-			{ keyPercent = 256/256, offset = -16/32 }
-		}
-	},
-	HealthColorTapped = true,
-	HealthColorDisconnected = true,
-	HealthColorClass = true, -- color players in their class colors
-	HealthColorCivilian = true, -- color friendly players as civilians
-	HealthColorReaction = true,
-	HealthColorHealth = true,
-	HealthColorPlayer = true, 
-	HealthFrequent = true,
-
-	HealthBackdropPlace = { "CENTER", 0, 0 },
-	HealthBackdropSize = { 84*256/(256-28), 14*64/(64-28) },
-	HealthBackdropTexture = GetMedia("nameplate_backdrop"),
-	HealthBackdropDrawLayer = { "BACKGROUND", -2 },
-	HealthBackdropColor = { 1, 1, 1, 1 },
-
-	CastPlace = { "TOP", 0, -20 },
-	CastSize = { 84, 14 }, 
-	CastOrientation = "LEFT", 
-	CastColor = { Colors.cast[1], Colors.cast[2], Colors.cast[3], 1 },
-	CastTexture = GetMedia("nameplate_bar"),
-	CastTexCoord = { 14/256,(256-14)/256,14/64,(64-14)/64 },
-	CastTimeToHoldFailed = .5, 
-	CastSparkMap = {
-		top = {
-			{ keyPercent =   0/256, offset = -16/32 }, 
-			{ keyPercent =   4/256, offset = -16/32 }, 
-			{ keyPercent =  19/256, offset =   0/32 }, 
-			{ keyPercent = 236/256, offset =   0/32 }, 
-			{ keyPercent = 256/256, offset = -16/32 }
-		},
-		bottom = {
-			{ keyPercent =   0/256, offset = -16/32 }, 
-			{ keyPercent =   4/256, offset = -16/32 }, 
-			{ keyPercent =  19/256, offset =   0/32 }, 
-			{ keyPercent = 236/256, offset =   0/32 }, 
-			{ keyPercent = 256/256, offset = -16/32 }
-		}
-	},
-	CastBackdropPlace = { "CENTER", 0, 0 },
-	CastBackdropSize = { 84*256/(256-28), 14*64/(64-28) },
-	CastBackdropTexture = GetMedia("nameplate_backdrop"),
-	CastBackdropDrawLayer = { "BACKGROUND", 0 },
-	CastBackdropColor = { 1, 1, 1, 1 },
-	CastNamePlace = { "TOP", 0, -18 },
-	CastNameFont = GetFont(12, true),
-	CastNameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-	CastNameDrawLayer = { "OVERLAY", 1 }, 
-	CastNameJustifyH = "CENTER", 
-	CastNameJustifyV = "MIDDLE",
-	CastShieldPlace = { "CENTER", 0, -1 }, 
-	CastShieldSize = { 124, 69 },
-	CastShieldTexture = GetMedia("cast_back_spiked"),
-	CastShieldDrawLayer = { "BACKGROUND", -5 },
-	CastShieldColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
-	CastPostUpdate = NamePlate_CastBar_PostUpdate,
-
-	-- Try to work around the problem with misaligned auras by changing the anchor? 
-	-- I can't seem to find any position but the initial, so it might be that they're 
-	-- anchored before the frame has a real size and the anchor just "sticks"...? 
-	-- Weirdness. Can't reproduce it consistantly, which backs up that theory. 
-	-- So for now I'll just attempt to work around it, see if it goes away!
-	AuraFrameSize = { 30*3 + 4*2, 30*2 + 4  }, 
+	AuraAnchor = "Health", 
+	AuraBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 12 },
+	AuraBorderBackdropBorderColor = { Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3 },
+	AuraBorderBackdropColor = { 0, 0, 0, 0 },
+	AuraBorderFramePlace = { "CENTER", 0, 0 }, 
+	AuraBorderFrameSize = { 30 + 10, 30 + 10 },
+	AuraCountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
+	AuraCountFont = GetFont(12, true),
+	AuraCountPlace = { "BOTTOMRIGHT", 9, -6 },
 	AuraFramePlace = { "TOPLEFT", (84 - (30*3 + 4*2))/2, 30*2 + 4 + 10 },
-	AuraPoint = "BOTTOMLEFT", AuraAnchor = "Health", AuraRelPoint = "TOPLEFT",
-	AuraOffsetX = (84 - (30*3 + 4*2))/2, AuraOffsetY = 10 + 4,
+	AuraFrameSize = { 30*3 + 4*2, 30*2 + 4  }, 
+	AuraIconPlace = { "CENTER", 0, 0 },
+	AuraIconSize = { 30 - 6, 30 - 6 },
+	AuraIconTexCoord = { 5/64, 59/64, 5/64, 59/64 }, -- aura icon tex coords
+	AuraOffsetX = (84 - (30*3 + 4*2))/2, 
+	AuraOffsetY = 10 + 4,
+	AuraPoint = "BOTTOMLEFT", 
 	AuraProperties = {
 		growthX = "LEFT", 
 		growthY = "UP", 
@@ -2862,32 +2852,93 @@ Layouts.NamePlates = {
 		tooltipOffsetX = -8,
 		tooltipOffsetY = -16
 	},
-	AuraIconPlace = { "CENTER", 0, 0 },
-	AuraIconSize = { 30 - 6, 30 - 6 },
-	AuraIconTexCoord = { 5/64, 59/64, 5/64, 59/64 }, -- aura icon tex coords
-	AuraCountPlace = { "BOTTOMRIGHT", 9, -6 },
-	AuraCountFont = GetFont(12, true),
-	AuraCountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
-	AuraTimePlace = { "TOPLEFT", -6, 6 },
+	AuraRelPoint = "TOPLEFT",
 	AuraTimeFont = GetFont(11, true),
-	AuraBorderFramePlace = { "CENTER", 0, 0 }, 
-	AuraBorderFrameSize = { 30 + 10, 30 + 10 },
-	AuraBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 12 },
-	AuraBorderBackdropColor = { 0, 0, 0, 0 },
-	AuraBorderBackdropBorderColor = { Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3 },
+	AuraTimePlace = { "TOPLEFT", -6, 6 },
+	CastBackdropColor = { 1, 1, 1, 1 },
+	CastBackdropDrawLayer = { "BACKGROUND", 0 },
+	CastBackdropPlace = { "CENTER", 0, 0 },
+	CastBackdropSize = { 84*256/(256-28), 14*64/(64-28) },
+	CastBackdropTexture = GetMedia("nameplate_backdrop"),
+	CastColor = { Colors.cast[1], Colors.cast[2], Colors.cast[3], 1 },
+	CastNameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+	CastNameDrawLayer = { "OVERLAY", 1 }, 
+	CastNameFont = GetFont(12, true),
+	CastNameJustifyH = "CENTER", 
+	CastNameJustifyV = "MIDDLE",
+	CastNamePlace = { "TOP", 0, -18 },
+	CastOrientation = "LEFT", 
+	CastPlace = { "TOP", 0, -20 },
+	CastPostUpdate = NamePlate_CastBar_PostUpdate,
+	CastShieldColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
+	CastShieldDrawLayer = { "BACKGROUND", -5 },
+	CastShieldPlace = { "CENTER", 0, -1 }, 
+	CastShieldSize = { 124, 69 },
+	CastShieldTexture = GetMedia("cast_back_spiked"),
+	CastSize = { 84, 14 }, 
+	CastSparkMap = {
+		top = {
+			{ keyPercent =   0/256, offset = -16/32 }, 
+			{ keyPercent =   4/256, offset = -16/32 }, 
+			{ keyPercent =  19/256, offset =   0/32 }, 
+			{ keyPercent = 236/256, offset =   0/32 }, 
+			{ keyPercent = 256/256, offset = -16/32 }
+		},
+		bottom = {
+			{ keyPercent =   0/256, offset = -16/32 }, 
+			{ keyPercent =   4/256, offset = -16/32 }, 
+			{ keyPercent =  19/256, offset =   0/32 }, 
+			{ keyPercent = 236/256, offset =   0/32 }, 
+			{ keyPercent = 256/256, offset = -16/32 }
+		}
+	},
+	CastTexture = GetMedia("nameplate_bar"),
+	CastTexCoord = { 14/256,(256-14)/256,14/64,(64-14)/64 },
+	CastTimeToHoldFailed = .5, 
+	HealthBackdropColor = { 1, 1, 1, 1 },
+	HealthBackdropDrawLayer = { "BACKGROUND", -2 },
+	HealthBackdropPlace = { "CENTER", 0, 0 },
+	HealthBackdropSize = { 84*256/(256-28), 14*64/(64-28) },
+	HealthBackdropTexture = GetMedia("nameplate_backdrop"),
+	HealthBarOrientation = "LEFT", 
+	HealthColorCivilian = true, 
+	HealthColorClass = true, 
+	HealthColorDisconnected = true,
+	HealthColorHealth = true,
+	HealthColorPlayer = true, 
+	HealthColorReaction = true,
+	HealthColorTapped = true,
+	HealthFrequent = true,
+	HealthPlace = { "TOP", 0, -2 },
+	HealthSize = { 84, 14 }, 
+	HealthSparkMap = {
+		top = {
+			{ keyPercent =   0/256, offset = -16/32 }, 
+			{ keyPercent =   4/256, offset = -16/32 }, 
+			{ keyPercent =  19/256, offset =   0/32 }, 
+			{ keyPercent = 236/256, offset =   0/32 }, 
+			{ keyPercent = 256/256, offset = -16/32 }
+		},
+		bottom = {
+			{ keyPercent =   0/256, offset = -16/32 }, 
+			{ keyPercent =   4/256, offset = -16/32 }, 
+			{ keyPercent =  19/256, offset =   0/32 }, 
+			{ keyPercent = 236/256, offset =   0/32 }, 
+			{ keyPercent = 256/256, offset = -16/32 }
+		}
+	},
+	HealthTexCoord = { 14/256,(256-14)/256,14/64,(64-14)/64 },
+	HealthTexture = GetMedia("nameplate_bar"),
+	PostCreateAuraButton = NamePlates_Auras_PostCreateButton,
 	PostUpdateAura = NamePlates_Auras_PostUpdate,
 	PostUpdateAuraButton = NamePlates_Auras_PostUpdateButton,
-	PostCreateAuraButton = NamePlates_Auras_PostCreateButton,
-
+	PostUpdateRaidTarget = NamePlates_RaidTarget_PostUpdate,
+	RaidTargetDrawLayer = { "ARTWORK", 0 },
 	RaidTargetPlace = { "TOP", 0, 20+ 44 }, -- no auras
 	RaidTargetPlace_AuraRow = { "TOP", 0, 20+ 80 }, -- auras, 1 row
 	RaidTargetPlace_AuraRows = { "TOP", 0, 20+ 112 }, -- auras, 2 rows
 	RaidTargetSize = { 64, 64 },
 	RaidTargetTexture = GetMedia("raid_target_icons"),
-	RaidTargetDrawLayer = { "ARTWORK", 0 },
-	PostUpdateRaidTarget = NamePlates_RaidTarget_PostUpdate,
-
-	-- CVars adjusted at startup
 	SetConsoleVars = {
 		-- Because we want friendly NPC nameplates
 		-- We're toning them down a lot as it is, 
@@ -2938,41 +2989,57 @@ Layouts.NamePlates = {
 	
 		-- The max distance to show the target nameplate when the target is behind the camera.
 		nameplateTargetBehindMaxDistance = 15 -- default 15
-	}
+	},
+	Size = { 80, 32 }
 }
 
 -- Custom Tooltips
 Layouts.Tooltips = {
-	-- Going with full positioning after 8.2.0. 
-	TooltipPlace = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -(48 + 58 + 213), (107 + 59) }, 
-	--TooltipPlace = { "BOTTOMRIGHT", "Minimap", "BOTTOMLEFT", -48, 107 }, 
-
-	TooltipStatusBarTexture = GetMedia("statusbar_normal"), 
-	TooltipBackdrop = {
-		bgFile = [[Interface\ChatFrame\ChatFrameBackground]], tile = false, 
-		edgeFile = GetMedia("tooltip_border_blizzcompatible"), edgeSize = 32, 
-		insets = { top = 2.5, bottom = 2.5, left = 2.5, right = 2.5 }
-	},
-	TooltipBackdropColor = { .05, .05, .05, .85 },
-	TooltipBackdropBorderColor = { 1, 1, 1, 1 },
-
+	PostCreateBar = Tooltip_Bar_PostCreate,
+	PostCreateLinePair = Tooltip_LinePair_PostCreate,
 	PostCreateTooltip = Tooltip_PostCreate,
-	PostCreateLinePair = Tooltip_LinePair_PostCreate, 
-	PostCreateBar = Tooltip_Bar_PostCreate
+	TooltipBackdrop = {
+		bgFile = [[Interface\ChatFrame\ChatFrameBackground]], 
+		edgeFile = GetMedia("tooltip_border_blizzcompatible"), 
+		edgeSize = 32, 
+		insets = { top = 2.5, bottom = 2.5, left = 2.5, right = 2.5 },
+		tile = false
+	},
+	TooltipBackdropBorderColor = { 1, 1, 1, 1 },
+	TooltipBackdropColor = { .05, .05, .05, .85 },
+	TooltipPlace = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -(48 + 58 + 213), (107 + 59) }, 
+	TooltipStatusBarTexture = GetMedia("statusbar_normal")
 }
 
 -- PlayerHUD (combo points and castbar)
 Layouts.UnitFramePlayerHUD = {
-	Size = { 103, 103 }, 
-	Place = { "BOTTOMLEFT", 75, 127 },
-	IgnoreMouseOver = true, 
-
-	CastBarPlace = { "BOTTOM", "UICenter", "BOTTOM", 0, 250 }, -- CENTER, 0, -133
-	CastBarSize = Constant.SmallBar,
-	CastBarTexture = Constant.SmallBarTexture, 
 	CastBarColor = { 70/255, 255/255, 131/255, .69 }, 
 	CastBarOrientation = "RIGHT",
 	CastTimeToHoldFailed = .5, 
+	CastBarBackgroundColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
+	CastBarBackgroundDrawLayer = { "BACKGROUND", 1 },
+	CastBarBackgroundPlace = { "CENTER", 1, -1 }, 
+	CastBarBackgroundSize = { 193,93 },
+	CastBarBackgroundTexture = GetMedia("cast_back"), 
+	CastBarValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+	CastBarValueDrawLayer = { "OVERLAY", 1 },
+	CastBarValueFont = GetFont(14, true),
+	CastBarValueJustifyH = "CENTER",
+	CastBarValueJustifyV = "MIDDLE",
+	CastBarValuePlace = { "CENTER", 0, 0 },
+	CastBarNameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+	CastBarNameDrawLayer = { "OVERLAY", 1 },
+	CastBarNameFont = GetFont(15, true),
+	CastBarNameJustifyH = "CENTER",
+	CastBarNameJustifyV = "MIDDLE",
+	CastBarNamePlace = { "TOP", 0, -(12 + 14) },
+	CastBarPlace = { "BOTTOM", "UICenter", "BOTTOM", 0, 250 }, -- CENTER, 0, -133
+	CastBarSize = Constant.SmallBar,
+	CastBarShieldColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
+	CastBarShieldDrawLayer = { "BACKGROUND", 1 }, 
+	CastBarShieldPlace = { "CENTER", 1, -2 }, 
+	CastBarShieldSize = { 193, 93 },
+	CastBarShieldTexture = GetMedia("cast_back_spiked"), 
 	CastBarSparkMap = {
 		top = {
 			{ keyPercent =   0/128, offset = -16/32 }, 
@@ -2987,28 +3054,6 @@ Layouts.UnitFramePlayerHUD = {
 			{ keyPercent = 128/128, offset = -16/32 }
 		}
 	},
-	CastBarBackgroundPlace = { "CENTER", 1, -1 }, 
-	CastBarBackgroundSize = { 193,93 },
-	CastBarBackgroundTexture = GetMedia("cast_back"), 
-	CastBarBackgroundDrawLayer = { "BACKGROUND", 1 },
-	CastBarBackgroundColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
-	CastBarValuePlace = { "CENTER", 0, 0 },
-	CastBarValueFont = GetFont(14, true),
-	CastBarValueDrawLayer = { "OVERLAY", 1 },
-	CastBarValueJustifyH = "CENTER",
-	CastBarValueJustifyV = "MIDDLE",
-	CastBarValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-	CastBarNamePlace = { "TOP", 0, -(12 + 14) },
-	CastBarNameFont = GetFont(15, true),
-	CastBarNameDrawLayer = { "OVERLAY", 1 },
-	CastBarNameJustifyH = "CENTER",
-	CastBarNameJustifyV = "MIDDLE",
-	CastBarNameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-	CastBarShieldPlace = { "CENTER", 1, -2 }, 
-	CastBarShieldSize = { 193, 93 },
-	CastBarShieldTexture = GetMedia("cast_back_spiked"), 
-	CastBarShieldDrawLayer = { "BACKGROUND", 1 }, 
-	CastBarShieldColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
 	CastBarSpellQueuePlace = { "BOTTOM", "UICenter", "BOTTOM", 0, 250 }, 
 	CastBarSpellQueueSize = Constant.SmallBar,
 	CastBarSpellQueueTexture = Constant.SmallBarTexture, 
@@ -3028,383 +3073,35 @@ Layouts.UnitFramePlayerHUD = {
 			{ keyPercent = 128/128, offset = -16/32 }
 		}
 	},
-
-	ClassPowerPlace = { "CENTER", "UICenter", "CENTER", 0, 0 }, 
-	ClassPowerSize = { 2,2 }, 
-	ClassPowerHideWhenUnattackable = true, 
-	ClassPowerMaxComboPoints = 5, 
-	ClassPowerHideWhenNoTarget = true, 
+	CastBarTexture = Constant.SmallBarTexture, 
 	ClassPowerAlphaWhenEmpty = .5, 
 	ClassPowerAlphaWhenOutOfCombat = 1,
 	ClassPowerAlphaWhenOutOfCombatRunes = .5, 
+	ClassPowerHideWhenNoTarget = true, 
+	ClassPowerHideWhenUnattackable = true, 
+	ClassPowerMaxComboPoints = 5, 
+	ClassPowerPlace = { "CENTER", "UICenter", "CENTER", 0, 0 }, 
+	ClassPowerPostCreatePoint = PlayerHUD_ClassPowerPostCreatePoint,
+	ClassPowerPostUpdate = PlayerHUD_ClassPowerPostUpdate,
 	ClassPowerReverseSides = false, 
 	ClassPowerRuneSortOrder = "ASC",
-
-	ClassPowerPostCreatePoint = function(element, id, point)
-		point.case = point:CreateTexture()
-		point.case:SetDrawLayer("BACKGROUND", -2)
-		point.case:SetVertexColor(211/255, 200/255, 169/255)
-
-		point.slotTexture:SetPoint("TOPLEFT", -1.5, 1.5)
-		point.slotTexture:SetPoint("BOTTOMRIGHT", 1.5, -1.5)
-		point.slotTexture:SetVertexColor(130/255 *.3, 133/255 *.3, 130/255 *.3, 2/3)
-
-		point:SetOrientation("UP") -- set the bars to grow from bottom to top.
-		point:SetSparkTexture(GetMedia("blank")) -- this will be too tricky to rotate and map
-		
-	end,
-
-	ClassPowerPostUpdate = function(element, unit, min, max, newMax, powerType)
-
-		--	Class Powers available in Legion/BfA: 
-		--------------------------------------------------------------------------------- 
-		-- 	* Arcane Charges 	Generated points. 5 cap. 0 baseline.
-		--	* Chi: 				Generated points. 5 cap, 6 if talented, 0 baseline.
-		--	* Combo Points: 	Fast generated points. 5 cap, 6-10 if talented, 0 baseline.
-		--	* Holy Power: 		Fast generated points. 5 cap, 0 baseline.
-		--	* Soul Shards: 		Slowly generated points. 5 cap, 1 point baseline.
-		--	* Stagger: 			Generated points. 3 cap. 3 baseline. 
-		--	* Runes: 			Fast refilling points. 6 cap, 6 baseline.
-	
-		local style
-	
-		-- 5 points: 4 circles, 1 larger crystal
-		if (powerType == "COMBO_POINTS") then 
-			style = "ComboPoints"
-	
-		-- 5 points: 5 circles, center one larger
-		elseif (powerType == "CHI") then
-			style = "Chi"
-	
-		--5 points: 3 circles, 3 crystals, last crystal larger
-		elseif (powerType == "ARCANE_CHARGES") or (powerType == "HOLY_POWER") or (powerType == "SOUL_SHARDS") then 
-			style = "SoulShards"
-	
-		-- 3 points: 
-		elseif (powerType == "STAGGER") then 
-			style = "Stagger"
-	
-		-- 6 points: 
-		elseif (powerType == "RUNES") then 
-			style = "Runes"
-		end 
-	
-		-- For my own reference, these are properly sized and aligned so far:
-		-- yes 	ComboPoints 
-		-- no 	Chi
-		-- yes 	SoulShards (also ArcaneCharges, HolyPower)
-		-- no 	Stagger
-		-- no 	Runes
-	
-		-- Do we need to set or update the textures?
-		if (style ~= element.powerStyle) then 
-	
-			local posMod = element.flipSide and -1 or 1
-	
-			if (style == "ComboPoints") then
-				local point1, point2, point3, point4, point5 = element[1], element[2], element[3], element[4], element[5]
-	
-				point1:SetPoint("CENTER", -203*posMod,-137)
-				point1:SetSize(13,13)
-				point1:SetStatusBarTexture(GetMedia("point_crystal"))
-				point1:GetStatusBarTexture():SetRotation(degreesToRadians(6*posMod))
-				point1.slotTexture:SetTexture(GetMedia("point_crystal"))
-				point1.slotTexture:SetRotation(degreesToRadians(6*posMod))
-				point1.case:SetPoint("CENTER", 0, 0)
-				point1.case:SetSize(58,58)
-				point1.case:SetRotation(degreesToRadians(6*posMod))
-				point1.case:SetTexture(GetMedia("point_plate"))
-	
-				point2:SetPoint("CENTER", -221*posMod,-111)
-				point2:SetSize(13,13)
-				point2:SetStatusBarTexture(GetMedia("point_crystal"))
-				point2:GetStatusBarTexture():SetRotation(degreesToRadians(5*posMod))
-				point2.slotTexture:SetTexture(GetMedia("point_crystal"))
-				point2.slotTexture:SetRotation(degreesToRadians(5*posMod))
-				point2.case:SetPoint("CENTER", 0, 0)
-				point2.case:SetSize(60,60)
-				point2.case:SetRotation(degreesToRadians(5*posMod))
-				point2.case:SetTexture(GetMedia("point_plate"))
-	
-				point3:SetPoint("CENTER", -231*posMod,-79)
-				point3:SetSize(13,13)
-				point3:SetStatusBarTexture(GetMedia("point_crystal"))
-				point3:GetStatusBarTexture():SetRotation(degreesToRadians(4*posMod))
-				point3.slotTexture:SetTexture(GetMedia("point_crystal"))
-				point3.slotTexture:SetRotation(degreesToRadians(4*posMod))
-				point3.case:SetPoint("CENTER", 0,0)
-				point3.case:SetSize(60,60)
-				point3.case:SetRotation(degreesToRadians(4*posMod))
-				point3.case:SetTexture(GetMedia("point_plate"))
-			
-				point4:SetPoint("CENTER", -225*posMod,-44)
-				point4:SetSize(13,13)
-				point4:SetStatusBarTexture(GetMedia("point_crystal"))
-				point4:GetStatusBarTexture():SetRotation(degreesToRadians(3*posMod))
-				point4.slotTexture:SetTexture(GetMedia("point_crystal"))
-				point4.slotTexture:SetRotation(degreesToRadians(3*posMod))
-				point4.case:SetPoint("CENTER", 0, 0)
-				point4.case:SetSize(60,60)
-				point4.case:SetRotation(0)
-				point4.case:SetTexture(GetMedia("point_plate"))
-			
-				point5:SetPoint("CENTER", -203*posMod,-11)
-				point5:SetSize(14,21)
-				point5:SetStatusBarTexture(GetMedia("point_crystal"))
-				point5:GetStatusBarTexture():SetRotation(degreesToRadians(1*posMod))
-				point5.slotTexture:SetTexture(GetMedia("point_crystal"))
-				point5.slotTexture:SetRotation(degreesToRadians(1*posMod))
-				point5.case:SetRotation(degreesToRadians(1*posMod))
-				point5.case:SetPoint("CENTER",0,0)
-				point5.case:SetSize(82,96)
-				point5.case:SetRotation(degreesToRadians(1*posMod))
-				point5.case:SetTexture(GetMedia("point_diamond"))
-	
-			elseif (style == "Chi") then
-				local point1, point2, point3, point4, point5 = element[1], element[2], element[3], element[4], element[5]
-	
-				point1:SetPoint("CENTER", -203*posMod,-137)
-				point1:SetSize(13,13)
-				point1:SetStatusBarTexture(GetMedia("point_crystal"))
-				point1:GetStatusBarTexture():SetRotation(degreesToRadians(6*posMod))
-				point1.slotTexture:SetTexture(GetMedia("point_crystal"))
-				point1.slotTexture:SetRotation(degreesToRadians(6*posMod))
-				point1.case:SetPoint("CENTER", 0, 0)
-				point1.case:SetSize(58,58)
-				point1.case:SetRotation(degreesToRadians(6*posMod))
-				point1.case:SetTexture(GetMedia("point_plate"))
-	
-				point2:SetPoint("CENTER", -223*posMod,-109)
-				point2:SetSize(13,13)
-				point2:SetStatusBarTexture(GetMedia("point_crystal"))
-				point2:GetStatusBarTexture():SetRotation(degreesToRadians(5*posMod))
-				point2.slotTexture:SetTexture(GetMedia("point_crystal"))
-				point2.slotTexture:SetRotation(degreesToRadians(5*posMod))
-				point2.case:SetPoint("CENTER", 0, 0)
-				point2.case:SetSize(60,60)
-				point2.case:SetRotation(degreesToRadians(5*posMod))
-				point2.case:SetTexture(GetMedia("point_plate"))
-	
-				point3:SetPoint("CENTER", -234*posMod,-73)
-				point3:SetSize(39,40)
-				point3:SetStatusBarTexture(GetMedia("point_hearth"))
-				point3:GetStatusBarTexture():SetRotation(0)
-				point3.slotTexture:SetTexture(GetMedia("point_hearth"))
-				point3.slotTexture:SetRotation(0)
-				point3.case:SetPoint("CENTER", 0,0)
-				point3.case:SetSize(80,80)
-				point3.case:SetRotation(0)
-				point3.case:SetTexture(GetMedia("point_plate"))
-			
-				point4:SetPoint("CENTER", -221*posMod,-36)
-				point4:SetSize(13,13)
-				point4:SetStatusBarTexture(GetMedia("point_crystal"))
-				point4:GetStatusBarTexture():SetRotation(0)
-				point4.slotTexture:SetTexture(GetMedia("point_crystal"))
-				point4.slotTexture:SetRotation(0)
-				point4.case:SetPoint("CENTER", 0, 0)
-				point4.case:SetSize(60,60)
-				point4.case:SetRotation(0)
-				point4.case:SetTexture(GetMedia("point_plate"))
-			
-				point5:SetPoint("CENTER", -203*posMod,-9)
-				point5:SetSize(13,13)
-				point5:SetStatusBarTexture(GetMedia("point_crystal"))
-				point5:GetStatusBarTexture():SetRotation(0)
-				point5.slotTexture:SetTexture(GetMedia("point_crystal"))
-				point5.slotTexture:SetRotation(0)
-				point5.case:SetPoint("CENTER",0, 0)
-				point5.case:SetSize(60,60)
-				point5.case:SetRotation(0)
-				point5.case:SetTexture(GetMedia("point_plate"))
-	
-			elseif (style == "SoulShards") then 
-				local point1, point2, point3, point4, point5 = element[1], element[2], element[3], element[4], element[5]
-	
-				point1:SetPoint("CENTER", -203*posMod,-137)
-				point1:SetSize(12,12)
-				point1:SetStatusBarTexture(GetMedia("point_crystal"))
-				point1:GetStatusBarTexture():SetRotation(degreesToRadians(6*posMod))
-				point1.slotTexture:SetTexture(GetMedia("point_crystal"))
-				point1.slotTexture:SetRotation(degreesToRadians(6*posMod))
-				point1.case:SetPoint("CENTER", 0, 0)
-				point1.case:SetSize(54,54)
-				point1.case:SetRotation(degreesToRadians(6*posMod))
-				point1.case:SetTexture(GetMedia("point_plate"))
-	
-				point2:SetPoint("CENTER", -221*posMod,-111)
-				point2:SetSize(13,13)
-				point2:SetStatusBarTexture(GetMedia("point_crystal"))
-				point2:GetStatusBarTexture():SetRotation(degreesToRadians(5*posMod))
-				point2.slotTexture:SetTexture(GetMedia("point_crystal"))
-				point2.slotTexture:SetRotation(degreesToRadians(5*posMod))
-				point2.case:SetPoint("CENTER", 0, 0)
-				point2.case:SetSize(60,60)
-				point2.case:SetRotation(degreesToRadians(5*posMod))
-				point2.case:SetTexture(GetMedia("point_plate"))
-	
-				point3:SetPoint("CENTER", -235*posMod,-80)
-				point3:SetSize(11,15)
-				point3:SetStatusBarTexture(GetMedia("point_crystal"))
-				point3:GetStatusBarTexture():SetRotation(degreesToRadians(3*posMod))
-				point3.slotTexture:SetTexture(GetMedia("point_crystal"))
-				point3.slotTexture:SetRotation(degreesToRadians(3*posMod))
-				point3.case:SetPoint("CENTER",0,0)
-				point3.case:SetSize(65,60)
-				point3.case:SetRotation(degreesToRadians(3*posMod))
-				point3.case:SetTexture(GetMedia("point_diamond"))
-			
-				point4:SetPoint("CENTER", -227*posMod,-44)
-				point4:SetSize(12,18)
-				point4:SetStatusBarTexture(GetMedia("point_crystal"))
-				point4:GetStatusBarTexture():SetRotation(degreesToRadians(3*posMod))
-				point4.slotTexture:SetTexture(GetMedia("point_crystal"))
-				point4.slotTexture:SetRotation(degreesToRadians(3*posMod))
-				point4.case:SetPoint("CENTER",0,0)
-				point4.case:SetSize(78,79)
-				point4.case:SetRotation(degreesToRadians(3*posMod))
-				point4.case:SetTexture(GetMedia("point_diamond"))
-			
-				point5:SetPoint("CENTER", -203*posMod,-11)
-				point5:SetSize(14,21)
-				point5:SetStatusBarTexture(GetMedia("point_crystal"))
-				point5:GetStatusBarTexture():SetRotation(degreesToRadians(1*posMod))
-				point5.slotTexture:SetTexture(GetMedia("point_crystal"))
-				point5.slotTexture:SetRotation(degreesToRadians(1*posMod))
-				point5.case:SetRotation(degreesToRadians(1*posMod))
-				point5.case:SetPoint("CENTER",0,0)
-				point5.case:SetSize(82,96)
-				point5.case:SetRotation(degreesToRadians(1*posMod))
-				point5.case:SetTexture(GetMedia("point_diamond"))
-	
-	
-				-- 1.414213562
-			elseif (style == "Stagger") then 
-				local point1, point2, point3 = element[1], element[2], element[3]
-	
-				point1:SetPoint("CENTER", -223*posMod,-109)
-				point1:SetSize(13,13)
-				point1:SetStatusBarTexture(GetMedia("point_crystal"))
-				point1:GetStatusBarTexture():SetRotation(degreesToRadians(5*posMod))
-				point1.slotTexture:SetTexture(GetMedia("point_crystal"))
-				point1.slotTexture:SetRotation(degreesToRadians(5*posMod))
-				point1.case:SetPoint("CENTER", 0, 0)
-				point1.case:SetSize(60,60)
-				point1.case:SetRotation(degreesToRadians(5*posMod))
-				point1.case:SetTexture(GetMedia("point_plate"))
-	
-				point2:SetPoint("CENTER", -234*posMod,-73)
-				point2:SetSize(39,40)
-				point2:SetStatusBarTexture(GetMedia("point_hearth"))
-				point2:GetStatusBarTexture():SetRotation(0)
-				point2.slotTexture:SetTexture(GetMedia("point_hearth"))
-				point2.slotTexture:SetRotation(0)
-				point2.case:SetPoint("CENTER", 0,0)
-				point2.case:SetSize(80,80)
-				point2.case:SetRotation(0)
-				point2.case:SetTexture(GetMedia("point_plate"))
-			
-				point3:SetPoint("CENTER", -221*posMod,-36)
-				point3:SetSize(13,13)
-				point3:SetStatusBarTexture(GetMedia("point_crystal"))
-				point3:GetStatusBarTexture():SetRotation(0)
-				point3.slotTexture:SetTexture(GetMedia("point_crystal"))
-				point3.slotTexture:SetRotation(0)
-				point3.case:SetPoint("CENTER", 0, 0)
-				point3.case:SetSize(60,60)
-				point3.case:SetRotation(0)
-				point3.case:SetTexture(GetMedia("point_plate"))
-	
-	
-			elseif (style == "Runes") then 
-				local point1, point2, point3, point4, point5, point6 = element[1], element[2], element[3], element[4], element[5], element[6]
-	
-				point1:SetPoint("CENTER", -203*posMod,-131)
-				point1:SetSize(28,28)
-				point1:SetStatusBarTexture(GetMedia("point_rune2"))
-				point1:GetStatusBarTexture():SetRotation(0)
-				point1.slotTexture:SetTexture(GetMedia("point_rune2"))
-				point1.slotTexture:SetRotation(0)
-				point1.case:SetPoint("CENTER", 0, 0)
-				point1.case:SetSize(58,58)
-				point1.case:SetRotation(0)
-				point1.case:SetTexture(GetMedia("point_dk_block"))
-	
-				point2:SetPoint("CENTER", -227*posMod,-107)
-				point2:SetSize(28,28)
-				point2:SetStatusBarTexture(GetMedia("point_rune4"))
-				point2:GetStatusBarTexture():SetRotation(0)
-				point2.slotTexture:SetTexture(GetMedia("point_rune4"))
-				point2.slotTexture:SetRotation(0)
-				point2.case:SetPoint("CENTER", 0, 0)
-				point2.case:SetSize(68,68)
-				point2.case:SetRotation(0)
-				point2.case:SetTexture(GetMedia("point_dk_block"))
-	
-				point3:SetPoint("CENTER", -253*posMod,-83)
-				point3:SetSize(30,30)
-				point3:SetStatusBarTexture(GetMedia("point_rune1"))
-				point3:GetStatusBarTexture():SetRotation(0)
-				point3.slotTexture:SetTexture(GetMedia("point_rune1"))
-				point3.slotTexture:SetRotation(0)
-				point3.case:SetPoint("CENTER", 0,0)
-				point3.case:SetSize(74,74)
-				point3.case:SetRotation(0)
-				point3.case:SetTexture(GetMedia("point_dk_block"))
-			
-				point4:SetPoint("CENTER", -220*posMod,-64)
-				point4:SetSize(28,28)
-				point4:SetStatusBarTexture(GetMedia("point_rune3"))
-				point4:GetStatusBarTexture():SetRotation(0)
-				point4.slotTexture:SetTexture(GetMedia("point_rune3"))
-				point4.slotTexture:SetRotation(0)
-				point4.case:SetPoint("CENTER", 0, 0)
-				point4.case:SetSize(68,68)
-				point4.case:SetRotation(0)
-				point4.case:SetTexture(GetMedia("point_dk_block"))
-	
-				point5:SetPoint("CENTER", -246*posMod,-38)
-				point5:SetSize(32,32)
-				point5:SetStatusBarTexture(GetMedia("point_rune2"))
-				point5:GetStatusBarTexture():SetRotation(0)
-				point5.slotTexture:SetTexture(GetMedia("point_rune2"))
-				point5.slotTexture:SetRotation(0)
-				point5.case:SetPoint("CENTER", 0, 0)
-				point5.case:SetSize(78,78)
-				point5.case:SetRotation(0)
-				point5.case:SetTexture(GetMedia("point_dk_block"))
-	
-				point6:SetPoint("CENTER", -214*posMod,-10)
-				point6:SetSize(40,40)
-				point6:SetStatusBarTexture(GetMedia("point_rune1"))
-				point6:GetStatusBarTexture():SetRotation(0)
-				point6.slotTexture:SetTexture(GetMedia("point_rune1"))
-				point6.slotTexture:SetRotation(0)
-				point6.case:SetPoint("CENTER", 0, 0)
-				point6.case:SetSize(98,98)
-				point6.case:SetRotation(0)
-				point6.case:SetTexture(GetMedia("point_dk_block"))
-	
-			end 
-	
-			-- Store the element's full stylestring
-			element.powerStyle = style
-		end 
-	end
+	ClassPowerSize = { 2,2 }, 
+	IgnoreMouseOver = true, 
+	Place = { "BOTTOMLEFT", 75, 127 },
+	Size = { 103, 103 }
 }
 
 -- 2-5 player groups
 Layouts.UnitFrameParty = setmetatable({
+	AlternateGroupAnchor = "BOTTOMLEFT", 
+	AlternateGrowthX = 140, -- Horizontal growth per new unit
+	AlternateGrowthY = 0, -- Vertical growth per new unit
+	AlternatePlace = { "BOTTOMLEFT", "UICenter", "BOTTOMLEFT", 56, 360 + 10 }, -- Position of the healermode frame
 	
-	Size = { 130, 130 }, -- Add room for portraits
 	Place = { "TOPLEFT", "UICenter", "TOPLEFT", 50, -42 }, -- Position of the initial frame
 	GroupAnchor = "TOPLEFT", 
 	GrowthX = 130, -- Horizontal growth per new unit
 	GrowthY = 0, -- Vertical growth per new unit
-	AlternatePlace = { "BOTTOMLEFT", "UICenter", "BOTTOMLEFT", 56, 360 + 10 }, -- Position of the healermode frame
-	AlternateGroupAnchor = "BOTTOMLEFT", 
-	AlternateGrowthX = 140, -- Horizontal growth per new unit
-	AlternateGrowthY = 0, -- Vertical growth per new unit
 	
 	HealthColorTapped = false, -- color tap denied units 
 	HealthColorDisconnected = true, -- color disconnected units
@@ -3443,7 +3140,6 @@ Layouts.UnitFrameParty = setmetatable({
 	PortraitForegroundTexture = GetMedia("party_portrait_border"), 
 	PortraitForegroundDrawLayer = { "BACKGROUND", 0 },
 	PortraitForegroundColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
-
 		
 	AuraProperties = {
 		growthX = "RIGHT", 
@@ -3481,6 +3177,7 @@ Layouts.UnitFrameParty = setmetatable({
 	AuraBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 12 },
 	AuraBorderBackdropColor = { 0, 0, 0, 0 },
 	AuraBorderBackdropBorderColor = { Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3 },
+	Size = { 130, 130 }, 
 
 	-- Prio #1
 	GroupAuraSize = { 36, 36 },
