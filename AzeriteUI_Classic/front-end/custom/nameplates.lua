@@ -277,8 +277,6 @@ Module.OnInit = function(self)
 end 
 
 Module.OnEnable = function(self)
-	if self.layout.UseNamePlates then
-		self:StartNamePlateEngine()
-		self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
-	end
+	self:StartNamePlateEngine()
+	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
 end 
