@@ -767,30 +767,19 @@ local positionHeaderFrame = function(self, unit, id, layout)
 end
 
 -- Boss, Pet, ToT
-local StyleSmallFrame = function(self, unit, id, Layout, ...)
-
-	-- Frame
-	-----------------------------------------------------------
-	self:SetSize(unpack(Layout.Size)) 
-
-	if (unit:match("^arena(%d+)")) or (unit:match("^boss(%d+)")) then 
-		positionHeaderFrame(self, unit, id, Layout)
-	else
-		self:Place(unpack(Layout.Place)) 
-	end 
-
-	if Layout.FrameLevel then 
-		self:SetFrameLevel(self:GetFrameLevel() + Layout.FrameLevel)
-	end 
-
-	if Layout.HitRectInsets then 
-		self:SetHitRectInsets(unpack(Layout.HitRectInsets))
-	else 
-		self:SetHitRectInsets(0, 0, 0, 0)
-	end 
+local StyleSmallFrame = function(self, unit, id, layout, ...)
 
 	self.colors = Colors
-	self.layout = Layout
+	self.layout = layout
+
+	self:SetSize(unpack(layout.Size)) 
+	self:SetFrameLevel(self:GetFrameLevel() + layout.FrameLevel)
+
+	if (unit:match("^boss(%d+)")) then 
+		positionHeaderFrame(self, unit, id, layout)
+	else
+		self:Place(unpack(layout.Place)) 
+	end 
 
 	-- Scaffolds
 	-----------------------------------------------------------
@@ -811,317 +800,118 @@ local StyleSmallFrame = function(self, unit, id, Layout, ...)
 
 	-- Health Bar
 	-----------------------------------------------------------	
-	local health 
-
-	if (Layout.HealthType == "Orb") then 
-		health = content:CreateOrb()
-
-	elseif (Layout.HealthType == "SpinBar") then 
-		health = content:CreateSpinBar()
-
-	else 
-		health = content:CreateStatusBar()
-		health:SetOrientation(Layout.HealthBarOrientation or "RIGHT") 
-		health:SetFlippedHorizontally(Layout.HealthBarSetFlippedHorizontally)
-		if Layout.HealthBarSparkMap then 
-			health:SetSparkMap(Layout.HealthBarSparkMap) -- set the map the spark follows along the bar.
-		end 
-	end 
-
-	health:SetStatusBarTexture(Layout.HealthBarTexture)
-	health:SetSize(unpack(Layout.HealthSize))
-	health:Place(unpack(Layout.HealthPlace))
-	health:SetSmoothingMode(Layout.HealthSmoothingMode or "bezier-fast-in-slow-out") -- set the smoothing mode.
-	health:SetSmoothingFrequency(Layout.HealthSmoothingFrequency or .5) -- set the duration of the smoothing.
-	health.colorTapped = Layout.HealthColorTapped  -- color tap denied units 
-	health.colorDisconnected = Layout.HealthColorDisconnected -- color disconnected units
-	health.colorClass = Layout.HealthColorClass -- color players by class 
-	health.colorPetAsPlayer = Layout.HealthColorPetAsPlayer -- color your pet as you
-	health.colorReaction = Layout.HealthColorReaction -- color NPCs by their reaction standing with us
-	health.colorHealth = Layout.HealthColorHealth -- color anything else in the default health color
-	health.frequent = Layout.HealthFrequentUpdates -- listen to frequent health events for more accurate updates
-
+	local health = content:CreateStatusBar()
+	health:SetOrientation(layout.HealthBarOrientation or "RIGHT") 
+	health:SetFlippedHorizontally(layout.HealthBarSetFlippedHorizontally)
+	health:SetSparkMap(layout.HealthBarSparkMap) 
+	health:SetStatusBarTexture(layout.HealthBarTexture)
+	health:SetSize(unpack(layout.HealthSize))
+	health:Place(unpack(layout.HealthPlace))
+	health:SetSmoothingMode(layout.HealthSmoothingMode or "bezier-fast-in-slow-out") 
+	health:SetSmoothingFrequency(layout.HealthSmoothingFrequency or .5) 
+	health.colorTapped = layout.HealthColorTapped  -- color tap denied units 
+	health.colorDisconnected = layout.HealthColorDisconnected -- color disconnected units
+	health.colorClass = layout.HealthColorClass -- color players by class 
+	health.colorPetAsPlayer = layout.HealthColorPetAsPlayer -- color your pet as you
+	health.colorReaction = layout.HealthColorReaction -- color NPCs by their reaction standing with us
+	health.colorHealth = layout.HealthColorHealth -- color anything else in the default health color
+	health.frequent = layout.HealthFrequentUpdates -- listen to frequent health events for more accurate updates
 	self.Health = health
-	self.Health.PostUpdate = Layout.HealthBarPostUpdate
+	self.Health.PostUpdate = layout.HealthBarPostUpdate
 	
-	if Layout.UseHealthBackdrop then 
-		local healthBg = health:CreateTexture()
-		healthBg:SetDrawLayer(unpack(Layout.HealthBackdropDrawLayer))
-		healthBg:SetSize(unpack(Layout.HealthBackdropSize))
-		healthBg:SetPoint(unpack(Layout.HealthBackdropPlace))
-		healthBg:SetTexture(Layout.HealthBackdropTexture)
-		if Layout.HealthBackdropColor then 
-			healthBg:SetVertexColor(unpack(Layout.HealthBackdropColor))
-		end
-		self.Health.Bg = healthBg
-	end 
+	local healthBg = health:CreateTexture()
+	healthBg:SetDrawLayer(unpack(layout.HealthBackdropDrawLayer))
+	healthBg:SetSize(unpack(layout.HealthBackdropSize))
+	healthBg:SetPoint(unpack(layout.HealthBackdropPlace))
+	healthBg:SetTexture(layout.HealthBackdropTexture)
+	healthBg:SetVertexColor(unpack(layout.HealthBackdropColor))
+	self.Health.Bg = healthBg
 
-	-- Power 
-	-----------------------------------------------------------
-	if Layout.UsePowerBar then 
-		local power = backdrop:CreateStatusBar()
-		power:SetSize(unpack(Layout.PowerSize))
-		power:Place(unpack(Layout.PowerPlace))
-		power:SetStatusBarTexture(Layout.PowerBarTexture)
-		power:SetTexCoord(unpack(Layout.PowerBarTexCoord))
-		power:SetOrientation(Layout.PowerBarOrientation or "RIGHT") -- set the bar to grow towards the top.
-		power:SetSmoothingMode(Layout.PowerBarSmoothingMode) -- set the smoothing mode.
-		power:SetSmoothingFrequency(Layout.PowerBarSmoothingFrequency or .5) -- set the duration of the smoothing.
-
-		if Layout.PowerBarSparkMap then 
-			power:SetSparkMap(Layout.PowerBarSparkMap) -- set the map the spark follows along the bar.
-		end 
-
-		power.ignoredResource = Layout.PowerIgnoredResource -- make the bar hide when MANA is the primary resource. 
-
-		self.Power = power
-		self.Power.OverrideColor = OverridePowerColor
-
-		if Layout.UsePowerBackground then 
-			local powerBg = power:CreateTexture()
-			powerBg:SetDrawLayer(unpack(Layout.PowerBackgroundDrawLayer))
-			powerBg:SetSize(unpack(Layout.PowerBackgroundSize))
-			powerBg:SetPoint(unpack(Layout.PowerBackgroundPlace))
-			powerBg:SetTexture(Layout.PowerBackgroundTexture)
-			powerBg:SetVertexColor(unpack(Layout.PowerBackgroundColor)) 
-			self.Power.Bg = powerBg
-		end
-
-		if Layout.UsePowerForeground then 
-			local powerFg = power:CreateTexture()
-			powerFg:SetSize(unpack(Layout.PowerForegroundSize))
-			powerFg:SetPoint(unpack(Layout.PowerForegroundPlace))
-			powerFg:SetDrawLayer(unpack(Layout.PowerForegroundDrawLayer))
-			powerFg:SetTexture(Layout.PowerForegroundTexture)
-			self.Power.Fg = powerFg
-		end
-	end 
-
+	-- Health Value
+	local healthPerc = health:CreateFontString()
+	healthPerc:SetPoint(unpack(layout.HealthPercentPlace))
+	healthPerc:SetDrawLayer(unpack(layout.HealthPercentDrawLayer))
+	healthPerc:SetJustifyH(layout.HealthPercentJustifyH)
+	healthPerc:SetJustifyV(layout.HealthPercentJustifyV)
+	healthPerc:SetFontObject(layout.HealthPercentFont)
+	healthPerc:SetTextColor(unpack(layout.HealthPercentColor))
+	self.Health.ValuePercent = healthPerc
+	
 	-- Cast Bar
 	-----------------------------------------------------------
-	if Layout.UseCastBar then
-		local cast = content:CreateStatusBar()
-		cast:SetSize(unpack(Layout.CastBarSize))
-		cast:SetFrameLevel(health:GetFrameLevel() + 1)
-		cast:Place(unpack(Layout.CastBarPlace))
-		cast:SetOrientation(Layout.CastBarOrientation) -- set the bar to grow towards the right.
-		cast:SetSmoothingMode(Layout.CastBarSmoothingMode) -- set the smoothing mode.
-		cast:SetSmoothingFrequency(Layout.CastBarSmoothingFrequency)
-		cast:SetStatusBarColor(unpack(Layout.CastBarColor)) -- the alpha won't be overwritten. 
-		cast:SetStatusBarTexture(Layout.CastBarTexture)
+	local cast = content:CreateStatusBar()
+	cast:SetSize(unpack(layout.CastBarSize))
+	cast:SetFrameLevel(health:GetFrameLevel() + 1)
+	cast:Place(unpack(layout.CastBarPlace))
+	cast:SetOrientation(layout.CastBarOrientation) 
+	cast:SetSmoothingMode(layout.CastBarSmoothingMode) 
+	cast:SetSmoothingFrequency(layout.CastBarSmoothingFrequency)
+	cast:SetStatusBarColor(unpack(layout.CastBarColor)) 
+	cast:SetStatusBarTexture(layout.CastBarTexture)
+	cast:SetSparkMap(layout.CastBarSparkMap) 
+	self.Cast = cast
+	self.Cast.PostUpdate = layout.CastBarPostUpdate
 
-		if Layout.CastBarSparkMap then 
-			cast:SetSparkMap(Layout.CastBarSparkMap) -- set the map the spark follows along the bar.
-		end
-
-		self.Cast = cast
-		self.Cast.PostUpdate = Layout.CastBarPostUpdate
-	end 
-
+	-- Cast Name
+	local name = (layout.CastBarNameParent and self[layout.CastBarNameParent] or overlay):CreateFontString()
+	name:SetPoint(unpack(layout.CastBarNamePlace))
+	name:SetFontObject(layout.CastBarNameFont)
+	name:SetDrawLayer(unpack(layout.CastBarNameDrawLayer))
+	name:SetJustifyH(layout.CastBarNameJustifyH)
+	name:SetJustifyV(layout.CastBarNameJustifyV)
+	name:SetTextColor(unpack(layout.CastBarNameColor))
+	name:SetSize(unpack(layout.CastBarNameSize))
+	self.Cast.Name = name
+	
 	-- Target Highlighting
 	-----------------------------------------------------------
-	if Layout.UseTargetHighlight then
+	local owner = layout.TargetHighlightParent and self[layout.TargetHighlightParent] or self
+	local targetHighlightFrame = CreateFrame("Frame", nil, owner)
+	targetHighlightFrame:SetAllPoints()
+	targetHighlightFrame:SetIgnoreParentAlpha(true)
 
-		-- Add an extra frame to break away from alpha changes
-		local owner = (Layout.TargetHighlightParent and self[Layout.TargetHighlightParent] or self)
-		local targetHighlightFrame = CreateFrame("Frame", nil, owner)
-		targetHighlightFrame:SetAllPoints()
-		targetHighlightFrame:SetIgnoreParentAlpha(true)
+	local targetHighlight = targetHighlightFrame:CreateTexture()
+	targetHighlight:SetDrawLayer(unpack(layout.TargetHighlightDrawLayer))
+	targetHighlight:SetSize(unpack(layout.TargetHighlightSize))
+	targetHighlight:SetPoint(unpack(layout.TargetHighlightPlace))
+	targetHighlight:SetTexture(layout.TargetHighlightTexture)
+	targetHighlight.showTarget = layout.TargetHighlightShowTarget
+	targetHighlight.colorTarget = layout.TargetHighlightTargetColor
+	self.TargetHighlight = targetHighlight
 
-		local targetHighlight = targetHighlightFrame:CreateTexture()
-		targetHighlight:SetDrawLayer(unpack(Layout.TargetHighlightDrawLayer))
-		targetHighlight:SetSize(unpack(Layout.TargetHighlightSize))
-		targetHighlight:SetPoint(unpack(Layout.TargetHighlightPlace))
-		targetHighlight:SetTexture(Layout.TargetHighlightTexture)
-		targetHighlight.showTarget = Layout.TargetHighlightShowTarget
-		targetHighlight.colorTarget = Layout.TargetHighlightTargetColor
-
-		self.TargetHighlight = targetHighlight
-	end
-
-	-- Unit Status
-	-----------------------------------------------------------
-	if Layout.UseUnitStatus then 
-		local unitStatus = overlay:CreateFontString()
-		unitStatus:SetPoint(unpack(Layout.UnitStatusPlace))
-		unitStatus:SetDrawLayer(unpack(Layout.UnitStatusDrawLayer))
-		unitStatus:SetJustifyH(Layout.UnitStatusJustifyH)
-		unitStatus:SetJustifyV(Layout.UnitStatusJustifyV)
-		unitStatus:SetFontObject(Layout.UnitStatusFont)
-		unitStatus:SetTextColor(unpack(Layout.UnitStatusColor))
-		unitStatus.hideAFK = Layout.UnitStatusHideAFK
-		unitStatus.hideDead = Layout.UnitStatusHideDead
-		unitStatus.hideOffline = Layout.UnitStatusHideOffline
-		unitStatus.afkMsg = Layout.UseUnitStatusMessageAFK
-		unitStatus.deadMsg = Layout.UseUnitStatusMessageDead
-		unitStatus.offlineMsg = Layout.UseUnitStatusMessageDC
-		unitStatus.oomMsg = Layout.UseUnitStatusMessageOOM
-		if Layout.UnitStatusSize then 
-			unitStatus:SetSize(unpack(Layout.UnitStatusSize))
-		end 
-		self.UnitStatus = unitStatus
-		self.UnitStatus.PostUpdate = Layout.UnitStatusPostUpdate
-	end 
-		
 	-- Auras
 	-----------------------------------------------------------
-	if Layout.UseAuras then 
+	if (layout.AuraProperties) then 
 		local auras = content:CreateFrame("Frame")
-		auras:Place(unpack(Layout.AuraFramePlace))
-		auras:SetSize(unpack(Layout.AuraFrameSize)) -- auras will be aligned in the available space, this size gives us 8x1 auras
-		auras.auraSize = Layout.AuraSize -- size of the aura. assuming squares. 
-		auras.spacingH = Layout.AuraSpaceH -- horizontal/column spacing between buttons
-		auras.spacingV = Layout.AuraSpaceV -- vertical/row spacing between aura buttons
-		auras.growthX = Layout.AuraGrowthX -- auras grow to the left
-		auras.growthY = Layout.AuraGrowthY -- rows grow downwards (we just have a single row, though)
-		auras.maxVisible = Layout.AuraMax -- when set will limit the number of buttons regardless of space available
-		auras.maxBuffs = Layout.AuraMaxBuffs -- maximum number of visible buffs
-		auras.maxDebuffs = Layout.AuraMaxDebuffs -- maximum number of visible debuffs
-		auras.debuffsFirst = Layout.AuraDebuffsFirst -- show debuffs before buffs
-		auras.showCooldownSpiral = Layout.ShowAuraCooldownSpirals -- don't show the spiral as a timer
-		auras.showCooldownTime = Layout.ShowAuraCooldownTime -- show timer numbers
-		auras.auraFilterString = Layout.auraFilterFunc -- general aura filter, only used if the below aren't here
-		auras.buffFilterString = Layout.AuraBuffFilter -- buff specific filter passed to blizzard API calls
-		auras.debuffFilterString = Layout.AuraDebuffFilter -- debuff specific filter passed to blizzard API calls
-		auras.auraFilterFunc = Layout.auraFilterFuncFunc -- general aura filter function, called when the below aren't there
-		auras.buffFilterFunc = Layout.buffFilterFuncFunc -- buff specific filter function
-		auras.debuffFilterFunc = Layout.debuffFilterFuncFunc -- debuff specific filter function
-		auras.tooltipDefaultPosition = Layout.AuraTooltipDefaultPosition
-		auras.tooltipPoint = Layout.AuraTooltipPoint
-		auras.tooltipAnchor = Layout.AuraTooltipAnchor
-		auras.tooltipRelPoint = Layout.AuraTooltipRelPoint
-		auras.tooltipOffsetX = Layout.AuraTooltipOffsetX
-		auras.tooltipOffsetY = Layout.AuraTooltipOffsetY
-			
+		auras:Place(unpack(layout.AuraFramePlace))
+		auras:SetSize(unpack(layout.AuraFrameSize))
+		for property,value in pairs(layout.AuraProperties) do 
+			auras[property] = value
+		end
 		self.Auras = auras
 		self.Auras.PostCreateButton = PostCreateAuraButton -- post creation styling
 		self.Auras.PostUpdateButton = PostUpdateAuraButton -- post updates when something changes (even timers)
 	end 
 
-	if Layout.UseBuffs then 
-		local buffs = content:CreateFrame("Frame")
-		buffs:Place(unpack(Layout.BuffFramePlace))
-		buffs:SetSize(unpack(Layout.BuffFrameSize)) -- auras will be aligned in the available space, this size gives us 8x1 auras
-		buffs.auraSize = Layout.BuffSize -- size of the aura. assuming squares. 
-		buffs.spacingH = Layout.BuffSpaceH -- horizontal/column spacing between buttons
-		buffs.spacingV = Layout.BuffSpaceV -- vertical/row spacing between aura buttons
-		buffs.growthX = Layout.BuffGrowthX -- auras grow to the left
-		buffs.growthY = Layout.BuffGrowthY -- rows grow downwards (we just have a single row, though)
-		buffs.maxVisible = Layout.BuffMax -- when set will limit the number of buttons regardless of space available
-		buffs.showCooldownSpiral = Layout.ShowBuffCooldownSpirals -- don't show the spiral as a timer
-		buffs.showCooldownTime = Layout.ShowBuffCooldownTime -- show timer numbers
-		buffs.buffFilterString = Layout.buffFilterFunc -- buff specific filter passed to blizzard API calls
-		buffs.buffFilterFunc = Layout.buffFilterFuncFunc -- buff specific filter function
-		buffs.tooltipDefaultPosition = Layout.BuffTooltipDefaultPosition
-		buffs.tooltipPoint = Layout.BuffTooltipPoint
-		buffs.tooltipAnchor = Layout.BuffTooltipAnchor
-		buffs.tooltipRelPoint = Layout.BuffTooltipRelPoint
-		buffs.tooltipOffsetX = Layout.BuffTooltipOffsetX
-		buffs.tooltipOffsetY = Layout.BuffTooltipOffsetY
-			
-		self.Buffs = buffs
-		self.Buffs.PostCreateButton = PostCreateAuraButton -- post creation styling
-		self.Buffs.PostUpdateButton = PostUpdateAuraButton -- post updates when something changes (even timers)
-	end 
-
-	if Layout.UseDebuffs then 
-		local debuffs = content:CreateFrame("Frame")
-		debuffs:Place(unpack(Layout.DebuffFramePlace))
-		debuffs:SetSize(unpack(Layout.DebuffFrameSize)) -- auras will be aligned in the available space, this size gives us 8x1 auras
-		debuffs.auraSize = Layout.DebuffSize -- size of the aura. assuming squares. 
-		debuffs.spacingH = Layout.DebuffSpaceH -- horizontal/column spacing between buttons
-		debuffs.spacingV = Layout.DebuffSpaceV -- vertical/row spacing between aura buttons
-		debuffs.growthX = Layout.DebuffGrowthX -- auras grow to the left
-		debuffs.growthY = Layout.DebuffGrowthY -- rows grow downwards (we just have a single row, though)
-		debuffs.maxVisible = Layout.DebuffMax -- when set will limit the number of buttons regardless of space available
-		debuffs.showCooldownSpiral = Layout.ShowDebuffCooldownSpirals -- don't show the spiral as a timer
-		debuffs.showCooldownTime = Layout.ShowDebuffCooldownTime -- show timer numbers
-		debuffs.debuffFilterString = Layout.debuffFilterFunc -- debuff specific filter passed to blizzard API calls
-		debuffs.debuffFilterFunc = Layout.debuffFilterFuncFunc -- debuff specific filter function
-		debuffs.tooltipDefaultPosition = Layout.DebuffTooltipDefaultPosition
-		debuffs.tooltipPoint = Layout.DebuffTooltipPoint
-		debuffs.tooltipAnchor = Layout.DebuffTooltipAnchor
-		debuffs.tooltipRelPoint = Layout.DebuffTooltipRelPoint
-		debuffs.tooltipOffsetX = Layout.DebuffTooltipOffsetX
-		debuffs.tooltipOffsetY = Layout.DebuffTooltipOffsetY
-			
-		self.Debuffs = debuffs
-		self.Debuffs.PostCreateButton = PostCreateAuraButton -- post creation styling
-		self.Debuffs.PostUpdateButton = PostUpdateAuraButton -- post updates when something changes (even timers)
-	end 
-
-	-- Texts
-	-----------------------------------------------------------
 	-- Unit Name
-	if Layout.UseName then 
+	if layout.NamePlace then 
 		local name = overlay:CreateFontString()
-		name:SetPoint(unpack(Layout.NamePlace))
-		name:SetDrawLayer(unpack(Layout.NameDrawLayer))
-		name:SetJustifyH(Layout.NameJustifyH)
-		name:SetJustifyV(Layout.NameJustifyV)
-		name:SetFontObject(Layout.NameFont)
-		name:SetTextColor(unpack(Layout.NameColor))
-		if Layout.NameSize then 
-			name:SetSize(unpack(Layout.NameSize))
-		end 
+		name:SetPoint(unpack(layout.NamePlace))
+		name:SetDrawLayer(unpack(layout.NameDrawLayer))
+		name:SetJustifyH(layout.NameJustifyH)
+		name:SetJustifyV(layout.NameJustifyV)
+		name:SetFontObject(layout.NameFont)
+		name:SetTextColor(unpack(layout.NameColor))
 		self.Name = name
 	end 
 
-	-- Health Value
-	if Layout.UseHealthValue then 
-		local healthVal = health:CreateFontString()
-		healthVal:SetPoint(unpack(Layout.HealthValuePlace))
-		healthVal:SetDrawLayer(unpack(Layout.HealthValueDrawLayer))
-		healthVal:SetJustifyH(Layout.HealthValueJustifyH)
-		healthVal:SetJustifyV(Layout.HealthValueJustifyV)
-		healthVal:SetFontObject(Layout.HealthValueFont)
-		healthVal:SetTextColor(unpack(Layout.HealthValueColor))
-		healthVal.showPercent = Layout.HealthShowPercent
-
-		self.Health.Value = healthVal
-		self.Health.OverrideValue = Layout.HealthValueOverride or SmallFrame_OverrideHealthValue
-	end 
-
-	if Layout.UseHealthPercent then 
-		local healthPerc = health:CreateFontString()
-		healthPerc:SetPoint(unpack(Layout.HealthPercentPlace))
-		healthPerc:SetDrawLayer(unpack(Layout.HealthPercentDrawLayer))
-		healthPerc:SetJustifyH(Layout.HealthPercentJustifyH)
-		healthPerc:SetJustifyV(Layout.HealthPercentJustifyV)
-		healthPerc:SetFontObject(Layout.HealthPercentFont)
-		healthPerc:SetTextColor(unpack(Layout.HealthPercentColor))
-		self.Health.ValuePercent = healthPerc
-	end 
-
-	-- Cast Name
-	if Layout.UseCastBar then
-		if Layout.UseCastBarName then 
-			local name, parent 
-			if Layout.CastBarNameParent then 
-				parent = self[Layout.CastBarNameParent]
-			end 
-			local name = (parent or overlay):CreateFontString()
-			name:SetPoint(unpack(Layout.CastBarNamePlace))
-			name:SetFontObject(Layout.CastBarNameFont)
-			name:SetDrawLayer(unpack(Layout.CastBarNameDrawLayer))
-			name:SetJustifyH(Layout.CastBarNameJustifyH)
-			name:SetJustifyV(Layout.CastBarNameJustifyV)
-			name:SetTextColor(unpack(Layout.CastBarNameColor))
-			if Layout.CastBarNameSize then 
-				name:SetSize(unpack(Layout.CastBarNameSize))
-			end 
-			self.Cast.Name = name
-		end 
-	end
-
-	if (unit == "targettarget") and (Layout.HideWhenUnitIsPlayer or Layout.HideWhenTargetIsCritter or Layout.HideWhenUnitIsTarget) then 
-		self.hideWhenUnitIsPlayer = Layout.HideWhenUnitIsPlayer
-		self.hideWhenUnitIsTarget = Layout.HideWhenUnitIsTarget
-		self.hideWhenTargetIsCritter = Layout.HideWhenTargetIsCritter
+	if (unit == "targettarget") and (layout.HideWhenUnitIsPlayer or layout.HideWhenTargetIsCritter or layout.HideWhenUnitIsTarget) then 
+		self.hideWhenUnitIsPlayer = layout.HideWhenUnitIsPlayer
+		self.hideWhenUnitIsTarget = layout.HideWhenUnitIsTarget
+		self.hideWhenTargetIsCritter = layout.HideWhenTargetIsCritter
 		self.PostUpdate = ToTFrame_PostUpdateAlpha
 		self:RegisterEvent("PLAYER_TARGET_CHANGED", ToTFrame_PostUpdateAlpha, true)
 	end 
-
 end
 
 -- Party
@@ -2443,7 +2233,7 @@ end
 
 -----------------------------------------------------------
 -----------------------------------------------------------
--- 				UnitFrame Modules
+-- Modules
 -----------------------------------------------------------
 -----------------------------------------------------------
 
@@ -2539,7 +2329,7 @@ end
 -- Pet
 -----------------------------------------------------------
 UnitFramePet.OnInit = function(self)
-	self.layout = Wheel("LibDB"):GetDatabase(Core:GetPrefix()..":[UnitFramePet]", true)
+	self.layout = GetLayout(self:GetName())
 	self.frame = self:SpawnUnitFrame("pet", "UICenter", function(frame, unit, id, _, ...)
 		return UnitStyles.StylePetFrame(frame, unit, id, self.layout, ...)
 	end)
@@ -2604,7 +2394,7 @@ end
 -- Target of Target
 -----------------------------------------------------------
 UnitFrameToT.OnInit = function(self)
-	self.layout = Wheel("LibDB"):GetDatabase(Core:GetPrefix()..":[UnitFrameToT]", true)
+	self.layout = GetLayout(self:GetName())
 	self.frame = self:SpawnUnitFrame("targettarget", "UICenter", function(frame, unit, id, _, ...)
 		return UnitStyles.StyleToTFrame(frame, unit, id, self.layout, ...)
 	end)
@@ -2748,7 +2538,7 @@ end
 -----------------------------------------------------------
 -- These don't really exist in classic, right?
 UnitFrameBoss.OnInit = function(self)
-	self.layout = Wheel("LibDB"):GetDatabase(Core:GetPrefix()..":[UnitFrameBoss]", true)
+	self.layout = GetLayout(self:GetName())
 	self.frame = {}
 
 	local style = function(frame, unit, id, _, ...)

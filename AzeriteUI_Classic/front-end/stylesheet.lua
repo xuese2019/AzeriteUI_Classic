@@ -1070,47 +1070,19 @@ end
 local SmallFrame_CastBarPostUpdate = function(element, unit)
 	local self = element._owner
 	local cast = self.Cast
-	local health = self.Health
-	local status = self.UnitStatus
+	local healthPercent = self.Health.ValuePercent
 
-	-- This takes presedence
-	local casting = cast.casting or cast.channeling
-	cast.Name:SetShown(casting)
-
-	-- Only show the health value if we're not casting, and no status should be visible
-	if (status) then 
-		if (casting) then 
-			status:Hide()
-			if (health.Value) then 
-				health.Value:Hide()
-			end 
-			if (health.ValuePercent) then 
-				health.ValuePercent:Hide()
-			end 
-		elseif (status.status) then 
-			status:Show()
-			if (health.Value) then 
-				health.Value:Hide()
-			end 
-			if (health.ValuePercent) then 
-				health.ValuePercent:Hide()
-			end 
-		else 
-			status:Hide()
-			if (health.Value) then 
-				health.Value:Show()
-			end 
-			if (health.ValuePercent) then 
-				health.ValuePercent:Show()
-			end 
-		end 
+	-- Bug in the back-end, hotfixing it here for now. 
+	if UnitIsDeadOrGhost(unit) then 
+		cast.Name:Hide()
+		healthPercent:SetText(DEAD)
+		healthPercent:Show()
+	elseif (cast.casting or cast.channeling) then 
+		healthPercent:Hide()
+		cast.Name:Show()
 	else 
-		if (health.Value) then 
-			health.Value:SetShown(not casting)
-		end 
-		if (health.ValuePercent) then 
-			health.ValuePercent:SetShown(not casting)
-		end 
+		cast.Name:Hide()
+		healthPercent:Show()
 	end 
 end
 
@@ -1127,181 +1099,168 @@ end
 ------------------------------------------------------------------
 -- Table containing common values for the templates
 local Constant = {
-	SmallFrame = { 136, 47 },
+	SmallAuraSize = 30, 
 	SmallBar = { 112, 11 }, 
 	SmallBarTexture = GetMedia("cast_bar"),
-	SmallAuraSize = 30, 
-
-	TinyFrame = { 130, 30 }, 
+	SmallFrame = { 136, 47 },
+	RaidBar = { 80 *.94, 14  *.94}, 
+	RaidFrame = { 110 *.94, 30 *.94 }, 
 	TinyBar = { 80, 14 }, 
 	TinyBarTexture = GetMedia("cast_bar"),
-
-	RaidFrame = { 110 *.94, 30 *.94 }, 
-	RaidBar = { 80 *.94, 14  *.94}, 
+	TinyFrame = { 130, 30 }
 }
 
 local Template_SmallFrame = {
-	Size = Constant.SmallFrame,
-	FrameLevel = 20, 
-	
-	HealthPlace = { "CENTER", 0, 0 }, 
-		HealthSize = Constant.SmallBar,  -- health size
-		HealthType = "StatusBar", -- health type
-		HealthBarTexture = Constant.SmallBarTexture, 
-		HealthBarOrientation = "RIGHT", -- bar orientation
-		HealthBarSetFlippedHorizontally = false, 
-		HealthBarSparkMap = {
-			top = {
-				{ keyPercent =   0/128, offset = -16/32 }, 
-				{ keyPercent =   4/128, offset = -16/32 }, 
-				{ keyPercent =  10/128, offset =   0/32 }, 
-				{ keyPercent = 119/128, offset =   0/32 }, 
-				{ keyPercent = 128/128, offset = -16/32 }
-			},
-			bottom = {
-				{ keyPercent =   0/128, offset = -16/32 }, 
-				{ keyPercent =   4/128, offset = -16/32 }, 
-				{ keyPercent =  10/128, offset =   0/32 }, 
-				{ keyPercent = 119/128, offset =   0/32 }, 
-				{ keyPercent = 126/128, offset = -16/32 },
-				{ keyPercent = 128/128, offset = -16/32 }
-			}
-		},
-		HealthSmoothingMode = "bezier-fast-in-slow-out", -- smoothing method
-		HealthSmoothingFrequency = .2, -- speed of the smoothing method
-		HealthFrequentUpdates = true, -- listen to frequent health events for more accurate updates
-
-		UseHealthBackdrop = true,
-			HealthBackdropPlace = { "CENTER", 1, -2 },
-			HealthBackdropSize = { 193,93 },
-			HealthBackdropTexture = GetMedia("cast_back"), 
-			HealthBackdropDrawLayer = { "BACKGROUND", -1 },
-			HealthBackdropColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
-
-		UseHealthPercent = true, 
-			HealthPercentPlace = { "CENTER", 0, 0 },
-			HealthPercentDrawLayer = { "OVERLAY", 1 },
-			HealthPercentJustifyH = "CENTER", 
-			HealthPercentJustifyV = "MIDDLE", 
-			HealthPercentFont = GetFont(14, true),
-			HealthPercentColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
-
-	UseCastBar = true,
-		CastBarPlace = { "CENTER", 0, 0 },
-		CastBarSize = Constant.SmallBar,
-		CastBarOrientation = "RIGHT", 
-		CastBarSmoothingMode = "bezier-fast-in-slow-out", 
-		CastBarSmoothingFrequency = .15,
-		CastBarSparkMap = {
-			top = {
-				{ keyPercent =   0/128, offset = -16/32 }, 
-				{ keyPercent =   4/128, offset = -16/32 }, 
-				{ keyPercent =  10/128, offset =   0/32 }, 
-				{ keyPercent = 119/128, offset =   0/32 }, 
-				{ keyPercent = 126/128, offset = -16/32 },
-				{ keyPercent = 128/128, offset = -16/32 }
-			},
-			bottom = {
-				{ keyPercent =   0/128, offset = -16/32 }, 
-				{ keyPercent =   4/128, offset = -16/32 }, 
-				{ keyPercent =  10/128, offset =   0/32 }, 
-				{ keyPercent = 119/128, offset =   0/32 }, 
-				{ keyPercent = 126/128, offset = -16/32 },
-				{ keyPercent = 128/128, offset = -16/32 }
-			}
-		},
-		CastBarTexture = Constant.SmallBarTexture, 
-		CastBarColor = { 1, 1, 1, .15 },
-
-	-- This should be the same as the health value
-	UseCastBarName = true, 
-		CastBarNameParent = "Health",
-		CastBarNamePlace = { "CENTER", 0, 1 },
-		CastBarNameSize = { Constant.SmallBar[1] - 20, Constant.SmallBar[2] }, 
-		CastBarNameFont = GetFont(12, true),
-		CastBarNameColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
-		CastBarNameDrawLayer = { "OVERLAY", 1 }, 
-		CastBarNameJustifyH = "CENTER", 
-		CastBarNameJustifyV = "MIDDLE",
-
+	CastBarColor = { 1, 1, 1, .15 },
+	CastBarNameColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
+	CastBarNameDrawLayer = { "OVERLAY", 1 }, 
+	CastBarNameFont = GetFont(12, true),
+	CastBarNameJustifyH = "CENTER", 
+	CastBarNameJustifyV = "MIDDLE",
+	CastBarNameParent = "Health",
+	CastBarNamePlace = { "CENTER", 0, 1 },
+	CastBarNameSize = { Constant.SmallBar[1] - 20, Constant.SmallBar[2] }, 
+	CastBarOrientation = "RIGHT", 
+	CastBarPlace = { "CENTER", 0, 0 },
 	CastBarPostUpdate =	SmallFrame_CastBarPostUpdate,
+	CastBarSize = Constant.SmallBar,
+	CastBarSmoothingFrequency = .15,
+	CastBarSmoothingMode = "bezier-fast-in-slow-out", 
+	CastBarSparkMap = {
+		top = {
+			{ keyPercent =   0/128, offset = -16/32 }, 
+			{ keyPercent =   4/128, offset = -16/32 }, 
+			{ keyPercent =  10/128, offset =   0/32 }, 
+			{ keyPercent = 119/128, offset =   0/32 }, 
+			{ keyPercent = 126/128, offset = -16/32 },
+			{ keyPercent = 128/128, offset = -16/32 }
+		},
+		bottom = {
+			{ keyPercent =   0/128, offset = -16/32 }, 
+			{ keyPercent =   4/128, offset = -16/32 }, 
+			{ keyPercent =  10/128, offset =   0/32 }, 
+			{ keyPercent = 119/128, offset =   0/32 }, 
+			{ keyPercent = 126/128, offset = -16/32 },
+			{ keyPercent = 128/128, offset = -16/32 }
+		}
+	},
+	CastBarTexture = Constant.SmallBarTexture, 
+	FrameLevel = 20, 
+	HealthBackdropColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
+	HealthBackdropDrawLayer = { "BACKGROUND", -1 },
+	HealthBackdropPlace = { "CENTER", 1, -2 },
+	HealthBackdropSize = { 193,93 },
+	HealthBackdropTexture = GetMedia("cast_back"), 
+	HealthBarTexture = Constant.SmallBarTexture, 
+	HealthBarOrientation = "RIGHT", 
 	HealthBarPostUpdate = SmallFrame_CastBarPostUpdate, 
-
-	UseTargetHighlight = true, 
-		TargetHighlightParent = "Health", 
-		TargetHighlightPlace = { "CENTER", 1, -2 },
-		TargetHighlightSize = { 193,93 },
-		TargetHighlightTexture = GetMedia("cast_back_outline"), 
-		TargetHighlightDrawLayer = { "BACKGROUND", 0 },
-		TargetHighlightShowTarget = true, TargetHighlightTargetColor = { 255/255, 239/255, 169/255, 1 }, 
-		TargetHighlightShowFocus = true, TargetHighlightFocusColor = { 144/255, 195/255, 255/255, 1 }, 
-
+	HealthBarSetFlippedHorizontally = false, 
+	HealthBarSparkMap = {
+		top = {
+			{ keyPercent =   0/128, offset = -16/32 }, 
+			{ keyPercent =   4/128, offset = -16/32 }, 
+			{ keyPercent =  10/128, offset =   0/32 }, 
+			{ keyPercent = 119/128, offset =   0/32 }, 
+			{ keyPercent = 128/128, offset = -16/32 }
+		},
+		bottom = {
+			{ keyPercent =   0/128, offset = -16/32 }, 
+			{ keyPercent =   4/128, offset = -16/32 }, 
+			{ keyPercent =  10/128, offset =   0/32 }, 
+			{ keyPercent = 119/128, offset =   0/32 }, 
+			{ keyPercent = 126/128, offset = -16/32 },
+			{ keyPercent = 128/128, offset = -16/32 }
+		}
+	},
+	HealthFrequentUpdates = true, 
+	HealthPercentColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
+	HealthPercentDrawLayer = { "OVERLAY", 1 },
+	HealthPercentFont = GetFont(14, true),
+	HealthPercentJustifyH = "CENTER", 
+	HealthPercentJustifyV = "MIDDLE", 
+	HealthPercentPlace = { "CENTER", 0, 0 },
+	HealthPlace = { "CENTER", 0, 0 }, 
+	HealthSize = Constant.SmallBar,
+	HealthSmoothingFrequency = .2, 
+	HealthSmoothingMode = "bezier-fast-in-slow-out", 
+	Size = Constant.SmallFrame,
+	TargetHighlightDrawLayer = { "BACKGROUND", 0 },
+	TargetHighlightParent = "Health", 
+	TargetHighlightPlace = { "CENTER", 1, -2 },
+	TargetHighlightSize = { 193,93 },
+	TargetHighlightShowFocus = true, TargetHighlightFocusColor = { 144/255, 195/255, 255/255, 1 }, 
+	TargetHighlightShowTarget = true, TargetHighlightTargetColor = { 255/255, 239/255, 169/255, 1 }, 
+	TargetHighlightTexture = GetMedia("cast_back_outline")
 } 
 
 local Template_SmallFrame_Auras = setmetatable({
-	UseAuras = true, 
-		AuraFrameSize = { Constant.SmallAuraSize*6 + 4*5, Constant.SmallAuraSize }, 
-		AuraFramePlace = { "LEFT", Constant.SmallFrame[1] + 13, -1 },
-		AuraSize = Constant.SmallAuraSize, 
-		AuraSpaceH = 4, 
-		AuraSpaceV = 4, 
-		AuraGrowthX = "RIGHT", 
-		AuraGrowthY = "UP", 
-		AuraMax = 6, 
-		AuraMaxBuffs = nil, 
-		AuraMaxDebuffs = nil, 
-		AuraDebuffsFirst = false, 
-		ShowAuraCooldownSpirals = false, 
-		ShowAuraCooldownTime = true, 
-		AuraFilter = nil, 
-		AuraBuffFilter = "HELPFUL", 
-		AuraDebuffFilter = "HARMFUL", 
-		AuraFilterFunc = nil, 
-		BuffFilterFunc = nil, 
-		DebuffFilterFunc = nil, 
-		AuraTooltipDefaultPosition = nil, 
-		AuraTooltipPoint = "BOTTOMLEFT", 
-		AuraTooltipAnchor = nil, 
-		AuraTooltipRelPoint = "TOPLEFT", 
-		AuraTooltipOffsetX = 8, 
-		AuraTooltipOffsetY = 16,
-
-		AuraIconPlace = { "CENTER", 0, 0 },
-		AuraIconSize = { Constant.SmallAuraSize - 6, Constant.SmallAuraSize - 6 },
-		AuraIconTexCoord = { 5/64, 59/64, 5/64, 59/64 }, -- aura icon tex coords
-		AuraCountPlace = { "BOTTOMRIGHT", 9, -6 },
-		AuraCountFont = GetFont(12, true),
-		AuraCountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
-		AuraTimePlace = { "TOPLEFT", -6, 6 }, -- { "CENTER", 0, 0 },
-		AuraTimeFont = GetFont(11, true),
-		AuraBorderFramePlace = { "CENTER", 0, 0 }, 
-		AuraBorderFrameSize = { Constant.SmallAuraSize + 14, Constant.SmallAuraSize + 14 },
-		AuraBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 16 },
-		AuraBorderBackdropColor = { 0, 0, 0, 0 },
-		AuraBorderBackdropBorderColor = { Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3 },
-
-	
+	AuraBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 16 },
+	AuraBorderBackdropColor = { 0, 0, 0, 0 },
+	AuraBorderBackdropBorderColor = { Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3 },
+	AuraBorderFramePlace = { "CENTER", 0, 0 }, 
+	AuraBorderFrameSize = { Constant.SmallAuraSize + 14, Constant.SmallAuraSize + 14 },
+	AuraCountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
+	AuraCountFont = GetFont(12, true),
+	AuraCountPlace = { "BOTTOMRIGHT", 9, -6 },
+	AuraFramePlace = { "LEFT", Constant.SmallFrame[1] + 13, -1 },
+	AuraFrameSize = { Constant.SmallAuraSize*6 + 4*5, Constant.SmallAuraSize },
+	AuraIconPlace = { "CENTER", 0, 0 },
+	AuraIconSize = { Constant.SmallAuraSize - 6, Constant.SmallAuraSize - 6 },
+	AuraIconTexCoord = { 5/64, 59/64, 5/64, 59/64 },
+	AuraProperties = {
+		auraHeight = nil, 
+		auraSize = Constant.SmallAuraSize, 
+		auraWidth = nil, 
+		debuffsFirst = false, 
+		disableMouse = false, 
+		filter = nil, 
+		filterBuffs = "HELPFUL", 
+		filterDebuffs = "HARMFUL", 
+		func = nil, 
+		funcBuffs = nil, 
+		funcDebuffs = nil, 
+		growthX = "RIGHT", 
+		growthY = "UP", 
+		maxBuffs = nil, 
+		maxDebuffs = nil, 
+		maxVisible = 6, 
+		showDurations = true, 
+		showSpirals = false, 
+		showLongDurations = true,
+		spacingH = 4, 
+		spacingV = 4, 
+		tooltipAnchor = nil,
+		tooltipDefaultPosition = false, 
+		tooltipOffsetX = 8,
+		tooltipOffsetY = 16,
+		tooltipPoint = "BOTTOMLEFT",
+		tooltipRelPoint = "TOPLEFT"
+	},
+	AuraTimeFont = GetFont(11, true),
+	AuraTimePlace = { "TOPLEFT", -6, 6 }
 }, { __index = Template_SmallFrame })
 
 local Template_SmallFrameReversed = setmetatable({
-	HealthBarOrientation = "LEFT", 
-	HealthBarSetFlippedHorizontally = true, 
 	CastBarOrientation = "LEFT", 
 	CastBarSetFlippedHorizontally = true, 
+	HealthBarOrientation = "LEFT", 
+	HealthBarSetFlippedHorizontally = true 
 }, { __index = Template_SmallFrame })
 
 local Template_SmallFrameReversed_Auras = setmetatable({
-	HealthBarOrientation = "LEFT", 
-	HealthBarSetFlippedHorizontally = true, 
+	AuraFramePlace = { "RIGHT", -(Constant.SmallFrame[1] + 13), -1 },
+	AuraProperties = setmetatable({
+		growthX = "LEFT", 
+		growthY = "DOWN", 
+		tooltipOffsetX = -8,
+		tooltipOffsetY = -16,
+		tooltipPoint = "TOPRIGHT",
+		tooltipRelPoint = "BOTTOMRIGHT"
+	}, { __index = Template_SmallFrame_Auras.AuraProperties}),
 	CastBarOrientation = "LEFT", 
 	CastBarSetFlippedHorizontally = true, 
-	AuraFramePlace = { "RIGHT", -(Constant.SmallFrame[1] + 13), -1 },
-	AuraGrowthX = "LEFT", 
-	AuraGrowthY = "DOWN", 
-	AuraTooltipPoint = "TOPRIGHT", 
-	AuraTooltipRelPoint = "BOTTOMRIGHT", 
-	AuraTooltipOffsetX = -8, 
-	AuraTooltipOffsetY = -16
+	HealthBarOrientation = "LEFT", 
+	HealthBarSetFlippedHorizontally = true
 }, { __index = Template_SmallFrame_Auras })
 
 local Template_TinyFrame = {
@@ -1367,83 +1326,6 @@ local Template_TinyFrame = {
 	TargetHighlightShowTarget = true, TargetHighlightTargetColor = { 255/255, 229/255, 109/255, 1 }, 
 	TargetHighlightShowFocus = true, TargetHighlightFocusColor = { 44/255, 165/255, 255/255, 1 }, 
 }
-
-------------------------------------------------------------------
--- Singular Units
-------------------------------------------------------------------
--- Target of Target
-local UnitFrameToT = setmetatable({
-	Place = { "RIGHT", "UICenter", "TOPRIGHT", -492, -96 + 6 }, -- adding 4 pixels up to avoid it covering the targetframe health percentage / cast time values
-	 
-	UseName = true, 
-		NamePlace = { "BOTTOMRIGHT", -(Constant.SmallFrame[1] - Constant.SmallBar[1])/2, Constant.SmallFrame[2] - Constant.SmallBar[2] + 16 - 4 }, 
-		NameDrawLayer = { "OVERLAY", 1 },
-		NameJustifyH = "RIGHT",
-		NameJustifyV = "TOP",
-		NameFont = GetFont(14, true),
-		NameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .75 },
-		NameSize = nil,
-
-	HealthFrequentUpdates = true, 
-	HealthColorTapped = true, -- color tap denied units 
-	HealthColorDisconnected = true, -- color disconnected units
-	HealthColorClass = true, -- color players by class 
-	HealthColorPetAsPlayer = true, -- color your pet as you 
-	HealthColorReaction = true, -- color NPCs by their reaction standing with us
-	HealthColorHealth = false, -- color anything else in the default health color
-	HideWhenUnitIsPlayer = true, -- hide the frame when the unit is the player
-	HideWhenUnitIsTarget = true, -- hide the frame when the unit matches our target
-	HideWhenTargetIsCritter = true, -- hide the frame when unit is a critter
-		
-}, { __index = Template_SmallFrameReversed })
-
--- Player Pet
-local UnitFramePet = setmetatable({
-	Place = { "LEFT", "UICenter", "BOTTOMLEFT", 362, 125 },
-
-	HealthFrequentUpdates = true, 
-	HealthColorTapped = false, -- color tap denied units 
-	HealthColorDisconnected = false, -- color disconnected units
-	HealthColorClass = false, -- color players by class 
-	HealthColorPetAsPlayer = false, -- color your pet as you 
-	HealthColorReaction = false, -- color NPCs by their reaction standing with us
-	HealthColorHealth = true, -- color anything else in the default health color
-
-}, { __index = Template_SmallFrame })
-
-------------------------------------------------------------------
--- Grouped Units
-------------------------------------------------------------------
--- Boss 
-local UnitFrameBoss = setmetatable({
-	Place = { "TOPRIGHT", "UICenter", "RIGHT", -64, 261 }, -- Position of the initial frame
-		GrowthX = 0, -- Horizontal growth per new unit
-		GrowthY = -97, -- Vertical growth per new unit
-
-	UseName = true, 
-		NamePlace = { "BOTTOMRIGHT", -(Constant.SmallFrame[1] - Constant.SmallBar[1])/2, Constant.SmallFrame[2] - Constant.SmallBar[2] + 16 }, 
-		NameDrawLayer = { "OVERLAY", 1 },
-		NameJustifyH = "CENTER",
-		NameJustifyV = "TOP",
-		NameFont = GetFont(14, true),
-		NameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .75 },
-		NameSize = nil,
-
-	BuffFilterFunc = GetAuraFilterFunc("boss"), 
-	DebuffFilterFunc = GetAuraFilterFunc("boss"), 
-
-	HealthColorTapped = false, -- color tap denied units 
-	HealthColorDisconnected = false, -- color disconnected units
-	HealthColorClass = false, -- color players by class 
-	HealthColorPetAsPlayer = false, -- color your pet as you 
-	HealthColorReaction = true, -- color NPCs by their reaction standing with us
-	HealthColorHealth = true, -- color anything else in the default health color
-
-}, { __index = Template_SmallFrameReversed_Auras })
-
-LibDB:NewDatabase(ADDON..":[UnitFramePet]", UnitFramePet)
-LibDB:NewDatabase(ADDON..":[UnitFrameToT]", UnitFrameToT)
-LibDB:NewDatabase(ADDON..":[UnitFrameBoss]", UnitFrameBoss)
 
 ------------------------------------------------
 -- Module Defaults
@@ -2236,471 +2118,9 @@ Layouts.Tooltips = {
 	TooltipStatusBarTexture = GetMedia("statusbar_normal")
 }
 
--- 2-5 player groups
-Layouts.UnitFrameParty = setmetatable({
-	AlternateGroupAnchor = "BOTTOMLEFT", 
-	AlternateGrowthX = 140, -- Horizontal growth per new unit
-	AlternateGrowthY = 0, -- Vertical growth per new unit
-	AlternatePlace = { "BOTTOMLEFT", "UICenter", "BOTTOMLEFT", 56, 360 + 10 }, -- Position of the healermode frame
-	
-	Place = { "TOPLEFT", "UICenter", "TOPLEFT", 50, -42 }, -- Position of the initial frame
-	GroupAnchor = "TOPLEFT", 
-	GrowthX = 130, -- Horizontal growth per new unit
-	GrowthY = 0, -- Vertical growth per new unit
-	
-	HealthColorTapped = false, -- color tap denied units 
-	HealthColorDisconnected = true, -- color disconnected units
-	HealthColorClass = true, -- color players by class
-	HealthColorPetAsPlayer = true, -- color your pet as you 
-	HealthColorReaction = true, -- color NPCs by their reaction standing with us
-	HealthColorHealth = true, -- color anything else in the default health color
-	HealthValuePlace = { "CENTER", 0, 0 },
-	HealthValueDrawLayer = { "OVERLAY", 1 },
-	HealthValueJustifyH = "CENTER", 
-	HealthValueJustifyV = "MIDDLE", 
-	HealthValueFont = GetFont(13, true),
-	HealthValueColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
-	HealthShowPercent = true, 
-
-	PortraitPlace = { "BOTTOM", 0, 22 },
-	PortraitSize = { 70, 73 }, 
-	PortraitAlpha = .85, 
-	PortraitDistanceScale = 1,
-	PortraitPositionX = 0,
-	PortraitPositionY = 0,
-	PortraitPositionZ = 0,
-	PortraitRotation = 0, -- in degrees
-	PortraitShowFallback2D = true, -- display 2D portraits when unit is out of range of 3D models
-	PortraitBackgroundPlace = { "BOTTOM", 0, -6 }, 
-	PortraitBackgroundSize = { 130, 130 },
-	PortraitBackgroundTexture = GetMedia("party_portrait_back"), 
-	PortraitBackgroundDrawLayer = { "BACKGROUND", 0 }, 
-	PortraitBackgroundColor = { .5, .5, .5 }, 
-	PortraitShadePlace = { "BOTTOM", 0, 16 },
-	PortraitShadeSize = { 86, 86 }, 
-	PortraitShadeTexture = GetMedia("shade_circle"),
-	PortraitShadeDrawLayer = { "BACKGROUND", -1 },
-	PortraitForegroundPlace = { "BOTTOM", 0, -38 },
-	PortraitForegroundSize = { 194, 194 },
-	PortraitForegroundTexture = GetMedia("party_portrait_border"), 
-	PortraitForegroundDrawLayer = { "BACKGROUND", 0 },
-	PortraitForegroundColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
-		
-	AuraProperties = {
-		growthX = "RIGHT", 
-		growthY = "DOWN", 
-		spacingH = 4, 
-		spacingV = 4, 
-		auraSize = 30, auraWidth = nil, auraHeight = nil, 
-		maxVisible = 6, maxBuffs = nil, maxDebuffs = nil, 
-		filter = nil, filterBuffs = "PLAYER HELPFUL", filterDebuffs = "PLAYER HARMFUL", 
-		func = nil, funcBuffs = GetAuraFilterFunc("party"), funcDebuffs = GetAuraFilterFunc("party"), 
-		debuffsFirst = false, 
-		disableMouse = false, 
-		showSpirals = false, 
-		showDurations = true, 
-		showLongDurations = true,
-		tooltipDefaultPosition = false, 
-		tooltipPoint = "TOPRIGHT",
-		tooltipAnchor = nil,
-		tooltipRelPoint = "BOTTOMRIGHT",
-		tooltipOffsetX = -8,
-		tooltipOffsetY = -16
-	},
-	AuraFrameSize = { 30*3 + 2*5, 30*2 + 5  }, 
-	AuraFramePlace = { "BOTTOM", 0, -(30*2 + 5 + 16) },
-	AuraIconPlace = { "CENTER", 0, 0 },
-	AuraIconSize = { 30 - 6, 30 - 6 },
-	AuraIconTexCoord = { 5/64, 59/64, 5/64, 59/64 }, -- aura icon tex coords
-	AuraCountPlace = { "BOTTOMRIGHT", 9, -6 },
-	AuraCountFont = GetFont(12, true),
-	AuraCountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
-	AuraTimePlace = { "TOPLEFT", -6, 6 },
-	AuraTimeFont = GetFont(11, true),
-	AuraBorderFramePlace = { "CENTER", 0, 0 }, 
-	AuraBorderFrameSize = { 30 + 10, 30 + 10 },
-	AuraBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 12 },
-	AuraBorderBackdropColor = { 0, 0, 0, 0 },
-	AuraBorderBackdropBorderColor = { Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3 },
-	Size = { 130, 130 }, 
-
-	-- Prio #1
-	GroupAuraSize = { 36, 36 },
-	GroupAuraPlace = { "BOTTOM", 0, Constant.TinyBar[2]/2 - 36/2 -1 }, 
-	GroupAuraButtonIconPlace = { "CENTER", 0, 0 },
-	GroupAuraButtonIconSize = { 36 - 6, 36 - 6 },
-	GroupAuraButtonIconTexCoord = { 5/64, 59/64, 5/64, 59/64 }, -- aura icon tex coords
-	GroupAuraButtonCountPlace = { "BOTTOMRIGHT", 9, -6 },
-	GroupAuraButtonCountFont = GetFont(12, true),
-	GroupAuraButtonCountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
-	GroupAuraButtonTimePlace = { "CENTER", 0, 0 },
-	GroupAuraButtonTimeFont = GetFont(11, true),
-	GroupAuraButtonTimeColor = { 250/255, 250/255, 250/255, .85 },
-	GroupAuraButtonBorderFramePlace = { "CENTER", 0, 0 }, 
-	GroupAuraButtonBorderFrameSize = { 36 + 16, 36 + 16 },
-	GroupAuraButtonBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 16 },
-	GroupAuraButtonBorderBackdropColor = { 0, 0, 0, 0 },
-	GroupAuraButtonBorderBackdropBorderColor = { Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3 },
-	GroupAuraButtonDisableMouse = false, 
-	GroupAuraTooltipDefaultPosition = nil, 
-	GroupAuraPostUpdate = function(element, unit)
-		local self = element._owner 
-
-		local rz = self.ResurrectIndicator
-		local rc = self.ReadyCheck
-		local us = self.UnitStatus
-		local hv = self.Health.Value
-
-		if element:IsShown() then 
-			-- Hide all lower priority elements
-			rc:Hide()
-			rz:Hide()
-			us:Hide()
-			hv:Hide()
-
-			-- Colorize the border
-			if (element.filter == "HARMFUL") then 
-				local color = element.debuffType and spellTypeColor[element.debuffType]
-				if color then 
-					element.Border:SetBackdropBorderColor(color[1], color[2], color[3])
-				else
-					element.Border:SetBackdropBorderColor(Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3)
-				end
-			else
-				element.Border:SetBackdropBorderColor(Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3)
-			end
-
-		else 
-			-- Display lower priority elements as needed 
-			if rc.status then 
-				rc:Show()
-				rz:Hide()
-				us:Hide()
-				hv:Hide()
-			elseif rz.status then 
-				rc:Hide()
-				rz:Show()
-				us:Hide()
-				hv:Hide()
-			elseif us.status then 
-				rc:Hide()
-				rz:Hide()
-				us:Show()
-				hv:Hide()
-			else
-				hv:Show()
-			end 
-		end 
-	end, 
-
-	-- Prio #2
-	ReadyCheckPlace = { "CENTER", 0, -7 }, 
-	ReadyCheckSize = { 32, 32 }, 
-	ReadyCheckDrawLayer = { "OVERLAY", 7 },
-	ReadyCheckPostUpdate = function(element, unit, status) 
-		local self = element._owner
-
-		local rd = self.GroupAura
-		local rz = self.ResurrectIndicator
-		local us = self.UnitStatus
-		local hv = self.Health.Value
-
-		if element:IsShown() then 
-			hv:Hide()
-
-			-- Hide if a higher priority element is visible
-			if rd:IsShown() then 
-				return element:Hide()
-			end 
-			-- Hide all lower priority elements
-			rz:Hide()
-			us:Hide()
-		else 
-			-- Show lower priority elements if no higher is visible
-			if (not rd:IsShown()) then 
-				if (rz.status) then 
-					rz:Show()
-					us:Hide()
-					hv:Hide()
-				elseif (us.status) then 
-					rz:Hide()
-					us:Show()
-					hv:Hide()
-				else 
-					hv:Show()
-				end 
-			else 
-				hv:Show()
-			end 
-		end 
-	end,
-	
-	-- Prio #3
-	ResurrectIndicatorPlace = { "CENTER", 0, -7 }, 
-	ResurrectIndicatorSize = { 32, 32 }, 
-	ResurrectIndicatorDrawLayer = { "OVERLAY", 1 },
-	ResurrectIndicatorPostUpdate = function(element, unit, incomingResurrect) 
-		local self = element._owner
-
-		local rc = self.ReadyCheck
-		local rd = self.GroupAura
-		local us = self.UnitStatus
-		local hv = self.Health.Value
-
-		if element:IsShown() then 
-			hv:Hide()
-
-			-- Hide if a higher priority element is visible
-			if (rd:IsShown() or rc.status) then 
-				return element:Hide()
-			end 
-			-- Hide lower priority element
-			us:Hide()
-		else
-			-- Show lower priority elements if no higher is visible
-			if (not rd:IsShown()) and (not rc.status) then 
-				if (us.status) then 
-					us:Show()
-					hv:Hide()
-				else
-					hv:Show()
-				end 
-			end
-		end 
-	end,
-
-	-- Prio #4
-	UnitStatusPlace = { "CENTER", 0, -(7 + 100/2) },
-	UnitStatusDrawLayer = { "ARTWORK", 2 },
-	UnitStatusJustifyH = "CENTER",
-	UnitStatusJustifyV = "MIDDLE",
-	UnitStatusFont = GetFont(12, true),
-	UnitStatusColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .75 },
-	UseUnitStatusMessageOOM = L["oom"],
-	UnitStatusHideAFK = true, 
-	UnitStatusHideOffline = true, 
-	UnitStatusHideDead = true, 
-	UnitStatusPostUpdate = function(element, unit) 
-		local self = element._owner
-
-		local rc = self.ReadyCheck
-		local rd = self.GroupAura
-		local rz = self.ResurrectIndicator
-		local hv = self.Health.Value
-
-		if element:IsShown() then 
-			-- Hide if a higher priority element is visible
-			if (rd:IsShown() or rc.status or rz.status) then 
-				element:Hide()
-			end 
-			hv:Hide()
-		else
-			hv:Show()
-		end 
-	end,
-	
-}, { __index = Template_TinyFrame })
-
--- 6-40 player groups
-Layouts.UnitFrameRaid = setmetatable({
-
-	TargetHighlightSize = { 140 * .94, 90 *.94 },
-	Size = Constant.RaidFrame, 
-	Place = { "TOPLEFT", "UICenter", "TOPLEFT", 64, -42 }, -- Position of the initial frame
-	AlternatePlace = { "BOTTOMLEFT", "UICenter", "BOTTOMLEFT", 64, 360 - 10 }, -- Position of the initial frame
-
-	GroupSizeNormal = 5,
-	GrowthXNormal = 0, -- Horizontal growth per new unit within a group
-	GrowthYNormal = -38 - 4, -- Vertical growth per new unit within a group
-	GrowthYNormalHealerMode = -(-38 - 4), -- Vertical growth per new unit within a group
-	GroupGrowthXNormal = 110, 
-	GroupGrowthYNormal = -(38 + 8)*5 - 10,
-	GroupGrowthYNormalHealerMode = -(-(38 + 8)*5 - 10),
-	GroupColsNormal = 5, 
-	GroupRowsNormal = 1, 
-	GroupAnchorNormal = "TOPLEFT", 
-	GroupAnchorNormalHealerMode = "BOTTOMLEFT", 
-	GroupSizeEpic = 8,
-	GrowthXEpic = 0, 
-	GrowthYEpic = -38 - 4,
-	GrowthYEpicHealerMode = -(-38 - 4),
-	GroupGrowthXEpic = 110, 
-	GroupGrowthYEpic = -(38 + 8)*8 - 10,
-	GroupGrowthYEpicHealerMode = -(-(38 + 8)*8 - 10),
-	GroupColsEpic = 5, 
-	GroupRowsEpic = 1, 
-	GroupAnchorEpic = "TOPLEFT", 
-	GroupAnchorEpicHealerMode = "BOTTOMLEFT", 
-
-	HealthSize = Constant.RaidBar, 
-	HealthBackdropSize = { 140 *.94, 90 *.94 },
-	HealthColorTapped = false, -- color tap denied units 
-	HealthColorDisconnected = true, -- color disconnected units
-	HealthColorClass = true, -- color players by class
-	HealthColorPetAsPlayer = true, -- color your pet as you 
-	HealthColorReaction = true, -- color NPCs by their reaction standing with us
-	HealthColorHealth = true, -- color anything else in the default health color
-
-	NamePlace = { "TOP", 0, 1 - 2 }, 
-	NameDrawLayer = { "ARTWORK", 1 },
-	NameJustifyH = "CENTER",
-	NameJustifyV = "TOP",
-	NameFont = GetFont(11, true),
-	NameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .75 },
-	NameMaxChars = 8, 
-	NameUseDots = false, 
-
-	RaidRolePoint = "RIGHT", RaidRoleAnchor = "Name", RaidRolePlace = { "LEFT", -1, 1 }, 
-	RaidRoleSize = { 16, 16 }, 
-	RaidRoleDrawLayer = { "ARTWORK", 3 },
-	RaidRoleRaidTargetTexture = GetMedia("raid_target_icons_small"),
-	
-	-- Prio #1
-	GroupAuraSize = { 24, 24 },
-	GroupAuraPlace = { "BOTTOM", 0, Constant.TinyBar[2]/2 - 24/2 -(1 + 2) }, 
-	GroupAuraButtonIconPlace = { "CENTER", 0, 0 },
-	GroupAuraButtonIconSize = { 24 - 6, 24 - 6 },
-	GroupAuraButtonIconTexCoord = { 5/64, 59/64, 5/64, 59/64 }, -- aura icon tex coords
-	GroupAuraButtonCountPlace = { "BOTTOMRIGHT", 9, -6 },
-	GroupAuraButtonCountFont = GetFont(12, true),
-	GroupAuraButtonCountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
-	GroupAuraButtonTimePlace = { "CENTER", 0, 0 },
-	GroupAuraButtonTimeFont = GetFont(11, true),
-	GroupAuraButtonTimeColor = { 250/255, 250/255, 250/255, .85 },
-	GroupAuraButtonBorderFramePlace = { "CENTER", 0, 0 }, 
-	GroupAuraButtonBorderFrameSize = { 24 + 12, 24 + 12 },
-	GroupAuraButtonBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 12 },
-	GroupAuraButtonBorderBackdropColor = { 0, 0, 0, 0 },
-	GroupAuraButtonBorderBackdropBorderColor = { Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3 },
-	GroupAuraButtonDisableMouse = false, 
-	GroupAuraTooltipDefaultPosition = nil, 
-	GroupAuraPostUpdate = function(element, unit)
-		local self = element._owner 
-
-		local rz = self.ResurrectIndicator
-		local rc = self.ReadyCheck
-		local us = self.UnitStatus
-
-		if element:IsShown() then 
-			-- Hide all lower priority elements
-			rc:Hide()
-			rz:Hide()
-			us:Hide()
-
-			-- Colorize the border
-			if (element.filter == "HARMFUL") then 
-				local color = element.debuffType and spellTypeColor[element.debuffType]
-				if color then 
-					element.Border:SetBackdropBorderColor(color[1], color[2], color[3])
-				else
-					element.Border:SetBackdropBorderColor(Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3)
-				end
-			else
-				element.Border:SetBackdropBorderColor(Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3)
-			end
-	
-		else 
-			-- Display lower priority elements as needed 
-			if rc.status then 
-				rc:Show()
-				rz:Hide()
-				us:Hide()
-			elseif rz.status then 
-				rc:Hide()
-				rz:Show()
-				us:Hide()
-			elseif us.status then 
-				rc:Hide()
-				rz:Hide()
-				us:Show()
-			end 
-		end 
-	end, 
-
-	-- Prio #2
-	ReadyCheckPlace = { "CENTER", 0, -7 }, 
-	ReadyCheckSize = { 32, 32 }, 
-	ReadyCheckDrawLayer = { "OVERLAY", 7 },
-	ReadyCheckPostUpdate = function(element, unit, status) 
-		local self = element._owner
-
-		local rd = self.GroupAura
-		local rz = self.ResurrectIndicator
-		local us = self.UnitStatus
-
-		if element:IsShown() then 
-			-- Hide if a higher priority element is visible
-			if rd:IsShown() then 
-				return element:Hide()
-			end 
-			-- Hide all lower priority elements
-			rz:Hide()
-			us:Hide()
-		else 
-			-- Show lower priority elements if no higher is visible
-			if (not rd:IsShown()) then 
-				if (rz.status) then 
-					rz:Show()
-					us:Hide()
-				elseif (us.status) then 
-					rz:Hide()
-					us:Show()
-				end 
-			end 
-		end 
-	end,
-
-	-- Prio #3
-	ResurrectIndicatorPlace = { "CENTER", 0, -7 }, 
-	ResurrectIndicatorSize = { 32, 32 }, 
-	ResurrectIndicatorDrawLayer = { "OVERLAY", 1 },
-	ResurrectIndicatorPostUpdate = function(element, unit, incomingResurrect) 
-		local self = element._owner
-
-		local rc = self.ReadyCheck
-		local rd = self.GroupAura
-		local us = self.UnitStatus
-
-		if element:IsShown() then 
-			-- Hide if a higher priority element is visible
-			if (rd:IsShown() or rc.status) then 
-				return element:Hide()
-			end 
-			-- Hide lower priority element
-			us:Hide()
-		else
-			-- Show lower priority elements if no higher is visible
-			if (not rd:IsShown()) and (not rc.status) then 
-				if (us.status) then 
-					us:Show()
-				end 
-			end
-		end 
-	end,
-
-	-- Prio #4
-	UnitStatusPlace = { "CENTER", 0, -7 },
-	UnitStatusDrawLayer = { "ARTWORK", 2 },
-	UnitStatusJustifyH = "CENTER",
-	UnitStatusJustifyV = "MIDDLE",
-	UnitStatusFont = GetFont(12, true),
-	UnitStatusColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .75 },
-	UseUnitStatusMessageOOM = L["oom"],
-	UnitStatusPostUpdate = function(element, unit) 
-		local self = element._owner
-		local rc = self.ReadyCheck
-		local rd = self.GroupAura
-		local rz = self.ResurrectIndicator
-		if element:IsShown() then 
-			-- Hide if a higher priority element is visible
-			if (rd:IsShown() or rc.status or rz.status) then 
-				element:Hide()
-			end 
-		end 
-	end,
-
-}, { __index = Template_TinyFrame })
-
+------------------------------------------------
+-- Unit Frame Layouts
+------------------------------------------------
 -- Player
 Layouts.UnitFramePlayer = { 
 	AuraBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 16 },
@@ -3474,6 +2894,528 @@ Layouts.UnitFrameTarget = {
 	TargetIndicatorYouByFriendSize = { 96, 48 },
 	TargetIndicatorYouByFriendTexture = GetMedia("icon_target_green")
 }
+
+------------------------------------------------
+-- Template Unit Frame Layouts
+------------------------------------------------
+-- Boss 
+Layouts.UnitFrameBoss = setmetatable({
+	BuffFilterFunc = GetAuraFilterFunc("boss"), 
+	DebuffFilterFunc = GetAuraFilterFunc("boss"), 
+	GrowthX = 0, -- Horizontal growth per new unit
+	GrowthY = -97, -- Vertical growth per new unit
+	NameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .75 },
+	NameDrawLayer = { "OVERLAY", 1 },
+	NameFont = GetFont(14, true),
+	NameJustifyH = "CENTER",
+	NameJustifyV = "TOP",
+	NamePlace = { "BOTTOMRIGHT", -(Constant.SmallFrame[1] - Constant.SmallBar[1])/2, Constant.SmallFrame[2] - Constant.SmallBar[2] + 16 }, 
+	HealthColorClass = false, -- color players by class 
+	HealthColorDisconnected = false, -- color disconnected units
+	HealthColorHealth = true, -- color anything else in the default health color
+	HealthColorPetAsPlayer = false, -- color your pet as you 
+	HealthColorReaction = true, -- color NPCs by their reaction standing with us
+	HealthColorTapped = false, -- color tap denied units 
+	Place = { "TOPRIGHT", "UICenter", "RIGHT", -64, 261 } -- Position of the initial frame
+}, { __index = Template_SmallFrameReversed_Auras })
+
+-- 2-5 player groups
+Layouts.UnitFrameParty = setmetatable({
+	AlternateGroupAnchor = "BOTTOMLEFT", 
+	AlternateGrowthX = 140, -- Horizontal growth per new unit
+	AlternateGrowthY = 0, -- Vertical growth per new unit
+	AlternatePlace = { "BOTTOMLEFT", "UICenter", "BOTTOMLEFT", 56, 360 + 10 }, -- Position of the healermode frame
+	
+	Place = { "TOPLEFT", "UICenter", "TOPLEFT", 50, -42 }, -- Position of the initial frame
+	GroupAnchor = "TOPLEFT", 
+	GrowthX = 130, -- Horizontal growth per new unit
+	GrowthY = 0, -- Vertical growth per new unit
+	
+	HealthColorTapped = false, -- color tap denied units 
+	HealthColorDisconnected = true, -- color disconnected units
+	HealthColorClass = true, -- color players by class
+	HealthColorPetAsPlayer = true, -- color your pet as you 
+	HealthColorReaction = true, -- color NPCs by their reaction standing with us
+	HealthColorHealth = true, -- color anything else in the default health color
+	HealthValuePlace = { "CENTER", 0, 0 },
+	HealthValueDrawLayer = { "OVERLAY", 1 },
+	HealthValueJustifyH = "CENTER", 
+	HealthValueJustifyV = "MIDDLE", 
+	HealthValueFont = GetFont(13, true),
+	HealthValueColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
+	HealthShowPercent = true, 
+
+	PortraitPlace = { "BOTTOM", 0, 22 },
+	PortraitSize = { 70, 73 }, 
+	PortraitAlpha = .85, 
+	PortraitDistanceScale = 1,
+	PortraitPositionX = 0,
+	PortraitPositionY = 0,
+	PortraitPositionZ = 0,
+	PortraitRotation = 0, -- in degrees
+	PortraitShowFallback2D = true, -- display 2D portraits when unit is out of range of 3D models
+	PortraitBackgroundPlace = { "BOTTOM", 0, -6 }, 
+	PortraitBackgroundSize = { 130, 130 },
+	PortraitBackgroundTexture = GetMedia("party_portrait_back"), 
+	PortraitBackgroundDrawLayer = { "BACKGROUND", 0 }, 
+	PortraitBackgroundColor = { .5, .5, .5 }, 
+	PortraitShadePlace = { "BOTTOM", 0, 16 },
+	PortraitShadeSize = { 86, 86 }, 
+	PortraitShadeTexture = GetMedia("shade_circle"),
+	PortraitShadeDrawLayer = { "BACKGROUND", -1 },
+	PortraitForegroundPlace = { "BOTTOM", 0, -38 },
+	PortraitForegroundSize = { 194, 194 },
+	PortraitForegroundTexture = GetMedia("party_portrait_border"), 
+	PortraitForegroundDrawLayer = { "BACKGROUND", 0 },
+	PortraitForegroundColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
+		
+	AuraProperties = {
+		growthX = "RIGHT", 
+		growthY = "DOWN", 
+		spacingH = 4, 
+		spacingV = 4, 
+		auraSize = 30, auraWidth = nil, auraHeight = nil, 
+		maxVisible = 6, maxBuffs = nil, maxDebuffs = nil, 
+		filter = nil, filterBuffs = "PLAYER HELPFUL", filterDebuffs = "PLAYER HARMFUL", 
+		func = nil, funcBuffs = GetAuraFilterFunc("party"), funcDebuffs = GetAuraFilterFunc("party"), 
+		debuffsFirst = false, 
+		disableMouse = false, 
+		showSpirals = false, 
+		showDurations = true, 
+		showLongDurations = true,
+		tooltipDefaultPosition = false, 
+		tooltipPoint = "TOPRIGHT",
+		tooltipAnchor = nil,
+		tooltipRelPoint = "BOTTOMRIGHT",
+		tooltipOffsetX = -8,
+		tooltipOffsetY = -16
+	},
+	AuraFrameSize = { 30*3 + 2*5, 30*2 + 5  }, 
+	AuraFramePlace = { "BOTTOM", 0, -(30*2 + 5 + 16) },
+	AuraIconPlace = { "CENTER", 0, 0 },
+	AuraIconSize = { 30 - 6, 30 - 6 },
+	AuraIconTexCoord = { 5/64, 59/64, 5/64, 59/64 }, -- aura icon tex coords
+	AuraCountPlace = { "BOTTOMRIGHT", 9, -6 },
+	AuraCountFont = GetFont(12, true),
+	AuraCountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
+	AuraTimePlace = { "TOPLEFT", -6, 6 },
+	AuraTimeFont = GetFont(11, true),
+	AuraBorderFramePlace = { "CENTER", 0, 0 }, 
+	AuraBorderFrameSize = { 30 + 10, 30 + 10 },
+	AuraBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 12 },
+	AuraBorderBackdropColor = { 0, 0, 0, 0 },
+	AuraBorderBackdropBorderColor = { Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3 },
+	Size = { 130, 130 }, 
+
+	-- Prio #1
+	GroupAuraSize = { 36, 36 },
+	GroupAuraPlace = { "BOTTOM", 0, Constant.TinyBar[2]/2 - 36/2 -1 }, 
+	GroupAuraButtonIconPlace = { "CENTER", 0, 0 },
+	GroupAuraButtonIconSize = { 36 - 6, 36 - 6 },
+	GroupAuraButtonIconTexCoord = { 5/64, 59/64, 5/64, 59/64 }, -- aura icon tex coords
+	GroupAuraButtonCountPlace = { "BOTTOMRIGHT", 9, -6 },
+	GroupAuraButtonCountFont = GetFont(12, true),
+	GroupAuraButtonCountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
+	GroupAuraButtonTimePlace = { "CENTER", 0, 0 },
+	GroupAuraButtonTimeFont = GetFont(11, true),
+	GroupAuraButtonTimeColor = { 250/255, 250/255, 250/255, .85 },
+	GroupAuraButtonBorderFramePlace = { "CENTER", 0, 0 }, 
+	GroupAuraButtonBorderFrameSize = { 36 + 16, 36 + 16 },
+	GroupAuraButtonBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 16 },
+	GroupAuraButtonBorderBackdropColor = { 0, 0, 0, 0 },
+	GroupAuraButtonBorderBackdropBorderColor = { Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3 },
+	GroupAuraButtonDisableMouse = false, 
+	GroupAuraTooltipDefaultPosition = nil, 
+	GroupAuraPostUpdate = function(element, unit)
+		local self = element._owner 
+
+		local rz = self.ResurrectIndicator
+		local rc = self.ReadyCheck
+		local us = self.UnitStatus
+		local hv = self.Health.Value
+
+		if element:IsShown() then 
+			-- Hide all lower priority elements
+			rc:Hide()
+			rz:Hide()
+			us:Hide()
+			hv:Hide()
+
+			-- Colorize the border
+			if (element.filter == "HARMFUL") then 
+				local color = element.debuffType and spellTypeColor[element.debuffType]
+				if color then 
+					element.Border:SetBackdropBorderColor(color[1], color[2], color[3])
+				else
+					element.Border:SetBackdropBorderColor(Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3)
+				end
+			else
+				element.Border:SetBackdropBorderColor(Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3)
+			end
+
+		else 
+			-- Display lower priority elements as needed 
+			if rc.status then 
+				rc:Show()
+				rz:Hide()
+				us:Hide()
+				hv:Hide()
+			elseif rz.status then 
+				rc:Hide()
+				rz:Show()
+				us:Hide()
+				hv:Hide()
+			elseif us.status then 
+				rc:Hide()
+				rz:Hide()
+				us:Show()
+				hv:Hide()
+			else
+				hv:Show()
+			end 
+		end 
+	end, 
+
+	-- Prio #2
+	ReadyCheckPlace = { "CENTER", 0, -7 }, 
+	ReadyCheckSize = { 32, 32 }, 
+	ReadyCheckDrawLayer = { "OVERLAY", 7 },
+	ReadyCheckPostUpdate = function(element, unit, status) 
+		local self = element._owner
+
+		local rd = self.GroupAura
+		local rz = self.ResurrectIndicator
+		local us = self.UnitStatus
+		local hv = self.Health.Value
+
+		if element:IsShown() then 
+			hv:Hide()
+
+			-- Hide if a higher priority element is visible
+			if rd:IsShown() then 
+				return element:Hide()
+			end 
+			-- Hide all lower priority elements
+			rz:Hide()
+			us:Hide()
+		else 
+			-- Show lower priority elements if no higher is visible
+			if (not rd:IsShown()) then 
+				if (rz.status) then 
+					rz:Show()
+					us:Hide()
+					hv:Hide()
+				elseif (us.status) then 
+					rz:Hide()
+					us:Show()
+					hv:Hide()
+				else 
+					hv:Show()
+				end 
+			else 
+				hv:Show()
+			end 
+		end 
+	end,
+	
+	-- Prio #3
+	ResurrectIndicatorPlace = { "CENTER", 0, -7 }, 
+	ResurrectIndicatorSize = { 32, 32 }, 
+	ResurrectIndicatorDrawLayer = { "OVERLAY", 1 },
+	ResurrectIndicatorPostUpdate = function(element, unit, incomingResurrect) 
+		local self = element._owner
+
+		local rc = self.ReadyCheck
+		local rd = self.GroupAura
+		local us = self.UnitStatus
+		local hv = self.Health.Value
+
+		if element:IsShown() then 
+			hv:Hide()
+
+			-- Hide if a higher priority element is visible
+			if (rd:IsShown() or rc.status) then 
+				return element:Hide()
+			end 
+			-- Hide lower priority element
+			us:Hide()
+		else
+			-- Show lower priority elements if no higher is visible
+			if (not rd:IsShown()) and (not rc.status) then 
+				if (us.status) then 
+					us:Show()
+					hv:Hide()
+				else
+					hv:Show()
+				end 
+			end
+		end 
+	end,
+
+	-- Prio #4
+	UnitStatusPlace = { "CENTER", 0, -(7 + 100/2) },
+	UnitStatusDrawLayer = { "ARTWORK", 2 },
+	UnitStatusJustifyH = "CENTER",
+	UnitStatusJustifyV = "MIDDLE",
+	UnitStatusFont = GetFont(12, true),
+	UnitStatusColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .75 },
+	UseUnitStatusMessageOOM = L["oom"],
+	UnitStatusHideAFK = true, 
+	UnitStatusHideOffline = true, 
+	UnitStatusHideDead = true, 
+	UnitStatusPostUpdate = function(element, unit) 
+		local self = element._owner
+
+		local rc = self.ReadyCheck
+		local rd = self.GroupAura
+		local rz = self.ResurrectIndicator
+		local hv = self.Health.Value
+
+		if element:IsShown() then 
+			-- Hide if a higher priority element is visible
+			if (rd:IsShown() or rc.status or rz.status) then 
+				element:Hide()
+			end 
+			hv:Hide()
+		else
+			hv:Show()
+		end 
+	end,
+	
+}, { __index = Template_TinyFrame })
+
+-- Player Pet
+Layouts.UnitFramePet = setmetatable({
+	HealthColorClass = false, -- color players by class 
+	HealthColorDisconnected = false, -- color disconnected units
+	HealthColorHealth = true, -- color anything else in the default health color
+	HealthColorPetAsPlayer = false, -- color your pet as you 
+	HealthColorReaction = false, -- color NPCs by their reaction standing with us
+	HealthColorTapped = false, -- color tap denied units 
+	HealthFrequentUpdates = true, 
+	Place = { "LEFT", "UICenter", "BOTTOMLEFT", 362, 125 }
+}, { __index = Template_SmallFrame })
+
+-- 6-40 player groups
+Layouts.UnitFrameRaid = setmetatable({
+
+	TargetHighlightSize = { 140 * .94, 90 *.94 },
+	Size = Constant.RaidFrame, 
+	Place = { "TOPLEFT", "UICenter", "TOPLEFT", 64, -42 }, -- Position of the initial frame
+	AlternatePlace = { "BOTTOMLEFT", "UICenter", "BOTTOMLEFT", 64, 360 - 10 }, -- Position of the initial frame
+
+	GroupSizeNormal = 5,
+	GrowthXNormal = 0, -- Horizontal growth per new unit within a group
+	GrowthYNormal = -38 - 4, -- Vertical growth per new unit within a group
+	GrowthYNormalHealerMode = -(-38 - 4), -- Vertical growth per new unit within a group
+	GroupGrowthXNormal = 110, 
+	GroupGrowthYNormal = -(38 + 8)*5 - 10,
+	GroupGrowthYNormalHealerMode = -(-(38 + 8)*5 - 10),
+	GroupColsNormal = 5, 
+	GroupRowsNormal = 1, 
+	GroupAnchorNormal = "TOPLEFT", 
+	GroupAnchorNormalHealerMode = "BOTTOMLEFT", 
+	GroupSizeEpic = 8,
+	GrowthXEpic = 0, 
+	GrowthYEpic = -38 - 4,
+	GrowthYEpicHealerMode = -(-38 - 4),
+	GroupGrowthXEpic = 110, 
+	GroupGrowthYEpic = -(38 + 8)*8 - 10,
+	GroupGrowthYEpicHealerMode = -(-(38 + 8)*8 - 10),
+	GroupColsEpic = 5, 
+	GroupRowsEpic = 1, 
+	GroupAnchorEpic = "TOPLEFT", 
+	GroupAnchorEpicHealerMode = "BOTTOMLEFT", 
+
+	HealthSize = Constant.RaidBar, 
+	HealthBackdropSize = { 140 *.94, 90 *.94 },
+	HealthColorTapped = false, -- color tap denied units 
+	HealthColorDisconnected = true, -- color disconnected units
+	HealthColorClass = true, -- color players by class
+	HealthColorPetAsPlayer = true, -- color your pet as you 
+	HealthColorReaction = true, -- color NPCs by their reaction standing with us
+	HealthColorHealth = true, -- color anything else in the default health color
+
+	NamePlace = { "TOP", 0, 1 - 2 }, 
+	NameDrawLayer = { "ARTWORK", 1 },
+	NameJustifyH = "CENTER",
+	NameJustifyV = "TOP",
+	NameFont = GetFont(11, true),
+	NameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .75 },
+	NameMaxChars = 8, 
+	NameUseDots = false, 
+
+	RaidRolePoint = "RIGHT", RaidRoleAnchor = "Name", RaidRolePlace = { "LEFT", -1, 1 }, 
+	RaidRoleSize = { 16, 16 }, 
+	RaidRoleDrawLayer = { "ARTWORK", 3 },
+	RaidRoleRaidTargetTexture = GetMedia("raid_target_icons_small"),
+	
+	-- Prio #1
+	GroupAuraSize = { 24, 24 },
+	GroupAuraPlace = { "BOTTOM", 0, Constant.TinyBar[2]/2 - 24/2 -(1 + 2) }, 
+	GroupAuraButtonIconPlace = { "CENTER", 0, 0 },
+	GroupAuraButtonIconSize = { 24 - 6, 24 - 6 },
+	GroupAuraButtonIconTexCoord = { 5/64, 59/64, 5/64, 59/64 }, -- aura icon tex coords
+	GroupAuraButtonCountPlace = { "BOTTOMRIGHT", 9, -6 },
+	GroupAuraButtonCountFont = GetFont(12, true),
+	GroupAuraButtonCountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
+	GroupAuraButtonTimePlace = { "CENTER", 0, 0 },
+	GroupAuraButtonTimeFont = GetFont(11, true),
+	GroupAuraButtonTimeColor = { 250/255, 250/255, 250/255, .85 },
+	GroupAuraButtonBorderFramePlace = { "CENTER", 0, 0 }, 
+	GroupAuraButtonBorderFrameSize = { 24 + 12, 24 + 12 },
+	GroupAuraButtonBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 12 },
+	GroupAuraButtonBorderBackdropColor = { 0, 0, 0, 0 },
+	GroupAuraButtonBorderBackdropBorderColor = { Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3 },
+	GroupAuraButtonDisableMouse = false, 
+	GroupAuraTooltipDefaultPosition = nil, 
+	GroupAuraPostUpdate = function(element, unit)
+		local self = element._owner 
+
+		local rz = self.ResurrectIndicator
+		local rc = self.ReadyCheck
+		local us = self.UnitStatus
+
+		if element:IsShown() then 
+			-- Hide all lower priority elements
+			rc:Hide()
+			rz:Hide()
+			us:Hide()
+
+			-- Colorize the border
+			if (element.filter == "HARMFUL") then 
+				local color = element.debuffType and spellTypeColor[element.debuffType]
+				if color then 
+					element.Border:SetBackdropBorderColor(color[1], color[2], color[3])
+				else
+					element.Border:SetBackdropBorderColor(Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3)
+				end
+			else
+				element.Border:SetBackdropBorderColor(Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3)
+			end
+	
+		else 
+			-- Display lower priority elements as needed 
+			if rc.status then 
+				rc:Show()
+				rz:Hide()
+				us:Hide()
+			elseif rz.status then 
+				rc:Hide()
+				rz:Show()
+				us:Hide()
+			elseif us.status then 
+				rc:Hide()
+				rz:Hide()
+				us:Show()
+			end 
+		end 
+	end, 
+
+	-- Prio #2
+	ReadyCheckPlace = { "CENTER", 0, -7 }, 
+	ReadyCheckSize = { 32, 32 }, 
+	ReadyCheckDrawLayer = { "OVERLAY", 7 },
+	ReadyCheckPostUpdate = function(element, unit, status) 
+		local self = element._owner
+
+		local rd = self.GroupAura
+		local rz = self.ResurrectIndicator
+		local us = self.UnitStatus
+
+		if element:IsShown() then 
+			-- Hide if a higher priority element is visible
+			if rd:IsShown() then 
+				return element:Hide()
+			end 
+			-- Hide all lower priority elements
+			rz:Hide()
+			us:Hide()
+		else 
+			-- Show lower priority elements if no higher is visible
+			if (not rd:IsShown()) then 
+				if (rz.status) then 
+					rz:Show()
+					us:Hide()
+				elseif (us.status) then 
+					rz:Hide()
+					us:Show()
+				end 
+			end 
+		end 
+	end,
+
+	-- Prio #3
+	ResurrectIndicatorPlace = { "CENTER", 0, -7 }, 
+	ResurrectIndicatorSize = { 32, 32 }, 
+	ResurrectIndicatorDrawLayer = { "OVERLAY", 1 },
+	ResurrectIndicatorPostUpdate = function(element, unit, incomingResurrect) 
+		local self = element._owner
+
+		local rc = self.ReadyCheck
+		local rd = self.GroupAura
+		local us = self.UnitStatus
+
+		if element:IsShown() then 
+			-- Hide if a higher priority element is visible
+			if (rd:IsShown() or rc.status) then 
+				return element:Hide()
+			end 
+			-- Hide lower priority element
+			us:Hide()
+		else
+			-- Show lower priority elements if no higher is visible
+			if (not rd:IsShown()) and (not rc.status) then 
+				if (us.status) then 
+					us:Show()
+				end 
+			end
+		end 
+	end,
+
+	-- Prio #4
+	UnitStatusPlace = { "CENTER", 0, -7 },
+	UnitStatusDrawLayer = { "ARTWORK", 2 },
+	UnitStatusJustifyH = "CENTER",
+	UnitStatusJustifyV = "MIDDLE",
+	UnitStatusFont = GetFont(12, true),
+	UnitStatusColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .75 },
+	UseUnitStatusMessageOOM = L["oom"],
+	UnitStatusPostUpdate = function(element, unit) 
+		local self = element._owner
+		local rc = self.ReadyCheck
+		local rd = self.GroupAura
+		local rz = self.ResurrectIndicator
+		if element:IsShown() then 
+			-- Hide if a higher priority element is visible
+			if (rd:IsShown() or rc.status or rz.status) then 
+				element:Hide()
+			end 
+		end 
+	end,
+
+}, { __index = Template_TinyFrame })
+
+-- Target of Target
+Layouts.UnitFrameToT = setmetatable({
+	HealthColorClass = true, -- color players by class 
+	HealthColorDisconnected = true, -- color disconnected units
+	HealthColorHealth = false, -- color anything else in the default health color
+	HealthColorPetAsPlayer = true, -- color your pet as you 
+	HealthColorReaction = true, -- color NPCs by their reaction standing with us
+	HealthColorTapped = true, -- color tap denied units 
+	HealthFrequentUpdates = true, 
+	HideWhenTargetIsCritter = true, -- hide the frame when unit is a critter
+	HideWhenUnitIsPlayer = true, -- hide the frame when the unit is the player
+	HideWhenUnitIsTarget = true, -- hide the frame when the unit matches our target
+	NameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .75 },
+	NameDrawLayer = { "OVERLAY", 1 },
+	NameFont = GetFont(14, true),
+	NameJustifyH = "RIGHT",
+	NameJustifyV = "TOP",
+	NamePlace = { "BOTTOMRIGHT", -(Constant.SmallFrame[1] - Constant.SmallBar[1])/2, Constant.SmallFrame[2] - Constant.SmallBar[2] + 16 - 4 }, 
+	Place = { "RIGHT", "UICenter", "TOPRIGHT", -492, -96 + 6 }
+}, { __index = Template_SmallFrameReversed })
 
 ------------------------------------------------
 -- Private Addon API
