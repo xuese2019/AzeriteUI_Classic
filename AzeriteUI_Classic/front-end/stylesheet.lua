@@ -1151,12 +1151,24 @@ local TargetFrame_NamePostUpdate = function(self, event, ...)
 		self.Name.maxChars = 30
 		self.Name.usingSmallWidth = true
 		self.Name:ForceUpdate()
-		UnitFrameTarget:AddDebugMessageFormatted("UnitFrameTarget changed name element width to small.")
+		local Core = Wheel("LibModule"):GetModule(ADDON, true)
+		if (Core) then 
+			local UnitFrameTarget = Core:GetModule("UnitFrameTarget", true)
+			if (UnitFrameTarget) then 
+				UnitFrameTarget:AddDebugMessageFormatted("UnitFrameTarget changed name element width to small.")
+			end
+		end
 	elseif (self.Name.usingSmallWidth) then
 		self.Name.maxChars = 64
 		self.Name.usingSmallWidth = nil
 		self.Name:ForceUpdate()
-		UnitFrameTarget:AddDebugMessageFormatted("UnitFrameTarget changed name element width to full.")
+		local Core = Wheel("LibModule"):GetModule(ADDON, true)
+		if (Core) then 
+			local UnitFrameTarget = Core:GetModule("UnitFrameTarget", true)
+			if (UnitFrameTarget) then 
+				UnitFrameTarget:AddDebugMessageFormatted("UnitFrameTarget changed name element width to full.")
+			end
+		end
 	end 
 end
 
