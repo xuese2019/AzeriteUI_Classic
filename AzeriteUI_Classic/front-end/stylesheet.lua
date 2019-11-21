@@ -27,11 +27,13 @@ local string_match = string.match
 local string_upper = string.upper
 local tonumber = tonumber
 local tostring = tostring
+local unpack = unpack
 
 -- WoW API
 local GetCVarDefault = GetCVarDefault
 local UnitCanAttack = UnitCanAttack
 local UnitClassification = UnitClassification
+local UnitCreatureType = UnitCreatureType
 local UnitExists = UnitExists
 local UnitCastingInfo = CastingInfo
 local UnitChannelInfo = ChannelInfo
@@ -927,6 +929,91 @@ local PlayerFrame_CastBarPostUpdate = function(element, unit)
 	end 
 end
 
+local PlayerFrame_ExtraPowerOverrideColor = function(element, unit, min, max, powerType, powerID, disconnected, dead, tapped)
+	local self = element._owner
+	local layout = self.layout
+	local r, g, b
+	if disconnected then
+		r, g, b = unpack(self.colors.disconnected)
+	elseif dead then
+		r, g, b = unpack(self.colors.dead)
+	elseif tapped then
+		r, g, b = unpack(self.colors.tapped)
+	else
+		if layout.ManaColorSuffix then 
+			r, g, b = unpack(powerType and self.colors.power[powerType .. layout.ManaColorSuffix] or self.colors.power[powerType] or self.colors.power.UNUSED)
+		else 
+			r, g, b = unpack(powerType and self.colors.power[powerType] or self.colors.power.UNUSED)
+		end 
+	end
+	element:SetStatusBarColor(r, g, b)
+end 
+
+local PlayerFrame_PowerOverrideColor = function(element, unit, min, max, powerType, powerID, disconnected, dead, tapped)
+	local self = element._owner
+	local layout = self.layout
+	local r, g, b
+	if disconnected then
+		r, g, b = unpack(self.colors.disconnected)
+	elseif dead then
+		r, g, b = unpack(self.colors.dead)
+	elseif tapped then
+		r, g, b = unpack(self.colors.tapped)
+	else
+		if layout.PowerColorSuffix then 
+			r, g, b = unpack(powerType and self.colors.power[powerType .. layout.PowerColorSuffix] or self.colors.power[powerType] or self.colors.power.UNUSED)
+		else 
+			r, g, b = unpack(powerType and self.colors.power[powerType] or self.colors.power.UNUSED)
+		end 
+	end
+	element:SetStatusBarColor(r, g, b)
+end 
+
+local PlayerFrame_TexturesPostUpdate = function(self, overrideLevel)
+	local layout = self.layout
+	local playerLevel = overrideLevel or UnitLevel("player")
+	if (playerLevel >= 60) then 
+		self.Health:SetSize(unpack(layout.SeasonedHealthSize))
+		self.Health:SetStatusBarTexture(layout.SeasonedHealthTexture)
+		self.Health.Bg:SetTexture(layout.SeasonedHealthBackdropTexture)
+		self.Health.Bg:SetVertexColor(unpack(layout.SeasonedHealthBackdropColor))
+		self.Power.Fg:SetTexture(layout.SeasonedPowerForegroundTexture)
+		self.Power.Fg:SetVertexColor(unpack(layout.SeasonedPowerForegroundColor))
+		self.Cast:SetSize(unpack(layout.SeasonedCastSize))
+		self.Cast:SetStatusBarTexture(layout.SeasonedCastTexture)
+		if (self.ExtraPower) then
+			self.ExtraPower.Fg:SetTexture(layout.SeasonedManaOrbTexture)
+			self.ExtraPower.Fg:SetVertexColor(unpack(layout.SeasonedManaOrbColor)) 
+		end 
+	elseif (playerLevel >= layout.HardenedLevel) then 
+		self.Health:SetSize(unpack(layout.HardenedHealthSize))
+		self.Health:SetStatusBarTexture(layout.HardenedHealthTexture)
+		self.Health.Bg:SetTexture(layout.HardenedHealthBackdropTexture)
+		self.Health.Bg:SetVertexColor(unpack(layout.HardenedHealthBackdropColor))
+		self.Power.Fg:SetTexture(layout.HardenedPowerForegroundTexture)
+		self.Power.Fg:SetVertexColor(unpack(layout.HardenedPowerForegroundColor))
+		self.Cast:SetSize(unpack(layout.HardenedCastSize))
+		self.Cast:SetStatusBarTexture(layout.HardenedCastTexture)
+		if (self.ExtraPower) then 
+			self.ExtraPower.Fg:SetTexture(layout.HardenedManaOrbTexture)
+			self.ExtraPower.Fg:SetVertexColor(unpack(layout.HardenedManaOrbColor)) 
+		end 
+	else 
+		self.Health:SetSize(unpack(layout.NoviceHealthSize))
+		self.Health:SetStatusBarTexture(layout.NoviceHealthTexture)
+		self.Health.Bg:SetTexture(layout.NoviceHealthBackdropTexture)
+		self.Health.Bg:SetVertexColor(unpack(layout.NoviceHealthBackdropColor))
+		self.Power.Fg:SetTexture(layout.NovicePowerForegroundTexture)
+		self.Power.Fg:SetVertexColor(unpack(layout.NovicePowerForegroundColor))
+		self.Cast:SetSize(unpack(layout.NoviceCastSize))
+		self.Cast:SetStatusBarTexture(layout.NoviceCastTexture)
+		if (self.ExtraPower) then 
+			self.ExtraPower.Fg:SetTexture(layout.NoviceManaOrbTexture)
+			self.ExtraPower.Fg:SetVertexColor(unpack(layout.NoviceManaOrbColor)) 
+		end
+	end 
+end 
+
 local PlayerHUD_ClassPowerPostCreatePoint = function(element, id, point)
 	point.case = point:CreateTexture()
 	point.case:SetDrawLayer("BACKGROUND", -2)
@@ -1050,6 +1137,29 @@ local TargetFrame_LevelVisibilityFilter = function(element, unit)
 	end 
 end
 
+local TargetFrame_NamePostUpdate = function(self, event, ...)
+	if (event == "GP_UNITFRAME_TOT_VISIBLE") then 
+		self.totVisible = true
+	elseif (event == "GP_UNITFRAME_TOT_INVISIBLE") then 
+		self.totVisible = nil
+	elseif (event == "GP_UNITFRAME_TOT_SHOWN") then 
+		self.totShown = true
+	elseif (event == "GP_UNITFRAME_TOT_HIDDEN") then
+		self.totShown = nil
+	end
+	if (self.totShown and self.totVisible and (not self.Name.usingSmallWidth)) then 
+		self.Name.maxChars = 30
+		self.Name.usingSmallWidth = true
+		self.Name:ForceUpdate()
+		UnitFrameTarget:AddDebugMessageFormatted("UnitFrameTarget changed name element width to small.")
+	elseif (self.Name.usingSmallWidth) then
+		self.Name.maxChars = 64
+		self.Name.usingSmallWidth = nil
+		self.Name:ForceUpdate()
+		UnitFrameTarget:AddDebugMessageFormatted("UnitFrameTarget changed name element width to full.")
+	end 
+end
+
 local TargetFrame_PowerValueOverride = function(element, unit, min, max, powerType, powerID, disconnected, dead, tapped)
 	local value = element.Value
 	if (min == 0 or max == 0) and (not value.showAtZero) then
@@ -1065,6 +1175,119 @@ local TargetFrame_PowerVisibilityFilter = function(element, unit)
 	else 
 		return true
 	end 
+end
+
+local TargetFrame_TexturesPostUpdate = function(self)
+	if (not UnitExists("target")) then 
+		return
+	end 
+	local targetStyle
+
+	-- Figure out if the various artwork and bar textures need to be updated
+	-- We could put this into element post updates, 
+	-- but to avoid needless checks we limit this to actual target updates. 
+	local targetLevel = UnitLevel("target") or 0
+	local classification = UnitClassification("target")
+	local creatureType = UnitCreatureType("target")
+
+	if UnitIsPlayer("target") then 
+		if ((targetLevel < 1) or (targetLevel >= 60)) then 
+			targetStyle = "Seasoned"
+		elseif (targetLevel >= self.layout.HardenedLevel) then 
+			targetStyle = "Hardened"
+		else
+			targetStyle = "Novice" 
+		end 
+	elseif ((classification == "worldboss") or (targetLevel < 1)) then 
+		targetStyle = "Boss"
+	elseif (targetLevel >= 60) then 
+		targetStyle = "Seasoned"
+	elseif (targetLevel >= self.layout.HardenedLevel) then 
+		targetStyle = "Hardened"
+	elseif (creatureType == "Critter") then 
+		targetStyle = "Critter"
+	else
+		targetStyle = "Novice" 
+	end 
+
+	-- Silently return if there was no change
+	if (targetStyle == self.currentStyle) or (not targetStyle) then 
+		return 
+	end 
+
+	-- Store the new style
+	self.currentStyle = targetStyle
+
+	self.Health:Place(unpack(self.layout[self.currentStyle.."HealthPlace"]))
+	self.Health:SetSize(unpack(self.layout[self.currentStyle.."HealthSize"]))
+	self.Health:SetStatusBarTexture(self.layout[self.currentStyle.."HealthTexture"])
+	self.Health:SetSparkMap(self.layout[self.currentStyle.."HealthSparkMap"])
+
+	self.Health.Bg:ClearAllPoints()
+	self.Health.Bg:SetPoint(unpack(self.layout[self.currentStyle.."HealthBackdropPlace"]))
+	self.Health.Bg:SetSize(unpack(self.layout[self.currentStyle.."HealthBackdropSize"]))
+	self.Health.Bg:SetTexture(self.layout[self.currentStyle.."HealthBackdropTexture"])
+	self.Health.Bg:SetVertexColor(unpack(self.layout[self.currentStyle.."HealthBackdropColor"]))
+
+	self.Health.Value:SetShown(self.layout[self.currentStyle.."HealthValueVisible"])
+	self.Health.ValuePercent:SetShown(self.layout[self.currentStyle.."HealthPercentVisible"])
+
+	self.Cast:Place(unpack(self.layout[self.currentStyle.."CastPlace"]))
+	self.Cast:SetSize(unpack(self.layout[self.currentStyle.."CastSize"]))
+	self.Cast:SetStatusBarTexture(self.layout[self.currentStyle.."CastTexture"])
+	self.Cast:SetSparkMap(self.layout[self.currentStyle.."CastSparkMap"])
+
+	self.Portrait.Fg:SetTexture(self.layout[self.currentStyle.."PortraitForegroundTexture"])
+	self.Portrait.Fg:SetVertexColor(unpack(self.layout[self.currentStyle.."PortraitForegroundColor"]))
+	
+end 
+
+local SmallFrame_AlphaPostUpdate = function(self)
+	local unit = self.unit
+	if (not unit) then 
+		return 
+	end 
+
+	local targetStyle
+
+	-- Hide it when tot is the same as the target
+	if self.hideWhenUnitIsPlayer and (UnitIsUnit(unit, "player")) then 
+		targetStyle = "Hidden"
+
+	elseif self.hideWhenUnitIsTarget and (UnitIsUnit(unit, "target")) then 
+		targetStyle = "Hidden"
+
+	elseif self.hideWhenTargetIsCritter then 
+		local level = UnitLevel("target")
+		if ((level and level == 1) and (not UnitIsPlayer("target"))) then 
+			targetStyle = "Hidden"
+		else 
+			targetStyle = "Shown"
+		end 
+	else 
+		targetStyle = "Shown"
+	end 
+
+	-- Silently return if there was no change
+	if (targetStyle == self.alphaStyle) then 
+		return 
+	end 
+
+	-- Store the new style
+	self.alphaStyle = targetStyle
+
+	-- Apply the new style
+	if (targetStyle == "Shown") then 
+		self:SetAlpha(1)
+		self:SendMessage("GP_UNITFRAME_TOT_VISIBLE")
+	elseif (targetStyle == "Hidden") then 
+		self:SetAlpha(0)
+		self:SendMessage("GP_UNITFRAME_TOT_INVISIBLE")
+	end
+
+	if self.TargetHighlight then 
+		self.TargetHighlight:ForceUpdate()
+	end
 end
 
 local SmallFrame_CastBarPostUpdate = function(element, unit)
@@ -1085,6 +1308,36 @@ local SmallFrame_CastBarPostUpdate = function(element, unit)
 		healthPercent:Show()
 	end 
 end
+
+local TinyFrame_OverrideValue = function(element, unit, min, max, disconnected, dead, tapped)
+	if (min >= 1e8) then 		element.Value:SetFormattedText("%.0fm", min/1e6)  -- 100m, 1000m, 2300m, etc
+	elseif (min >= 1e6) then 	element.Value:SetFormattedText("%.1fm", min/1e6)  -- 1.0m - 99.9m 
+	elseif (min >= 1e5) then 	element.Value:SetFormattedText("%.0fk", min/1e3)  -- 100k - 999k
+	elseif (min >= 1e3) then 	element.Value:SetFormattedText("%.1fk", min/1e3)  -- 1.0k - 99.9k
+	elseif (min > 0) then 		element.Value:SetText(min) 						  -- 1 - 999
+	else 						element.Value:SetText("")
+	end 
+end 
+
+local TinyFrame_OverrideHealthValue = function(element, unit, min, max, disconnected, dead, tapped)
+	if dead then 
+		if element.Value then 
+			return element.Value:SetText(DEAD)
+		end
+	elseif (UnitIsAFK(unit)) then 
+		if element.Value then 
+			return element.Value:SetText(AFK)
+		end
+	else 
+		if element.Value then 
+			if element.Value.showPercent and (min < max) then 
+				return element.Value:SetFormattedText("%.0f%%", min/max*100 - (min/max*100)%1)
+			else 
+				return TinyFrame_OverrideValue(element, unit, min, max, disconnected, dead, tapped)
+			end 
+		end 
+	end 
+end 
 
 local UnitFrame_Aura_PostCreateButton = function(element, button)
 	local layout = element._owner.layout
@@ -1190,6 +1443,7 @@ local Constant = {
 }
 
 local Template_SmallFrame = {
+	AlphaPostUpdate = SmallFrame_AlphaPostUpdate,
 	CastBarColor = { 1, 1, 1, .15 },
 	CastBarNameColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
 	CastBarNameDrawLayer = { "OVERLAY", 1 }, 
@@ -1376,7 +1630,8 @@ local Template_TinyFrame = {
 	HealthBackdropTexture = GetMedia("cast_back"), 
 	HealthBackdropDrawLayer = { "BACKGROUND", -1 },
 	HealthBackdropColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] }, 
-	
+	HealthValueOverride = TinyFrame_OverrideHealthValue,
+
 	CastBarPlace = { "BOTTOM", 0, 0 },
 	CastBarSize = Constant.TinyBar,
 	CastBarOrientation = "RIGHT", 
@@ -2356,6 +2611,7 @@ Layouts.UnitFramePlayer = {
 	ManaForegroundPlace = { "CENTER", 0, 0 }, 
 	ManaForegroundSize = { 188, 188 }, 
 	ManaOrbTextures = { GetMedia("pw_orb_bar4"), GetMedia("pw_orb_bar3"), GetMedia("pw_orb_bar3") },
+	ManaOverridePowerColor = PlayerFrame_ExtraPowerOverrideColor,
 	ManaPlace = { "BOTTOMLEFT", -97 +5, 22 + 5 }, 
 	ManaShadeColor = { 1, 1, 1, 1 }, 
 	ManaShadeDrawLayer = { "BORDER", -1 }, 
@@ -2409,6 +2665,8 @@ Layouts.UnitFramePlayer = {
 	NovicePowerForegroundTexture = GetMedia("pw_crystal_case_low"),
 	NovicePowerForegroundColor = { Colors.ui.wood[1], Colors.ui.wood[2], Colors.ui.wood[3] },
 	Place = { "BOTTOMLEFT", 167, 100 },
+	PostUpdateTextures = PlayerFrame_TexturesPostUpdate,
+	PowerOverrideColor = PlayerFrame_PowerOverrideColor, 
 	PowerBackgroundColor = { 1, 1, 1, .95 },
 	PowerBackgroundDrawLayer = { "BACKGROUND", -2 },
 	PowerBackgroundPlace = { "CENTER", 0, 0 },
@@ -2846,6 +3104,7 @@ Layouts.UnitFrameTarget = {
 	NameJustifyH = "RIGHT", 
 	NameJustifyV = "TOP",
 	NamePlace = { "TOPRIGHT", -40, 18 },
+	NamePostUpdateBecauseOfToT = TargetFrame_NamePostUpdate,
 	NameSize = { 250, 18 },
 	NoviceCastPlace = { "TOPRIGHT", -27, -27 }, 
 	NoviceCastSize = { 385, 37 },
@@ -2903,6 +3162,7 @@ Layouts.UnitFrameTarget = {
 	PortraitShadeSize = { 107, 107 }, 
 	PortraitShadeTexture = GetMedia("shade_circle"),
 	PortraitSize = { 85, 85 }, 
+	PostUpdateTextures = TargetFrame_TexturesPostUpdate,
 	PowerBackgroundColor = { 1, 1, 1, .85 },
 	PowerBackgroundDrawLayer = { "BACKGROUND", -2 },
 	PowerBackgroundPlace = { "CENTER", 0, 0 },
