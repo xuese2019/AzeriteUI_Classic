@@ -1433,7 +1433,7 @@ end
 ------------------------------------------------------------------
 -- UnitFrame Config Templates
 ------------------------------------------------------------------
--- Table containing common values for the templates
+-- Table containing common values for the unit frame templates.
 local Constant = {
 	SmallAuraSize = 30, 
 	SmallBar = { 112, 11 }, 
@@ -1446,6 +1446,7 @@ local Constant = {
 	TinyFrame = { 130, 30 }
 }
 
+-- Used for Pet, also the base for the variants below.
 local Template_SmallFrame = {
 	AlphaPostUpdate = SmallFrame_AlphaPostUpdate,
 	CastBarColor = { 1, 1, 1, .15 },
@@ -1528,8 +1529,9 @@ local Template_SmallFrame = {
 	TargetHighlightShowFocus = true, TargetHighlightFocusColor = { 144/255, 195/255, 255/255, 1 }, 
 	TargetHighlightShowTarget = true, TargetHighlightTargetColor = { 255/255, 239/255, 169/255, 1 }, 
 	TargetHighlightTexture = GetMedia("cast_back_outline")
-} 
+}
 
+-- Really just a base for the reversed variant below.
 local Template_SmallFrame_Auras = setmetatable({
 	Aura_PostCreateButton = UnitFrame_Aura_PostCreateButton,
 	Aura_PostUpdateButton = UnitFrame_Aura_PostUpdateButton,
@@ -1579,6 +1581,7 @@ local Template_SmallFrame_Auras = setmetatable({
 	AuraTimePlace = { "TOPLEFT", -6, 6 }
 }, { __index = Template_SmallFrame })
 
+-- Used for ToT.
 local Template_SmallFrameReversed = setmetatable({
 	CastBarOrientation = "LEFT", 
 	CastBarSetFlippedHorizontally = true, 
@@ -1586,6 +1589,7 @@ local Template_SmallFrameReversed = setmetatable({
 	HealthBarSetFlippedHorizontally = true 
 }, { __index = Template_SmallFrame })
 
+-- Used for Boss.
 local Template_SmallFrameReversed_Auras = setmetatable({
 	AuraFramePlace = { "RIGHT", -(Constant.SmallFrame[1] + 13), -1 },
 	AuraProperties = setmetatable({
@@ -1602,6 +1606,7 @@ local Template_SmallFrameReversed_Auras = setmetatable({
 	HealthBarSetFlippedHorizontally = true
 }, { __index = Template_SmallFrame_Auras })
 
+-- Used for Raid and Party frames.
 local Template_TinyFrame = {
 	Size = Constant.TinyFrame,
 
