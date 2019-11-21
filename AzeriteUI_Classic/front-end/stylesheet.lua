@@ -1086,6 +1086,85 @@ local SmallFrame_CastBarPostUpdate = function(element, unit)
 	end 
 end
 
+local UnitFrame_Aura_PostCreateButton = function(element, button)
+	local layout = element._owner.layout
+
+	button.Icon:SetTexCoord(unpack(layout.AuraIconTexCoord))
+	button.Icon:SetSize(unpack(layout.AuraIconSize))
+	button.Icon:ClearAllPoints()
+	button.Icon:SetPoint(unpack(layout.AuraIconPlace))
+
+	button.Count:SetFontObject(layout.AuraCountFont)
+	button.Count:SetJustifyH("CENTER")
+	button.Count:SetJustifyV("MIDDLE")
+	button.Count:ClearAllPoints()
+	button.Count:SetPoint(unpack(layout.AuraCountPlace))
+	if layout.AuraCountColor then 
+		button.Count:SetTextColor(unpack(layout.AuraCountColor))
+	end 
+
+	button.Time:SetFontObject(layout.AuraTimeFont)
+	button.Time:ClearAllPoints()
+	button.Time:SetPoint(unpack(layout.AuraTimePlace))
+
+	local layer, level = button.Icon:GetDrawLayer()
+
+	button.Darken = button.Darken or button:CreateTexture()
+	button.Darken:SetDrawLayer(layer, level + 1)
+	button.Darken:SetSize(button.Icon:GetSize())
+	button.Darken:SetPoint("CENTER", 0, 0)
+	button.Darken:SetColorTexture(0, 0, 0, .25)
+
+	button.Overlay:SetFrameLevel(button:GetFrameLevel() + 10)
+	button.Overlay:ClearAllPoints()
+	button.Overlay:SetPoint("CENTER", 0, 0)
+	button.Overlay:SetSize(button.Icon:GetSize())
+
+	button.Border = button.Border or button.Overlay:CreateFrame("Frame", nil, button.Overlay)
+	button.Border:SetFrameLevel(button.Overlay:GetFrameLevel() - 5)
+	button.Border:ClearAllPoints()
+	button.Border:SetPoint(unpack(layout.AuraBorderFramePlace))
+	button.Border:SetSize(unpack(layout.AuraBorderFrameSize))
+	button.Border:SetBackdrop(layout.AuraBorderBackdrop)
+	button.Border:SetBackdropColor(unpack(layout.AuraBorderBackdropColor))
+	button.Border:SetBackdropBorderColor(unpack(layout.AuraBorderBackdropBorderColor))
+end
+
+local UnitFrame_Aura_PostUpdateButton = function(element, button)
+	local colors = element._owner.colors
+	local layout = element._owner.layout
+	if UnitIsFriend("player", button.unit) then 
+		if button.isBuff then 
+			local color = layout.AuraBorderBackdropBorderColor
+			if color then 
+				button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
+			end 
+		else
+			local color = colors.debuff[button.debuffType or "none"] or layout.AuraBorderBackdropBorderColor
+			if color then 
+				button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
+			end 
+		end
+	else 
+		if button.isStealable then 
+			local color = colors.power.ARCANE_CHARGES or layout.AuraBorderBackdropBorderColor
+			if color then 
+				button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
+			end 
+		elseif button.isBuff then 
+			local color = colors.quest.green or layout.AuraBorderBackdropBorderColor
+			if color then 
+				button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
+			end 
+		else
+			local color = colors.debuff[button.debuffType or "none"] or layout.AuraBorderBackdropBorderColor
+			if color then 
+				button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
+			end 
+		end
+	end 
+end
+
 -- Little trick to see the layout and dimensions of the blip icons
 --local f = UIParent:CreateTexture()
 --f:SetTexture([[Interface\MiniMap\ObjectIconsAtlas.blp]]) 
@@ -1194,6 +1273,8 @@ local Template_SmallFrame = {
 } 
 
 local Template_SmallFrame_Auras = setmetatable({
+	Aura_PostCreateButton = UnitFrame_Aura_PostCreateButton,
+	Aura_PostUpdateButton = UnitFrame_Aura_PostUpdateButton,
 	AuraBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 16 },
 	AuraBorderBackdropColor = { 0, 0, 0, 0 },
 	AuraBorderBackdropBorderColor = { Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3 },
@@ -2123,6 +2204,8 @@ Layouts.Tooltips = {
 ------------------------------------------------
 -- Player
 Layouts.UnitFramePlayer = { 
+	Aura_PostCreateButton = UnitFrame_Aura_PostCreateButton,
+	Aura_PostUpdateButton = UnitFrame_Aura_PostUpdateButton,
 	AuraBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 16 },
 	AuraBorderBackdropColor = { 0, 0, 0, 0 },
 	AuraBorderBackdropBorderColor = { Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3 },
@@ -2482,6 +2565,8 @@ Layouts.UnitFramePlayerHUD = {
 
 -- Target
 Layouts.UnitFrameTarget = { 
+	Aura_PostCreateButton = UnitFrame_Aura_PostCreateButton,
+	Aura_PostUpdateButton = UnitFrame_Aura_PostUpdateButton,
 	AuraBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 16 },
 	AuraBorderBackdropColor = { 0, 0, 0, 0 },
 	AuraBorderBackdropBorderColor = { Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3 }, 
@@ -2925,6 +3010,8 @@ Layouts.UnitFrameParty = setmetatable({
 	AlternateGrowthX = 140, -- Horizontal growth per new unit
 	AlternateGrowthY = 0, -- Vertical growth per new unit
 	AlternatePlace = { "BOTTOMLEFT", "UICenter", "BOTTOMLEFT", 56, 360 + 10 }, -- Position of the healermode frame
+	Aura_PostCreateButton = UnitFrame_Aura_PostCreateButton,
+	Aura_PostUpdateButton = UnitFrame_Aura_PostUpdateButton,
 	
 	Place = { "TOPLEFT", "UICenter", "TOPLEFT", 50, -42 }, -- Position of the initial frame
 	GroupAnchor = "TOPLEFT", 
