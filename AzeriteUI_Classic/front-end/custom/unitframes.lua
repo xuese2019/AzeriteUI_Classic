@@ -8,11 +8,7 @@ but prior to loading any of the module config files.
 Meaning we can reference the general databases with certainty, 
 but any layout data will have to be passed as function arguments.
 
-TODO:
-Remove most of the callbacks, and put them in the stylesheet file.
-
---]]--
-
+	--]]--
 local ADDON, Private = ...
 local Core = Wheel("LibModule"):GetModule(ADDON)
 if (not Core) then 
@@ -74,8 +70,9 @@ local _,PlayerClass = UnitClass("player")
 local _,PlayerLevel = UnitLevel("player")
 
 -----------------------------------------------------------
--- Secure Snippets
+-- Secure Stuff
 -----------------------------------------------------------
+-- All secure code snippets
 local SECURE = {
 
 	-- Called on the group headers
@@ -313,23 +310,8 @@ local SECURE = {
 	]=]
 }
 
------------------------------------------------------------
--- Utility Functions
------------------------------------------------------------
-local short = function(value)
-	value = tonumber(value)
-	if (not value) then return "" end
-	if (value >= 1e9) then
-		return ("%.1fb"):format(value / 1e9):gsub("%.?0+([kmb])$", "%1")
-	elseif value >= 1e6 then
-		return ("%.1fm"):format(value / 1e6):gsub("%.?0+([kmb])$", "%1")
-	elseif value >= 1e3 or value <= -1e3 then
-		return ("%.1fk"):format(value / 1e3):gsub("%.?0+([kmb])$", "%1")
-	else
-		return tostring(value - value%1)
-	end	
-end
-
+-- Create a secure callback frame our menu system can use
+-- to alter unitframe setting while engaged in combat.
 local CreateSecureCallbackFrame = function(module, owner, db, script)
 
 	-- Create a secure proxy frame for the menu system
@@ -360,6 +342,7 @@ end
 -----------------------------------------------------------
 -- Callbacks
 -----------------------------------------------------------
+-- Tiny little "hack" for faster AFK status updates.
 local TinyFrame_OnEvent = function(self, event, unit, ...)
 	if (event == "PLAYER_FLAGS_CHANGED") then 
 		-- Do some trickery to instantly update the afk status, 
