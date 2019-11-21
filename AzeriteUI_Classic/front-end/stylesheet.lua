@@ -1418,14 +1418,6 @@ local UnitFrame_Aura_PostUpdateButton = function(element, button)
 	end 
 end
 
--- Little trick to see the layout and dimensions of the blip icons
---local f = UIParent:CreateTexture()
---f:SetTexture([[Interface\MiniMap\ObjectIconsAtlas.blp]]) 
---f:SetPoint("CENTER")
---local g = UIParent:CreateTexture()
---g:SetColorTexture(0,.7,0,.25)
---g:SetAllPoints(f)
-
 ------------------------------------------------------------------
 -- UnitFrame Config Templates
 ------------------------------------------------------------------

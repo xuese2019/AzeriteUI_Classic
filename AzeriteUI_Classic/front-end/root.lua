@@ -297,6 +297,22 @@ Core.ApplyExperimentalFeatures = function(self)
 	-- Add command to /clear the main chatframe
 	self:RegisterChatCommand("clear", function() ChatFrame1:Clear() end)
 	self:RegisterChatCommand("fix", fixMacroIcons)
+
+	-- Little trick to show the layout and dimensions
+	-- of the Minimap blip icons on-screen in-game, 
+	-- whenever blizzard decide to update those. 
+	
+	-- By setting a single point, but not any sizes, 
+	-- the texture is shown in its original size and dimensions!
+	--local f = UIParent:CreateTexture()
+	--f:SetTexture([[Interface\MiniMap\ObjectIconsAtlas.blp]])
+	--f:SetPoint("CENTER")
+
+	-- Add a little backdrop for easy
+	-- copy & paste from screenshots!
+	--local g = UIParent:CreateTexture()
+	--g:SetColorTexture(0,.7,0,.25)
+	--g:SetAllPoints(f)
 end
 
 -- We could add this into the back-end, leaving it here for now, though. 
