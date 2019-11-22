@@ -22,14 +22,16 @@ local UnitPlayerControlled = UnitPlayerControlled
 
 -- Addon API
 local GetPlayerRole = Wheel("LibPlayerData").GetPlayerRole
-local HasInfoFlags = Wheel("LibAura").HasAuraInfoFlags
-local AddFlags = Wheel("LibAura").AddAuraUserFlags
-local HasUserFlags = Wheel("LibAura").HasAuraUserFlags
-local GetUserFlags = Wheel("LibAura").GetAllAuraUserFlags
+local HasInfoFlags = Wheel("LibAuraData").HasAuraInfoFlags
+local AddFlags = Wheel("LibAuraData").AddAuraUserFlags
+local HasUserFlags = Wheel("LibAuraData").HasAuraUserFlags
+local GetUserFlags = Wheel("LibAuraData").GetAllAuraUserFlags
 
--- Databases
-local infoFilter = Wheel("LibAura"):GetAllAuraInfoBitFilters() -- Aura flags by keywords
-local auraInfoFlags = Wheel("LibAura"):GetAllAuraInfoFlags() -- Aura info flags
+-- Library Databases
+local infoFilter = Wheel("LibAuraData"):GetAllAuraInfoBitFilters() -- Aura flags by keywords
+local auraInfoFlags = Wheel("LibAuraData"):GetAllAuraInfoFlags() -- Aura info flags
+
+-- Local Databases
 local auraUserFlags = {} -- Aura filter flags 
 local auraFilters = {} -- Aura filter functions
 local colorDB = {} -- Addon color schemes

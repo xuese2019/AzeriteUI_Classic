@@ -337,7 +337,7 @@ local IterateBuffs = function(element, unit, filter, customFilter, visible)
 		end
 
 		-- Figure out if the debuff is owned by us, not just cast by us
-		local isOwnedByPlayer = (unitCaster and (unitCaster == "player" or unitCaster == "pet" or (UnitHasVehicleUI and UnitHasVehicleUI("player") and unitCaster == "vehicle")))
+		local isOwnedByPlayer = unitCaster and (unitCaster == "player" or unitCaster == "pet")
 
 		-- Run the custom filter method, if it exists
 		local auraPriority, isFiltered
@@ -443,7 +443,7 @@ local IterateDebuffs = function(element, unit, filter, customFilter, visible)
 		end
 
 		-- Figure out if the debuff is owned by us, not just cast by us
-		local isOwnedByPlayer = (unitCaster and (unitCaster == "player" or unitCaster == "pet" or (UnitHasVehicleUI and UnitHasVehicleUI("player") and unitCaster == "vehicle")))
+		local isOwnedByPlayer = unitCaster and (unitCaster == "player" or unitCaster == "pet")
 
 		-- Run the custom filter method, if it exists
 		local auraPriority, isFiltered
@@ -781,5 +781,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Auras", Enable, Disable, Proxy, 48)
+	Lib:RegisterElement("Auras", Enable, Disable, Proxy, 49)
 end 

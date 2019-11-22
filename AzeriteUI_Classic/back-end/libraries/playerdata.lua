@@ -1,4 +1,4 @@
-local LibPlayerData = Wheel:Set("LibPlayerData", 13)
+local LibPlayerData = Wheel:Set("LibPlayerData", 14)
 if (not LibPlayerData) then	
 	return
 end
@@ -88,7 +88,15 @@ end
 
 -- Unit Health Cache
 ---------------------------------------------------------------------	
--- Just a proxy for RealMobHealth right now. Shortest path. 
+-- These functions are intended to return nil 
+-- if no actual health data is available. 
+-- We're currently using them as a proxy for RealMobHealth
+-- when that is available, but modifies the return values to
+-- accomodate our system of returning nil when only percentages exist.
+
+-- TODO: Return healthMax too with this one,
+-- and rewrite front end modules to match the new behavior.
+-- This will be to effectively cut the number of function calls in half.
 LibPlayerData.UnitHealth = function(self, unit)
 	if (RealMobHealth and RealMobHealth.GetUnitHealth) then 
 		local healthCur, healthMax, curIsGuess, maxIsGuess = RealMobHealth.GetUnitHealth(unit)
