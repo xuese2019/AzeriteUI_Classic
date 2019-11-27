@@ -1216,7 +1216,7 @@ local TargetFrame_TexturesPostUpdate = function(self)
 		targetStyle = "Seasoned"
 	elseif (targetLevel >= self.layout.HardenedLevel) then 
 		targetStyle = "Hardened"
-	elseif (creatureType == "Critter") then 
+	elseif (creatureType == "Critter") or (targetLevel == 1) then 
 		targetStyle = "Critter"
 	else
 		targetStyle = "Novice" 
