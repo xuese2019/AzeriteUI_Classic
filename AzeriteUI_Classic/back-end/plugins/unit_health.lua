@@ -363,11 +363,6 @@ local Disable = function(self)
 		self:UnregisterEvent("UNIT_MAXHEALTH", Proxy)
 		self:UnregisterEvent("UNIT_CONNECTION", Proxy)
 		self:UnregisterEvent("UNIT_FACTION", Proxy) 
-		self:UnregisterEvent("UNIT_THREAT_SITUATION_UPDATE", Proxy)
-		self:UnregisterEvent("UNIT_THREAT_LIST_UPDATE", Proxy)
-		self:UnregisterEvent("UNIT_HEAL_PREDICTION", Proxy)
-		self:UnregisterEvent("UNIT_ABSORB_AMOUNT_CHANGED", Proxy)
-		self:UnregisterEvent("UNIT_HEAL_ABSORB_AMOUNT_CHANGED", Proxy)
 
 		health:Hide()
 		health.guid = nil
@@ -386,5 +381,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Health", Enable, Disable, Proxy, 39)
+	Lib:RegisterElement("Health", Enable, Disable, Proxy, 40)
 end 
