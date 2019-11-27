@@ -27,12 +27,14 @@ LibAuraData.embeds = LibAuraData.embeds or {}
 LibAuraData.infoFlags = LibAuraData.infoFlags or {} -- static library info flags about the auras
 LibAuraData.auraFlags = LibAuraData.auraFlags or {} -- static library aura flag cache
 LibAuraData.userFlags = LibAuraData.userFlags or {} -- static user/module flag cache
+LibAuraData.auraDuration = LibAuraData.auraDuration or {} -- static library aura duration cache
 
 -- Quality of Life
 ---------------------------------------------------------------------	
-local InfoFlags = LibAuraData.infoFlags -- static library info flags about the auras
-local AuraFlags = LibAuraData.auraFlags -- static library aura flag cache
-local UserFlags = LibAuraData.userFlags --- static user/module flag cache
+local InfoFlags = LibAuraData.infoFlags
+local AuraFlags = LibAuraData.auraFlags
+local UserFlags = LibAuraData.userFlags
+local AuraDuration = LibAuraData.auraDuration
 
 -- Local constants & tables
 ---------------------------------------------------------------------	

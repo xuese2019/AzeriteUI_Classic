@@ -1,4 +1,4 @@
-local LibAura = Wheel:Set("LibAura", 19)
+local LibAura = Wheel:Set("LibAura", 20)
 if (not LibAura) then	
 	return
 end
@@ -41,12 +41,16 @@ local type = type
 -- WoW API
 local CombatLogGetCurrentEventInfo = CombatLogGetCurrentEventInfo
 local GetComboPoints = GetComboPoints
+local GetPlayerInfoByGUID = GetPlayerInfoByGUID
 local GetSpellInfo = GetSpellInfo
 local GetTime = GetTime
+local IsInGroup = IsInGroup
+local IsInRaid = IsInRaid
 local IsPlayerSpell = IsPlayerSpell
 local UnitAura = UnitAura
 local UnitClass = UnitClass
 local UnitGUID = UnitGUID
+local UnitIsFeignDeath = UnitIsFeignDeath
 local UnitInParty = UnitInParty
 local UnitInRaid = UnitInRaid
 local UnitIsUnit = UnitIsUnit
@@ -79,6 +83,16 @@ local DRMultipliers = { .5, .25, 0 }
 local playerGUID = UnitGUID("player")
 local _, playerClass = UnitClass("player")
 local sunderArmorName = GetSpellInfo(11597)
+
+local localUnits = { player = true, pet = true }
+for i = 1,4 do 
+	localUnits["party"..i] = true 
+	localUnits["party"..i.."pet"] = true 
+end 
+for i = 2,40 do 
+	localUnits["raid"..i] = true 
+	localUnits["raid"..i.."pet"] = true 
+end 
 
 -- Utility Functions
 --------------------------------------------------------------------------
@@ -132,6 +146,29 @@ local parseFilter = function(filter)
 						.. (cancelable and " CANCELABLE" or "") 
 						.. (not_cancelable and " NOT_CANCELABLE" or "") 
 end 
+
+local isHunterGUID = function(guid)
+	local _,class = GetPlayerInfoByGUID(guid)
+	return class == "HUNTER"
+end
+
+local isFriendlyFeigning = function(guid)
+	if (IsInRaid()) then
+		for i = 1, MAX_RAID_MEMBERS do
+			local unitID = "raid"..i
+			if (UnitGUID(unitID) == guid) and (UnitIsFeignDeath(unitID)) then
+				return true
+			end
+		end
+	elseif (IsInGroup()) then
+		for i = 1, MAX_PARTY_MEMBERS do
+			local unitID = "party"..i
+			if (UnitGUID(unitID) == guid) and (UnitIsFeignDeath(unitID)) then
+				return true
+			end
+		end
+	end
+end
 
 local comboCache, comboCacheOld = 0,0
 local GetComboPointsCached = function()
@@ -236,7 +273,13 @@ Frame.OnEvent = function(self, event, unit, ...)
 		end
 
 		if (eventType == "UNIT_DIED") then
-			-- clear cache
+			if (isHunterGUID(dstGUID)) then
+				local isDstFriendly = bit_band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) > 0
+				if (not isDstFriendly) or (isFriendlyFeigning(dstGUID)) then
+					return
+				end
+			end
+			
 		end
 
 	end 
@@ -248,16 +291,6 @@ end
 
 LibAura.CacheUnitDebuffsByFilter = function(self, unit, filter)
 	return self:CacheUnitAurasByFilter(unit, "HARMFUL" .. (filter or ""))
-end 
-
-local localUnits = { player = true, pet = true }
-for i = 1,4 do 
-	localUnits["party"..i] = true 
-	localUnits["party"..i.."pet"] = true 
-end 
-for i = 2,40 do 
-	localUnits["raid"..i] = true 
-	localUnits["raid"..i.."pet"] = true 
 end 
 
 LibAura.CacheUnitAurasByFilter = function(self, unit, filter)
@@ -411,7 +444,7 @@ LibAura.RegisterAuraWatch = function(self, unit, filter)
 	if (not LibAura.isTracking) then 
 		RegisterEvent(Frame, "UNIT_SPELLCAST_SUCCEEDED")
 		RegisterEvent(Frame, "COMBAT_LOG_EVENT_UNFILTERED")
-		if (playerClass == "ROGUE") then
+		if (playerClass == "ROGUE") or (playerClass == "DRUID") then
 			RegisterEvent(Frame, "PLAYER_TARGET_CHANGED")
 			RegisterUnitEvent(Frame, "UNIT_POWER_UPDATE", "player")
 		end
@@ -437,7 +470,7 @@ LibAura.UnregisterAuraWatch = function(self, unit, filter)
 		UnregisterEvent(Frame, "UNIT_AURA")
 		UnregisterEvent(Frame, "UNIT_SPELLCAST_SUCCEEDED")
 		UnregisterEvent(Frame, "COMBAT_LOG_EVENT_UNFILTERED")
-		if (playerClass == "ROGUE") then
+		if (playerClass == "ROGUE") or (playerClass == "DRUID") then
 			UnregisterEvent(Frame, "PLAYER_TARGET_CHANGED")
 			UnregisterEvent(Frame, "UNIT_POWER_UPDATE")
 		end
