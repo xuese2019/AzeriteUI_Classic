@@ -203,10 +203,11 @@ end
 local OnUpdate = function(element, elapsed)
 	local self = element._owner
 	local unit = self.unit
-	if (not unit) or (not UnitExists(unit)) then 
+	if (not unit) or (not UnitExists(unit)) or (UnitIsDeadOrGhost(unit)) then 
 		clear(element)
 		element.casting = nil
 		element.channeling = nil
+		element.tradeskill = nil
 		if (element:IsShown()) then 
 			element:Hide()
 		end
@@ -217,9 +218,9 @@ local OnUpdate = function(element, elapsed)
 		local duration = element.duration + elapsed
 		if (duration >= element.max) then
 			clear(element) 
-			element.tradeskill = nil
 			element.casting = nil
 			element.channeling = nil
+			element.tradeskill = nil
 			if (element:IsShown()) then 
 				element:Hide()
 			end
@@ -381,10 +382,14 @@ Update = function(self, event, unit, ...)
 
 		clear(element)
 		element.casting = nil
+		element.channeling = nil
 		element.notInterruptible = nil
-		element.tradeskill = nil
 		element.total = nil
+		element.tradeskill = nil
 
+		if element.Shield then 
+			element.Shield:Hide() 
+		end 
 		if (element:IsShown()) then 
 			element:Hide()
 		end
@@ -392,14 +397,15 @@ Update = function(self, event, unit, ...)
 	elseif (event == "UNIT_SPELLCAST_INTERRUPTED") or (event == "GP_SPELL_CAST_INTERRUPTED") then
 
 		clear(element)
-		element.tradeskill = nil
-		element.total = nil
 		element.casting = nil
 		element.channeling = nil
 		element.notInterruptible = nil
+		element.total = nil
+		element.tradeskill = nil
 
-		if element.Shield then element.Shield:Hide() end 
-
+		if element.Shield then 
+			element.Shield:Hide() 
+		end 
 		if element.timeToHold then
 			element.failedMessageTimer = element.timeToHold
 			local msg = element.Failed or element.Value or element.Name
@@ -565,6 +571,7 @@ local Enable = function(self)
 			self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP", Proxy)
 		else
 			self:RegisterMessage("GP_SPELL_CAST_START", Proxy)
+			self:RegisterMessage("GP_SPELL_CAST_STOP", Proxy)
 			self:RegisterMessage("GP_SPELL_CAST_FAILED", Proxy)
 			self:RegisterMessage("GP_SPELL_CAST_SUCCESS", Proxy)
 			self:RegisterMessage("GP_SPELL_CAST_INTERRUPTED", Proxy)
@@ -595,6 +602,7 @@ local Disable = function(self)
 		self:UnregisterEvent("UNIT_SPELLCAST_CHANNEL_STOP", Proxy)
 
 		self:UnregisterMessage("GP_SPELL_CAST_START", Proxy)
+		self:UnregisterMessage("GP_SPELL_CAST_STOP", Proxy)
 		self:UnregisterMessage("GP_SPELL_CAST_FAILED", Proxy)
 		self:UnregisterMessage("GP_SPELL_CAST_SUCCESS", Proxy)
 		self:UnregisterMessage("GP_SPELL_CAST_INTERRUPTED", Proxy)
@@ -611,5 +619,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 33)
+	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 34)
 end 

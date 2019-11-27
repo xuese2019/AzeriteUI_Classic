@@ -1,4 +1,4 @@
-local LibCast = Wheel:Set("LibCast", 3)
+local LibCast = Wheel:Set("LibCast", 4)
 if (not LibCast) then
 	return
 end
@@ -42,6 +42,7 @@ local ChannelInfo = ChannelInfo
 local GetSpellInfo = GetSpellInfo
 local GetSpellTexture = GetSpellTexture
 local GetTime = GetTime
+local IsLoggedIn = IsLoggedIn
 local UnitIsUnit = UnitIsUnit
 
 -- Library registries
@@ -260,12 +261,6 @@ LibCast.OnEvent = function(self, event, ...)
 			destGUID, destName, destFlags, destRaidFlags,
 			spellID, spellName, _, damage, _, resisted, blocked, absorbed = ...
 
-		-- Just while developing, because the cities are spammy.
-		--if (sourceGUID ~= playerGUID) then return end
-
-		-- Not all failed spells are registered. This is a problem. 
-		--print(eventType, sourceName, spellName)
-
 		if (eventType == "SPELL_CAST_START") then
 			local spellID = self:GetSpellID(spellName)
 			if (not spellID) then 
@@ -408,7 +403,7 @@ LibCast.OnEvent = function(self, event, ...)
 				self:SendMessage("GP_SPELL_CAST_STOP", sourceGUID)
 			end 
 			return
-		
+	
 		elseif (eventType == "SWING_DAMAGE") or (eventType == "RANGE_DAMAGE") or (eventType == "SPELL_DAMAGE")
 		or (eventType == "ENVIRONMENTAL_DAMAGE") then 
 			
