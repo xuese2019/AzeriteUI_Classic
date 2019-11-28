@@ -1,4 +1,4 @@
-local LibTooltip = Wheel:Set("LibTooltip", 69)
+local LibTooltip = Wheel:Set("LibTooltip", 70)
 if (not LibTooltip) then
 	return
 end
@@ -1224,7 +1224,6 @@ Tooltip.SetActionItem = function(self, slot)
 				self:AddLine(string_format(DPS_TEMPLATE, string_format("%.1f", data.itemDPS+.05)), colors.highlight[1], colors.highlight[2], colors.highlight[3])
 			end 
 
-			local stat1R, stat1G, stat1B = colors.normal[1], colors.normal[2], colors.normal[3]
 			local statR, statG, statB = colors.quest.green[1], colors.quest.green[2], colors.quest.green[3] 
 			
 			-- armor 
@@ -1239,15 +1238,20 @@ Tooltip.SetActionItem = function(self, slot)
 
 			-- parry?
 
-			-- primary stat
+			-- primary stats
 			if data.primaryStatValue and (data.primaryStatValue ~= 0) then 
-				self:AddLine(string_format("%s %s", (data.primaryStatValue > 0) and ("+"..tostring(data.primaryStatValue)) or tostring(data.primaryStatValue), data.primaryStat), stat1R, stat1G, stat1B)
+				self:AddLine(string_format("%s %s", (data.primaryStatValue > 0) and ("+"..tostring(data.primaryStatValue)) or tostring(data.primaryStatValue), data.primaryStat), statR, statG, statB)
 
+			end 
+			if data.primaryStats then 
+				for key,value in pairs(data.primaryStats) do 
+					self:AddLine(string_format("%s %s", (value > 0) and ("+"..tostring(value)) or tostring(value), _G[key]), statR, statG, statB)
+				end 
 			end 
 
 			-- stamina
 			if data.itemStamina and (data.itemStamina ~= 0) then 
-				self:AddLine(string_format("%s %s", (data.itemStamina > 0) and ("+"..tostring(data.itemStamina)) or tostring(data.itemStamina), ITEM_MOD_STAMINA_SHORT), stat1R, stat1G, stat1B)
+				self:AddLine(string_format("%s %s", (data.itemStamina > 0) and ("+"..tostring(data.itemStamina)) or tostring(data.itemStamina), ITEM_MOD_STAMINA_SHORT), statR, statG, statB)
 
 			end 
 

@@ -1,4 +1,4 @@
-local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 44)
+local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 45)
 if (not LibTooltipScanner) then	
 	return
 end
@@ -68,6 +68,9 @@ LibTooltipScanner.scannerTooltip = LibTooltipScanner.scannerTooltip
 -- Shortcuts
 local Scanner = LibTooltipScanner.scannerTooltip
 local ScannerName = LibTooltipScanner.scannerName
+
+-- Constants
+local playerClass = UnitClass("player")
 
 -- Scanning Constants & Patterns
 ---------------------------------------------------------
@@ -229,6 +232,14 @@ local isPrimaryStat = {
 	ITEM_MOD_STRENGTH_SHORT = true,
 	ITEM_MOD_AGILITY_SHORT = true,
 	ITEM_MOD_INTELLECT_SHORT = true,
+	ITEM_MOD_SPIRIT_SHORT = true
+}
+
+local sorted1stStats = {
+	"ITEM_MOD_STRENGTH_SHORT",
+	"ITEM_MOD_AGILITY_SHORT",
+	"ITEM_MOD_INTELLECT_SHORT",
+	"ITEM_MOD_SPIRIT_SHORT"
 }
 
 local isSecondaryStat = {
@@ -241,11 +252,12 @@ local isSecondaryStat = {
 	ITEM_MOD_CR_AVOIDANCE_SHORT = true, 
 	ITEM_MOD_CR_SPEED_SHORT = true, 
 
+	ITEM_MOD_DEFENSE_SKILL_RATING_SHORT = true,
 	ITEM_MOD_DODGE_RATING_SHORT = true, 
 	ITEM_MOD_PARRY_RATING_SHORT = true, 
 
 	ITEM_MOD_BLOCK_VALUE_SHORT = true, 
-	ITEM_MOD_BLOCK_RATING_SHORT = true, 
+	ITEM_MOD_BLOCK_RATING_SHORT = true
 }
 
 local sorted2ndStats = {
@@ -258,11 +270,12 @@ local sorted2ndStats = {
 	"ITEM_MOD_CR_AVOIDANCE_SHORT", 
 	"ITEM_MOD_CR_SPEED_SHORT", 
 
+	"ITEM_MOD_DEFENSE_SKILL_RATING_SHORT",
 	"ITEM_MOD_DODGE_RATING_SHORT", 
 	"ITEM_MOD_PARRY_RATING_SHORT", 
 
 	"ITEM_MOD_BLOCK_VALUE_SHORT", 
-	"ITEM_MOD_BLOCK_RATING_SHORT",
+	"ITEM_MOD_BLOCK_RATING_SHORT"
 }
 
 -- Utility Functions
@@ -730,6 +743,8 @@ LibTooltipScanner.GetTooltipDataForAction = function(self, actionSlot, tbl)
 end
 
 -- Special combo variant that returns item info from an action slot
+-- We'll truncate the info a bit here to make it feel more like a spell
+-- and less like an item. Full item details will be included in pure item methods.
 LibTooltipScanner.GetTooltipDataForActionItem = function(self, actionSlot, tbl)
 	ClearScanner()
 
@@ -766,10 +781,7 @@ LibTooltipScanner.GetTooltipDataForActionItem = function(self, actionSlot, tbl)
 		local effectiveLevel, previewLevel, origLevel = GetDetailedItemLevelInfo(itemLink)
 
 		local itemStats = GetItemStats(itemLink)
-
-		local spec = GetSpecialization and GetSpecialization()
-		local role = GetSpecializationRole and GetSpecializationRole(spec)
-		local primaryStat = GetSpecializationInfo and select(6, GetSpecializationInfo(spec, nil, nil, nil, UnitSex("player")))
+		local primaryStat
 
 		tbl.itemName = itemName -- localized
 		tbl.itemID = tonumber(string_match(itemLink, "item:(%d+)"))
@@ -787,10 +799,10 @@ LibTooltipScanner.GetTooltipDataForActionItem = function(self, actionSlot, tbl)
 		tbl.itemSetID = itemSetID
 		tbl.isCraftingReagent = isCraftingReagent
 		tbl.itemArmor = itemStats and tonumber(itemStats.RESISTANCE0_NAME)
-		tbl.itemStamina = itemStats and tonumber(itemStats.ITEM_MOD_STRENGTH_SHORT)
+		tbl.itemStamina = itemStats and tonumber(itemStats.ITEM_MOD_STAMINA_SHORT)
 		tbl.itemDPS = itemStats and tonumber(itemStats.ITEM_MOD_DAMAGE_PER_SECOND_SHORT)
-		tbl.uselessStats = {}
-		tbl.secondaryStats = {}	
+		tbl.primaryStats = {}
+		tbl.secondaryStats = {}
 
 		local primaryKey
 		if (primaryStat == LE_UNIT_STAT_STRENGTH) then 
@@ -811,7 +823,7 @@ LibTooltipScanner.GetTooltipDataForActionItem = function(self, actionSlot, tbl)
 		if itemStats then
 			for key,value in pairs(itemStats) do 
 				if (isPrimaryStat[key] and (key ~= primaryKey)) then 
-					tbl.uselessStats[key] = value
+					tbl.primaryStats[key] = value
 				end 
 				if (isSecondaryStat[key]) then 
 					tbl.secondaryStats[key] = value
@@ -1651,6 +1663,8 @@ LibTooltipScanner.GetTooltipDataForItemID = function(self, itemID, tbl)
 end
 
 -- Returns specific data for the specific itemLink
+-- TODO: Add in everything from GetTooltipDataForActionItem()
+-- TODO: Add in scanning for sets, enchants, and descriptions. 
 LibTooltipScanner.GetTooltipDataForItemLink = function(self, itemLink, tbl)
 	ClearScanner()
 
