@@ -5,7 +5,7 @@ if (not Core) then
 end
 
 local L = Wheel("LibLocale"):GetLocale(ADDON)
-local Module = Core:NewModule("Minimap", "LibEvent", "LibDB", "LibMinimap", "LibTooltip", "LibTime", "LibPlayerData")
+local Module = Core:NewModule("Minimap", "LibEvent", "LibDB", "LibMinimap", "LibTooltip", "LibTime", "LibSound", "LibPlayerData")
 
 -- Don't grab buttons if these are active
 local MBB = Module:IsAddOnEnabled("MBB") 
@@ -566,6 +566,7 @@ local Time_UpdateTooltip = function(self)
 	tooltip:AddDoubleLine(TIMEMANAGER_TOOLTIP_LOCALTIME, string_format(getTimeStrings(lh, lm, lsuffix, useStandardTime)), rh, gh, bh, r, g, b)
 	tooltip:AddDoubleLine(TIMEMANAGER_TOOLTIP_REALMTIME, string_format(getTimeStrings(sh, sm, ssuffix, useStandardTime)), rh, gh, bh, r, g, b)
 	tooltip:AddLine(" ")
+	tooltip:AddLine(green..L["<Left-Click>"]..NC .. " " .. TIMEMANAGER_SHOW_STOPWATCH, rh, gh, bh)
 
 	if useServerTime then 
 		tooltip:AddLine(L["%s to use local computer time."]:format(green..L["<Middle-Click>"]..NC), rh, gh, bh)
@@ -593,7 +594,17 @@ local Time_OnLeave = function(self)
 end 
 
 local Time_OnClick = function(self, mouseButton)
-	if (mouseButton == "MiddleButton") then 
+	if (mouseButton == "LeftButton") then 
+		if (not IsAddOnLoaded("Blizzard_TimeManager")) then
+			UIParentLoadAddOn("Blizzard_TimeManager")
+		end
+		Stopwatch_Toggle()
+		if (StopwatchFrame:IsShown()) then
+			Module:PlaySoundKitID(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+		else
+			Module:PlaySoundKitID(SOUNDKIT.IG_MAINMENU_QUIT)
+		end
+	elseif (mouseButton == "MiddleButton") then 
 		Module.db.useServerTime = not Module.db.useServerTime
 
 		self.clock.useServerTime = Module.db.useServerTime

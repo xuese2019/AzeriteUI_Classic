@@ -19,6 +19,9 @@ local _G = _G
 local ipairs = ipairs
 local string_find = string.find
 local string_format = string.format
+local string_lower = string.lower
+local string_match = string.match
+local tonumber = tonumber
 
 -- WoW API
 local BNGetFriendGameAccountInfo = _G.BNGetFriendGameAccountInfo
@@ -294,9 +297,76 @@ Core.ApplyExperimentalFeatures = function(self)
 		end 
 	end
 
-	-- Add command to /clear the main chatframe
+	local commands = {
+		SLASH_STOPWATCH_PARAM_PLAY1 = "play",
+		SLASH_STOPWATCH_PARAM_PLAY2 = "play",
+		SLASH_STOPWATCH_PARAM_PAUSE1 = "pause",
+		SLASH_STOPWATCH_PARAM_PAUSE2 = "pause",
+		SLASH_STOPWATCH_PARAM_STOP1 = "stop",
+		SLASH_STOPWATCH_PARAM_STOP2 = "clear",
+		SLASH_STOPWATCH_PARAM_STOP3 = "reset",
+		SLASH_STOPWATCH_PARAM_STOP4 = "stop",
+		SLASH_STOPWATCH_PARAM_STOP5 = "clear",
+		SLASH_STOPWATCH_PARAM_STOP6 = "reset"
+	}
+
+	-- try to match a command
+	local matchCommand = function(param, text)
+		local i, compare
+		i = 1
+		repeat
+			compare = commands[param..i]
+			if (compare and compare == text) then
+				return true
+			end
+			i = i + 1
+		until (not compare)
+		return false
+	end
+
+	local stopWatch = function(_,msg)
+		if (not IsAddOnLoaded("Blizzard_TimeManager")) then
+			UIParentLoadAddOn("Blizzard_TimeManager")
+		end
+		if (StopwatchFrame) then
+			local text = string_match(msg, "%s*([^%s]+)%s*")
+			if (text) then
+				text = string_lower(text)
+	
+				-- in any of the following cases, the stopwatch will be shown
+				StopwatchFrame:Show()
+	
+				if (matchCommand("SLASH_STOPWATCH_PARAM_PLAY", text)) then
+					Stopwatch_Play()
+					return
+				end
+				if (matchCommand("SLASH_STOPWATCH_PARAM_PAUSE", text)) then
+					Stopwatch_Pause()
+					return
+				end
+				if (matchCommand("SLASH_STOPWATCH_PARAM_STOP", text)) then
+					Stopwatch_Clear()
+					return
+				end
+				-- try to match a countdown
+				-- kinda ghetto, but hey, it's simple and it works =)
+				local hour, minute, second = string_match(msg, "(%d+):(%d+):(%d+)")
+				if (not hour) then
+					minute, second = string_match(msg, "(%d+):(%d+)")
+					if (not minute) then
+						second = string_match(msg, "(%d+)")
+					end
+				end
+				Stopwatch_StartCountdown(tonumber(hour), tonumber(minute), tonumber(second))
+			else
+				Stopwatch_Toggle()
+			end
+		end
+	end
+
 	self:RegisterChatCommand("clear", function() ChatFrame1:Clear() end)
 	self:RegisterChatCommand("fix", fixMacroIcons)
+	self:RegisterChatCommand("stopwatch", stopWatch)
 
 	-- Little trick to show the layout and dimensions
 	-- of the Minimap blip icons on-screen in-game, 
