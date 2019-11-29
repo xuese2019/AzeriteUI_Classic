@@ -1,4 +1,4 @@
-local LibAura = Wheel:Set("LibAura", 20)
+local LibAura = Wheel:Set("LibAura", 21)
 if (not LibAura) then	
 	return
 end
@@ -12,13 +12,13 @@ assert(LibEvent, "LibAura requires LibEvent to be loaded.")
 local LibFrame = Wheel("LibFrame")
 assert(LibFrame, "LibAura requires LibFrame to be loaded.")
 
-local LibPlayerData = Wheel("LibPlayerData")
-assert(LibPlayerData, "LibAura requires LibPlayerData to be loaded.")
+local LibAuraData = Wheel("LibAuraData")
+assert(LibAuraData, "LibAura requires LibAuraData to be loaded.")
 
 LibMessage:Embed(LibAura)
 LibEvent:Embed(LibAura)
 LibFrame:Embed(LibAura)
-LibPlayerData:Embed(LibAura)
+LibAuraData:Embed(LibAura)
 
 -- Lua API
 local _G = _G
@@ -274,11 +274,13 @@ Frame.OnEvent = function(self, event, unit, ...)
 
 		if (eventType == "UNIT_DIED") then
 			if (isHunterGUID(dstGUID)) then
-				local isDstFriendly = bit_band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) > 0
-				if (not isDstFriendly) or (isFriendlyFeigning(dstGUID)) then
+				local isDestFriendly = bit_band(destFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) > 0
+				if (not isDestFriendly) or (isFriendlyFeigning(destGUID)) then
 					return
 				end
 			end
+
+
 			
 		end
 
