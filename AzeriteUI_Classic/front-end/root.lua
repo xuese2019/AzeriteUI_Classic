@@ -173,7 +173,7 @@ Core.GetSecureUpdater = function(self)
 
 		-- Lua callback to proxy the setting to the chat window module. 
 		callbackFrame.OnModeToggle = function(callbackFrame)
-			for i,moduleName in ipairs({ "ChatWindows" }) do 
+			for i,moduleName in ipairs({ "BlizzardChatFrames" }) do 
 				local module = self:GetModule(moduleName, true)
 				if module and not (module:IsIncompatible() or module:DependencyFailed()) then 
 					if (module.OnModeToggle) then 
