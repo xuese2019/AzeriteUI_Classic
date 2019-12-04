@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.74-RC] 2019-12-04
+### Fixed
+- The chat window position should once again instantly update without needing to reload when the Healer Layout is toggled in the menu.
+
 ## [1.0.73-RC] 2019-11-29
 ### Added
 - Added back Blizzard's `/stopwatch` command. The stopwatch exists in Classic, so why not?
