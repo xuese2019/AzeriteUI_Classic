@@ -126,7 +126,7 @@ local SetDisplaySizeOld = function()
 	LibFrame.frame:SetScale(scale)
 	LibFrame.frame:SetSize(round(displayWidth), round(displayHeight))
 end 
-local SetDisplaySize = function()
+local SetDisplaySize = function(ratio)
 	local width, height = WorldFrame:GetSize()
 	width = round(width)
 	height = round(height)
