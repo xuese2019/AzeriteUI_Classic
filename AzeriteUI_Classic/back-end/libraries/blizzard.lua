@@ -1,4 +1,4 @@
-local LibBlizzard = Wheel:Set("LibBlizzard", 37)
+local LibBlizzard = Wheel:Set("LibBlizzard", 38)
 if (not LibBlizzard) then 
 	return
 end
@@ -361,6 +361,21 @@ UIWidgets["MirrorTimer"] = function(self)
 		timer:UnregisterAllEvents()
 	end
 end 
+
+UIWidgets["QuestTimerFrame"] = function(self)
+	QuestTimerFrame:SetScript("OnLoad", nil)
+	QuestTimerFrame:SetScript("OnEvent", nil)
+	QuestTimerFrame:SetScript("OnUpdate", nil)
+	QuestTimerFrame:SetScript("OnShow", nil)
+	QuestTimerFrame:SetScript("OnHide", nil)
+	QuestTimerFrame:SetParent(UIHider)
+	QuestTimerFrame:Hide()
+	QuestTimerFrame.numTimers = 0
+	QuestTimerFrame.updating = nil
+	for i = 1,MAX_QUESTS do
+		_G["QuestTimer"..i]:Hide()
+	end
+end
 
 UIWidgets["QuestWatchFrame"] = function(self)
 	if QuestWatchFrame then 
