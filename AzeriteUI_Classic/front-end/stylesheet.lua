@@ -1898,21 +1898,21 @@ Layouts.BlizzardMicroMenu = {
 	MenuWindow_CreateBorder = Core_Window_CreateBorder
 }
 
--- Blizzard Instance Countdown Timers
-Layouts.BlizzardMirrorTimers = {
-	Anchor = Wheel("LibFrame"):GetFrame(),
-	AnchorOffsetX = 0,
-	AnchorOffsetY = -370, 
-	AnchorPoint = "TOP",
-	BackdropColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
-	BackdropDrawLayer = { "BACKGROUND", -5 },
-	BackdropPlace = { "CENTER", 1, -2 }, 
-	BackdropSize = { 193,93 }, 
-	BackdropTexture = GetMedia("cast_back"),
-	BarColor = { Colors.quest.red[1], Colors.quest.red[2], Colors.quest.red[3] }, 
-	BarPlace = { "CENTER", 0, 0 },
-	BarSize = { 111, 12 }, 
-	BarSparkMap = {
+-- Blizzard Timers (mirror, quest)
+Layouts.BlizzardTimers = {
+	MirrorAnchor = Wheel("LibFrame"):GetFrame(),
+	MirrorAnchorOffsetX = 0,
+	MirrorAnchorOffsetY = -370, 
+	MirrorAnchorPoint = "TOP",
+	MirrorBackdropColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
+	MirrorBackdropDrawLayer = { "BACKGROUND", -5 },
+	MirrorBackdropPlace = { "CENTER", 1, -2 }, 
+	MirrorBackdropSize = { 193,93 }, 
+	MirrorBackdropTexture = GetMedia("cast_back"),
+	MirrorBarColor = { Colors.quest.red[1], Colors.quest.red[2], Colors.quest.red[3] }, 
+	MirrorBarPlace = { "CENTER", 0, 0 },
+	MirrorBarSize = { 111, 12 }, 
+	MirrorBarSparkMap = {
 		top = {
 			{ keyPercent =   0/128, offset = -16/32 }, 
 			{ keyPercent =  10/128, offset =   0/32 }, 
@@ -1926,13 +1926,13 @@ Layouts.BlizzardMirrorTimers = {
 			{ keyPercent = 128/128, offset = -16/32 }
 		}
 	},
-	BarTexture = GetMedia("cast_bar"), 
-	BarValueColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .7 },
-	BarValueFont = GetFont(14, true),
-	BarValuePlace = { "CENTER", 0, 0 }, 
-	BlankTexture = GetMedia("blank"), 
-	Growth = -50, 
-	Size = { 111, 14 }
+	MirrorBarTexture = GetMedia("cast_bar"), 
+	MirrorBarValueColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .7 },
+	MirrorBarValueFont = GetFont(14, true),
+	MirrorBarValuePlace = { "CENTER", 0, 0 }, 
+	MirrorBlankTexture = GetMedia("blank"), 
+	MirrorGrowth = -50, 
+	MirrorSize = { 111, 14 }
 }
 
 -- Blizzard Objectives Tracker

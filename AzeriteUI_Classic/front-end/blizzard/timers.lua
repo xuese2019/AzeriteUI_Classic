@@ -3,7 +3,7 @@ local Core = Wheel("LibModule"):GetModule(ADDON)
 if (not Core) then 
 	return 
 end
-local Module = Core:NewModule("BlizzardMirrorTimers", "LibMessage", "LibEvent", "LibSecureHook", "LibFrame", "LibStatusBar")
+local Module = Core:NewModule("BlizzardTimers", "LibMessage", "LibEvent", "LibSecureHook", "LibFrame", "LibStatusBar")
 
 -- Lua API
 local _G = _G
@@ -19,7 +19,7 @@ local GetLayout = Private.GetLayout
 -----------------------------------------------------------------
 -- Utility
 -----------------------------------------------------------------
-local sort = function(a, b)
+local sort_mirrors = function(a, b)
 	if (a.type and b.type and (a.type == b.type)) then
 		return a.id < b.id -- same type, order by their id
 	else
@@ -30,7 +30,7 @@ end
 -----------------------------------------------------------------
 -- Styling
 -----------------------------------------------------------------
-Module.StyleTimer = function(self, frame, ignoreTextureFix)
+Module.StyleMirrorTimer = function(self, frame, ignoreTextureFix)
 	local layout = self.layout
 	local timer = self.timers[frame.bar]
 	local bar = timer.bar
@@ -50,20 +50,20 @@ Module.StyleTimer = function(self, frame, ignoreTextureFix)
 		end 
 	end
 
-	frame:SetSize(unpack(layout.Size))
+	frame:SetSize(unpack(layout.MirrorSize))
 
 	bar:ClearAllPoints()
-	bar:SetPoint(unpack(layout.BarPlace))
-	bar:SetSize(unpack(layout.BarSize))
-	bar:SetStatusBarTexture(layout.BarTexture)
+	bar:SetPoint(unpack(layout.MirrorBarPlace))
+	bar:SetSize(unpack(layout.MirrorBarSize))
+	bar:SetStatusBarTexture(layout.MirrorBarTexture)
 	bar:SetFrameLevel(frame:GetFrameLevel() + 5)
 
 	local backdrop = bar:CreateTexture()
-	backdrop:SetPoint(unpack(layout.BackdropPlace))
-	backdrop:SetSize(unpack(layout.BackdropSize))
-	backdrop:SetDrawLayer(unpack(layout.BackdropDrawLayer))
-	backdrop:SetTexture(layout.BackdropTexture)
-	backdrop:SetVertexColor(unpack(layout.BackdropColor))
+	backdrop:SetPoint(unpack(layout.MirrorBackdropPlace))
+	backdrop:SetSize(unpack(layout.MirrorBackdropSize))
+	backdrop:SetDrawLayer(unpack(layout.MirrorBackdropDrawLayer))
+	backdrop:SetTexture(layout.MirrorBackdropTexture)
+	backdrop:SetVertexColor(unpack(layout.MirrorBackdropColor))
 
 	if (not ignoreTextureFix) then 
 		-- just hide the spark for now
@@ -72,7 +72,7 @@ Module.StyleTimer = function(self, frame, ignoreTextureFix)
 			spark:SetDrawLayer("OVERLAY") -- needs to be OVERLAY, as ARTWORK will sometimes be behind the bars
 			spark:SetPoint("CENTER", bar:GetStatusBarTexture(), "RIGHT", 0, 0)
 			spark:SetSize(.001,.001)
-			spark:SetTexture(layout.BlankTexture) 
+			spark:SetTexture(layout.MirrorBlankTexture) 
 			spark:SetVertexColor(0,0,0,0)
 		end 
 
@@ -82,7 +82,7 @@ Module.StyleTimer = function(self, frame, ignoreTextureFix)
 			border:ClearAllPoints()
 			border:SetPoint("CENTER", 0, 0)
 			border:SetSize(.001, .001)
-			border:SetTexture(layout.BlankTexture)
+			border:SetTexture(layout.MirrorBlankTexture)
 			border:SetVertexColor(0,0,0,0)
 		end 
 	end 
@@ -91,38 +91,24 @@ Module.StyleTimer = function(self, frame, ignoreTextureFix)
 	if msg then 
 		msg:SetParent(bar)
 		msg:ClearAllPoints()
-		msg:SetPoint(unpack(layout.BarValuePlace))
+		msg:SetPoint(unpack(layout.MirrorBarValuePlace))
 		msg:SetDrawLayer("OVERLAY", 1)
 		msg:SetJustifyH("CENTER")
 		msg:SetJustifyV("MIDDLE")
-		msg:SetFontObject(layout.BarValueFont)
-		msg:SetTextColor(unpack(layout.BarValueColor))
+		msg:SetFontObject(layout.MirrorBarValueFont)
+		msg:SetTextColor(unpack(layout.MirrorBarValueColor))
 	end 
 
 	if (not ignoreTextureFix) then 
-		self:SetSecureHook(bar, "SetValue", "UpdateBarTexture")
-		self:SetSecureHook(bar, "SetMinMaxValues", "UpdateBarTexture")
+		self:SetSecureHook(bar, "SetValue", "UpdateMirrorTimerBarTexture")
+		self:SetSecureHook(bar, "SetMinMaxValues", "UpdateMirrorTimerBarTexture")
 	end 
 end
 
 -----------------------------------------------------------------
 -- Callbacks
 -----------------------------------------------------------------
-Module.UpdateBarTexture = function(self, event, bar)
-	local min, max = bar:GetMinMaxValues()
-	local value = bar:GetValue()
-	if ((not min) or (not max) or (not value)) then
-		return
-	end
-	if (value > max) then
-		value = max
-	elseif (value < min) then
-		value = min
-	end
-	bar:GetStatusBarTexture():SetTexCoord(0, (value-min)/(max-min), 0, 1) -- cropping, not shrinking
-end
-
-Module.UpdateAnchors = function(self, event, ...)
+Module.UpdateMirrorTimerAnchors = function(self, event, ...)
 	local layout = self.layout
 	local timers = self.timers
 	local order = self.order or {}
@@ -134,7 +120,7 @@ Module.UpdateAnchors = function(self, event, ...)
 	
 	-- Release the points of all timers
 	for bar,timer in pairs(timers) do
-		timer.frame:SetParent(layout.Anchor)
+		timer.frame:SetParent(layout.MirrorAnchor)
 		timer.frame:ClearAllPoints() 
 		if (timer.frame:IsShown()) then
 			order[#order + 1] = timer
@@ -145,22 +131,36 @@ Module.UpdateAnchors = function(self, event, ...)
 	if (#order > 0) then
 
 		-- Sort by type -> id
-		table_sort(order, sort) 
+		table_sort(order, sort_mirrors) 
 
 		-- Figure out the start offset
-		local offsetY = layout.AnchorOffsetY 
+		local offsetY = layout.MirrorAnchorOffsetY 
 
 		-- Add space for capturebars, if visible
 		if self.captureBarVisible then 
-			offsetY = offsetY + layout.Growth
+			offsetY = offsetY + layout.MirrorGrowth
 		end 
 
 		-- Position the bars
 		for i = 1, #order do
-			order[i].frame:SetPoint(layout.AnchorPoint, layout.Anchor, layout.AnchorPoint, layout.AnchorOffsetX, offsetY)
-			offsetY = offsetY + layout.Growth
+			order[i].frame:SetPoint(layout.MirrorAnchorPoint, layout.MirrorAnchor, layout.MirrorAnchorPoint, layout.MirrorAnchorOffsetX, offsetY)
+			offsetY = offsetY + layout.MirrorGrowth
 		end
 	end
+end
+
+Module.UpdateMirrorTimerBarTexture = function(self, event, bar)
+	local min, max = bar:GetMinMaxValues()
+	local value = bar:GetValue()
+	if ((not min) or (not max) or (not value)) then
+		return
+	end
+	if (value > max) then
+		value = max
+	elseif (value < min) then
+		value = min
+	end
+	bar:GetStatusBarTexture():SetTexCoord(0, (value-min)/(max-min), 0, 1) -- cropping, not shrinking
 end
 
 Module.UpdateMirrorTimers = function(self)
@@ -181,17 +181,17 @@ Module.UpdateMirrorTimers = function(self)
 			timers[frame.bar].type = 1
 			timers[frame.bar].id = i
 
-			self:StyleTimer(frame)
+			self:StyleMirrorTimer(frame)
 		end 
 	end 
 	if (event ~= "ForceUpdate") then 
-		self:UpdateAnchors()
+		self:UpdateMirrorTimerAnchors()
 	end 
 end
 
 Module.UpdateAll = function(self)
 	self:UpdateMirrorTimers("ForceUpdate")
-	self:UpdateAnchors()
+	self:UpdateMirrorTimerAnchors()
 end
 
 -----------------------------------------------------------------
@@ -200,8 +200,6 @@ end
 Module.OnInit = function(self)
 	self.layout = GetLayout(self:GetName())
 	self.timers = {} -- all timer data, hashed by bar objects
-	self.buffTimers = {} -- all buff timer frames, indexed
-	self.buffTimersByAuraID = {} -- all active buff timers, hashed by auraID
 
 	-- Update mirror timers (breath/fatigue)
 	self:SetSecureHook("MirrorTimer_Show", "UpdateMirrorTimers")
