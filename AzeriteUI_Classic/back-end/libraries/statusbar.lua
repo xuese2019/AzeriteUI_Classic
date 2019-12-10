@@ -1,4 +1,4 @@
-local LibStatusBar = Wheel:Set("LibStatusBar", 53)
+local LibStatusBar = Wheel:Set("LibStatusBar", 55)
 if (not LibStatusBar) then
 	return
 end
@@ -101,7 +101,7 @@ local Update = function(self, elapsed)
 
 	local value = data.disableSmoothing and data.barValue or data.barDisplayValue
 	local min, max = data.barMin, data.barMax
-	local width, height = data.barWidth, data.barHeight
+	local width, height = data.scaffold:GetSize()
 	local orientation = data.barOrientation
 	local bar = data.bar
 	local spark = data.spark
@@ -362,7 +362,6 @@ local OnUpdate = function(self, elapsed)
 	if data.updatesRunning then
 		if (data.disableSmoothing) then
 			if (data.barValue <= data.barMin) or (data.barValue >= data.barMax) then
-				--data.scaffold:SetScript("OnUpdate", nil)
 				data.updatesRunning = nil
 			end
 		elseif (data.smoothing) then
@@ -395,10 +394,6 @@ local OnUpdate = function(self, elapsed)
 
 					-- Tha change relative to point in time and distance passed
 					local change = 2*(3 * ( 1 - position )^2 * position) * average*2 --  y = 3 * (1 − t)^2 * t  -- quad bezier fast ascend + slow descend
-					--local change = 2*(3 * ( 1 - position ) * position^2) * average*2 -- y = 3 * (1 − t) * t^2 -- quad bezier slow ascend + fast descend
-					--local change = 2 * average * ((position < .7) and math_abs(position/.7) or math_abs((1-position)/.3)) -- linear slow ascend + fast descend
-					
-					--print(("time: %.3f pos: %.3f change: %.1f"):format(GetTime() - data.smoothingStart, position, change))
 
 					-- If there's room for a change in the intended direction, apply it, otherwise finish the animation
 					if ( (data.barValue > data.barDisplayValue) and (data.barValue > data.barDisplayValue + change) )
@@ -415,7 +410,6 @@ local OnUpdate = function(self, elapsed)
 			end
 		else
 			if (data.barDisplayValue <= data.barMin) or (data.barDisplayValue >= data.barMax) or (not data.smoothing) then
-				--data.scaffold:SetScript("OnUpdate", nil)
 				data.updatesRunning = nil
 			end
 		end
@@ -639,10 +633,8 @@ StatusBar.SetOrientation = function(self, orientation)
 	data.barOrientation = orientation
 	if (orientation == "LEFT") or (orientation == "RIGHT") then
 		data.spark:SetTexCoord(0, 1, 3/32, 28/32)
-		--data.spark:SetTexCoord(0, 1, 11/32, 19/32)
 	elseif (orientation == "UP") or (orientation == "DOWN") then
 		data.spark:SetTexCoord(1,11/32,0,11/32,1,19/32,0,19/32)
-		--data.spark:SetTexCoord(1,3/32,0,3/32,1,28/32,0,28/32)
 	end
 	if (self.PostUpdateOrientation) then
 		self:PostUpdateOrientation(orientation)
@@ -700,7 +692,6 @@ end
 
 StatusBar.SetSize = function(self, ...)
 	local data = Bars[self]
-	data.barWidth, data.barHeight = ...
 	data.scaffold:SetSize(...)
 	if self.PostUpdateSize then
 		self:PostUpdateSize(...)
@@ -709,7 +700,6 @@ end
 
 StatusBar.SetWidth = function(self, ...)
 	local data = Bars[self]
-	data.barWidth = ...
 	data.scaffold:SetWidth(...)
 	if self.PostUpdateWidth then
 		self:PostUpdateWidth(...)
@@ -718,7 +708,6 @@ end
 
 StatusBar.SetHeight = function(self, ...)
 	local data = Bars[self]
-	data.barHeight = ...
 	data.scaffold:SetHeight(...)
 	if self.PostUpdateHeight then
 		self:PostUpdateHeight(...)
@@ -726,18 +715,15 @@ StatusBar.SetHeight = function(self, ...)
 end
 
 StatusBar.GetHeight = function(self, ...)
-	return Bars[self].barHeight
-	--return Bars[self].scaffold:GetHeight()
+	return Bars[self].scaffold:GetHeight()
 end
 
 StatusBar.GetWidth = function(self, ...)
-	return Bars[self].barWidth
-	--return Bars[self].scaffold:GetWidth()
+	return Bars[self].scaffold:GetWidth()
 end
 
 StatusBar.GetSize = function(self, ...)
-	return Bars[self].barWidth, Bars[self].barHeight
-	--return Bars[self].scaffold:GetWidth(), Bars[self].scaffold:GetHeight()
+	return Bars[self].scaffold:GetWidth(), Bars[self].scaffold:GetHeight()
 end
 
 StatusBar.SetFrameLevel = function(self, ...)
@@ -858,8 +844,6 @@ LibStatusBar.CreateStatusBar = function(self, parent)
 	data.barDisplayValue = 0 -- displayed value while smoothing
 	data.barOrientation = "RIGHT" -- direction the bar is growing in
 	data.barSmoothingMode = "bezier-fast-in-slow-out"
-	data.barWidth = 1
-	data.barHeight = 1
 
 	data.sparkThickness = 8
 	data.sparkOffset = 1/32
