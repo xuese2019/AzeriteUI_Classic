@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.77-RC] 2019-12-11
+### Changed
+- Only apply our spam removal to system messages. That should be the correct message group.
+
 ## [1.0.76-RC] 2019-12-11
 ### Added
 - Added the Minimap Battlefield button. We're using our green groupfinder eye from the retail version of this addon.
