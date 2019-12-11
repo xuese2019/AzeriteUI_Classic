@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.79-RC] 2019-12-11
+### Fixed
+- Both the Minimap button and BG entry popup should work... better, now. 
+
+### Removed
+- Removed the popup styling. It's problematic right now.
+
 ## [1.0.78-RC] 2019-12-11
 ### Fixed
 - Fixed spam filter issues. Clearly chat events have changed since I was a young noob. Luckily this older noob figured it out.
