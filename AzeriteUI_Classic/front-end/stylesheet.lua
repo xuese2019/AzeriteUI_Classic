@@ -2141,7 +2141,6 @@ Layouts.Minimap = {
 	BattleGroundEyePlace = { "CENTER", math_cos(45*math_pi/180) * (213/2 + 10), math_sin(45*math_pi/180) * (213/2 + 10) }, 
 	BattleGroundEyeSize = { 64, 64 }, 
 	BattleGroundEyeTexture = GetMedia("group-finder-eye-green"),
-	BattleGroundQueueStatusPlace = { "BOTTOMRIGHT", _G.QueueStatusMinimapButton, "TOPLEFT", 0, 0 },
 	BlipScale = 1.15, 
 	BlipTextures = {
 		["1.13.2"] = GetMedia("Blip-Nandini-New-113_2"),

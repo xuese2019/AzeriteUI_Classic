@@ -4,6 +4,9 @@ if (not Core) then
 	return 
 end
 
+-- Styling broken in 1.13.3.
+do return end
+
 local Module = Core:NewModule("BlizzardPopupStyling", "LibEvent")
 
 -- WoW API
@@ -26,13 +29,6 @@ end
 -- Not strictly certain if moving them in combat would taint them, 
 -- but knowing the blizzard UI, I'm not willing to take that chance.
 Module.PostUpdateAnchors = function(self)
-	-- 12/11 12:06:04.950  Interface\FrameXML\StaticPopup.lua:4971 StaticPopup_OnClick()
-	-- 12/11 12:06:04.950  An action was blocked because of taint from AzeriteUI_Classic - AcceptBattlefieldPort()
-	-- 12/11 12:06:04.950      Interface\FrameXML\StaticPopup.lua:689 OnAccept()
-	-- 12/11 12:06:04.950      Interface\FrameXML\StaticPopup.lua:5003 StaticPopup_OnClick()
-	-- 12/11 12:06:04.950      StaticPopup1Button1:OnClick()
-	do return end
-
 	if InCombatLockdown() then 
 		return self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
 	end 

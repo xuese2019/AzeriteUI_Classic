@@ -1,4 +1,4 @@
-local LibBlizzard = Wheel:Set("LibBlizzard", 39)
+local LibBlizzard = Wheel:Set("LibBlizzard", 40)
 if (not LibBlizzard) then 
 	return
 end
@@ -306,8 +306,6 @@ UIWidgets["Minimap"] = function(self)
 	
 	-- Classic Battleground Queue Button
 	if MiniMapBattlefieldFrame then 
-
-		--MiniMapBattlefieldFrame:SetParent(UIHider)
 		MiniMapBattlefieldIcon:SetParent(UIHider)
 		MiniMapBattlefieldIcon:SetAlpha(0)
 		MiniMapBattlefieldBorder:SetParent(UIHider)

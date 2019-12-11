@@ -1051,36 +1051,31 @@ Module.SetUpMinimap = function(self)
 
 	Handler.Tracking = tracking
 
+	local BGFrame = MiniMapBattlefieldFrame
+	local BGFrameBorder = MiniMapBattlefieldBorder
 
-	-- MiniMapBattlefieldFrame
-	local queueButton = MiniMapBattlefieldFrame
-	if queueButton then
+	if BGFrame then
 		local button = Handler:CreateOverlayFrame()
 		button:SetFrameLevel(button:GetFrameLevel() + 10) 
 		button:Place(unpack(layout.BattleGroundEyePlace))
 		button:SetSize(unpack(layout.BattleGroundEyeSize))
 
-		queueButton:SetParent(button)
-		queueButton:ClearAllPoints()
-		queueButton:SetPoint("CENTER", button, "CENTER", 0, 0)
-		queueButton:SetSize(unpack(layout.BattleGroundEyeSize))
+		local point, x, y = unpack(layout.BattleGroundEyePlace)
 
-		local iconTexture = queueButton:CreateTexture()
-		iconTexture:SetDrawLayer("ARTWORK", 1)
-		iconTexture:SetPoint("CENTER", 0, 0)
-		iconTexture:SetSize(unpack(layout.BattleGroundEyeSize))
-		iconTexture:SetTexture(layout.BattleGroundEyeTexture)
-		iconTexture:SetVertexColor(unpack(layout.BattleGroundEyeColor))
+		BGFrame:ClearAllPoints()
+		BGFrame:SetPoint("TOPRIGHT", Minimap, 0, 0)
+		BGFrameBorder:Hide()
+	
+		local eye = button:CreateTexture()
+		eye:SetDrawLayer("ARTWORK", 1)
+		eye:SetPoint("CENTER", 0, 0)
+		eye:SetSize(unpack(layout.BattleGroundEyeSize))
+		eye:SetTexture(layout.BattleGroundEyeTexture)
+		eye:SetVertexColor(unpack(layout.BattleGroundEyeColor))
+		eye:SetShown(BGFrame:IsShown())
 
-		-- 12/11 12:06:04.950  Interface\FrameXML\StaticPopup.lua:4971 StaticPopup_OnClick()
-		-- 12/11 12:06:04.950  An action was blocked because of taint from AzeriteUI_Classic - AcceptBattlefieldPort()
-		-- 12/11 12:06:04.950      Interface\FrameXML\StaticPopup.lua:689 OnAccept()
-		-- 12/11 12:06:04.950      Interface\FrameXML\StaticPopup.lua:5003 StaticPopup_OnClick()
-		-- 12/11 12:06:04.950      StaticPopup1Button1:OnClick()
-
-		--local dropDown = MiniMapBattlefieldDropDown
-		--dropDown:ClearAllPoints()
-		--dropDown:SetPoint(unpack(layout.BattleGroundQueueStatusPlace))
+		BGFrame:HookScript("OnShow", function() eye:Show() end)
+		BGFrame:HookScript("OnHide", function() eye:Hide() end)
 	end
 
 end 

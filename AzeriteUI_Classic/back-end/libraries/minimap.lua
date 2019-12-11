@@ -1,4 +1,4 @@
-local Version = 43
+local Version = 44
 local LibMinimap = Wheel:Set("LibMinimap", Version)
 if (not LibMinimap) then
 	return
@@ -88,6 +88,7 @@ do
 	-- Should we hide these too maybe? Just enslave them to our upcoming system?
 	LibMinimap.baggedButtonsIgnored["MBB_MinimapButtonFrame"] = true
 	LibMinimap.baggedButtonsIgnored["MinimapButtonFrame"] = true
+	LibMinimap.baggedButtonsIgnored["MiniMapBattlefieldFrame"] = true
 	--LibMinimap.baggedButtonsIgnored["QueueStatusMinimapButton"] = true
 	
 	LibMinimap.baggedButtonsIgnored["BookOfTracksFrame"] = true
