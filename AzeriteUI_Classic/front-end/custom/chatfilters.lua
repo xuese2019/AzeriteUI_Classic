@@ -16,14 +16,14 @@ local string_match = string.match
 local ChatFrame_AddMessageEventFilter = ChatFrame_AddMessageEventFilter
 local ChatFrame_RemoveMessageEventFilter = ChatFrame_RemoveMessageEventFilter
 
-local bgChatFixer = {
-	ERR_NOT_IN_INSTANCE_GROUP or "You aren't in an instance group.",
-	ERR_NOT_IN_RAID or "You are not in a raid group"
+local battlegroundSpam = {
+	ERR_NOT_IN_INSTANCE_GROUP,
+	ERR_NOT_IN_RAID
 }
 
 local OnChatMessage = function(_, msg, ...)
 	if msg then
-		for _,filter in ipairs(K.PrivateChatEventSpam) do
+		for _,filter in ipairs(battlegroundSpam) do
 			if string_match(msg, filter) then
 				return true
 			end
