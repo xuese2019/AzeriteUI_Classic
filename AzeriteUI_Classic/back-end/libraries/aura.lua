@@ -1,4 +1,4 @@
-local LibAura = Wheel:Set("LibAura", 21)
+local LibAura = Wheel:Set("LibAura", 22)
 if (not LibAura) then	
 	return
 end
@@ -148,6 +148,9 @@ local parseFilter = function(filter)
 end 
 
 local isHunterGUID = function(guid)
+	if (not guid) then 
+		return 
+	end
 	local _,class = GetPlayerInfoByGUID(guid)
 	return class == "HUNTER"
 end
