@@ -2137,10 +2137,16 @@ Layouts.GroupTools = {
 
 -- Minimap
 Layouts.Minimap = {
+	BattleGroundEyeColor = { .90, .95, 1 }, 
+	BattleGroundEyePlace = { "CENTER", math_cos(45*math_pi/180) * (213/2 + 10), math_sin(45*math_pi/180) * (213/2 + 10) }, 
+	BattleGroundEyeSize = { 64, 64 }, 
+	BattleGroundEyeTexture = GetMedia("group-finder-eye-green"),
+	BattleGroundQueueStatusPlace = { "BOTTOMRIGHT", _G.QueueStatusMinimapButton, "TOPLEFT", 0, 0 },
 	BlipScale = 1.15, 
 	BlipTextures = {
 		["1.13.2"] = GetMedia("Blip-Nandini-New-113_2"),
-		["1.13.3"] = [[Interface\Minimap\ObjectIconsAtlas.blp]] -- Blizzard Fallback
+		["1.13.3"] = GetMedia("Blip-Nandini-New-113_2"),
+		["1.13.4"] = [[Interface\Minimap\ObjectIconsAtlas.blp]] -- Blizzard Fallback
 	},
 	Clock_OverrideValue = Minimap_Clock_OverrideValue,
 	ClockColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] }, 
@@ -2257,7 +2263,7 @@ Layouts.Minimap = {
 	TrackingButtonIconBgTexture = GetMedia("hp_critter_case_glow"),
 	TrackingButtonIconMask = GetMedia("hp_critter_case_glow"), -- actionbutton_circular_mask
 	TrackingButtonIconSize = { 28, 28 },
-	TrackingButtonPlace = { "CENTER", math_cos(45*math_pi/180) * (213/2 + 10), math_sin(45*math_pi/180) * (213/2 + 10) }, 
+	TrackingButtonPlace = { "CENTER", math_cos(22.*math_pi/180) * (213/2 + 10), math_sin(22.5*math_pi/180) * (213/2 + 10) }, 
 	TrackingButtonSize = { 56, 56 }, 
 	XP_OverrideValue = Minimap_XP_OverrideValue,
 	ZonePlaceFunc = Minimap_ZoneName_PlaceFunc,
