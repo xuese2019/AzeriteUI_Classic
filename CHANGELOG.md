@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.78-RC] 2019-12-11
+### Fixed
+- Fixed spam filter issues. Clearly chat events have changed since I was a young noob. Luckily this older noob figured it out.
+
 ## [1.0.77-RC] 2019-12-11
 ### Changed
 - Only apply our spam removal to system messages. That should be the correct message group.
