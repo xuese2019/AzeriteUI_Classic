@@ -1050,6 +1050,33 @@ Module.SetUpMinimap = function(self)
 	self:RegisterEvent("UNIT_AURA", "OnEvent")
 
 	Handler.Tracking = tracking
+
+
+	-- MiniMapBattlefieldFrame
+	local queueButton = MiniMapBattlefieldFrame
+	if queueButton then
+		local button = Handler:CreateOverlayFrame()
+		button:SetFrameLevel(button:GetFrameLevel() + 10) 
+		button:Place(unpack(layout.BattleGroundEyePlace))
+		button:SetSize(unpack(layout.BattleGroundEyeSize))
+
+		queueButton:SetParent(button)
+		queueButton:ClearAllPoints()
+		queueButton:SetPoint("CENTER", button, "CENTER", 0, 0)
+		queueButton:SetSize(unpack(layout.BattleGroundEyeSize))
+
+		local iconTexture = queueButton:CreateTexture()
+		iconTexture:SetDrawLayer("ARTWORK", 1)
+		iconTexture:SetPoint("CENTER", 0, 0)
+		iconTexture:SetSize(unpack(layout.BattleGroundEyeSize))
+		iconTexture:SetTexture(layout.BattleGroundEyeTexture)
+		iconTexture:SetVertexColor(unpack(layout.BattleGroundEyeColor))
+
+		local dropDown = MiniMapBattlefieldDropDown
+		dropDown:ClearAllPoints()
+		dropDown:SetPoint(unpack(layout.BattleGroundQueueStatusPlace))
+	end
+
 end 
 
 -- Set up the MBB (MinimapButtonBag) integration
