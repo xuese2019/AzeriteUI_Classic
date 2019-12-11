@@ -1,4 +1,4 @@
-local LibBlizzard = Wheel:Set("LibBlizzard", 38)
+local LibBlizzard = Wheel:Set("LibBlizzard", 39)
 if (not LibBlizzard) then 
 	return
 end
@@ -304,41 +304,17 @@ UIWidgets["Minimap"] = function(self)
 	MinimapZoomOut:SetParent(UIHider)
 	MinimapZoneTextButton:SetParent(UIHider)
 	
-	-- WoD/Legion Garrison/Class hall button
-	-- ugly hack to keep the keybind functioning
-	if GarrisonLandingPageMinimapButton then 
-		GarrisonLandingPageMinimapButton:SetParent(UIHider)
-		GarrisonLandingPageMinimapButton:UnregisterAllEvents()
-		GarrisonLandingPageMinimapButton:Show()
-		GarrisonLandingPageMinimapButton.Hide = GarrisonLandingPageMinimapButton.Show
-	end 
+	-- Classic Battleground Queue Button
+	if MiniMapBattlefieldFrame then 
 
-	-- New dungeon finder eye in MoP
-	if QueueStatusMinimapButton then 
-		QueueStatusMinimapButton:SetHighlightTexture("") 
-		--QueueStatusMinimapButton.Eye.texture:SetParent(UIHider)
-		--QueueStatusMinimapButton.Eye.texture:SetAlpha(0)
-
-		if QueueStatusMinimapButtonBorder then
-			QueueStatusMinimapButtonBorder:SetTexture(nil)
-			QueueStatusMinimapButtonBorder:SetAlpha(0)
-		end
-
-		if QueueStatusMinimapButton.Highlight then -- bugged out in MoP
-			QueueStatusMinimapButton.Highlight:SetTexture(nil)
-			QueueStatusMinimapButton.Highlight:SetAlpha(0)
-		end
+		--MiniMapBattlefieldFrame:SetParent(UIHider)
+		MiniMapBattlefieldIcon:SetParent(UIHider)
+		MiniMapBattlefieldIcon:SetAlpha(0)
+		MiniMapBattlefieldBorder:SetParent(UIHider)
+		MiniMapBattlefieldBorder:SetTexture(nil) -- the butt fugly standard border
+		BattlegroundShine:SetTexture(nil) -- annoying background "shine"
+		--MiniMapBattlefieldDropDown
 	end
-
-	-- Guild instance difficulty
-	if GuildInstanceDifficulty then 
-		GuildInstanceDifficulty:SetParent(UIHider)
-	end 
-
-	-- Instance difficulty
-	if MiniMapInstanceDifficulty then 
-		MiniMapInstanceDifficulty:SetParent(UIHider)
-	end 
 
 	-- Can we do this?
 	self:DisableUIWidget("MinimapClock")
