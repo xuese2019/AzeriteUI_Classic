@@ -242,13 +242,13 @@ Core.ApplyExperimentalFeatures = function(self)
 
 	-- Attempt to hook the bag bar to the bags
 	-- Retrieve the first slot button and the backpack
-	local firstSlot = _G.CharacterBag0Slot
-	local backpack = _G.ContainerFrame1
+	local firstSlot = CharacterBag0Slot
+	local backpack = ContainerFrame1
 
 	-- These should always exist, but Blizz do have a way of changing things,
 	-- and I prefer having functionality not be applied in a future update 
 	-- rather than having the UI break from nil bugs. 
-	if firstSlot and backpack then 
+	if (firstSlot and backpack) then 
 		firstSlot:ClearAllPoints()
 		firstSlot:SetPoint("TOPRIGHT", backpack, "BOTTOMRIGHT", -6, 0)
 
@@ -285,6 +285,17 @@ Core.ApplyExperimentalFeatures = function(self)
 				previous = slot
 			end 
 		end 
+
+		local keyring = KeyRingButton
+		if (keyring) then 
+			keyring:SetParent(backpack)
+			keyring:SetHeight(slotSize) 
+			keyring:SetFrameStrata(strata)
+			keyring:SetFrameLevel(level)
+			keyring:ClearAllPoints()
+			keyring:SetPoint("RIGHT", previous, "LEFT", 0, 0)
+			previous = keyring
+		end
 	end 
 
 	-- Register addon specific aura filters.
