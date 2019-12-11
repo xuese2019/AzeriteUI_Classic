@@ -1072,9 +1072,15 @@ Module.SetUpMinimap = function(self)
 		iconTexture:SetTexture(layout.BattleGroundEyeTexture)
 		iconTexture:SetVertexColor(unpack(layout.BattleGroundEyeColor))
 
-		local dropDown = MiniMapBattlefieldDropDown
-		dropDown:ClearAllPoints()
-		dropDown:SetPoint(unpack(layout.BattleGroundQueueStatusPlace))
+		-- 12/11 12:06:04.950  Interface\FrameXML\StaticPopup.lua:4971 StaticPopup_OnClick()
+		-- 12/11 12:06:04.950  An action was blocked because of taint from AzeriteUI_Classic - AcceptBattlefieldPort()
+		-- 12/11 12:06:04.950      Interface\FrameXML\StaticPopup.lua:689 OnAccept()
+		-- 12/11 12:06:04.950      Interface\FrameXML\StaticPopup.lua:5003 StaticPopup_OnClick()
+		-- 12/11 12:06:04.950      StaticPopup1Button1:OnClick()
+
+		--local dropDown = MiniMapBattlefieldDropDown
+		--dropDown:ClearAllPoints()
+		--dropDown:SetPoint(unpack(layout.BattleGroundQueueStatusPlace))
 	end
 
 end 
