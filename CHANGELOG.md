@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.75-RC] 2019-12-11
+### Added
+- Added the keyring button to the backpack.
+- Added in some groundwork for a couple of upcoming features.
+
+### Changed
+- Updated the TOC version to WoW Client Patch 1.13.3.
+- Adjusted statusbar code to avoid a very subtle wobbling that nobody but me seem to have noticed.
+
 ## [1.0.74-RC] 2019-12-04
 ### Fixed
 - The chat window position should once again instantly update without needing to reload when the Healer Layout is toggled in the menu.
