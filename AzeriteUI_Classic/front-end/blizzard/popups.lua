@@ -54,5 +54,5 @@ Module.OnInit = function(self)
 	self:PostUpdateAnchors() 
 
 	-- The popups are re-anchored by blizzard, so we need to re-adjust them when they do.
-	hooksecurefunc("StaticPopup_SetUpPosition", function() self:PostUpdateAnchors() end)
+	--hooksecurefunc("StaticPopup_SetUpPosition", function() self:PostUpdateAnchors() end)
 end 
