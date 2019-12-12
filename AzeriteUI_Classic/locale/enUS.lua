@@ -7,6 +7,10 @@ end
 -- No, we don't want this. 
 ADDON = ADDON:gsub("_Classic", "")
 
+-- 1.13.3 Battleground popup bugfix
+L["You are now eligible to enter %s.|n|n|cff00ff00Right-click the green eye|non the minimap to enter!|r"] = true
+L["I understand!"] = true
+
 -- General Stuff
 --------------------------------------------
 -- Most of these are inserted into other strings, 

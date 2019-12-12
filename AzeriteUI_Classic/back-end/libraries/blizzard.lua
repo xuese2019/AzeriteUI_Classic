@@ -306,11 +306,11 @@ UIWidgets["Minimap"] = function(self)
 	
 	-- Classic Battleground Queue Button
 	if MiniMapBattlefieldFrame then 
-		MiniMapBattlefieldIcon:SetParent(UIHider)
-		MiniMapBattlefieldIcon:SetAlpha(0)
-		MiniMapBattlefieldBorder:SetParent(UIHider)
-		MiniMapBattlefieldBorder:SetTexture(nil) -- the butt fugly standard border
-		BattlegroundShine:SetTexture(nil) -- annoying background "shine"
+		--MiniMapBattlefieldIcon:SetParent(UIHider)
+		--MiniMapBattlefieldIcon:SetAlpha(0)
+		--MiniMapBattlefieldBorder:SetParent(UIHider)
+		--MiniMapBattlefieldBorder:SetTexture(nil) -- the butt fugly standard border
+		--BattlegroundShine:SetTexture(nil) -- annoying background "shine"
 		--MiniMapBattlefieldDropDown
 	end
 

@@ -379,6 +379,16 @@ Core.ApplyExperimentalFeatures = function(self)
 	self:RegisterChatCommand("fix", fixMacroIcons)
 	self:RegisterChatCommand("stopwatch", stopWatch)
 
+	local fuckedUpPop = StaticPopupDialogs["CONFIRM_BATTLEFIELD_ENTRY"]
+	fuckedUpPop.text = L["You are now eligible to enter %s.|n|n|cff00ff00Right-click the green eye|non the minimap to enter!|r"]
+	fuckedUpPop.OnAccept = function() 
+		if (StaticPopup_Visible("CONFIRM_BATTLEFIELD_ENTRY")) then
+			StaticPopup_Hide("CONFIRM_BATTLEFIELD_ENTRY")
+		end
+	end
+	fuckedUpPop.button1 = L["I understand!"] -- HIDE -- ENTER_BATTLE
+	fuckedUpPop.button2 = nil
+
 	-- Little trick to show the layout and dimensions
 	-- of the Minimap blip icons on-screen in-game, 
 	-- whenever blizzard decide to update those. 

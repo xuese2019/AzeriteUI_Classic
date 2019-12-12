@@ -1053,6 +1053,7 @@ Module.SetUpMinimap = function(self)
 
 	local BGFrame = MiniMapBattlefieldFrame
 	local BGFrameBorder = MiniMapBattlefieldBorder
+	local BGIcon = MiniMapBattlefieldIcon
 
 	if BGFrame then
 		local button = Handler:CreateOverlayFrame()
@@ -1062,9 +1063,12 @@ Module.SetUpMinimap = function(self)
 
 		local point, x, y = unpack(layout.BattleGroundEyePlace)
 
+		-- For some reason any other points 
 		BGFrame:ClearAllPoints()
 		BGFrame:SetPoint("TOPRIGHT", Minimap, 0, 0)
+		BGFrame:SetHitRectInsets(-6, -6, -6, -6)
 		BGFrameBorder:Hide()
+		BGIcon:SetAlpha(0)
 	
 		local eye = button:CreateTexture()
 		eye:SetDrawLayer("ARTWORK", 1)
