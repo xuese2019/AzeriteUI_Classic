@@ -1078,8 +1078,15 @@ Module.SetUpMinimap = function(self)
 		eye:SetVertexColor(unpack(layout.BattleGroundEyeColor))
 		eye:SetShown(BGFrame:IsShown())
 
-		BGFrame:HookScript("OnShow", function() eye:Show() end)
-		BGFrame:HookScript("OnHide", function() eye:Hide() end)
+		tracking:Place(unpack(BGFrame:IsShown() and layout.TrackingButtonPlaceAlternate or layout.TrackingButtonPlace))
+		BGFrame:HookScript("OnShow", function() 
+			eye:Show()
+			tracking:Place(unpack(layout.TrackingButtonPlaceAlternate))
+		end)
+		BGFrame:HookScript("OnHide", function() 
+			eye:Hide()
+			tracking:Place(unpack(layout.TrackingButtonPlace))
+		end)
 	end
 
 end 
