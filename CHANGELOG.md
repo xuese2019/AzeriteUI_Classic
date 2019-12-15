@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.82-RC] 2019-12-15
+### Changed
+- Fixing a wrong date in some secret code. No biggie, it'll fire tomorrow for those lacking this update. But I want pretty colors!
+
 ## [1.0.81-RC] 2019-12-14
 ### Changed
 - The minimap tracking button now changes position based on whether the BG eye is visible or not.

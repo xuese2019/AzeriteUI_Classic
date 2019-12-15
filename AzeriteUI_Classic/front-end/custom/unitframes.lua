@@ -1136,7 +1136,7 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, layout, ...)
 
 	local day = tonumber(date("%d"))
 	local month = tonumber(date("%m"))
-	if ((month >= 12) and (day >=16 )) or ((month <= 1) and (day <= 2)) then 
+	if ((month >= 12) and (day >= 15 )) or ((month <= 1) and (day <= 2)) then 
 		local winterVeilPower = power:CreateTexture()
 		winterVeilPower:SetSize(unpack(layout.WinterVeilPowerSize))
 		winterVeilPower:SetPoint(unpack(layout.WinterVeilPowerPlace))
@@ -1198,7 +1198,7 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, layout, ...)
 		
 		local day = tonumber(date("%d"))
 		local month = tonumber(date("%m"))
-		if ((month >= 12) and (day >=16 )) or ((month <= 1) and (day <= 2)) then 
+		if ((month >= 12) and (day >=15 )) or ((month <= 1) and (day <= 2)) then 
 			local winterVeilMana = extraPower:CreateTexture()
 			winterVeilMana:SetSize(unpack(layout.WinterVeilManaSize))
 			winterVeilMana:SetPoint(unpack(layout.WinterVeilManaPlace))
