@@ -114,6 +114,31 @@ Module.StyleErrorFrame = function(self)
 	self:RegisterEvent("UI_INFO_MESSAGE", "OnEvent")
 end 
 
+Module.StyleRaidWarningFrame = function(self)
+	-- WoW uses a font size of 20, which is WAY too large with our setup!
+	-- We're going for "slightly larger than comfortable" anyway, though,
+	-- since so many of our users are playing this on their tv sets,
+	-- and seeing these messages from a distance does matter in raids etc.
+	local fontSize = 18
+	RaidWarningFrameSlot1:SetFontObject(Private.GetFont(fontSize,true))
+	RaidWarningFrameSlot2:SetFontObject(Private.GetFont(fontSize,true))
+
+	-- The RaidWarnings have a tendency to look really weird,
+	-- as the SetTextHeight method scales the text after it already
+	-- has been turned into a bitmap and turned into a texture.
+	-- So I'm just going to turn it off. Completely.
+	local frame = RaidWarningFrame
+	frame.timings.RAID_NOTICE_MIN_HEIGHT = fontSize
+	frame.timings.RAID_NOTICE_MAX_HEIGHT = fontSize
+	frame.timings.RAID_NOTICE_SCALE_UP_TIME = 0
+	frame.timings.RAID_NOTICE_SCALE_DOWN_TIME = 0
+	RaidWarningFrameSlot1.SetTextHeight = function() end
+	RaidWarningFrameSlot2.SetTextHeight = function() end
+
+	-- Just a little in-game test for dev purposes!
+	-- /run RaidNotice_AddMessage(RaidWarningFrame, "Testing how texts will be displayed with my changes!", ChatTypeInfo["RAID_WARNING"])
+end
+
 Module.StyleQuestTimerFrame = function(self)
 	self:CreateHolder(QuestTimerFrame, unpack(self.layout.QuestTimerFramePlace))
 	self:CreatePointHook(QuestTimerFrame)
@@ -147,5 +172,6 @@ end
 
 Module.OnEnable = function(self)
 	self:StyleErrorFrame()
+	self:StyleRaidWarningFrame()
 	self:StyleQuestTimerFrame()
 end
