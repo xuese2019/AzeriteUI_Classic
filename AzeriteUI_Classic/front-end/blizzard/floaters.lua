@@ -8,6 +8,7 @@ local Module = Core:NewModule("BlizzardFloaterHUD", "LibEvent", "LibFrame", "Lib
 
 -- Private API
 local GetConfig = Private.GetConfig
+local GetFont = Private.GetFont
 local GetLayout = Private.GetLayout
 
 local HolderCache, StyleCache = {}, {}
@@ -107,7 +108,7 @@ Module.StyleErrorFrame = function(self)
 	frame:SetAlpha(.75)
 	frame:UnregisterEvent("UI_ERROR_MESSAGE")
 	frame:UnregisterEvent("UI_INFO_MESSAGE")
-	frame:SetFontObject(Private.GetFont(16))
+	frame:SetFontObject(GetFont(16))
 	self.UIErrorsFrame = frame
 
 	self:RegisterEvent("UI_ERROR_MESSAGE", "OnEvent")
@@ -120,8 +121,10 @@ Module.StyleRaidWarningFrame = function(self)
 	-- since so many of our users are playing this on their tv sets,
 	-- and seeing these messages from a distance does matter in raids etc.
 	local fontSize = 18
-	RaidWarningFrameSlot1:SetFontObject(Private.GetFont(fontSize,true))
-	RaidWarningFrameSlot2:SetFontObject(Private.GetFont(fontSize,true))
+	RaidWarningFrameSlot1:SetFontObject(GetFont(fontSize,true))
+	RaidWarningFrameSlot1:SetShadowColor(0,0,0,0)
+	RaidWarningFrameSlot2:SetFontObject(GetFont(fontSize,true))
+	RaidWarningFrameSlot2:SetShadowColor(0,0,0,0)
 
 	-- The RaidWarnings have a tendency to look really weird,
 	-- as the SetTextHeight method scales the text after it already
