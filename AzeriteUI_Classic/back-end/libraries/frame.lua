@@ -1,4 +1,4 @@
-local LibFrame = Wheel:Set("LibFrame", 56)
+local LibFrame = Wheel:Set("LibFrame", 57)
 if (not LibFrame) then	
 	return
 end
@@ -126,6 +126,8 @@ local SetDisplaySizeOld = function()
 	LibFrame.frame:SetScale(scale)
 	LibFrame.frame:SetSize(round(displayWidth), round(displayHeight))
 end 
+
+
 local SetDisplaySize = function(ratio)
 	local width, height = WorldFrame:GetSize()
 	width = round(width)
@@ -136,6 +138,39 @@ local SetDisplaySize = function(ratio)
 	local displayWidth = (((width/height) >= (16/10)*3) and width/3 or width)/scale
 	local displayHeight = height/scale
 	local displayRatio = displayWidth/displayHeight
+
+	-- Implement this later when we've create an API for it.
+	if false then 
+
+		-- Higher ratio means a narrower screen.
+		local desiredRatioMin = LibFrame.DesiredRatioMin or 4/3 -- 16/10 
+		local desiredRatioMax = LibFrame.DesiredRatioMax or 16/10 -- 16/9
+
+		local deviation = ((round(displayRatio*precision))/precision) - displayRatio
+
+		-- if the goal range exists, figure out which one to use. 
+		local min = ((desiredRatioMin - deviation) <= displayRatio) and ((desiredRatioMin + deviation) >= displayRatio)
+		local max = ((desiredRatioMax - deviation) <= displayRatio) and ((desiredRatioMax + deviation) >= displayRatio)
+
+		--print("Minratio, maxratio, deviation", desiredRatioMin, desiredRatioMax, deviation)
+
+		-- The desired ratio is within the bounds of the screen size, apply it!
+		if min then
+			displayWidth = round(displayHeight*desiredRatioMin)
+			--print("Going with Minratio, it's a fit!")
+		elseif max then 
+			displayWidth = round(displayHeight*desiredRatioMax)
+			--print("Going with Maxratio, it's a fit!")
+		else
+			if (displayRatio > desiredRatioMax) then
+				displayWidth = round(displayHeight*desiredRatioMax)
+				--print("Going with Maxratio, as it's closest to our goal")
+			elseif (displayRatio > desiredRatioMin) then 
+				displayWidth = round(displayHeight*desiredRatioMin)
+				--print("Going with Minratio, as it's closest to our goal")
+			end
+		end
+	end
 	
 	LibFrame.frame:SetIgnoreParentScale(true)
 	LibFrame.frame:SetFrameStrata(UIParent:GetFrameStrata())
