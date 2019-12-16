@@ -3386,7 +3386,7 @@ Layouts.UnitFrameParty = setmetatable({
 	GroupAuraButtonBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 16 },
 	GroupAuraButtonBorderBackdropColor = { 0, 0, 0, 0 },
 	GroupAuraButtonBorderBackdropBorderColor = { Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3 },
-	GroupAuraButtonDisableMouse = false, 
+	GroupAuraButtonDisableMouse = true, 
 	GroupAuraTooltipDefaultPosition = nil, 
 	GroupAuraPostUpdate = function(element, unit)
 		local self = element._owner 
@@ -3629,7 +3629,7 @@ Layouts.UnitFrameRaid = setmetatable({
 	GroupAuraButtonBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 12 },
 	GroupAuraButtonBorderBackdropColor = { 0, 0, 0, 0 },
 	GroupAuraButtonBorderBackdropBorderColor = { Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3 },
-	GroupAuraButtonDisableMouse = false, 
+	GroupAuraButtonDisableMouse = true, 
 	GroupAuraTooltipDefaultPosition = nil, 
 	GroupAuraPostUpdate = function(element, unit)
 		local self = element._owner 
