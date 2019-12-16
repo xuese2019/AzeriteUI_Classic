@@ -1065,13 +1065,13 @@ Module.SetUpMinimap = function(self)
 
 		-- For some reason any other points 
 		BGFrame:ClearAllPoints()
-		BGFrame:SetPoint("TOPRIGHT", Minimap, 0, 0)
-		BGFrame:SetHitRectInsets(-6, -6, -6, -6)
+		BGFrame:SetPoint("TOPRIGHT", Minimap, -4, -2)
+		BGFrame:SetHitRectInsets(-8, -8, -8, -8)
 		BGFrameBorder:Hide()
 		BGIcon:SetAlpha(0)
 	
 		local eye = button:CreateTexture()
-		eye:SetDrawLayer("ARTWORK", 1)
+		eye:SetDrawLayer("OVERLAY", 1)
 		eye:SetPoint("CENTER", 0, 0)
 		eye:SetSize(unpack(layout.BattleGroundEyeSize))
 		eye:SetTexture(layout.BattleGroundEyeTexture)
