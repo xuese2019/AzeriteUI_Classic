@@ -8,8 +8,7 @@ end
 ADDON = ADDON:gsub("_Classic", "")
 
 -- 1.13.3 Battleground popup bugfix
-L["You are now eligible to enter %s.|n|n|cff00ff00Right-click the green eye|non the minimap to enter!|r"] = true
-L["I understand!"] = true
+L["You can now enter a new battleground, right-click the green eye on the minimap to enter or leave!"] = true
 
 -- General Stuff
 --------------------------------------------

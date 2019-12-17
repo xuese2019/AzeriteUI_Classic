@@ -379,15 +379,43 @@ Core.ApplyExperimentalFeatures = function(self)
 	self:RegisterChatCommand("fix", fixMacroIcons)
 	self:RegisterChatCommand("stopwatch", stopWatch)
 
-	local fuckedUpPop = StaticPopupDialogs["CONFIRM_BATTLEFIELD_ENTRY"]
-	fuckedUpPop.text = L["You are now eligible to enter %s.|n|n|cff00ff00Right-click the green eye|non the minimap to enter!|r"]
-	fuckedUpPop.OnAccept = function() 
-		if (StaticPopup_Visible("CONFIRM_BATTLEFIELD_ENTRY")) then
-			StaticPopup_Hide("CONFIRM_BATTLEFIELD_ENTRY")
+	local battleground = self:CreateFrame("Frame", nil, "UICenter")
+	battleground:SetSize(574, 40)
+	battleground:Place("TOP", 0, -29)
+	battleground:Hide()
+	battleground.Text = battleground:CreateFontString(nil, "OVERLAY")
+	battleground.Text:SetFontObject(GetFont(18,true))
+	battleground.Text:SetText(L["You can now enter a new battleground, right-click the green eye on the minimap to enter or leave!"])
+	battleground.Text:SetPoint("TOP")
+	battleground.Text:SetJustifyH("CENTER")
+	battleground.Text:SetWidth(battleground:GetWidth())
+	battleground.Text:SetTextColor(1, 0, 0)
+
+	local animation = battleground:CreateAnimationGroup()
+	animation:SetLooping("BOUNCE")
+
+	local fadeOut = animation:CreateAnimation("Alpha")
+	fadeOut:SetFromAlpha(1)
+	fadeOut:SetToAlpha(.3)
+	fadeOut:SetDuration(.5)
+	fadeOut:SetSmoothing("IN_OUT")
+
+	self:RegisterEvent("UPDATE_BATTLEFIELD_STATUS", function() 
+		for i = 1, MAX_BATTLEFIELD_QUEUES do
+			local status, map, instanceID = GetBattlefieldStatus(i)
+			
+			if (status == "confirm") then
+				StaticPopup_Hide("CONFIRM_BATTLEFIELD_ENTRY")
+				
+				battleground:Show()
+				animation:Play()
+				
+				return
+			end
 		end
-	end
-	fuckedUpPop.button1 = L["I understand!"] -- HIDE -- ENTER_BATTLE
-	fuckedUpPop.button2 = nil
+		battleground:Hide()
+		animation:Stop()
+	end)
 
 	-- Little trick to show the layout and dimensions
 	-- of the Minimap blip icons on-screen in-game, 
