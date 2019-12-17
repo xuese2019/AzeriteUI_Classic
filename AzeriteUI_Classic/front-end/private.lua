@@ -35,7 +35,7 @@ local auraInfoFlags = Wheel("LibAuraData"):GetAllAuraInfoFlags() -- Aura info fl
 local auraUserFlags = {} -- Aura filter flags 
 local auraFilters = {} -- Aura filter functions
 local colorDB = {} -- Addon color schemes
-local fontsDB = { normal = {}, outline = {} } -- Addon fonts
+local fontsDB = { normal = {}, outline = {}, chatNormal = {}, chatOutline = {} } -- Addon fonts
 
 -- List of units we all count as the player
 local unitIsPlayer = { player = true, 	pet = true }
@@ -106,10 +106,18 @@ do
 		local fontNormal = _G[fontPrefix .. "Font" .. i]
 		if fontNormal then 
 			fontsDB.normal[i] = fontNormal
-		end 
+		end
 		local fontOutline = _G[fontPrefix .. "Font" .. i .. "_Outline"]
 		if fontOutline then 
 			fontsDB.outline[i] = fontOutline
+		end
+		local fontChatNormal = _G[fontPrefix .. "ChatFont" .. i]
+		if fontChatNormal then 
+			fontsDB.chatNormal[i] = fontChatNormal
+		end
+		local fontChatOutline = _G[fontPrefix .. "ChatFont" .. i .. "_Outline"]
+		if fontChatOutline then 
+			fontsDB.chatOutline[i] = fontChatOutline
 		end 
 	end 
 end 
@@ -435,8 +443,19 @@ local filterFuncs = setmetatable(auraFilters, { __index = function(t,k) return r
 -- Private API
 -----------------------------------------------------------------
 Private.Colors = colorDB
-Private.GetAuraFilterFunc = function(unit) return filterFuncs[unit or "default"] end
-Private.GetFont = function(size, outline) return fontsDB[outline and "outline" or "normal"][size] end
+
+Private.GetAuraFilterFunc = function(unit) 
+	return filterFuncs[unit or "default"] 
+end
+
+Private.GetFont = function(size, useOutline, useChatFont)
+	if (useChatFont) then 
+		return fontsDB[useOutline and "chatOutline" or "chatNormal"][size]
+	else
+		return fontsDB[useOutline and "outline" or "normal"][size]
+	end
+end
+
 Private.GetMedia = function(name, type) return ([[Interface\AddOns\%s\media\%s.%s]]):format(ADDON, name, type or "tga") end
 
 -----------------------------------------------------------------
