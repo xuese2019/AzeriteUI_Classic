@@ -379,6 +379,10 @@ Core.ApplyExperimentalFeatures = function(self)
 	self:RegisterChatCommand("fix", fixMacroIcons)
 	self:RegisterChatCommand("stopwatch", stopWatch)
 
+	-- Workaround for the completely random bg popup taints in 1.13.3.
+	-- Going with Tukz way of completely hiding the broken popup,
+	-- instead of just modifying the button away as I initially did.
+	-- No point adding more sources of taint to the tainted element.
 	local battleground = self:CreateFrame("Frame", nil, "UICenter")
 	battleground:SetSize(574, 40)
 	battleground:Place("TOP", 0, -29)
