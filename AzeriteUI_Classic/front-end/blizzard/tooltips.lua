@@ -193,11 +193,16 @@ local StatusBar_UpdateValue = function(bar, value, max)
 				value, max = healthCur, healthMax
 				isRealValue = true
 			else
-				-- Don't do this, as it'll make the values hide 
-				-- when not currently mousing over the unit.  
+				-- Don't do this, as it'll make the values hide
+				-- when not currently mousing over the unit.
 				--value, max = nil, nil
 			end 
 		end
+	end
+
+	-- This happens for pets of grouped units
+	if (not isRealValue) and (max ~= 100) then
+		isRealValue = true
 	end
 
 	if (value) then 

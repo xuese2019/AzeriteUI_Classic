@@ -1,4 +1,4 @@
-local LibTooltip = Wheel:Set("LibTooltip", 70)
+local LibTooltip = Wheel:Set("LibTooltip", 71)
 if (not LibTooltip) then
 	return
 end
@@ -2086,7 +2086,12 @@ Tooltip.UpdateBarValues = function(self, unit, noUpdate)
 				if (not min) or (not max) then 
 					min = UnitHealth(unit) or 0
 					max = UnitHealthMax(unit) or 0
-				end 
+				end
+
+				-- This happens for pets of grouped units
+				if (not isRealValue) and (max ~= 100) then
+					isRealValue = true
+				end
 			
 				-- Only show units with health, hide the bar otherwise
 				if ((min > 0) and (max > 0)) then 
