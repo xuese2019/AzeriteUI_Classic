@@ -4,9 +4,6 @@ if (not Core) then
 	return 
 end
 
--- Styling broken in 1.13.3. (Or not?)
---do return end
-
 local Module = Core:NewModule("BlizzardPopupStyling", "LibEvent")
 
 -- WoW API
