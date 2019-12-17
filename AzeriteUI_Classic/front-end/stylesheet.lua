@@ -372,33 +372,32 @@ local BlizzardMicroMenu_Button_PostCreate = Core_MenuButton_PostCreate
 local BlizzardMicroMenu_Button_PostUpdate = Core_MenuButton_Layers_PostUpdate
 
 -- Blizzard Popup PostCreate styling
-local BlizzardPopup_PostCreate = function(self, popup)
+local popupBackdrops = {}
+local BlizzardPopup_OnShow = function(popup)
 	popup:SetBackdrop(nil)
 	popup:SetBackdropColor(0,0,0,0)
 	popup:SetBackdropBorderColor(0,0,0,0)
 
-	-- 8.2.0 Additions
 	if (popup.Border) then 
-		popup.Border:Hide()
 		popup.Border:SetAlpha(0)
 	end
 
 	-- add a bigger backdrop frame with room for our larger buttons
-	if (not popup.backdrop) then
-		local backdrop = CreateFrame("Frame", nil, popup)
+	local backdrop = popupBackdrops[popup]
+	if (not backdrop) then
+		backdrop = CreateFrame("Frame", nil, popup)
 		backdrop:SetFrameLevel(popup:GetFrameLevel())
-		backdrop:SetPoint("TOPLEFT", -10, 10)
-		backdrop:SetPoint("BOTTOMRIGHT", 10, -10)
-		popup.backdrop = backdrop
+		backdrop:SetPoint("TOPLEFT", -4, 4)
+		backdrop:SetPoint("BOTTOMRIGHT", 4, -4)
+		popupBackdrops[popup] = backdrop
 	end	
 
-	local backdrop = popup.backdrop
+	local sizeMod = 3/4
 	backdrop:SetBackdrop({
 		bgFile = [[Interface\ChatFrame\ChatFrameBackground]],
 		edgeFile = GetMedia("tooltip_border_blizzcompatible"),
-		edgeSize = 32, 
-		tile = false, -- tiles don't tile vertically (?)
-		--tile = true, tileSize = 256, 
+		edgeSize = 32*sizeMod, 
+		tile = false, 
 		insets = { top = 2.5, bottom = 2.5, left = 2.5, right = 2.5 }
 	})
 	backdrop:SetBackdropColor(.05, .05, .05, .85)
@@ -416,40 +415,44 @@ local BlizzardPopup_PostCreate = function(self, popup)
 			button:SetBackdropColor(0,0,0,0)
 			button:SetBackdropBorderColor(0,0,0.0)
 
-			-- Create our own custom border.
-			-- Using our new thick tooltip border, just scaled down slightly.
-			local sizeMod = 3/4
-			local border = CreateFrame("Frame", nil, button)
-			border:SetFrameLevel(button:GetFrameLevel() - 1)
-			border:SetPoint("TOPLEFT", -23*sizeMod, 23*sizeMod -2)
-			border:SetPoint("BOTTOMRIGHT", 23*sizeMod, -23*sizeMod -2)
-			border:SetBackdrop({
-				bgFile = [[Interface\ChatFrame\ChatFrameBackground]],
-				edgeFile = GetMedia("tooltip_border"),
-				edgeSize = 32*sizeMod,
-				insets = {
-					left = 22*sizeMod,
-					right = 22*sizeMod,
-					top = 22*sizeMod +2,
-					bottom = 22*sizeMod -2
-				}
-			})
-			border:SetBackdropColor(.05, .05, .05, .75)
-			border:SetBackdropBorderColor(Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
-		
-			button:HookScript("OnEnter", function() 
-				button:SetBackdropColor(0,0,0,0)
-				button:SetBackdropBorderColor(0,0,0.0)
-				border:SetBackdropColor(.1, .1, .1, .75)
-				border:SetBackdropBorderColor(Colors.highlight[1], Colors.highlight[2], Colors.highlight[3])
-			end)
-
-			button:HookScript("OnLeave", function() 
-				button:SetBackdropColor(0,0,0,0)
-				button:SetBackdropBorderColor(0,0,0.0)
+			local border = popupBackdrops[button]
+			if (not border) then 
+				local sizeMod = 2/3
+				border = CreateFrame("Frame", nil, button)
+				border:SetFrameLevel(button:GetFrameLevel() - 1)
+				border:SetPoint("TOPLEFT", -23*sizeMod, 23*sizeMod -2)
+				border:SetPoint("BOTTOMRIGHT", 23*sizeMod, -23*sizeMod -2)
+				border:SetBackdrop({
+					bgFile = [[Interface\ChatFrame\ChatFrameBackground]],
+					edgeFile = GetMedia("tooltip_border"),
+					edgeSize = 32*sizeMod,
+					insets = {
+						left = 22*sizeMod,
+						right = 22*sizeMod,
+						top = 22*sizeMod +2,
+						bottom = 22*sizeMod -2
+					}
+				})
 				border:SetBackdropColor(.05, .05, .05, .75)
 				border:SetBackdropBorderColor(Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
-			end)
+
+				button:HookScript("OnEnter", function() 
+					button:SetBackdropColor(0,0,0,0)
+					button:SetBackdropBorderColor(0,0,0.0)
+					popupBackdrops[button]:SetBackdropColor(.1, .1, .1, .75)
+					popupBackdrops[button]:SetBackdropBorderColor(Colors.highlight[1], Colors.highlight[2], Colors.highlight[3])
+				end)
+	
+				button:HookScript("OnLeave", function() 
+					button:SetBackdropColor(0,0,0,0)
+					button:SetBackdropBorderColor(0,0,0.0)
+					popupBackdrops[button]:SetBackdropColor(.05, .05, .05, .75)
+					popupBackdrops[button]:SetBackdropBorderColor(Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
+				end)
+
+				popupBackdrops[button] = border
+			end
+		
 		end
 	end
 
@@ -483,6 +486,11 @@ local BlizzardPopup_PostCreate = function(self, popup)
 	editbox:SetBackdropColor(0, 0, 0, 0)
 	editbox:SetBackdropBorderColor(.15, .1, .05, 1)
 	editbox:SetTextInsets(6,6,0,0)
+	
+end
+
+local BlizzardPopup_PostCreate = function(self, popup)
+	popup:HookScript("OnShow", BlizzardPopup_OnShow)
 end
 
 -- Blizzard Popup anchor points post updates
