@@ -131,6 +131,7 @@ Module.StyleRaidWarningFrame = function(self)
 	-- has been turned into a bitmap and turned into a texture.
 	-- So I'm just going to turn it off. Completely.
 	local frame = RaidWarningFrame
+	frame:SetAlpha(.85)
 	frame.timings.RAID_NOTICE_MIN_HEIGHT = fontSize
 	frame.timings.RAID_NOTICE_MAX_HEIGHT = fontSize
 	frame.timings.RAID_NOTICE_SCALE_UP_TIME = 0
