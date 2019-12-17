@@ -120,10 +120,10 @@ Module.StyleRaidWarningFrame = function(self)
 	-- We're going for "slightly larger than comfortable" anyway, though,
 	-- since so many of our users are playing this on their tv sets,
 	-- and seeing these messages from a distance does matter in raids etc.
-	local fontSize = 18
-	RaidWarningFrameSlot1:SetFontObject(GetFont(fontSize,true))
+	local fontSize = 20
+	RaidWarningFrameSlot1:SetFontObject(GetFont(fontSize,true,true))
 	RaidWarningFrameSlot1:SetShadowColor(0,0,0,0)
-	RaidWarningFrameSlot2:SetFontObject(GetFont(fontSize,true))
+	RaidWarningFrameSlot2:SetFontObject(GetFont(fontSize,true,true))
 	RaidWarningFrameSlot2:SetShadowColor(0,0,0,0)
 
 	-- The RaidWarnings have a tendency to look really weird,
