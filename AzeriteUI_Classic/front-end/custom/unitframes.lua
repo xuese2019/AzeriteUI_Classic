@@ -805,7 +805,7 @@ local StyleRaidFrame = function(self, unit, id, layout, ...)
 	self.layout = layout
 	self.colors = Colors
 	self:SetSize(unpack(layout.Size)) 
-	self:SetHitRectInsets(0, 0, 0, 0)
+	self:SetHitRectInsets(unpack(layout.HitRectInsets))
 
 	-- Scaffolds
 	-----------------------------------------------------------

@@ -3570,6 +3570,7 @@ Layouts.UnitFramePet = setmetatable({
 Layouts.UnitFrameRaid = setmetatable({
 
 	TargetHighlightSize = { 140 * .94, 90 *.94 },
+	HitRectInsets = { 0, 0, 0, -10 },
 	Size = Constant.RaidFrame, 
 	Place = { "TOPLEFT", "UICenter", "TOPLEFT", 64, -42 }, -- Position of the initial frame
 	AlternatePlace = { "BOTTOMLEFT", "UICenter", "BOTTOMLEFT", 64, 360 - 10 }, -- Position of the initial frame
