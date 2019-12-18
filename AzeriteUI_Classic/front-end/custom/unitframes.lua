@@ -533,8 +533,8 @@ end
 -- Party
 local StylePartyFrame = function(self, unit, id, layout, ...)
 
-	self:SetSize(unpack(layout.Size)) 
-	self:SetHitRectInsets(0, 0, 0, 0)
+	self:SetSize(unpack(layout.Size))
+	self:SetHitRectInsets(unpack(layout.HitRectInsets))
 
 	-- Assign our own global custom colors
 	self.colors = Colors

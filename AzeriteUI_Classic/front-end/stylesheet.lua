@@ -3289,6 +3289,9 @@ Layouts.UnitFrameBoss = setmetatable({
 
 -- 2-5 player groups
 Layouts.UnitFrameParty = setmetatable({
+
+	HitRectInsets = { 0, 0, 0, -10 },
+
 	AlternateGroupAnchor = "BOTTOMLEFT", 
 	AlternateGrowthX = 140, -- Horizontal growth per new unit
 	AlternateGrowthY = 0, -- Vertical growth per new unit
