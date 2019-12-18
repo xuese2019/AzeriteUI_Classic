@@ -30,7 +30,7 @@ local blackList = {
 		[LE_GAME_ERR_OUT_OF_HEALTH] = true,
 		[LE_GAME_ERR_OUT_OF_RAGE] = true,
 		[LE_GAME_ERR_OUT_OF_RANGE] = true,
-		[LE_GAME_ERR_OUT_OF_ENERGY] = true,
+		[LE_GAME_ERR_OUT_OF_ENERGY] = true
 	},
 	[ ERR_ABILITY_COOLDOWN ] = true, 						-- Ability is not ready yet.
 	[ ERR_ATTACK_CHARMED ] = true, 							-- Can't attack while charmed. 
@@ -108,7 +108,8 @@ Module.StyleErrorFrame = function(self)
 	frame:SetAlpha(.75)
 	frame:UnregisterEvent("UI_ERROR_MESSAGE")
 	frame:UnregisterEvent("UI_INFO_MESSAGE")
-	frame:SetFontObject(GetFont(16))
+	frame:SetFontObject(GetFont(16,true))
+	frame:SetShadowColor(0,0,0,.5)
 	self.UIErrorsFrame = frame
 
 	self:RegisterEvent("UI_ERROR_MESSAGE", "OnEvent")
@@ -122,9 +123,9 @@ Module.StyleRaidWarningFrame = function(self)
 	-- and seeing these messages from a distance does matter in raids etc.
 	local fontSize = 20
 	RaidWarningFrameSlot1:SetFontObject(GetFont(fontSize,true,true))
-	RaidWarningFrameSlot1:SetShadowColor(0,0,0,0)
+	RaidWarningFrameSlot1:SetShadowColor(0,0,0,.5)
 	RaidWarningFrameSlot2:SetFontObject(GetFont(fontSize,true,true))
-	RaidWarningFrameSlot2:SetShadowColor(0,0,0,0)
+	RaidWarningFrameSlot2:SetShadowColor(0,0,0,.5)
 
 	-- The RaidWarnings have a tendency to look really weird,
 	-- as the SetTextHeight method scales the text after it already
