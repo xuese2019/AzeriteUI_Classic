@@ -887,14 +887,6 @@ local StyleRaidFrame = function(self, unit, id, layout, ...)
 	targetHighlight.colorTarget = layout.TargetHighlightTargetColor
 	self.TargetHighlight = targetHighlight
 
-	-- Raid Role
-	local raidRole = overlay:CreateTexture()
-	raidRole:SetPoint(layout.RaidRolePoint, self[layout.RaidRoleAnchor], unpack(layout.RaidRolePlace))
-	raidRole:SetSize(unpack(layout.RaidRoleSize))
-	raidRole:SetDrawLayer(unpack(layout.RaidRoleDrawLayer))
-	raidRole.roleTextures = { RAIDTARGET = layout.RaidRoleRaidTargetTexture }
-	self.RaidRole = raidRole
-	
 	-- Unit Name
 	local name = overlay:CreateFontString()
 	name:SetPoint(unpack(layout.NamePlace))
@@ -907,9 +899,18 @@ local StyleRaidFrame = function(self, unit, id, layout, ...)
 	name.useDots = layout.NameUseDots
 	self.Name = name
 
+	-- Raid Role
+	local raidRole = overlay:CreateTexture()
+	raidRole:SetPoint(layout.RaidRolePoint, self[layout.RaidRoleAnchor], unpack(layout.RaidRolePlace))
+	raidRole:SetSize(unpack(layout.RaidRoleSize))
+	raidRole:SetDrawLayer(unpack(layout.RaidRoleDrawLayer))
+	raidRole.roleTextures = { RAIDTARGET = layout.RaidRoleRaidTargetTexture }
+	self.RaidRole = raidRole
+	
 	-- Group Debuff (#1)
 	-----------------------------------------------------------
 	local groupAura = overlay:CreateFrame("Button")
+	groupAura:SetIgnoreParentAlpha(true)
 	groupAura:SetFrameLevel(overlay:GetFrameLevel() - 4)
 	groupAura:SetPoint(unpack(layout.GroupAuraPlace))
 	groupAura:SetSize(unpack(layout.GroupAuraSize))
