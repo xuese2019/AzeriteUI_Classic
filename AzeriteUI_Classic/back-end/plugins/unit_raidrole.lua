@@ -109,7 +109,6 @@ local Enable = function(self)
 			self:RegisterEvent("GROUP_ROSTER_UPDATE", Proxy, true)
 		end 
 
-
 		return true
 	end
 end 
@@ -126,5 +125,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("RaidRole", Enable, Disable, Proxy, 9)
+	Lib:RegisterElement("RaidRole", Enable, Disable, Proxy, 10)
 end 
