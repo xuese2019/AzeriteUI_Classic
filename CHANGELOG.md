@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.85-RC] 2019-12-18
+### Changed
+- Expanded the group frame hitboxes to cover the bottom part of the health border as well. Super easy to select targets now.
+- Further tuned the outline and shadow of both the raid warnings and error messages.
+- Dispellable and boss debuffs visible on the group frames should should now always be fully opaque, even if the group frame itself is faded down from being out of range.
+
+### Fixed
+- Fixed an issue that prevented raid marks, leader- and assistant crowns as well as main tank and main assist icons from showing up on the raid frames.
+
 ## [1.0.84-RC] 2019-12-17
 ### Changed
 - Prettied up the raid warnings a bit more.
