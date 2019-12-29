@@ -117,15 +117,8 @@ Module.StyleErrorFrame = function(self)
 end 
 
 Module.StyleRaidWarningFrame = function(self)
-	-- WoW uses a font size of 20, which is WAY too large with our setup!
-	-- We're going for "slightly larger than comfortable" anyway, though,
-	-- since so many of our users are playing this on their tv sets,
-	-- and seeing these messages from a distance does matter in raids etc.
 	local fontSize = 20
-	RaidWarningFrameSlot1:SetFontObject(GetFont(fontSize,true,true))
-	RaidWarningFrameSlot1:SetShadowColor(0,0,0,.5)
-	RaidWarningFrameSlot2:SetFontObject(GetFont(fontSize,true,true))
-	RaidWarningFrameSlot2:SetShadowColor(0,0,0,.5)
+	local frameWidth = 600
 
 	-- The RaidWarnings have a tendency to look really weird,
 	-- as the SetTextHeight method scales the text after it already
@@ -133,15 +126,26 @@ Module.StyleRaidWarningFrame = function(self)
 	-- So I'm just going to turn it off. Completely.
 	local frame = RaidWarningFrame
 	frame:SetAlpha(.85)
+	frame:SetHeight(85) -- 512,70
 	frame.timings.RAID_NOTICE_MIN_HEIGHT = fontSize
 	frame.timings.RAID_NOTICE_MAX_HEIGHT = fontSize
 	frame.timings.RAID_NOTICE_SCALE_UP_TIME = 0
 	frame.timings.RAID_NOTICE_SCALE_DOWN_TIME = 0
-	RaidWarningFrameSlot1.SetTextHeight = function() end
-	RaidWarningFrameSlot2.SetTextHeight = function() end
+
+	local slot1 = RaidWarningFrameSlot1
+	slot1:SetFontObject(GetFont(fontSize,true,true))
+	slot1:SetShadowColor(0,0,0,.5)
+	slot1:SetWidth(frameWidth) -- 800
+	slot1.SetTextHeight = function() end
+
+	local slot2 = RaidWarningFrameSlot2
+	slot2:SetFontObject(GetFont(fontSize,true,true))
+	slot2:SetShadowColor(0,0,0,.5)
+	slot2:SetWidth(frameWidth) -- 800
+	slot2.SetTextHeight = function() end
 
 	-- Just a little in-game test for dev purposes!
-	-- /run RaidNotice_AddMessage(RaidWarningFrame, "Testing how texts will be displayed with my changes!", ChatTypeInfo["RAID_WARNING"])
+	-- /run RaidNotice_AddMessage(RaidWarningFrame, "Testing how texts will be displayed with my changes! Testing how texts will be displayed with my changes!", ChatTypeInfo["RAID_WARNING"])
 end
 
 Module.StyleQuestTimerFrame = function(self)
