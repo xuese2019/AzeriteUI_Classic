@@ -400,9 +400,13 @@ end
 
 auraFilters.nameplate = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
 
+	local all = element.all
 	local hasFlags = not not GetUserFlags(Private)[spellID]
 	if (hasFlags) then 
-	end
+		if (HasUserFlags(Private, spellID, NeverOnPlate)) then 
+			return nil, nil, true
+		end
+	end 
 	return true, nil, not showUnfilteredSpellID
 end 
 
@@ -467,6 +471,30 @@ local ByPlayer = OnPlayer + OnTarget
 -- General Blacklist
 ------------------------------------------------------------------------
 AddFlags(Private, 17670, Never) 	-- Argent Dawn Commission
+
+-- Nameplate Blacklist
+------------------------------------------------------------------------
+AddFlags(Private,  1461, NeverOnPlate) 	-- Arcane Intellect (Rank ?)
+AddFlags(Private, 10157, NeverOnPlate) 	-- Arcane Intellect (Rank ?)
+AddFlags(Private,  6673, NeverOnPlate) 	-- Battle Shout (Rank 1)
+AddFlags(Private, 20217, NeverOnPlate) 	-- Blessing of Kings (Rank ?)
+AddFlags(Private, 11743, NeverOnPlate) 	-- Detect Greater Invisibility
+AddFlags(Private, 10293, NeverOnPlate) 	-- Devotion Aura (Rank ?)
+AddFlags(Private, 27841, NeverOnPlate) 	-- Divine Spirit (Rank ?)
+AddFlags(Private, 19898, NeverOnPlate) 	-- Frost Resistance Aura
+AddFlags(Private, 25898, NeverOnPlate) 	-- Greater Blessing of Kings (Rank ?)
+AddFlags(Private, 10220, NeverOnPlate) 	-- Ice Armor (Rank ?)
+AddFlags(Private, 24932, NeverOnPlate) 	-- Leader of the Pack
+AddFlags(Private,  1126, NeverOnPlate) 	-- Mark of the Wild (Rank 1)
+AddFlags(Private,  5232, NeverOnPlate) 	-- Mark of the Wild (Rank 2)
+AddFlags(Private,  6756, NeverOnPlate) 	-- Mark of the Wild (Rank 3)
+AddFlags(Private,  5234, NeverOnPlate) 	-- Mark of the Wild (Rank 4)
+AddFlags(Private,  8907, NeverOnPlate) 	-- Mark of the Wild (Rank 5)
+AddFlags(Private,  9884, NeverOnPlate) 	-- Mark of the Wild (Rank 6)
+AddFlags(Private,  9885, NeverOnPlate) 	-- Mark of the Wild (Rank 7)
+AddFlags(Private, 10938, NeverOnPlate) 	-- Power Word: Fortitude (Rank ?)
+AddFlags(Private, 21564, NeverOnPlate) 	-- Prayer of Fortitude (Rank ?)
+
 
 -- Druid (Balance)
 ------------------------------------------------------------------------
