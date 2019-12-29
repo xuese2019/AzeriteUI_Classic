@@ -1,4 +1,4 @@
-local LibUnitFrame = Wheel:Set("LibUnitFrame", 66)
+local LibUnitFrame = Wheel:Set("LibUnitFrame", 67)
 if (not LibUnitFrame) then	
 	return
 end
@@ -36,12 +36,12 @@ local tonumber = tonumber
 local unpack = unpack
 
 -- Blizzard API
-local CreateFrame = _G.CreateFrame
-local FriendsDropDown = _G.FriendsDropDown
-local ShowBossFrameWhenUninteractable = _G.ShowBossFrameWhenUninteractable
-local ToggleDropDownMenu = _G.ToggleDropDownMenu
-local UnitExists = _G.UnitExists
-local UnitGUID = _G.UnitGUID
+local CreateFrame = CreateFrame
+local FriendsDropDown = FriendsDropDown
+local ShowBossFrameWhenUninteractable = ShowBossFrameWhenUninteractable
+local ToggleDropDownMenu = ToggleDropDownMenu
+local UnitExists = UnitExists
+local UnitGUID = UnitGUID
 
 -- Library Registries
 LibUnitFrame.embeds = LibUnitFrame.embeds or {} -- who embeds this?
@@ -316,9 +316,13 @@ UnitFrame.OnLeave = function(self)
 	end 
 end
 
+UnitFrame.OnHide = function(self)
+	self.unitGUID = nil
+end
+
 UnitFrame.OverrideAllElements = function(self, event, ...)
 	local unit = self.unit
-	if (not unit) or (not (UnitExists(unit) or ShowBossFrameWhenUninteractable(unit))) then 
+	if (not unit) or (not UnitExists(unit) and not ShowBossFrameWhenUninteractable(unit)) then 
 		return 
 	end
 	return self:UpdateAllElements(event, ...)
@@ -328,11 +332,11 @@ end
 -- Intention is to avoid performance drops from people coming and going in PuG raids. 
 UnitFrame.OverrideAllElementsOnChangedGUID = function(self, event, ...)
 	local unit = self.unit
-	if (not unit) or (not (UnitExists(unit) or ShowBossFrameWhenUninteractable(unit))) then 
+	if (not unit) or (not UnitExists(unit) and not ShowBossFrameWhenUninteractable(unit)) then 
 		return 
 	end
 	local currentGUID = UnitGUID(unit)
-	if (self.unitGUID ~= currentGUID) then 
+	if currentGUID and (self.unitGUID ~= currentGUID) then 
 		self.unitGUID = currentGUID
 		return self:UpdateAllElements(event, ...)
 	end
@@ -416,11 +420,10 @@ LibUnitFrame.SpawnUnitFrame = function(self, unit, parent, styleFunc, ...)
 		frame:RegisterForClicks("AnyUp")
 	end 
 
+	frame:SetScript("OnHide", UnitFrame.OnHide)
+
 	if (unit == "target") then
 		frame:RegisterEvent("PLAYER_TARGET_CHANGED", UnitFrame.OverrideAllElements, true)
-
-	elseif (unit == "focus") then
-		-- No events here?
 
 	elseif (unit == "mouseover") then
 		frame:RegisterEvent("UPDATE_MOUSEOVER_UNIT", UnitFrame.OverrideAllElements, true)
