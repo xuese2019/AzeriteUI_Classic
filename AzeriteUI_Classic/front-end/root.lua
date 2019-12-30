@@ -1,7 +1,7 @@
 local ADDON, Private = ...
 
 -- Wooh! 
-local Core = Wheel("LibModule"):NewModule(ADDON, "LibDB", "LibMessage", "LibEvent", "LibBlizzard", "LibFrame", "LibSlash", "LibSwitcher", "LibAuraData")
+local Core = Wheel("LibModule"):NewModule(ADDON, "LibDB", "LibMessage", "LibEvent", "LibBlizzard", "LibFrame", "LibSlash", "LibSwitcher", "LibAuraData", "LibAura")
 
 -- Tell the back-end what addon to look for before 
 -- initializing this module and all its submodules. 
@@ -24,16 +24,16 @@ local string_match = string.match
 local tonumber = tonumber
 
 -- WoW API
-local BNGetFriendGameAccountInfo = _G.BNGetFriendGameAccountInfo
-local BNGetNumFriendGameAccounts = _G.BNGetNumFriendGameAccounts
-local BNGetNumFriends = _G.BNGetNumFriends
-local DisableAddOn = _G.DisableAddOn
-local EnableAddOn = _G.EnableAddOn
-local GetFriendInfo = _G.C_FriendList.GetFriendInfo
-local GetNumFriends = _G.C_FriendList.GetNumFriends
-local LoadAddOn = _G.LoadAddOn
-local ReloadUI = _G.ReloadUI
-local SetActionBarToggles = _G.SetActionBarToggles
+local BNGetFriendGameAccountInfo = BNGetFriendGameAccountInfo
+local BNGetNumFriendGameAccounts = BNGetNumFriendGameAccounts
+local BNGetNumFriends = BNGetNumFriends
+local DisableAddOn = DisableAddOn
+local EnableAddOn = EnableAddOn
+local GetFriendInfo = C_FriendList.GetFriendInfo
+local GetNumFriends = C_FriendList.GetNumFriends
+local LoadAddOn = LoadAddOn
+local ReloadUI = ReloadUI
+local SetActionBarToggles = SetActionBarToggles
 
 -- Private Addon API
 local GetAuraFilterFunc = Private.GetAuraFilterFunc
@@ -420,6 +420,82 @@ Core.ApplyExperimentalFeatures = function(self)
 		battleground:Hide()
 		animation:Stop()
 	end)
+
+	-- Let's fake spell highlights!
+	local spellHighlights = {} -- [auraID] = { spellID, spellID, ... }
+	spellHighlights[16870] = { -- Omen of Clarity (Proc)
+		 --9850, -- Claw (Rank 5) -- used solo, but not in groups or PvP. So skipping it.
+		 9867, -- Ravage (Rank 4)
+		 9858, -- Regrowth (Rank 9)
+		 9830  -- Shred (Rank 5)
+	}
+
+	local currentHighlights = {}
+	local activeHighlights = {}
+
+
+	-- Update spellhighlights
+	local UpdateHighlights = function(_, event, unit)
+		if (event == "GP_UNIT_AURA") and (unit ~= "player") then
+			return
+		end
+
+		-- Wipe any leftovers of the current highlights
+		for id in pairs(currentHighlights) do
+			currentHighlights[id] = nil
+		end
+
+		-- Iterate for current highlights
+		for i = 1, BUFF_MAX_DISPLAY do 
+
+			-- Retrieve buff information
+			local name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = self:GetUnitBuff("player", i, "HELPFUL PLAYER")
+
+			-- No name means no more buffs matching the filter
+			if (not name) then
+				break
+			end
+
+			for id,highlights in pairs(spellHighlights) do
+				if (id == spellId) then
+
+					-- Add it to current highlights.
+					currentHighlights[id] = true
+
+					-- Add to active and send an actication message if needed.
+					if (not activeHighlights[id]) then
+						activeHighlights[id] = true
+						for _,spellID in pairs(highlights) do
+							self:SendMessage("GP_SPELL_ACTIVATION_OVERLAY_GLOW_SHOW", spellID)
+						end
+					end
+				end
+			end
+		end
+
+		-- Disable active highlights that no longer match the current ones
+		for id in pairs(activeHighlights) do
+			if (not currentHighlights[id]) then
+				activeHighlights[id] = nil
+				for _,spellID in pairs(spellHighlights[id]) do
+					self:SendMessage("GP_SPELL_ACTIVATION_OVERLAY_GLOW_HIDE", spellID)
+				end
+			end
+		end
+	end
+
+	IsSpellOverlayed = function(spellId)
+		for id in pairs(activeHighlights) do
+			for _,spellID in pairs(spellHighlights[id]) do
+				if (spellId == spellID) then
+					return true
+				end
+			end
+		end
+	end
+
+	self:RegisterEvent("PLAYER_ENTERING_WORLD", UpdateHighlights)
+	self:RegisterMessage("GP_UNIT_AURA", UpdateHighlights)
 
 	-- Little trick to show the layout and dimensions
 	-- of the Minimap blip icons on-screen in-game, 

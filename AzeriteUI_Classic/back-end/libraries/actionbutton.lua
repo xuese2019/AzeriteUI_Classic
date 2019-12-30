@@ -1,10 +1,13 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 67)
+local LibSecureButton = Wheel:Set("LibSecureButton", 68)
 if (not LibSecureButton) then	
 	return
 end
 
 local LibEvent = Wheel("LibEvent")
 assert(LibEvent, "LibSecureButton requires LibEvent to be loaded.")
+
+local LibMessage = Wheel("LibMessage")
+assert(LibMessage, "LibSecureButton requires LibMessage to be loaded.")
 
 local LibFrame = Wheel("LibFrame")
 assert(LibFrame, "LibSecureButton requires LibFrame to be loaded.")
@@ -17,6 +20,7 @@ assert(LibTooltip, "LibSecureButton requires LibTooltip to be loaded.")
 
 -- Embed functionality into this
 LibEvent:Embed(LibSecureButton)
+LibMessage:Embed(LibSecureButton)
 LibFrame:Embed(LibSecureButton)
 LibSound:Embed(LibSecureButton)
 LibTooltip:Embed(LibSecureButton)
@@ -67,7 +71,7 @@ local SetClampedTextureRotation = _G.SetClampedTextureRotation
 local UnitClass = _G.UnitClass
 
 -- Will implement this through the back-end
-local IsSpellOverlayed = function() end
+--local IsSpellOverlayed = function() end
 
 -- Doing it this way to make the transition to library later on easier
 LibSecureButton.embeds = LibSecureButton.embeds or {} 
@@ -482,6 +486,31 @@ ActionButton.UnregisterAllEvents = function(self)
 	UnregisterAllEvents(self)
 end
 
+ActionButton.RegisterMessage = function(self, event, func)
+	if (not Callbacks[self]) then
+		Callbacks[self] = {}
+	end
+	if (not Callbacks[self][event]) then
+		Callbacks[self][event] = {}
+	end
+
+	local events = Callbacks[self][event]
+	if (#events > 0) then
+		for i = #events, 1, -1 do
+			if (events[i] == func) then
+				return
+			end
+		end
+	end
+
+	table_insert(events, func)
+
+	if (not LibSecureButton.IsMessageRegistered(self, event, func)) then
+		LibSecureButton.RegisterMessage(self, event, func)
+	end
+end
+
+
 -- Button Updates
 ----------------------------------------------------
 ActionButton.Update = function(self)
@@ -792,6 +821,7 @@ ActionButton.ShowOverlayGlow = function(self)
 			model:Hide()
 		end 
 		self.SpellHighlight:Show()
+	else
 	end
 end
 
@@ -805,7 +835,7 @@ end
 ActionButton.UpdateSpellHighlight = function(self)
 	if self.SpellHighlight then 
 		local spellId = self:GetSpellID()
-		if (spellId and IsSpellOverlayed(spellId)) then
+		if (spellId and (IsSpellOverlayed and IsSpellOverlayed(spellId))) then
 			self:ShowOverlayGlow()
 		else
 			self:HideOverlayGlow()
@@ -925,6 +955,9 @@ ActionButton.OnEnable = function(self)
 	self:RegisterEvent("UPDATE_BINDINGS", Update)
 	self:RegisterEvent("UPDATE_MACROS", Update)
 	self:RegisterEvent("UPDATE_SHAPESHIFT_FORM", Update)
+
+	self:RegisterMessage("GP_SPELL_ACTIVATION_OVERLAY_GLOW_SHOW", Update)
+	self:RegisterMessage("GP_SPELL_ACTIVATION_OVERLAY_GLOW_HIDE", Update)
 end
 
 ActionButton.OnDisable = function(self)

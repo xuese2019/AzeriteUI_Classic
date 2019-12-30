@@ -533,6 +533,12 @@ ActionButton.PostCreate = function(self, ...)
 	self.Keybind:SetShadowColor(unpack(layout.KeybindShadowColor))
 	self.Keybind:SetTextColor(unpack(layout.KeybindColor))
 
+	self.SpellHighlight:ClearAllPoints()
+	self.SpellHighlight:SetPoint(unpack(layout.SpellHighlightPlace))
+	self.SpellHighlight:SetSize(unpack(layout.SpellHighlightSize))
+	self.SpellHighlight.Texture:SetTexture(layout.SpellHighlightTexture)
+	self.SpellHighlight.Texture:SetVertexColor(unpack(layout.SpellHighlightColor))
+
 	self.SpellAutoCast:ClearAllPoints()
 	self.SpellAutoCast:SetPoint(unpack(layout.SpellAutoCastPlace))
 	self.SpellAutoCast:SetSize(unpack(layout.SpellAutoCastSize))
