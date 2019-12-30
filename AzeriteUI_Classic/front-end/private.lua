@@ -469,10 +469,12 @@ Private.GetMedia = function(name, type) return ([[Interface\AddOns\%s\media\%s.%
 local ByPlayer = OnPlayer + OnTarget
 
 -- General Blacklist
+-- Auras listed here won't be shown on any unitframes.
 ------------------------------------------------------------------------
 AddFlags(Private, 17670, Never) 	-- Argent Dawn Commission
 
 -- Nameplate Blacklist
+-- Auras listed here will be excluded from the nameplates.
 ------------------------------------------------------------------------
 AddFlags(Private,  1461, NeverOnPlate) 	-- Arcane Intellect (Rank ?)
 AddFlags(Private, 10157, NeverOnPlate) 	-- Arcane Intellect (Rank ?)
@@ -495,7 +497,6 @@ AddFlags(Private,  9885, NeverOnPlate) 	-- Mark of the Wild (Rank 7)
 AddFlags(Private, 10938, NeverOnPlate) 	-- Power Word: Fortitude (Rank ?)
 AddFlags(Private, 21564, NeverOnPlate) 	-- Prayer of Fortitude (Rank ?)
 
-
 -- Druid (Balance)
 ------------------------------------------------------------------------
 AddFlags(Private, 22812, OnPlayer) 	-- Barkskin
@@ -513,8 +514,8 @@ AddFlags(Private, 16689, OnPlayer) 	-- Nature's Grasp (Rank 3)
 AddFlags(Private, 16689, OnPlayer) 	-- Nature's Grasp (Rank 4)
 AddFlags(Private, 16689, OnPlayer) 	-- Nature's Grasp (Rank 5)
 AddFlags(Private, 16689, OnPlayer) 	-- Nature's Grasp (Rank 6)
-AddFlags(Private, 16864, OnPlayer + NoCombat + Warn) 	-- Omen of Clarity (Proc)
-AddFlags(Private, 16870, OnPlayer + NoCombat + Warn) 	-- Omen of Clarity (Proc)  -- where did this come from?
+AddFlags(Private, 16864, OnPlayer + NoCombat + Warn) 	-- Omen of Clarity (Buff)
+AddFlags(Private, 16870, OnPlayer + NoCombat + Warn) 	-- Omen of Clarity (Proc)
 AddFlags(Private,   467, ByPlayer + NoCombat + Warn) 	-- Thorns (Rank 1)
 AddFlags(Private,   782, ByPlayer + NoCombat + Warn) 	-- Thorns (Rank 2)
 AddFlags(Private,  1075, ByPlayer + NoCombat + Warn) 	-- Thorns (Rank 3)
