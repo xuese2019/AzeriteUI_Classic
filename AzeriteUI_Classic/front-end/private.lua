@@ -478,8 +478,11 @@ AddFlags(Private, 17670, Never) 	-- Argent Dawn Commission
 ------------------------------------------------------------------------
 AddFlags(Private,  1461, NeverOnPlate) 	-- Arcane Intellect (Rank ?)
 AddFlags(Private, 10157, NeverOnPlate) 	-- Arcane Intellect (Rank ?)
+AddFlags(Private, 13159, NeverOnPlate) 	-- Aspect of the Pack
 AddFlags(Private,  6673, NeverOnPlate) 	-- Battle Shout (Rank 1)
 AddFlags(Private, 20217, NeverOnPlate) 	-- Blessing of Kings (Rank ?)
+AddFlags(Private, 19838, NeverOnPlate) 	-- Blessing of Might (Rank ?)
+AddFlags(Private, 19746, NeverOnPlate) 	-- Concentration Aura
 AddFlags(Private, 11743, NeverOnPlate) 	-- Detect Greater Invisibility
 AddFlags(Private, 10293, NeverOnPlate) 	-- Devotion Aura (Rank ?)
 AddFlags(Private, 27841, NeverOnPlate) 	-- Divine Spirit (Rank ?)
@@ -496,6 +499,9 @@ AddFlags(Private,  9884, NeverOnPlate) 	-- Mark of the Wild (Rank 6)
 AddFlags(Private,  9885, NeverOnPlate) 	-- Mark of the Wild (Rank 7)
 AddFlags(Private, 10938, NeverOnPlate) 	-- Power Word: Fortitude (Rank ?)
 AddFlags(Private, 21564, NeverOnPlate) 	-- Prayer of Fortitude (Rank ?)
+AddFlags(Private, 10301, NeverOnPlate) 	-- Retribution Aura
+AddFlags(Private, 19896, NeverOnPlate) 	-- Shadow Resistance Aura
+AddFlags(Private, 20906, NeverOnPlate) 	-- Trueshot Aura
 
 -- Druid (Balance)
 ------------------------------------------------------------------------
