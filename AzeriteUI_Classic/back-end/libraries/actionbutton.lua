@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 68)
+local LibSecureButton = Wheel:Set("LibSecureButton", 69)
 if (not LibSecureButton) then	
 	return
 end
@@ -812,23 +812,13 @@ end
 
 ActionButton.ShowOverlayGlow = function(self)
 	if self.SpellHighlight then 
-		local model = self.SpellHighlight.Model
-		local w,h = self:GetSize()
-		if (w and h) then 
-			model:SetSize(w*2,h*2)
-			model:Show()
-		else 
-			model:Hide()
-		end 
 		self.SpellHighlight:Show()
-	else
 	end
 end
 
 ActionButton.HideOverlayGlow = function(self)
 	if self.SpellHighlight then 
 		self.SpellHighlight:Hide()
-		self.SpellHighlight.Model:Hide()
 	end
 end
 
@@ -1222,19 +1212,6 @@ LibSecureButton.CreateButtonSpellHighlight = function(self, button)
 	texture:SetAllPoints()
 	texture:SetVertexColor(255/255, 225/255, 125/255, 1)
 	button.SpellHighlight.Texture = texture
-
-	local model = spellHighlight:CreateFrame("PlayerModel")
-	model:Hide()
-	model:SetFrameLevel(button:GetFrameLevel()-1)
-	model:SetPoint("CENTER", 0, 0)
-	model:EnableMouse(false)
-	model:ClearModel()
-	model:SetDisplayInfo(26501) 
-	model:SetCamDistanceScale(3)
-	model:SetPortraitZoom(0)
-	model:SetPosition(0, 0, 0)
-
-	button.SpellHighlight.Model = model
 end
 
 -- Public API
