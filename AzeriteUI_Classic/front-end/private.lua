@@ -488,6 +488,7 @@ AddFlags(Private, 10293, NeverOnPlate) 	-- Devotion Aura (Rank ?)
 AddFlags(Private, 27841, NeverOnPlate) 	-- Divine Spirit (Rank ?)
 AddFlags(Private, 19898, NeverOnPlate) 	-- Frost Resistance Aura
 AddFlags(Private, 25898, NeverOnPlate) 	-- Greater Blessing of Kings (Rank ?)
+AddFlags(Private, 25899, NeverOnPlate) 	-- Greater Blessing of Sanctuary (Rank ?)
 AddFlags(Private, 10220, NeverOnPlate) 	-- Ice Armor (Rank ?)
 AddFlags(Private, 24932, NeverOnPlate) 	-- Leader of the Pack
 AddFlags(Private,  1126, NeverOnPlate) 	-- Mark of the Wild (Rank 1)
@@ -500,6 +501,7 @@ AddFlags(Private,  9885, NeverOnPlate) 	-- Mark of the Wild (Rank 7)
 AddFlags(Private, 10938, NeverOnPlate) 	-- Power Word: Fortitude (Rank ?)
 AddFlags(Private, 21564, NeverOnPlate) 	-- Prayer of Fortitude (Rank ?)
 AddFlags(Private, 10301, NeverOnPlate) 	-- Retribution Aura
+AddFlags(Private, 10958, NeverOnPlate) 	-- Shadow Protection
 AddFlags(Private, 19896, NeverOnPlate) 	-- Shadow Resistance Aura
 AddFlags(Private, 20906, NeverOnPlate) 	-- Trueshot Aura
 
