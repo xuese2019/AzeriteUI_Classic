@@ -476,12 +476,14 @@ AddFlags(Private, 17670, Never) 	-- Argent Dawn Commission
 -- Nameplate Blacklist
 -- Auras listed here will be excluded from the nameplates.
 ------------------------------------------------------------------------
+AddFlags(Private, 23028, NeverOnPlate) 	-- Arcane Brilliance (Rank ?)
 AddFlags(Private,  1461, NeverOnPlate) 	-- Arcane Intellect (Rank ?)
 AddFlags(Private, 10157, NeverOnPlate) 	-- Arcane Intellect (Rank ?)
 AddFlags(Private, 13159, NeverOnPlate) 	-- Aspect of the Pack
 AddFlags(Private,  6673, NeverOnPlate) 	-- Battle Shout (Rank 1)
 AddFlags(Private, 20217, NeverOnPlate) 	-- Blessing of Kings (Rank ?)
 AddFlags(Private, 19838, NeverOnPlate) 	-- Blessing of Might (Rank ?)
+AddFlags(Private, 11767, NeverOnPlate) 	-- Blood Pact
 AddFlags(Private, 19746, NeverOnPlate) 	-- Concentration Aura
 AddFlags(Private, 11743, NeverOnPlate) 	-- Detect Greater Invisibility
 AddFlags(Private, 10293, NeverOnPlate) 	-- Devotion Aura (Rank ?)
@@ -498,11 +500,19 @@ AddFlags(Private,  5234, NeverOnPlate) 	-- Mark of the Wild (Rank 4)
 AddFlags(Private,  8907, NeverOnPlate) 	-- Mark of the Wild (Rank 5)
 AddFlags(Private,  9884, NeverOnPlate) 	-- Mark of the Wild (Rank 6)
 AddFlags(Private,  9885, NeverOnPlate) 	-- Mark of the Wild (Rank 7)
+AddFlags(Private, 24907, NeverOnPlate) 	-- Moonkin Aura
+AddFlags(Private, 19480, NeverOnPlate) 	-- Paranoia
 AddFlags(Private, 10938, NeverOnPlate) 	-- Power Word: Fortitude (Rank ?)
 AddFlags(Private, 21564, NeverOnPlate) 	-- Prayer of Fortitude (Rank ?)
 AddFlags(Private, 10301, NeverOnPlate) 	-- Retribution Aura
 AddFlags(Private, 10958, NeverOnPlate) 	-- Shadow Protection
 AddFlags(Private, 19896, NeverOnPlate) 	-- Shadow Resistance Aura
+AddFlags(Private,   467, NeverOnPlate) 	-- Thorns (Rank 1)
+AddFlags(Private,   782, NeverOnPlate) 	-- Thorns (Rank 2)
+AddFlags(Private,  1075, NeverOnPlate) 	-- Thorns (Rank 3)
+AddFlags(Private,  8914, NeverOnPlate) 	-- Thorns (Rank 4)
+AddFlags(Private,  9756, NeverOnPlate) 	-- Thorns (Rank 5)
+AddFlags(Private,  9910, NeverOnPlate) 	-- Thorns (Rank 6)
 AddFlags(Private, 20906, NeverOnPlate) 	-- Trueshot Aura
 
 -- Druid (Balance)
