@@ -65,7 +65,7 @@ L["Sticky Minimap bars disabled."] = "Barres de la Mini-Carte desépinglées."
 -- These are displayed within the circular minimap bar frame, 
 -- and must be very short, or we'll have an ugly overflow going. 
 L["to level %s"] = "pour monter niveau %s" 
-L["to %s"] = "jusqu\'à %"
+L["to %s"] = "jusqu\'à %s"
 L["to next trait"] = "jusqu\'au prochain trait"
 
 -- Try to keep the following fairly short, as they should
