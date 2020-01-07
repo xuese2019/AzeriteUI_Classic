@@ -72,10 +72,7 @@ local Enable = function(self)
 			element:Hide()
 		end 
 
-		-- Avoid duplicate events, library fires this for all elements on raid/party
-		if (not self.unit:match("^party(%d+)")) and (not self.unit:match("^raid(%d+)")) then 
-			self:RegisterEvent("GROUP_ROSTER_UPDATE", Proxy, true)
-		end 
+		self:RegisterEvent("GROUP_ROSTER_UPDATE", Proxy, true)
 
 		return true 
 	end
@@ -99,5 +96,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("GroupRole", Enable, Disable, Proxy, 14)
+	Lib:RegisterElement("GroupRole", Enable, Disable, Proxy, 15)
 end 
