@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [1.0.86-RC] 2019-12-31
 ### Added
 - Added the very first experimental draft of our spell highlight system. Druids with Omen of Clarity will now find that Shred, Ravage, Maul and Regrowth are marked when their clearcast proc fires. This is a work in progress, and I'll expand the list for more classes, as well as write other methods into this system to light up reactive abilities like Warrior's Overpower and similar.
-- Started on the nameplate aura blacklist. Certain spam like Mark of the Wild, Leader of the Pack and certain other auras will no longer show up on party member nameplates. This too is a list in growth.
+- Started on the nameplate aura blacklist. Certain spam like Mark of the Wild, Leader of the Pack and various other auras will no longer show up on party member nameplates. This too is a list in growth.
 
 ## [1.0.85-RC] 2019-12-18
 ### Changed
