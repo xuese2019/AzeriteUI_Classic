@@ -906,6 +906,16 @@ local StyleRaidFrame = function(self, unit, id, layout, ...)
 	raidRole:SetDrawLayer(unpack(layout.RaidRoleDrawLayer))
 	raidRole.roleTextures = { RAIDTARGET = layout.RaidRoleRaidTargetTexture }
 	self.RaidRole = raidRole
+
+	-- Group Number
+	local groupNumber = overlay:CreateFontString()
+	groupNumber:SetPoint(unpack(layout.GroupNumberPlace))
+	groupNumber:SetDrawLayer(unpack(layout.GroupNumberDrawLayer))
+	groupNumber:SetJustifyH(layout.GroupNumberJustifyH)
+	groupNumber:SetJustifyV(layout.GroupNumberJustifyV)
+	groupNumber:SetFontObject(layout.GroupNumberFont)
+	groupNumber:SetTextColor(unpack(layout.GroupNumberColor))
+	self.GroupNumber = groupNumber
 	
 	-- Group Debuff (#1)
 	-----------------------------------------------------------

@@ -21,6 +21,7 @@
 <Script file='plugins\unit_crowdcontrol.lua'/>
 <Script file='plugins\unit_extrapower.lua'/>
 <Script file='plugins\unit_groupdebuff.lua'/>
+<Script file='plugins\unit_groupnumber.lua'/>
 <Script file='plugins\unit_grouprole.lua'/>
 <Script file='plugins\unit_health.lua'/>
 <Script file='plugins\unit_level.lua'/>

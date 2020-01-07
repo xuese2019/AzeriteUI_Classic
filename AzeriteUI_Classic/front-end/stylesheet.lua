@@ -3605,6 +3605,13 @@ Layouts.UnitFrameRaid = setmetatable({
 	GroupAnchorEpic = "TOPLEFT", 
 	GroupAnchorEpicHealerMode = "BOTTOMLEFT", 
 
+	GroupNumberColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
+	GroupNumberDrawLayer = { "ARTWORK", 1 },
+	GroupNumberFont = GetFont(11,true),
+	GroupNumberJustifyH = "RIGHT",
+	GroupNumberJustifyV = "BOTTOM",
+	GroupNumberPlace = { "BOTTOMLEFT", 2, -6 },
+
 	HealthSize = Constant.RaidBar, 
 	HealthBackdropSize = { 140 *.94, 90 *.94 },
 	HealthColorTapped = false, -- color tap denied units 
