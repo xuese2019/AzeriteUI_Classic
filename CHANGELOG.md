@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.88-RC] 2020-01-07
+### Added
+- Added subgroup numbers to the bottom left part of the raid frames. No more headache trying to figure out who's in what group, or where the Alliance AV leecher you want to report is!
+
+### Fixed
+- Fixed an issue with some raid frame elements like leader/assistant status as well as raid marks which sometimes only would update on a GUID change.
+
 ## [1.0.87-RC] 2020-01-05
 ### Fixed
 - Fixed a typo in the frFR translation that caused reputation tracking on frFR game clients to bug out.
