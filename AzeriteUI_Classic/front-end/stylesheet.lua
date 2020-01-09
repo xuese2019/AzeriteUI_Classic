@@ -1310,23 +1310,28 @@ local SmallFrame_AlphaPostUpdate = function(self)
 	end
 end
 
-local SmallFrame_CastBarPostUpdate = function(element, unit)
+local SmallFrame_BarTextPostUpdate = function(element, unit)
 	local self = element._owner
 	local cast = self.Cast
-	local healthPercent = self.Health.ValuePercent
+	local castName = self.Cast.Name
+	local healthValue = self.Health.ValuePercent
 
-	-- Bug in the back-end, hotfixing it here for now. 
-	if UnitIsDeadOrGhost(unit) then 
-		cast.Name:Hide()
-		healthPercent:SetText(DEAD)
-		healthPercent:Show()
-	elseif (cast.casting or cast.channeling) then 
-		healthPercent:Hide()
-		cast.Name:Show()
-	else 
-		cast.Name:Hide()
-		healthPercent:Show()
-	end 
+	-- Seems to be some flickering going on,
+	-- will attempt to fix it by wiping texts when hidden.
+	if (UnitIsDeadOrGhost(unit)) then
+		castName:SetText("")
+		castName:Hide()
+		healthValue:SetText(DEAD)
+		healthValue:Show()
+	elseif (cast.casting or cast.channeling) then
+		healthValue:SetText("")
+		healthValue:Hide()
+		castName:Show()
+	else
+		castName:SetText("")
+		castName:Hide()
+		healthValue:Show()
+	end
 end
 
 local TinyFrame_OverrideValue = function(element, unit, min, max, disconnected, dead, tapped)
@@ -1468,7 +1473,7 @@ local Template_SmallFrame = {
 	CastBarNameSize = { Constant.SmallBar[1] - 20, Constant.SmallBar[2] }, 
 	CastBarOrientation = "RIGHT", 
 	CastBarPlace = { "CENTER", 0, 0 },
-	CastBarPostUpdate =	SmallFrame_CastBarPostUpdate,
+	CastBarPostUpdate =	SmallFrame_BarTextPostUpdate,
 	CastBarSize = Constant.SmallBar,
 	CastBarSmoothingFrequency = .15,
 	CastBarSmoothingMode = "bezier-fast-in-slow-out", 
@@ -1499,7 +1504,7 @@ local Template_SmallFrame = {
 	HealthBackdropTexture = GetMedia("cast_back"), 
 	HealthBarTexture = Constant.SmallBarTexture, 
 	HealthBarOrientation = "RIGHT", 
-	HealthBarPostUpdate = SmallFrame_CastBarPostUpdate, 
+	HealthBarPostUpdate = SmallFrame_BarTextPostUpdate, 
 	HealthBarSetFlippedHorizontally = false, 
 	HealthBarSparkMap = {
 		top = {
