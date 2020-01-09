@@ -1,4 +1,4 @@
-local LibUnitFrame = Wheel:Set("LibUnitFrame", 67)
+local LibUnitFrame = Wheel:Set("LibUnitFrame", 68)
 if (not LibUnitFrame) then	
 	return
 end
@@ -430,7 +430,6 @@ LibUnitFrame.SpawnUnitFrame = function(self, unit, parent, styleFunc, ...)
 
 	elseif (unit:match("^boss(%d+)")) then
 		frame.unitGroup = "boss"
-
 		frame:SetFrameStrata("MEDIUM")
 		frame:SetFrameLevel(1000)
 		frame:RegisterEvent("INSTANCE_ENCOUNTER_ENGAGE_UNIT", UnitFrame.OverrideAllElements, true)
@@ -443,6 +442,11 @@ LibUnitFrame.SpawnUnitFrame = function(self, unit, parent, styleFunc, ...)
 	elseif (unit:match("^raid(%d+)")) then 
 		frame.unitGroup = "raid"
 		frame:RegisterEvent("GROUP_ROSTER_UPDATE", UnitFrame.OverrideAllElementsOnChangedGUID, true)
+
+	elseif (unit == "targettarget") then
+		-- Need an extra override event here so the ToT frame won't appear to lag behind on target changes.
+		frame:RegisterEvent("PLAYER_TARGET_CHANGED", UnitFrame.OverrideAllElements, true)
+		frame:EnableFrameFrequent(.5, "unit")
 
 	elseif (unit:match("%w+target")) then
 		frame:EnableFrameFrequent(.5, "unit")
