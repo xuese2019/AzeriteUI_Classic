@@ -478,6 +478,7 @@ AddFlags(Private, 17670, Never) 	-- Argent Dawn Commission
 ------------------------------------------------------------------------
 -- Proximity Auras
 AddFlags(Private, 13159, NeverOnPlate) 	-- Aspect of the Pack
+AddFlags(Private,  7805, NeverOnPlate) 	-- Blood Pact
 AddFlags(Private, 11767, NeverOnPlate) 	-- Blood Pact
 AddFlags(Private, 19746, NeverOnPlate) 	-- Concentration Aura
 AddFlags(Private, 10293, NeverOnPlate) 	-- Devotion Aura
