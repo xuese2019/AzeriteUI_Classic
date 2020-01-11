@@ -1,4 +1,4 @@
-local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 45)
+local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 46)
 if (not LibTooltipScanner) then	
 	return
 end
@@ -144,16 +144,25 @@ local pluralPattern = function(msg, plain)
 	msg = msg:gsub("|4.+:(.+);", "%1")
 	return plain and msg or ("^" .. msg)
 end
-	
+
+-- Trying in the simplest manner possible to work around
+-- issues where the localized version of a string
+-- contains placement order values, while the enUS does not.
+local numberPattern = function(msg)
+	msg = string_gsub(msg, "%%d", "(%%d+)")
+	msg = string_gsub(msg, "%%%d%$d", "(%%d+)")
+	return msg
+end
+
 -- Will come up with a better system as this expands, 
 -- just doing it fast and simple for now.
 local Patterns = {
 
-	ContainerSlots = 			"^" .. string_gsub(string_gsub(Constants.ContainerSlots, "%%d", "(%%d+)"), "%%s", "(%.+)"),
-	ItemBlock = 				"^" .. string_gsub(string_gsub(Constants.ItemBlock, "%%d", "(%%d+)"), "%%s", "(%%w)"),
+	ContainerSlots = 			"^" .. string_gsub(numberPattern(Constants.ContainerSlots), "%%s", "(%.+)"),
+	ItemBlock = 				"^" .. string_gsub(numberPattern(Constants.ItemBlock), "%%s", "(%%w)"),
 	ItemDamage = 				"^" .. string_gsub(string_gsub(Constants.ItemDamage, "%%s", "(%%d+)"), "%-", "%%-"),
-	ItemDurability = 			"^" .. string_gsub(Constants.ItemDurability, "%%d", "(%%d+)"),
-	ItemLevel = 				"^" .. string_gsub(Constants.ItemLevel, "%%d", "(%%d+)"),
+	ItemDurability = 			"^" .. numberPattern(Constants.ItemDurability),
+	ItemLevel = 				"^" .. numberPattern(Constants.ItemLevel),
 	Level = 						   Constants.Level,
 
 	-- For aura scanning
@@ -177,9 +186,9 @@ local Patterns = {
 	CastQueue2 = 				"^" .. Constants.CastNextRanged, 
 
 	-- CooldownRemaining
-	CooldownTimeRemaining1 = 		   string_gsub(Constants.CooldownTimeRemaining1, "%%d", "(%%d+)"), 
-	CooldownTimeRemaining2 = 		   string_gsub(Constants.CooldownTimeRemaining2, "%%d", "(%%d+)"), 
-	CooldownTimeRemaining3 = 		   string_gsub(Constants.CooldownTimeRemaining3, "%%d", "(%%d+)"), 
+	CooldownTimeRemaining1 = 		   numberPattern(Constants.CooldownTimeRemaining1), 
+	CooldownTimeRemaining2 = 		   numberPattern(Constants.CooldownTimeRemaining2), 
+	CooldownTimeRemaining3 = 		   numberPattern(Constants.CooldownTimeRemaining3), 
 
 	-- Item binds 
 	ItemBind1 = 				"^" .. Constants.ItemBoundSoul, 
@@ -195,16 +204,16 @@ local Patterns = {
 	-- Item unique status
 	ItemUnique1 = 				"^" .. Constants.ItemUnique,
 	ItemUnique2 = 				"^" .. Constants.ItemUniqueEquip,
-	ItemUnique3 = 				"^" .. string_gsub(Constants.ItemUniqueMultiple, "%%d", "(%%d+)"),
+	ItemUnique3 = 				"^" .. numberPattern(Constants.ItemUniqueMultiple),
 
 	-- Item effects
 	ItemEquipEffect = 			"^" .. Constants.ItemEquipEffect, 
 	ItemUseEffect = 			"^" .. Constants.ItemUseEffect, 
 
 	-- Recharge Remaining
-	RechargeTimeRemaining1 = 	"^" .. string_gsub(Constants.RechargeTimeRemaining1, "%%d", "(%%d+)"), 
-	RechargeTimeRemaining2 = 	"^" .. string_gsub(Constants.RechargeTimeRemaining2, "%%d", "(%%d+)"), 
-	RechargeTimeRemaining3 = 	"^" .. string_gsub(Constants.RechargeTimeRemaining3, "%%d", "(%%d+)"), 
+	RechargeTimeRemaining1 = 	"^" .. numberPattern(Constants.RechargeTimeRemaining1), 
+	RechargeTimeRemaining2 = 	"^" .. numberPattern(Constants.RechargeTimeRemaining2), 
+	RechargeTimeRemaining3 = 	"^" .. numberPattern(Constants.RechargeTimeRemaining3), 
 	
 	-- Spell Range
 	Range1 = 					"^" .. Constants.RangeMelee,
