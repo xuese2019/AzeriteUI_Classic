@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.90-RC] 2020-01-11
+### Added
+- Spells that require reagents should now show their remaining reagent count when placed on the action bars.
+
+### Fixed
+- Trying to work around some language issues that would cause placing items on the actionbar to sometimes bug out when hovering over them. The issue was related to different formatting of some game strings in English and non-English clients.
+
+## [1.0.89-RC] 2020-01-09
+### Changed
+- Added a forced update of all ToT unitframe elements on player target change, as this previously had up to half a second delay on player target changes when the ToT frame remained visible throughout the change.
+
 ## [1.0.88-RC] 2020-01-07
 ### Added
 - Added subgroup numbers to the bottom left part of the raid frames. No more headache trying to figure out who's in what group, or where the Alliance AV leecher you want to report is!
