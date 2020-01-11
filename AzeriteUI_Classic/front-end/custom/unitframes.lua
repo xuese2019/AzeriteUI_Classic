@@ -468,6 +468,13 @@ local StyleSmallFrame = function(self, unit, id, layout, ...)
 	self.Cast = cast
 	self.Cast.PostUpdate = layout.CastBarPostUpdate
 
+	-- A little hack here. Does it work better?
+	local toggleHealthValue = function()
+		healthPerc:SetShown((not cast:IsShown()))
+	end
+	cast:HookScript("OnShow", toggleHealthValue)
+	cast:HookScript("OnHide", toggleHealthValue)
+
 	-- Cast Name
 	local name = (layout.CastBarNameParent and self[layout.CastBarNameParent] or overlay):CreateFontString()
 	name:SetPoint(unpack(layout.CastBarNamePlace))
