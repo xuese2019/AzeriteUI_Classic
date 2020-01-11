@@ -38,7 +38,6 @@ local Proxy, ForceUpdate, Update
 local Generic = setmetatable({
 	EnablePower = function(self)
 		local element = self.ClassPower
-		--element.maxDisplayed = MAX_COMBO_POINTS
 
 		for i = 1, #element do 
 			element[i]:SetMinMaxValues(0,1)
@@ -50,10 +49,7 @@ local Generic = setmetatable({
 			self:RegisterEvent("PLAYER_REGEN_DISABLED", Proxy, true)
 			self:RegisterEvent("PLAYER_REGEN_ENABLED", Proxy, true)
 		end 
-
-		if (element.hideWhenNoTarget) then 
-			self:RegisterEvent("PLAYER_TARGET_CHANGED", Proxy, true)
-		end 
+		self:RegisterEvent("PLAYER_TARGET_CHANGED", Proxy, true)
 		
 	end,
 	DisablePower = function(self)
@@ -189,17 +185,17 @@ local Generic_MT = { __index = Generic }
 -- Specific powerTypes
 local ClassPower = {}
 ClassPower.None = {
-	EnablePower = function(self) 
+	EnablePower = function(self)
 		local element = self.ClassPower
-		for i = 1, #element do 
+		for i = 1, #element do
 			element[i]:SetMinMaxValues(0,1)
 			element[i]:SetValue(0)
 			element[i]:Hide()
 		end 
 	end, 
-	DisablePower = function() end, 
-	UpdatePower = function() end, 
-	UpdateColor = function() end, 
+	DisablePower = function() end,
+	UpdatePower = function() end,
+	UpdateColor = function() end,
 }
 
 ClassPower.ComboPoints = setmetatable({ 
@@ -381,10 +377,7 @@ local Enable = function(self)
 		end
 
 		self:RegisterEvent("UNIT_DISPLAYPOWER", Proxy)
-
-		--if element.hideWhenNoTarget then 
-		--	self:RegisterEvent("PLAYER_TARGET_CHANGED", Proxy, true)
-		--end 
+		self:RegisterEvent("PLAYER_TARGET_CHANGED", Proxy, true)
 
 		return true
 	end
@@ -403,11 +396,11 @@ local Disable = function(self)
 
 		-- Remove generic events
 		self:UnregisterEvent("UNIT_DISPLAYPOWER", Proxy)
-		--self:UnregisterEvent("PLAYER_TARGET_CHANGED", Proxy)
+		self:UnregisterEvent("PLAYER_TARGET_CHANGED", Proxy)
 	end
 end 
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("ClassPower", Enable, Disable, Proxy, 34)
+	Lib:RegisterElement("ClassPower", Enable, Disable, Proxy, 35)
 end 
