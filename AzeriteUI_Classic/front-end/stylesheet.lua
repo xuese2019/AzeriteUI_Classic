@@ -1597,8 +1597,9 @@ local Template_SmallFrame_Auras = setmetatable({
 
 -- Used for ToT.
 local Template_SmallFrameReversed = setmetatable({
-	CastBarOrientation = "LEFT", 
-	CastBarSetFlippedHorizontally = true, 
+	CastBarSize = nil, -- remove it for now to avoid the flickering. It's only ToT.
+	--CastBarOrientation = "LEFT", 
+	--CastBarSetFlippedHorizontally = true, 
 	HealthBarOrientation = "LEFT", 
 	HealthBarSetFlippedHorizontally = true 
 }, { __index = Template_SmallFrame })

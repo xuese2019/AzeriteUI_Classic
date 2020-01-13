@@ -455,25 +455,28 @@ local StyleSmallFrame = function(self, unit, id, layout, ...)
 	
 	-- Cast Bar
 	-----------------------------------------------------------
-	local cast = content:CreateStatusBar()
-	cast:SetSize(unpack(layout.CastBarSize))
-	cast:SetFrameLevel(health:GetFrameLevel() + 1)
-	cast:Place(unpack(layout.CastBarPlace))
-	cast:SetOrientation(layout.CastBarOrientation) 
-	cast:SetSmoothingMode(layout.CastBarSmoothingMode) 
-	cast:SetSmoothingFrequency(layout.CastBarSmoothingFrequency)
-	cast:SetStatusBarColor(unpack(layout.CastBarColor)) 
-	cast:SetStatusBarTexture(layout.CastBarTexture)
-	cast:SetSparkMap(layout.CastBarSparkMap) 
-	self.Cast = cast
-	self.Cast.PostUpdate = layout.CastBarPostUpdate
+	if (layout.CastBarSize) then 
+		local cast = content:CreateStatusBar()
+		cast:SetSize(unpack(layout.CastBarSize))
+		cast:SetFrameLevel(health:GetFrameLevel() + 1)
+		cast:Place(unpack(layout.CastBarPlace))
+		cast:SetOrientation(layout.CastBarOrientation) 
+		cast:SetSmoothingMode(layout.CastBarSmoothingMode) 
+		cast:SetSmoothingFrequency(layout.CastBarSmoothingFrequency)
+		cast:SetStatusBarColor(unpack(layout.CastBarColor)) 
+		cast:SetStatusBarTexture(layout.CastBarTexture)
+		cast:SetSparkMap(layout.CastBarSparkMap) 
+		self.Cast = cast
+		self.Cast.PostUpdate = layout.CastBarPostUpdate
 
-	-- A little hack here. Does it work better?
-	local toggleHealthValue = function()
-		healthPerc:SetShown((not cast:IsShown()))
+		-- A little hack here. Does it work better? NO!
+		local toggleHealthValue = function()
+			healthPerc:SetShown((not cast:IsShown()))
+		end
+
+		cast:HookScript("OnShow", toggleHealthValue)
+		cast:HookScript("OnHide", toggleHealthValue)
 	end
-	cast:HookScript("OnShow", toggleHealthValue)
-	cast:HookScript("OnHide", toggleHealthValue)
 
 	-- Cast Name
 	local name = (layout.CastBarNameParent and self[layout.CastBarNameParent] or overlay):CreateFontString()
