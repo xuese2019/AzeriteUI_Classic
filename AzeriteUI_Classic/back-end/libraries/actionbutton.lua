@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 71)
+local LibSecureButton = Wheel:Set("LibSecureButton", 72)
 if (not LibSecureButton) then	
 	return
 end
@@ -96,6 +96,8 @@ local BLING_TEXTURE = [[Interface\Cooldown\star4]]
 -- Generic format strings for our button names
 local BUTTON_NAME_TEMPLATE_SIMPLE = "%sActionButton"
 local BUTTON_NAME_TEMPLATE_FULL = "%sActionButton%.0f"
+local PETBUTTON_NAME_TEMPLATE_SIMPLE = "%sPetActionButton"
+local PETBUTTON_NAME_TEMPLATE_FULL = "%sPetActionButton%.0f"
 
 -- Time constants
 local DAY, HOUR, MINUTE = 86400, 3600, 60
@@ -186,12 +188,20 @@ local check = function(value, num, ...)
 	error(("Bad argument #%.0f to '%s': %s expected, got %s"):format(num, name, types, type(value)), 3)
 end
 
-local nameHelper = function(self, id)
+local nameHelper = function(self, id, buttonType)
 	local name
-	if id then 
-		name = string_format(BUTTON_NAME_TEMPLATE_FULL, self:GetOwner():GetName(), id)
+	if id then
+		if (buttonType == "pet") then 
+			name = string_format(PETBUTTON_NAME_TEMPLATE_FULL, self:GetOwner():GetName(), id)
+		else 
+			name = string_format(BUTTON_NAME_TEMPLATE_FULL, self:GetOwner():GetName(), id)
+		end
 	else 
-		name = string_format(BUTTON_NAME_TEMPLATE_SIMPLE, self:GetOwner():GetName())
+		if (buttonType == "pet") then 
+			name = string_format(PETBUTTON_NAME_TEMPLATE_SIMPLE, self:GetOwner():GetName())
+		else
+			name = string_format(BUTTON_NAME_TEMPLATE_SIMPLE, self:GetOwner():GetName())
+		end
 	end 
 	return name
 end
@@ -303,7 +313,7 @@ local OnUpdate = function(self, elapsed)
 
 end 
 
-local Update = function(self, event, ...)
+local UpdateActionButton = function(self, event, ...)
 	local arg1 = ...
 
 	if (event == "PLAYER_ENTERING_WORLD") then 
@@ -313,7 +323,7 @@ local Update = function(self, event, ...)
 	elseif (event == "PLAYER_REGEN_ENABLED") then 
 		if self.queuedForMacroUpdate then 
 			self:UpdateAutoCastMacro()
-			self:UnregisterEvent("PLAYER_REGEN_ENABLED", Update)
+			self:UnregisterEvent("PLAYER_REGEN_ENABLED", UpdateActionButton)
 			self.queuedForMacroUpdate = nil
 		end 
 
@@ -397,6 +407,32 @@ local Update = function(self, event, ...)
 	end 
 end
 
+local UpdatePetButton = function(self, event, ...)
+	local arg1 = ...
+	
+	if (event == "PLAYER_ENTERING_WORLD") then
+		self:Update()
+	elseif (event == "PET_BAR_UPDATE") then
+		self:Update()
+	elseif (event == "UNIT_PET" and arg1 == "player") then
+		self:Update()
+	elseif (((event == "UNIT_FLAGS") or (event == "UNIT_AURA")) and (arg1 == "pet")) then
+		self:Update()
+	elseif (event == "PLAYER_CONTROL_LOST") or (event == "PLAYER_CONTROL_GAINED") then
+		self:Update()
+	elseif (event == "PLAYER_FARSIGHT_FOCUS_CHANGED") then
+		self:Update()
+	elseif (event == "PET_BAR_UPDATE_COOLDOWN") then
+		self:UpdateCooldown()
+	elseif (event == "PET_BAR_SHOWGRID") then
+		self:ShowGrid()
+	elseif (event == "PET_BAR_HIDEGRID") then
+		self:HideGrid()
+	elseif (event == "UPDATE_BINDINGS") then
+		self:UpdateBinding()
+	end
+end
+
 local UpdateTooltip = function(self)
 	local tooltip = self:GetTooltip()
 	tooltip:Hide()
@@ -434,7 +470,7 @@ local RegisterUnitEvent = ActionButton_MT.__index.RegisterUnitEvent
 local UnregisterEvent = ActionButton_MT.__index.UnregisterEvent
 local UnregisterAllEvents = ActionButton_MT.__index.UnregisterAllEvents
 
--- Event Handling
+-- ActionButton Event Handling
 ----------------------------------------------------
 ActionButton.RegisterEvent = function(self, event, func)
 	if (not Callbacks[self]) then
@@ -513,8 +549,7 @@ ActionButton.RegisterMessage = function(self, event, func)
 	end
 end
 
-
--- Button Updates
+-- ActionButton Updates
 ----------------------------------------------------
 ActionButton.Update = function(self)
 	if HasAction(self.buttonAction) then 
@@ -577,7 +612,7 @@ end
 ActionButton.UpdateAutoCastMacro = function(self)
 	if InCombatLockdown() then 
 		self.queuedForMacroUpdate = true
-		self:RegisterEvent("PLAYER_REGEN_ENABLED", Update)
+		self:RegisterEvent("PLAYER_REGEN_ENABLED", UpdateActionButton)
 		return 
 	end
 	local name = IsAutoCastPetAction(self.buttonAction) and GetSpellInfo(self:GetSpellID())
@@ -941,68 +976,68 @@ end
 -- Script Handlers
 ----------------------------------------------------
 ActionButton.OnEnable = function(self)
-	self:RegisterEvent("ACTIONBAR_SLOT_CHANGED", Update)
-	self:RegisterEvent("ACTIONBAR_UPDATE_COOLDOWN", Update)
-	self:RegisterEvent("ACTIONBAR_UPDATE_STATE", Update)
-	self:RegisterEvent("ACTIONBAR_UPDATE_USABLE", Update)
-	self:RegisterEvent("ACTIONBAR_HIDEGRID", Update)
-	self:RegisterEvent("ACTIONBAR_SHOWGRID", Update)
-	self:RegisterEvent("CURSOR_UPDATE", Update)
-	self:RegisterEvent("LOSS_OF_CONTROL_ADDED", Update)
-	self:RegisterEvent("LOSS_OF_CONTROL_UPDATE", Update)
-	self:RegisterEvent("PET_BAR_HIDEGRID", Update)
-	self:RegisterEvent("PET_BAR_SHOWGRID", Update)
-	self:RegisterEvent("PET_BAR_UPDATE", Update)
-	self:RegisterEvent("PLAYER_ENTER_COMBAT", Update)
-	self:RegisterEvent("PLAYER_ENTERING_WORLD", Update)
-	self:RegisterEvent("PLAYER_LEAVE_COMBAT", Update)
-	self:RegisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED", Update)
-	self:RegisterEvent("PLAYER_TARGET_CHANGED", Update)
-	self:RegisterEvent("SPELL_UPDATE_CHARGES", Update)
-	self:RegisterEvent("SPELL_UPDATE_ICON", Update)
-	self:RegisterEvent("SPELLS_CHANGED", Update)
-	self:RegisterEvent("TRADE_SKILL_CLOSE", Update)
-	self:RegisterEvent("TRADE_SKILL_SHOW", Update)
-	self:RegisterEvent("UPDATE_BINDINGS", Update)
-	self:RegisterEvent("UPDATE_MACROS", Update)
-	self:RegisterEvent("UPDATE_SHAPESHIFT_FORM", Update)
+	self:RegisterEvent("ACTIONBAR_SLOT_CHANGED", UpdateActionButton)
+	self:RegisterEvent("ACTIONBAR_UPDATE_COOLDOWN", UpdateActionButton)
+	self:RegisterEvent("ACTIONBAR_UPDATE_STATE", UpdateActionButton)
+	self:RegisterEvent("ACTIONBAR_UPDATE_USABLE", UpdateActionButton)
+	self:RegisterEvent("ACTIONBAR_HIDEGRID", UpdateActionButton)
+	self:RegisterEvent("ACTIONBAR_SHOWGRID", UpdateActionButton)
+	self:RegisterEvent("CURSOR_UPDATE", UpdateActionButton)
+	self:RegisterEvent("LOSS_OF_CONTROL_ADDED", UpdateActionButton)
+	self:RegisterEvent("LOSS_OF_CONTROL_UPDATE", UpdateActionButton)
+	self:RegisterEvent("PET_BAR_HIDEGRID", UpdateActionButton)
+	self:RegisterEvent("PET_BAR_SHOWGRID", UpdateActionButton)
+	self:RegisterEvent("PET_BAR_UPDATE", UpdateActionButton)
+	self:RegisterEvent("PLAYER_ENTER_COMBAT", UpdateActionButton)
+	self:RegisterEvent("PLAYER_ENTERING_WORLD", UpdateActionButton)
+	self:RegisterEvent("PLAYER_LEAVE_COMBAT", UpdateActionButton)
+	self:RegisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED", UpdateActionButton)
+	self:RegisterEvent("PLAYER_TARGET_CHANGED", UpdateActionButton)
+	self:RegisterEvent("SPELL_UPDATE_CHARGES", UpdateActionButton)
+	self:RegisterEvent("SPELL_UPDATE_ICON", UpdateActionButton)
+	self:RegisterEvent("SPELLS_CHANGED", UpdateActionButton)
+	self:RegisterEvent("TRADE_SKILL_CLOSE", UpdateActionButton)
+	self:RegisterEvent("TRADE_SKILL_SHOW", UpdateActionButton)
+	self:RegisterEvent("UPDATE_BINDINGS", UpdateActionButton)
+	self:RegisterEvent("UPDATE_MACROS", UpdateActionButton)
+	self:RegisterEvent("UPDATE_SHAPESHIFT_FORM", UpdateActionButton)
 
-	self:RegisterMessage("GP_SPELL_ACTIVATION_OVERLAY_GLOW_SHOW", Update)
-	self:RegisterMessage("GP_SPELL_ACTIVATION_OVERLAY_GLOW_HIDE", Update)
+	self:RegisterMessage("GP_SPELL_ACTIVATION_OVERLAY_GLOW_SHOW", UpdateActionButton)
+	self:RegisterMessage("GP_SPELL_ACTIVATION_OVERLAY_GLOW_HIDE", UpdateActionButton)
 end
 
 ActionButton.OnDisable = function(self)
-	self:UnregisterEvent("ACTIONBAR_SLOT_CHANGED", Update)
-	self:UnregisterEvent("ACTIONBAR_UPDATE_COOLDOWN", Update)
-	self:UnregisterEvent("ACTIONBAR_UPDATE_STATE", Update)
-	self:UnregisterEvent("ACTIONBAR_UPDATE_USABLE", Update)
-	self:UnregisterEvent("ACTIONBAR_HIDEGRID", Update)
-	self:UnregisterEvent("ACTIONBAR_SHOWGRID", Update)
-	self:UnregisterEvent("CURSOR_UPDATE", Update)
-	self:UnregisterEvent("LOSS_OF_CONTROL_ADDED", Update)
-	self:UnregisterEvent("LOSS_OF_CONTROL_UPDATE", Update)
-	self:UnregisterEvent("PET_BAR_HIDEGRID", Update)
-	self:UnregisterEvent("PET_BAR_SHOWGRID", Update)
-	self:UnregisterEvent("PET_BAR_UPDATE", Update)
-	self:UnregisterEvent("PLAYER_ENTER_COMBAT", Update)
-	self:UnregisterEvent("PLAYER_ENTERING_WORLD", Update)
-	self:UnregisterEvent("PLAYER_LEAVE_COMBAT", Update)
-	self:UnregisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED", Update)
-	self:UnregisterEvent("PLAYER_TARGET_CHANGED", Update)
-	self:UnregisterEvent("SPELL_UPDATE_CHARGES", Update)
-	self:UnregisterEvent("SPELL_UPDATE_ICON", Update)
-	self:UnregisterEvent("TRADE_SKILL_CLOSE", Update)
-	self:UnregisterEvent("TRADE_SKILL_SHOW", Update)
-	self:UnregisterEvent("UPDATE_BINDINGS", Update)
-	self:UnregisterEvent("UPDATE_MACROS", Update)
-	self:UnregisterEvent("UPDATE_SHAPESHIFT_FORM", Update)
+	self:UnregisterEvent("ACTIONBAR_SLOT_CHANGED", UpdateActionButton)
+	self:UnregisterEvent("ACTIONBAR_UPDATE_COOLDOWN", UpdateActionButton)
+	self:UnregisterEvent("ACTIONBAR_UPDATE_STATE", UpdateActionButton)
+	self:UnregisterEvent("ACTIONBAR_UPDATE_USABLE", UpdateActionButton)
+	self:UnregisterEvent("ACTIONBAR_HIDEGRID", UpdateActionButton)
+	self:UnregisterEvent("ACTIONBAR_SHOWGRID", UpdateActionButton)
+	self:UnregisterEvent("CURSOR_UPDATE", UpdateActionButton)
+	self:UnregisterEvent("LOSS_OF_CONTROL_ADDED", UpdateActionButton)
+	self:UnregisterEvent("LOSS_OF_CONTROL_UPDATE", UpdateActionButton)
+	self:UnregisterEvent("PET_BAR_HIDEGRID", UpdateActionButton)
+	self:UnregisterEvent("PET_BAR_SHOWGRID", UpdateActionButton)
+	self:UnregisterEvent("PET_BAR_UPDATE", UpdateActionButton)
+	self:UnregisterEvent("PLAYER_ENTER_COMBAT", UpdateActionButton)
+	self:UnregisterEvent("PLAYER_ENTERING_WORLD", UpdateActionButton)
+	self:UnregisterEvent("PLAYER_LEAVE_COMBAT", UpdateActionButton)
+	self:UnregisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED", UpdateActionButton)
+	self:UnregisterEvent("PLAYER_TARGET_CHANGED", UpdateActionButton)
+	self:UnregisterEvent("SPELL_UPDATE_CHARGES", UpdateActionButton)
+	self:UnregisterEvent("SPELL_UPDATE_ICON", UpdateActionButton)
+	self:UnregisterEvent("TRADE_SKILL_CLOSE", UpdateActionButton)
+	self:UnregisterEvent("TRADE_SKILL_SHOW", UpdateActionButton)
+	self:UnregisterEvent("UPDATE_BINDINGS", UpdateActionButton)
+	self:UnregisterEvent("UPDATE_MACROS", UpdateActionButton)
+	self:UnregisterEvent("UPDATE_SHAPESHIFT_FORM", UpdateActionButton)
 end
 
-ActionButton.OnEvent = function(button, event, ...)
-	if (button:IsVisible() and Callbacks[button] and Callbacks[button][event]) then 
-		local events = Callbacks[button][event]
+ActionButton.OnEvent = function(self, event, ...)
+	if (self:IsVisible() and Callbacks[self] and Callbacks[self][event]) then 
+		local events = Callbacks[self][event]
 		for i = 1, #events do
-			events[i](button, event, ...)
+			events[i](self, event, ...)
 		end
 	end 
 end
@@ -1041,6 +1076,51 @@ end
 
 ActionButton.PostClick = function(self) 
 end
+
+-- PetButton Template
+-- *Note that generic methods will be
+--  borrowed from the ActionButton template.
+----------------------------------------------------
+local PetButton = LibSecureButton:CreateFrame("CheckButton")
+local PetButton_MT = { __index = PetButton }
+
+-- PetButton Event Handling
+----------------------------------------------------
+PetButton.RegisterEvent = ActionButton.RegisterEvent
+PetButton.UnregisterEvent = ActionButton.UnregisterEvent
+PetButton.UnregisterAllEvents = ActionButton.UnregisterAllEvents
+PetButton.RegisterMessage = ActionButton.RegisterMessage
+
+-- PetButton Updates
+----------------------------------------------------
+PetButton.Update = function(self)
+
+end
+
+PetButton.UpdateAutoCast = ActionButton.UpdateAutoCast
+
+-- Script Handlers
+----------------------------------------------------
+PetButton.OnEnable = function(self)
+	self:RegisterEvent("PLAYER_CONTROL_LOST", UpdatePetButton)
+	self:RegisterEvent("PLAYER_CONTROL_GAINED", UpdatePetButton)
+	self:RegisterEvent("PLAYER_ENTERING_WORLD", UpdatePetButton)
+	self:RegisterEvent("PLAYER_FARSIGHT_FOCUS_CHANGED", UpdatePetButton)
+	self:RegisterEvent("UNIT_PET", UpdatePetButton)
+	self:RegisterEvent("UNIT_FLAGS", UpdatePetButton)
+	self:RegisterEvent("UNIT_AURA", UpdatePetButton)
+	self:RegisterEvent("UPDATE_BINDINGS", UpdatePetButton)
+	self:RegisterEvent("PET_BAR_UPDATE", UpdatePetButton)
+	self:RegisterEvent("PET_BAR_UPDATE_COOLDOWN", UpdatePetButton)
+	self:RegisterEvent("PET_BAR_SHOWGRID", UpdatePetButton)
+	self:RegisterEvent("PET_BAR_HIDEGRID", UpdatePetButton)
+end
+
+PetButton.OnDisable = function(self)
+end
+
+PetButton.OnEvent = ActionButton.OnEvent
+
 
 -- Library API
 ----------------------------------------------------
@@ -1242,11 +1322,12 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 	check(buttonType, 2, "string")
 	check(buttonTemplate, 3, "table", "nil")
 
-	-- Doing it this way to only include the global arguments 
-	-- available in all button types as function arguments. 
+	-- Doing it this way to only include the global arguments
+	-- available in all button types as function arguments.
+	-- *What the hell am I talking about here?
 	local barID, buttonID = ...
 
-	-- Store the button and its type
+	-- Store the button
 	if (not Buttons[self]) then 
 		Buttons[self] = {}
 	end 
@@ -1254,14 +1335,15 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 	-- Increase the button count
 	LibSecureButton.numButtons = LibSecureButton.numButtons + 1
 
-	-- Count this addon's buttons 
+	-- Count the total number of buttons
+	-- belonging to the addon that spawned it.
 	local count = 0 
 	for button in pairs(Buttons[self]) do 
 		count = count + 1
 	end 
 
 	-- Make up an unique name
-	local name = nameHelper(self, count + 1)
+	local name = nameHelper(self, count + 1, buttonType)
 
 	-- Create an additional visibility layer to handle manual toggling
 	local visibility = self:CreateFrame("Frame", nil, parent, "SecureHandlerAttributeTemplate")
@@ -1296,166 +1378,173 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 	page:SetID(barID) 
 	page:SetAttribute("_onattributechanged", DEBUG_ENABLED and SECURE.Page_OnAttributeChanged_Debug or SECURE.Page_OnAttributeChanged)
 	
-	local button = setmetatable(page:CreateFrame("CheckButton", name, "SecureActionButtonTemplate"), ActionButton_MT)
-	button:SetFrameStrata("LOW")
+	local button
+	if (buttonType == "pet") then 
+		button = setmetatable(page:CreateFrame("CheckButton", name, "PetActionButtonTemplate"), PetButton_MT)
+	else 
+		button = setmetatable(page:CreateFrame("CheckButton", name, "SecureActionButtonTemplate"), ActionButton_MT)
+		button:SetFrameStrata("LOW")
 
-	LibSecureButton:CreateButtonLayers(button)
-	LibSecureButton:CreateButtonOverlay(button)
-	LibSecureButton:CreateButtonCooldowns(button)
-	LibSecureButton:CreateButtonCount(button)
-	LibSecureButton:CreateButtonKeybind(button)
-	LibSecureButton:CreateButtonAutoCast(button)
-	LibSecureButton:CreateButtonSpellHighlight(button)
-	LibSecureButton:CreateFlyoutArrow(button)
+		-- Create button layers
+		LibSecureButton:CreateButtonLayers(button)
+		LibSecureButton:CreateButtonOverlay(button)
+		LibSecureButton:CreateButtonCooldowns(button)
+		LibSecureButton:CreateButtonCount(button)
+		LibSecureButton:CreateButtonKeybind(button)
+		LibSecureButton:CreateButtonAutoCast(button)
+		LibSecureButton:CreateButtonSpellHighlight(button)
+		LibSecureButton:CreateFlyoutArrow(button)
 
-	button:RegisterForDrag("LeftButton", "RightButton")
-	button:RegisterForClicks("AnyUp")
+		button:RegisterForDrag("LeftButton", "RightButton")
+		button:RegisterForClicks("AnyUp")
 
-	-- This allows drag functionality, but stops the casting, 
-	-- thus allowing us to drag spells even with cast on down, wohoo! 
-	-- Doesn't currently appear to be a way to make this work without the modifier, though, 
-	-- since the override bindings we use work by sending mouse events to the listeners, 
-	-- meaning there's no way to separate keys and mouse buttons. 
-	button:SetAttribute("alt-ctrl-shift-type*", "stop")
+		-- This allows drag functionality, but stops the casting, 
+		-- thus allowing us to drag spells even with cast on down, wohoo! 
+		-- Doesn't currently appear to be a way to make this work without the modifier, though, 
+		-- since the override bindings we use work by sending mouse events to the listeners, 
+		-- meaning there's no way to separate keys and mouse buttons. 
+		button:SetAttribute("alt-ctrl-shift-type*", "stop")
 
-	button:SetID(buttonID)
-	button:SetAttribute("type", "action")
-	button:SetAttribute("flyoutDirection", "UP")
-	button:SetAttribute("checkselfcast", true)
-	button:SetAttribute("checkfocuscast", true)
-	button:SetAttribute("useparent-unit", true)
-	button:SetAttribute("useparent-actionpage", true)
-	button:SetAttribute("buttonLock", true)
-	button.id = buttonID
-	button.action = 0
+		button:SetID(buttonID)
+		button:SetAttribute("type", "action")
+		button:SetAttribute("flyoutDirection", "UP")
+		button:SetAttribute("checkselfcast", true)
+		button:SetAttribute("checkfocuscast", true)
+		button:SetAttribute("useparent-unit", true)
+		button:SetAttribute("useparent-actionpage", true)
+		button:SetAttribute("buttonLock", true)
+		button.id = buttonID
+		button.action = 0
 
-	button._owner = visibility
-	button._pager = page
+		button._owner = visibility
+		button._pager = page
 
-	button:SetScript("OnEnter", ActionButton.OnEnter)
-	button:SetScript("OnLeave", ActionButton.OnLeave)
-	button:SetScript("PreClick", ActionButton.PreClick)
-	button:SetScript("PostClick", ActionButton.PostClick)
-	button:SetScript("OnUpdate", OnUpdate)
+		button:SetScript("OnEnter", ActionButton.OnEnter)
+		button:SetScript("OnLeave", ActionButton.OnLeave)
+		button:SetScript("PreClick", ActionButton.PreClick)
+		button:SetScript("PostClick", ActionButton.PostClick)
+		button:SetScript("OnUpdate", OnUpdate)
 
-	-- A little magic to allow us to toggle autocasting of pet abilities
-	page:WrapScript(button, "PreClick", [[
-		if (button ~= "RightButton") then 
-			if (self:GetAttribute("type2")) then 
-				self:SetAttribute("type2", nil); 
+		-- A little magic to allow us to toggle autocasting of pet abilities
+		page:WrapScript(button, "PreClick", [[
+			if (button ~= "RightButton") then 
+				if (self:GetAttribute("type2")) then 
+					self:SetAttribute("type2", nil); 
+				end 
+				return 
+			end
+			local actionpage = self:GetAttribute("actionpage"); 
+			if (not actionpage) then
+				if (self:GetAttribute("type2")) then 
+					self:SetAttribute("type2", nil); 
+				end 
+				return
+			end
+			local id = self:GetID(); 
+			local action = (actionpage > 1) and ((actionpage - 1)*12 + id) or id; 
+			local actionType, id, subType = GetActionInfo(action);
+			if (subType == "pet") and (id ~= 0) then 
+				self:SetAttribute("type2", "macro"); 
+			else 
+				if (self:GetAttribute("type2")) then 
+					self:SetAttribute("type2", nil); 
+				end 
 			end 
-			return 
-		end
-		local actionpage = self:GetAttribute("actionpage"); 
-		if (not actionpage) then
-			if (self:GetAttribute("type2")) then 
-				self:SetAttribute("type2", nil); 
+		]]) 
+
+		page:SetFrameRef("Visibility", visibility)
+		page:SetFrameRef("Button", button)
+		visibility:SetFrameRef("Page", page)
+
+		button:SetAttribute("OnDragStart", [[
+			local actionpage = self:GetAttribute("actionpage"); 
+			if (not actionpage) then
+				return
+			end
+			local id = self:GetID(); 
+			local buttonLock = self:GetAttribute("buttonLock"); 
+			local action = (actionpage > 1) and ((actionpage - 1)*12 + id) or id; 
+			if action and ( (not buttonLock) or (IsShiftKeyDown() and IsAltKeyDown() and IsControlKeyDown()) ) then
+				return "action", action
+			end
+		]])
+
+		-- When a spell is dragged from a button
+		-- *This never fires when cast on down is enabled. ARGH! 
+		page:WrapScript(button, "OnDragStart", [[
+			return self:RunAttribute("OnDragStart")
+		]])
+		-- Bartender says: 
+		-- Wrap twice, because the post-script is not run when the pre-script causes a pickup (doh)
+		-- we also need some phony message, or it won't work =/
+		page:WrapScript(button, "OnDragStart", [[
+			return "message", "update"
+		]])
+
+		-- When a spell is dropped onto a button
+		page:WrapScript(button, "OnReceiveDrag", [[
+			local kind, value, subtype, extra = ...
+			if ((not kind) or (not value)) then 
+				return false 
+			end
+			local button = self:GetFrameRef("Button"); 
+			local buttonLock = button and button:GetAttribute("buttonLock"); 
+			local actionpage = self:GetAttribute("actionpage"); 
+			local id = self:GetID(); 
+			local action = actionpage and (actionpage > 1) and ((actionpage - 1)*12 + id) or id; 
+			if action and ((not buttonLock) or (IsShiftKeyDown() and IsAltKeyDown() and IsControlKeyDown())) then
+				return "action", action
 			end 
-			return
-		end
-		local id = self:GetID(); 
-		local action = (actionpage > 1) and ((actionpage - 1)*12 + id) or id; 
-		local actionType, id, subType = GetActionInfo(action);
-		if (subType == "pet") and (id ~= 0) then 
-			self:SetAttribute("type2", "macro"); 
+		]])
+		page:WrapScript(button, "OnReceiveDrag", [[
+			return "message", "update"
+		]])
+
+		local driver 
+		if (barID == 1) then 
+			driver = "[form,noform] 0; [bar:2]2; [bar:3]3; [bar:4]4; [bar:5]5; [bar:6]6"
+
+			local _, playerClass = UnitClass("player")
+			if (playerClass == "DRUID") then
+				driver = driver .. "; [bonusbar:1,nostealth] 7; [bonusbar:1,stealth] 7; [bonusbar:2] 8; [bonusbar:3] 9; [bonusbar:4] 10"
+
+			elseif (playerClass == "PRIEST") then
+				driver = driver .. "; [bonusbar:1] 7"
+
+			elseif (playerClass == "ROGUE") then
+				driver = driver .. "; [bonusbar:1] 7"
+
+			elseif (playerClass == "WARRIOR") then
+				driver = driver .. "; [bonusbar:1] 7; [bonusbar:2] 8" 
+			end
+			driver = driver .. "; 1"
 		else 
-			if (self:GetAttribute("type2")) then 
-				self:SetAttribute("type2", nil); 
-			end 
+			driver = tostring(barID)
 		end 
-	]]) 
 
-	page:SetFrameRef("Visibility", visibility)
-	page:SetFrameRef("Button", button)
-	visibility:SetFrameRef("Page", page)
-
-	button:SetAttribute("OnDragStart", [[
-		local actionpage = self:GetAttribute("actionpage"); 
-		if (not actionpage) then
-			return
-		end
-		local id = self:GetID(); 
-		local buttonLock = self:GetAttribute("buttonLock"); 
-		local action = (actionpage > 1) and ((actionpage - 1)*12 + id) or id; 
-		if action and ( (not buttonLock) or (IsShiftKeyDown() and IsAltKeyDown() and IsControlKeyDown()) ) then
-			return "action", action
-		end
-	]])
-
-	-- When a spell is dragged from a button
-	-- *This never fires when cast on down is enabled. ARGH! 
-	page:WrapScript(button, "OnDragStart", [[
-		return self:RunAttribute("OnDragStart")
-	]])
-	-- Bartender says: 
-	-- Wrap twice, because the post-script is not run when the pre-script causes a pickup (doh)
-	-- we also need some phony message, or it won't work =/
-	page:WrapScript(button, "OnDragStart", [[
-		return "message", "update"
-	]])
-
-	-- When a spell is dropped onto a button
-	page:WrapScript(button, "OnReceiveDrag", [[
-		local kind, value, subtype, extra = ...
-		if ((not kind) or (not value)) then 
-			return false 
-		end
-		local button = self:GetFrameRef("Button"); 
-		local buttonLock = button and button:GetAttribute("buttonLock"); 
-		local actionpage = self:GetAttribute("actionpage"); 
-		local id = self:GetID(); 
-		local action = actionpage and (actionpage > 1) and ((actionpage - 1)*12 + id) or id; 
-		if action and ((not buttonLock) or (IsShiftKeyDown() and IsAltKeyDown() and IsControlKeyDown())) then
-			return "action", action
+		local visibilityDriver
+		if (barID == 1) then 
+			visibilityDriver = "[@player,exists]show;hide"
+		else 
+			visibilityDriver = "[@player,noexists]hide;show"
 		end 
-	]])
-	page:WrapScript(button, "OnReceiveDrag", [[
-		return "message", "update"
-	]])
+		
+		-- enable the visibility driver
+		RegisterAttributeDriver(visibility, "state-vis", visibilityDriver)
+		
+		-- reset the page before applying a new page driver
+		page:SetAttribute("state-page", "0") 
 
-	local driver 
-	if (barID == 1) then 
-		driver = "[form,noform] 0; [bar:2]2; [bar:3]3; [bar:4]4; [bar:5]5; [bar:6]6"
+		-- just in case we're not run by a header, default to state 0
+		button:SetAttribute("state", "0")
 
-		local _, playerClass = UnitClass("player")
-		if (playerClass == "DRUID") then
-			driver = driver .. "; [bonusbar:1,nostealth] 7; [bonusbar:1,stealth] 7; [bonusbar:2] 8; [bonusbar:3] 9; [bonusbar:4] 10"
+		-- enable the page driver
+		RegisterAttributeDriver(page, "state-page", driver) 
 
-		elseif (playerClass == "PRIEST") then
-			driver = driver .. "; [bonusbar:1] 7"
+		-- initial action update
+		button:UpdateAction()
 
-		elseif (playerClass == "ROGUE") then
-			driver = driver .. "; [bonusbar:1] 7"
-
-		elseif (playerClass == "WARRIOR") then
-			driver = driver .. "; [bonusbar:1] 7; [bonusbar:2] 8" 
-		end
-		driver = driver .. "; 1"
-	else 
-		driver = tostring(barID)
-	end 
-
-	local visibilityDriver
-	if (barID == 1) then 
-		visibilityDriver = "[@player,exists]show;hide"
-	else 
-		visibilityDriver = "[@player,noexists]hide;show"
-	end 
-	
-	-- enable the visibility driver
-	RegisterAttributeDriver(visibility, "state-vis", visibilityDriver)
-	
-	-- reset the page before applying a new page driver
-	page:SetAttribute("state-page", "0") 
-
-	-- just in case we're not run by a header, default to state 0
-	button:SetAttribute("state", "0")
-
-	-- enable the page driver
-	RegisterAttributeDriver(page, "state-page", driver) 
-
-	-- initial action update
-	button:UpdateAction()
+	end
 
 	Buttons[self][button] = buttonType
 	AllButtons[button] = buttonType
