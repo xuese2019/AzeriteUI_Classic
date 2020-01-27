@@ -14,13 +14,16 @@
 # Unique global addon font objects
 FontStyles.xml
 
-# Addon libraries & plugins, the main engine of it all
+# External libraries, not made by us.
+# Loaded first, so our own can assume they exist.
+back-end\external.xml
+
+# Addon libraries & plugins, the main engine of it all.
 back-end\wheel.lua
 back-end\libraries.xml
 back-end\plugins.xml
-back-end\external.xml
 
-# Addon localization
+# Addon localization.
 locale\enUS.lua
 locale\deDE.lua
 locale\esES.lua
@@ -45,7 +48,7 @@ front-end\stylesheet.lua
 # all others are children of this one. 
 front-end\root.lua
 
-# Modules which mostly modify Blizzard elements
+# Modules which mostly modify Blizzard elements.
 front-end\blizzard\chatbubbles.lua
 front-end\blizzard\chatwindows.lua
 front-end\blizzard\floaters.lua
@@ -59,7 +62,7 @@ front-end\blizzard\timers.lua
 front-end\blizzard\tooltips.lua
 front-end\blizzard\worldmap.lua
 
-# Modules that mostly create new custom elements
+# Modules that mostly create new custom elements.
 front-end\custom\actionbars.lua
 front-end\custom\bindings.lua
 front-end\custom\chatfilters.lua
