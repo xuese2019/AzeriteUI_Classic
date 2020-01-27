@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.91-RC] 2020-01-28
+### Added
+- First draft of aura durations added. Better filtering and display coming this week! Yay!
+
 ## [1.0.90-RC] 2020-01-11
 ### Added
 - Spells that require reagents should now show their remaining reagent count when placed on the action bars.
