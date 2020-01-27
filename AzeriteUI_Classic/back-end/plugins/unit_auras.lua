@@ -553,16 +553,6 @@ local EvaluateVisibilities = function(element, visible)
 	end 
 end
 
-local EvaluateFilters = function(element, ...)
-	local numFilters = select("#", ...)
-	for i = 1,numFilters do 
-		
-	end 
-end
-
-local UpdateElement = function(self, event, unit)
-end
-
 local Update = function(self, event, unit, ...)
 	if (not unit) or (unit ~= self.unit) then 
 		return 
@@ -584,7 +574,7 @@ local Update = function(self, event, unit, ...)
 			Auras:PreUpdate(unit)
 		end
 
-		-- Store some basic values on the health element
+		-- Store some basic values on the element
 		local forced = forced or guid ~= Auras.guid
 		Auras.guid = guid
 	
@@ -629,7 +619,7 @@ local Update = function(self, event, unit, ...)
 			Buffs:PreUpdate(unit)
 		end
 
-		-- Store some basic values on the health element
+		-- Store some basic values on the element
 		local forced = forced or guid ~= Buffs.guid
 		Buffs.guid = guid
 		
@@ -659,7 +649,7 @@ local Update = function(self, event, unit, ...)
 			Debuffs:PreUpdate(unit)
 		end
 
-		-- Store some basic values on the health element
+		-- Store some basic values on the element
 		local forced = forced or guid ~= Debuffs.guid
 		Debuffs.guid = guid
 		
@@ -699,19 +689,21 @@ local Enable = function(self)
 	if (Auras or Buffs or Debuffs) then
 		local unit = self.unit
 
-		if Auras then
+		if (Auras) then
 			Auras._owner = self
 			Auras.unit = unit
 			Auras.ForceUpdate = ForceUpdate
 			Cache[Auras] = Cache[Auras] or {}
 		end
-		if Buffs then
+
+		if (Buffs) then
 			Buffs._owner = self
 			Buffs.unit = unit
 			Buffs.ForceUpdate = ForceUpdate
 			Cache[Buffs] = Cache[Buffs] or {}
 		end
-		if Debuffs then
+		
+		if (Debuffs) then
 			Debuffs._owner = self
 			Debuffs.unit = unit
 			Debuffs.ForceUpdate = ForceUpdate
@@ -719,7 +711,7 @@ local Enable = function(self)
 		end
 
 		local frequent = (Auras and Auras.frequent) or (Buffs and Buffs.frequent) or (Debuffs and Debuffs.frequent)
-		if frequent then
+		if (frequent) then
 			self:EnableFrequentUpdates("Auras", frequent)
 		else
 			self:RegisterMessage("GP_UNIT_AURA", Proxy)
@@ -731,6 +723,7 @@ local Enable = function(self)
 				self:RegisterEvent("PLAYER_TARGET_CHANGED", Proxy, true)
 			end
 		end
+
 		return true
 	end
 end 
@@ -740,28 +733,28 @@ local Disable = function(self)
 	local Buffs = self.Buffs
 	local Debuffs = self.Debuffs
 
-	if Auras or Buffs or Debuffs then
+	if (Auras or Buffs or Debuffs) then
 	
-		if Auras then
+		if (Auras) then
 			Auras.unit = nil
 			Auras:Hide()
-			if Cache[Auras] then 
+			if (Cache[Auras]) then 
 				table_wipe(Cache[Auras])
 			end
 		end
 	
-		if Buffs then
+		if (Buffs) then
 			Buffs.unit = nil
 			Buffs:Hide()
-			if Cache[Buffs] then 
+			if (Cache[Buffs]) then 
 				table_wipe(Cache[Buffs])
 			end
 		end
 	
-		if Debuffs then
+		if (Debuffs) then
 			Debuffs.unit = nil
 			Debuffs:Hide()
-			if Cache[Debuffs] then 
+			if (Cache[Debuffs]) then 
 				table_wipe(Cache[Debuffs])
 			end
 		end
@@ -781,5 +774,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Auras", Enable, Disable, Proxy, 49)
+	Lib:RegisterElement("Auras", Enable, Disable, Proxy, 50)
 end 
