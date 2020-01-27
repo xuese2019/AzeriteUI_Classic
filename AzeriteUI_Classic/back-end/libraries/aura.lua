@@ -155,41 +155,6 @@ local parseFilter = function(filter)
 						.. (not_cancelable and " NOT_CANCELABLE" or "") 
 end 
 
-local isHunterGUID = function(guid)
-	if (not guid) then 
-		return 
-	end
-	local _,class = GetPlayerInfoByGUID(guid)
-	return class == "HUNTER"
-end
-
-local isFriendlyFeigning = function(guid)
-	if (IsInRaid()) then
-		for i = 1, MAX_RAID_MEMBERS do
-			local unitID = "raid"..i
-			if (UnitGUID(unitID) == guid) and (UnitIsFeignDeath(unitID)) then
-				return true
-			end
-		end
-	elseif (IsInGroup()) then
-		for i = 1, MAX_PARTY_MEMBERS do
-			local unitID = "party"..i
-			if (UnitGUID(unitID) == guid) and (UnitIsFeignDeath(unitID)) then
-				return true
-			end
-		end
-	end
-end
-
-local comboCache, comboCacheOld = 0,0
-local GetComboPointsCached = function()
-	if (comboCache) then 
-		return (comboCacheOld > comboCache) and comboCacheOld or comboCache
-	else 
-		return GetComboPoints("player", "target") 
-	end
-end
-
 -- Aura tracking frame and event handling
 --------------------------------------------------------------------------
 local Frame = LibAura.frame
@@ -203,21 +168,7 @@ local UnregisterEvent = Frame_MT.__index.UnregisterEvent
 local UnregisterAllEvents = Frame_MT.__index.UnregisterAllEvents
 
 Frame.OnEvent = function(self, event, unit, ...)
-	if (event == "PLAYER_TARGET_CHANGED") then
-		comboCacheOld = comboCache
-		comboCache = GetComboPoints("player", "target")
-
-	elseif (event == "UNIT_POWER_UPDATE") then 
-		local powerType = ... 
-		if (powerType == "COMBO_POINTS") then 
-			comboCacheOld = comboCache
-			comboCache = GetComboPoints(unit, "target")
-		end 
-
-	elseif (event == "UNIT_SPELLCAST_SUCCEEDED") then 
-		local castID, spellID = ...
-
-	elseif (event == "UNIT_AURA") then 
+	if (event == "UNIT_AURA") then 
 		-- don't bother caching up anything we haven't got a registered aurawatch or cache for
 		if (not UnitHasAuraWatch[unit]) then 
 			return 
@@ -243,6 +194,13 @@ Frame.OnEvent = function(self, event, unit, ...)
 			destGUID, destName, destFlags, destRaidFlags,
 			spellID, arg2, arg3, arg4, arg5 = CombatLogGetCurrentEventInfo()
 
+		if (spellName == sunderArmorName) then
+			if (eventType == "SPELL_CAST_SUCCESS") then
+				eventType = "SPELL_AURA_REFRESH"
+				auraType = "DEBUFF"
+			end
+		end
+
 		-- We're only interested in who the aura is applied to.
 		local cacheByGUID
 		local cacheGUID = destGUID or sourceGUID
@@ -265,28 +223,6 @@ Frame.OnEvent = function(self, event, unit, ...)
 			cacheByGUID.destRaidFlags = destRaidFlags
 			cacheByGUID.isCastByPlayer = sourceGUID == playerGUID
 			cacheByGUID.unitCaster = sourceName
-		end
-
-		if (spellName == sunderArmorName) then
-			if (eventType == "SPELL_CAST_SUCCESS") then
-				eventType = "SPELL_AURA_REFRESH"
-				auraType = "DEBUFF"
-			end
-		end
-	
-		if ((auraType == "BUFF") or (auraType == "DEBUFF")) then
-		end
-
-		if (eventType == "SPELL_INTERRUPT") then
-		end
-
-		if (eventType == "UNIT_DIED") then
-			if (isHunterGUID(destGUID)) then
-				local isDestFriendly = bit_band(destFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) > 0
-				if (not isDestFriendly) or (isFriendlyFeigning(destGUID)) then
-					return
-				end
-			end
 		end
 	end
 end
@@ -458,13 +394,10 @@ LibAura.RegisterAuraWatch = function(self, unit, filter)
 	if (not IsEventRegistered(Frame, "UNIT_AURA")) then
 		RegisterEvent(Frame, "UNIT_AURA")
 	end
+
 	if (not LibAura.isTracking) then 
 		RegisterEvent(Frame, "UNIT_SPELLCAST_SUCCEEDED")
 		RegisterEvent(Frame, "COMBAT_LOG_EVENT_UNFILTERED")
-		if (playerClass == "ROGUE") or (playerClass == "DRUID") then
-			RegisterEvent(Frame, "PLAYER_TARGET_CHANGED")
-			RegisterUnitEvent(Frame, "UNIT_POWER_UPDATE", "player")
-		end
 		LibAura.isTracking = true
 	end 
 end
