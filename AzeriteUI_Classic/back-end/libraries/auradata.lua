@@ -1,5 +1,5 @@
 local LibAuraData = Wheel:Set("LibAuraData", -1)
-if (not LibAuraData) then	
+if (not LibAuraData) then
 	return
 end
 
@@ -22,25 +22,23 @@ local table_concat = table.concat
 local type = type
 
 -- Library registries
----------------------------------------------------------------------	
+---------------------------------------------------------------------
 LibAuraData.embeds = LibAuraData.embeds or {}
 LibAuraData.infoFlags = LibAuraData.infoFlags or {} -- static library info flags about the auras
 LibAuraData.auraFlags = LibAuraData.auraFlags or {} -- static library aura flag cache
 LibAuraData.userFlags = LibAuraData.userFlags or {} -- static user/module flag cache
-LibAuraData.auraDuration = LibAuraData.auraDuration or {} -- static library aura duration cache
 
 -- Quality of Life
----------------------------------------------------------------------	
+---------------------------------------------------------------------
 local InfoFlags = LibAuraData.infoFlags
 local AuraFlags = LibAuraData.auraFlags
 local UserFlags = LibAuraData.userFlags
-local AuraDuration = LibAuraData.auraDuration
 
 -- Local constants & tables
----------------------------------------------------------------------	
+---------------------------------------------------------------------
 
 -- Utility Functions
----------------------------------------------------------------------	
+---------------------------------------------------------------------
 -- Syntax check 
 local check = function(value, num, ...)
 	assert(type(num) == "number", ("Bad argument #%.0f to '%s': %s expected, got %s"):format(2, "Check", "number", type(num)))
@@ -57,16 +55,16 @@ end
 --------------------------------------------------------------------------
 -- InfoFlag queries
 --------------------------------------------------------------------------
--- Not a fan of this in the slightest, 
+-- Not a fan of this in the slightest,
 -- but for purposes of speed we need to hand this table out to the modules. 
 -- and in case of library updates we need this table to be the same,
 LibAuraData.GetAllAuraInfoFlags = function(self)
 	return Auras
 end
 
--- Return the hashed info flag table, 
+-- Return the hashed info flag table,
 -- to allow easy usage of keywords in the modules.
--- We will have make sure the keywords remain consistent.  
+-- We will have make sure the keywords remain consistent.
 LibAuraData.GetAllAuraInfoBitFilters = function(self)
 	return InfoFlags
 end
