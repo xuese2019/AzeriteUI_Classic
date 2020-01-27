@@ -30,6 +30,7 @@ LibAuraData:Embed(LibAura)
 -- Lua API
 local _G = _G
 local assert = assert
+local bit_band = bit.band
 local date = date
 local debugstack = debugstack
 local error = error
