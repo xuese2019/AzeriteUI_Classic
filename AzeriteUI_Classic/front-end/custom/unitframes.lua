@@ -8,7 +8,7 @@ but prior to loading any of the module config files.
 Meaning we can reference the general databases with certainty, 
 but any layout data will have to be passed as function arguments.
 
-	--]]--
+--]]--
 local ADDON, Private = ...
 local Core = Wheel("LibModule"):GetModule(ADDON)
 if (not Core) then 
