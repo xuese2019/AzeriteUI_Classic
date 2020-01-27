@@ -23,7 +23,7 @@ local UnitPlayerControlled = UnitPlayerControlled
 -- Addon API
 local GetPlayerRole = Wheel("LibPlayerData").GetPlayerRole
 local HasInfoFlags = Wheel("LibAuraData").HasAuraInfoFlags
-local AddFlags = Wheel("LibAuraData").AddAuraUserFlags
+local AddUserFlags = Wheel("LibAuraData").AddAuraUserFlags
 local HasUserFlags = Wheel("LibAuraData").HasAuraUserFlags
 local GetUserFlags = Wheel("LibAuraData").GetAllAuraUserFlags
 
@@ -328,74 +328,83 @@ local NeverOnPlate 		= 2^18 -- Never show on plates
 local NoCombat 			= 2^19 -- Never show in combat 
 local Warn 				= 2^20 -- Show when there is 30 secs left or less
 
-local playerName = UnitName("player")
-local showUnfilteredSpellID = (playerName == "Goldpaw" or playerName == "Lars") and (GetRealmName() == "Dragonfang") and (GetCurrentRegion() == 3)
+local hideUnfilteredSpellID, hideFilteredSpellID = false, false
+local buffDurationThreshold, debuffDurationThreshold = 61, 601
 
 -- Aura Filter Functions
 -----------------------------------------------------------------
-auraFilters.default = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
-
-	return true
-end
+-- Just to have a fallback.
+auraFilters.default = function() return true end
 
 auraFilters.player = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
 
 	local all = element.all
-
 	local hasFlags = not not GetUserFlags(Private)[spellID]
+
 	if (hasFlags) then 
 		if (HasUserFlags(Private, spellID, Never)) then 
-			return nil, nil, true
+			return nil, nil, hideFilteredSpellID
 		elseif (UnitAffectingCombat("player") and HasUserFlags(Private, spellID, NoCombat)) then 
 			if (isBuff and HasUserFlags(Private, spellID, Warn)) then 
-				if (timeLeft and (timeLeft > 0) and (timeLeft < 30)) or (duration and (duration > 0) and (duration < 30)) then
-					return true, nil, true
+				if (timeLeft and (timeLeft > 0) and (timeLeft < buffDurationThreshold)) or (duration and (duration > 0) and (duration < buffDurationThreshold)) then
+					return true, nil, hideFilteredSpellID
 				else 
-					return nil, nil, true
+					return nil, nil, hideFilteredSpellID
 				end
 			else
-				return nil, nil, true
+				return nil, nil, hideFilteredSpellID
 			end
 		elseif (HasUserFlags(Private, spellID, OnPlayer)) then 
-			return true, nil, true
+			return true, nil, hideFilteredSpellID
 		end
 	end 
+
 	if (UnitAffectingCombat("player")) then 
 		local timeLeft 
 		if (expirationTime and expirationTime > 0) then 
 			timeLeft = expirationTime - GetTime()
 		end
 		if (isBuff) then 
-			if (timeLeft and (timeLeft > 0) and (timeLeft < 30)) or (duration and (duration > 0) and (duration < 30)) then
-				return true, nil, not showUnfilteredSpellID
+			if (timeLeft and (timeLeft > 0) and (timeLeft < buffDurationThreshold)) or (duration and (duration > 0) and (duration < buffDurationThreshold)) then
+				return true, nil, hideUnfilteredSpellID
 			else 
-				return nil, nil, not showUnfilteredSpellID
+				return nil, nil, hideUnfilteredSpellID
 			end
 		else 
-			if (timeLeft and (timeLeft > 0) and (timeLeft < 601)) then 
-				return true, nil, not showUnfilteredSpellID
+			if (timeLeft and (timeLeft > 0) and (timeLeft < debuffDurationThreshold)) then 
+				return true, nil, hideUnfilteredSpellID
 			else
-				return nil, nil, not showUnfilteredSpellID
+				return nil, nil, hideUnfilteredSpellID
 			end
 		end 
 	else 
-		return true, nil, not showUnfilteredSpellID
+		return true, nil, hideUnfilteredSpellID
 	end 
 end 
 
 auraFilters.target = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
 
+	local all = element.all
 	local hasFlags = not not GetUserFlags(Private)[spellID]
+
 	if (hasFlags) then 
 		if (HasUserFlags(Private, spellID, Never)) then 
-			return nil, nil, true
+			return nil, nil, hideFilteredSpellID
 		elseif (UnitAffectingCombat("player") and HasUserFlags(Private, spellID, NoCombat)) then 
-			return nil, nil, true
-		elseif (HasUserFlags(Private, spellID, OnTarget)) then 
-			return true, nil, true
+			if (isBuff and HasUserFlags(Private, spellID, Warn)) then 
+				if (timeLeft and (timeLeft > 0) and (timeLeft < buffDurationThreshold)) or (duration and (duration > 0) and (duration < buffDurationThreshold)) then
+					return true, nil, hideFilteredSpellID
+				else 
+					return nil, nil, hideFilteredSpellID
+				end
+			else
+				return nil, nil, hideFilteredSpellID
+			end
+		elseif (HasUserFlags(Private, spellID, OnPlayer)) then 
+			return true, nil, hideFilteredSpellID
 		end
 	end 
-	return true, nil, not showUnfilteredSpellID
+	return true, nil, hideUnfilteredSpellID
 end
 
 auraFilters.nameplate = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
@@ -404,10 +413,19 @@ auraFilters.nameplate = function(element, isBuff, unit, isOwnedByPlayer, name, i
 	local hasFlags = not not GetUserFlags(Private)[spellID]
 	if (hasFlags) then 
 		if (HasUserFlags(Private, spellID, NeverOnPlate)) then 
-			return nil, nil, true
+			return nil, nil, hideFilteredSpellID
 		end
 	end 
-	return true, nil, not showUnfilteredSpellID
+	local timeLeft 
+	if (expirationTime and expirationTime > 0) then 
+		timeLeft = expirationTime - GetTime()
+		if (timeLeft and (timeLeft > 0) and (timeLeft < buffDurationThreshold)) or (duration and (duration > 0) and (duration < buffDurationThreshold)) then
+			return true, nil, hideUnfilteredSpellID
+		else 
+			return nil, nil, hideUnfilteredSpellID
+		end
+	end
+	return nil, nil, hideUnfilteredSpellID
 end 
 
 auraFilters.targettarget = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
@@ -416,21 +434,22 @@ end
 
 auraFilters.party = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
 
+	-- Well this obviously doesn't work.
 	local timeLeft 
 	if (expirationTime and expirationTime > 0) then 
 		timeLeft = expirationTime - GetTime()
 	end
 	if (isBuff) then 
-		if (timeLeft and (timeLeft > 0) and (timeLeft < 30)) then
-			return true, nil, not showUnfilteredSpellID
+		if (timeLeft and (timeLeft > 0) and (timeLeft < buffDurationThreshold)) then
+			return true, nil, hideUnfilteredSpellID
 		else 
-			return nil, nil, not showUnfilteredSpellID
+			return nil, nil, hideUnfilteredSpellID
 		end
 	else 
-		if (timeLeft and (timeLeft > 0) and (timeLeft < 601)) then 
-			return true, nil, not showUnfilteredSpellID
+		if (timeLeft and (timeLeft > 0) and (timeLeft < debuffDurationThreshold)) then 
+			return true, nil, hideUnfilteredSpellID
 		else
-			return nil, nil, not showUnfilteredSpellID
+			return nil, nil, hideUnfilteredSpellID
 		end
 	end 
 
@@ -466,167 +485,171 @@ Private.GetMedia = function(name, type) return ([[Interface\AddOns\%s\media\%s.%
 -- Aura Filter Flag Database
 -----------------------------------------------------------------
 -- Will update this once we get proper combat log parsing going
-local ByPlayer = OnPlayer + OnTarget
+--local ByPlayer = OnPlayer + OnTarget
 
 -- General Blacklist
 -- Auras listed here won't be shown on any unitframes.
 ------------------------------------------------------------------------
-AddFlags(Private, 17670, Never) 	-- Argent Dawn Commission
+AddUserFlags(Private, 17670, Never) 		-- Argent Dawn Commission
 
 -- Nameplate Blacklist
--- Auras listed here will be excluded from the nameplates.
 ------------------------------------------------------------------------
+-- Auras listed here will be excluded from the nameplates.
+-- Many similar to these will be excluded by default filters too,
+-- but we still with to eventually include all relevant ones.
+------------------------------------------------------------------------
+
 -- Proximity Auras
-AddFlags(Private, 13159, NeverOnPlate) 	-- Aspect of the Pack
-AddFlags(Private,  7805, NeverOnPlate) 	-- Blood Pact
-AddFlags(Private, 11767, NeverOnPlate) 	-- Blood Pact
-AddFlags(Private, 19746, NeverOnPlate) 	-- Concentration Aura
-AddFlags(Private, 10293, NeverOnPlate) 	-- Devotion Aura
-AddFlags(Private, 19898, NeverOnPlate) 	-- Frost Resistance Aura
-AddFlags(Private, 24932, NeverOnPlate) 	-- Leader of the Pack
-AddFlags(Private, 24907, NeverOnPlate) 	-- Moonkin Aura
-AddFlags(Private, 19480, NeverOnPlate) 	-- Paranoia
-AddFlags(Private, 10301, NeverOnPlate) 	-- Retribution Aura
-AddFlags(Private, 20218, NeverOnPlate) 	-- Sanctity Aura
-AddFlags(Private, 19896, NeverOnPlate) 	-- Shadow Resistance Aura
-AddFlags(Private, 20906, NeverOnPlate) 	-- Trueshot Aura
+AddUserFlags(Private, 13159, NeverOnPlate) 	-- Aspect of the Pack
+AddUserFlags(Private,  7805, NeverOnPlate) 	-- Blood Pact
+AddUserFlags(Private, 11767, NeverOnPlate) 	-- Blood Pact
+AddUserFlags(Private, 19746, NeverOnPlate) 	-- Concentration Aura
+AddUserFlags(Private, 10293, NeverOnPlate) 	-- Devotion Aura
+AddUserFlags(Private, 19898, NeverOnPlate) 	-- Frost Resistance Aura
+AddUserFlags(Private, 24932, NeverOnPlate) 	-- Leader of the Pack
+AddUserFlags(Private, 24907, NeverOnPlate) 	-- Moonkin Aura
+AddUserFlags(Private, 19480, NeverOnPlate) 	-- Paranoia
+AddUserFlags(Private, 10301, NeverOnPlate) 	-- Retribution Aura
+AddUserFlags(Private, 20218, NeverOnPlate) 	-- Sanctity Aura
+AddUserFlags(Private, 19896, NeverOnPlate) 	-- Shadow Resistance Aura
+AddUserFlags(Private, 20906, NeverOnPlate) 	-- Trueshot Aura
 
 -- Timed Buffs
-AddFlags(Private, 23028, NeverOnPlate) 	-- Arcane Brilliance (Rank ?)
-AddFlags(Private,  1461, NeverOnPlate) 	-- Arcane Intellect (Rank ?)
-AddFlags(Private, 10157, NeverOnPlate) 	-- Arcane Intellect (Rank ?)
-AddFlags(Private,  6673, NeverOnPlate) 	-- Battle Shout (Rank 1)
-AddFlags(Private, 11551, NeverOnPlate) 	-- Battle Shout (Rank ?)
-AddFlags(Private, 20217, NeverOnPlate) 	-- Blessing of Kings (Rank ?)
-AddFlags(Private, 19838, NeverOnPlate) 	-- Blessing of Might (Rank ?)
-AddFlags(Private, 11743, NeverOnPlate) 	-- Detect Greater Invisibility
-AddFlags(Private, 27841, NeverOnPlate) 	-- Divine Spirit (Rank ?)
-AddFlags(Private, 25898, NeverOnPlate) 	-- Greater Blessing of Kings (Rank ?)
-AddFlags(Private, 25899, NeverOnPlate) 	-- Greater Blessing of Sanctuary (Rank ?)
-AddFlags(Private, 21850, NeverOnPlate) 	-- Gift of the Wild (Rank 2)
-AddFlags(Private, 10220, NeverOnPlate) 	-- Ice Armor (Rank ?)
-AddFlags(Private,  1126, NeverOnPlate) 	-- Mark of the Wild (Rank 1)
-AddFlags(Private,  5232, NeverOnPlate) 	-- Mark of the Wild (Rank 2)
-AddFlags(Private,  6756, NeverOnPlate) 	-- Mark of the Wild (Rank 3)
-AddFlags(Private,  5234, NeverOnPlate) 	-- Mark of the Wild (Rank 4)
-AddFlags(Private,  8907, NeverOnPlate) 	-- Mark of the Wild (Rank 5)
-AddFlags(Private,  9884, NeverOnPlate) 	-- Mark of the Wild (Rank 6)
-AddFlags(Private,  9885, NeverOnPlate) 	-- Mark of the Wild (Rank 7)
-AddFlags(Private, 10938, NeverOnPlate) 	-- Power Word: Fortitude (Rank ?)
-AddFlags(Private, 21564, NeverOnPlate) 	-- Prayer of Fortitude (Rank ?)
-AddFlags(Private, 27681, NeverOnPlate) 	-- Prayer of Spirit (Rank ?)
-AddFlags(Private, 10958, NeverOnPlate) 	-- Shadow Protection
-AddFlags(Private,   467, NeverOnPlate) 	-- Thorns (Rank 1)
-AddFlags(Private,   782, NeverOnPlate) 	-- Thorns (Rank 2)
-AddFlags(Private,  1075, NeverOnPlate) 	-- Thorns (Rank 3)
-AddFlags(Private,  8914, NeverOnPlate) 	-- Thorns (Rank 4)
-AddFlags(Private,  9756, NeverOnPlate) 	-- Thorns (Rank 5)
-AddFlags(Private,  9910, NeverOnPlate) 	-- Thorns (Rank 6)
+AddUserFlags(Private, 23028, NeverOnPlate) 	-- Arcane Brilliance (Rank ?)
+AddUserFlags(Private,  1461, NeverOnPlate) 	-- Arcane Intellect (Rank ?)
+AddUserFlags(Private, 10157, NeverOnPlate) 	-- Arcane Intellect (Rank ?)
+AddUserFlags(Private,  6673, NeverOnPlate) 	-- Battle Shout (Rank 1)
+AddUserFlags(Private, 11551, NeverOnPlate) 	-- Battle Shout (Rank ?)
+AddUserFlags(Private, 20217, NeverOnPlate) 	-- Blessing of Kings (Rank ?)
+AddUserFlags(Private, 19838, NeverOnPlate) 	-- Blessing of Might (Rank ?)
+AddUserFlags(Private, 11743, NeverOnPlate) 	-- Detect Greater Invisibility
+AddUserFlags(Private, 27841, NeverOnPlate) 	-- Divine Spirit (Rank ?)
+AddUserFlags(Private, 25898, NeverOnPlate) 	-- Greater Blessing of Kings (Rank ?)
+AddUserFlags(Private, 25899, NeverOnPlate) 	-- Greater Blessing of Sanctuary (Rank ?)
+AddUserFlags(Private, 21850, NeverOnPlate) 	-- Gift of the Wild (Rank 2)
+AddUserFlags(Private, 10220, NeverOnPlate) 	-- Ice Armor (Rank ?)
+AddUserFlags(Private,  1126, NeverOnPlate) 	-- Mark of the Wild (Rank 1)
+AddUserFlags(Private,  5232, NeverOnPlate) 	-- Mark of the Wild (Rank 2)
+AddUserFlags(Private,  6756, NeverOnPlate) 	-- Mark of the Wild (Rank 3)
+AddUserFlags(Private,  5234, NeverOnPlate) 	-- Mark of the Wild (Rank 4)
+AddUserFlags(Private,  8907, NeverOnPlate) 	-- Mark of the Wild (Rank 5)
+AddUserFlags(Private,  9884, NeverOnPlate) 	-- Mark of the Wild (Rank 6)
+AddUserFlags(Private,  9885, NeverOnPlate) 	-- Mark of the Wild (Rank 7)
+AddUserFlags(Private, 10938, NeverOnPlate) 	-- Power Word: Fortitude (Rank ?)
+AddUserFlags(Private, 21564, NeverOnPlate) 	-- Prayer of Fortitude (Rank ?)
+AddUserFlags(Private, 27681, NeverOnPlate) 	-- Prayer of Spirit (Rank ?)
+AddUserFlags(Private, 10958, NeverOnPlate) 	-- Shadow Protection
+AddUserFlags(Private,   467, NeverOnPlate) 	-- Thorns (Rank 1)
+AddUserFlags(Private,   782, NeverOnPlate) 	-- Thorns (Rank 2)
+AddUserFlags(Private,  1075, NeverOnPlate) 	-- Thorns (Rank 3)
+AddUserFlags(Private,  8914, NeverOnPlate) 	-- Thorns (Rank 4)
+AddUserFlags(Private,  9756, NeverOnPlate) 	-- Thorns (Rank 5)
+AddUserFlags(Private,  9910, NeverOnPlate) 	-- Thorns (Rank 6)
 
 -- Druid (Balance)
 ------------------------------------------------------------------------
-AddFlags(Private, 22812, OnPlayer) 	-- Barkskin
-AddFlags(Private,   339, OnTarget) 	-- Entangling Roots (Rank 1)
-AddFlags(Private,  1062, OnTarget) 	-- Entangling Roots (Rank 2)
-AddFlags(Private,  5195, OnTarget) 	-- Entangling Roots (Rank 3)
-AddFlags(Private,  5196, OnTarget) 	-- Entangling Roots (Rank 4)
-AddFlags(Private,  9852, OnTarget) 	-- Entangling Roots (Rank 5)
-AddFlags(Private,  9853, OnTarget) 	-- Entangling Roots (Rank 6)
-AddFlags(Private,   770, OnTarget) 	-- Faerie Fire (Rank 1)
-AddFlags(Private, 18658, OnTarget) 	-- Hibernate (Rank 3)
-AddFlags(Private, 16689, OnPlayer) 	-- Nature's Grasp (Rank 1)
-AddFlags(Private, 16689, OnPlayer) 	-- Nature's Grasp (Rank 2)
-AddFlags(Private, 16689, OnPlayer) 	-- Nature's Grasp (Rank 3)
-AddFlags(Private, 16689, OnPlayer) 	-- Nature's Grasp (Rank 4)
-AddFlags(Private, 16689, OnPlayer) 	-- Nature's Grasp (Rank 5)
-AddFlags(Private, 16689, OnPlayer) 	-- Nature's Grasp (Rank 6)
-AddFlags(Private, 16864, OnPlayer + NoCombat + Warn) 	-- Omen of Clarity (Buff)
-AddFlags(Private, 16870, OnPlayer + NoCombat + Warn) 	-- Omen of Clarity (Proc)
-AddFlags(Private,   467, ByPlayer + NoCombat + Warn) 	-- Thorns (Rank 1)
-AddFlags(Private,   782, ByPlayer + NoCombat + Warn) 	-- Thorns (Rank 2)
-AddFlags(Private,  1075, ByPlayer + NoCombat + Warn) 	-- Thorns (Rank 3)
-AddFlags(Private,  8914, ByPlayer + NoCombat + Warn) 	-- Thorns (Rank 4)
-AddFlags(Private,  9756, ByPlayer + NoCombat + Warn) 	-- Thorns (Rank 5)
-AddFlags(Private,  9910, ByPlayer + NoCombat + Warn) 	-- Thorns (Rank 6)
+AddUserFlags(Private, 22812, OnPlayer) 	-- Barkskin
+AddUserFlags(Private,   339, OnTarget) 	-- Entangling Roots (Rank 1)
+AddUserFlags(Private,  1062, OnTarget) 	-- Entangling Roots (Rank 2)
+AddUserFlags(Private,  5195, OnTarget) 	-- Entangling Roots (Rank 3)
+AddUserFlags(Private,  5196, OnTarget) 	-- Entangling Roots (Rank 4)
+AddUserFlags(Private,  9852, OnTarget) 	-- Entangling Roots (Rank 5)
+AddUserFlags(Private,  9853, OnTarget) 	-- Entangling Roots (Rank 6)
+AddUserFlags(Private,   770, OnTarget) 	-- Faerie Fire (Rank 1)
+AddUserFlags(Private, 18658, OnTarget) 	-- Hibernate (Rank 3)
+AddUserFlags(Private, 16689, OnPlayer) 	-- Nature's Grasp (Rank 1)
+AddUserFlags(Private, 16689, OnPlayer) 	-- Nature's Grasp (Rank 2)
+AddUserFlags(Private, 16689, OnPlayer) 	-- Nature's Grasp (Rank 3)
+AddUserFlags(Private, 16689, OnPlayer) 	-- Nature's Grasp (Rank 4)
+AddUserFlags(Private, 16689, OnPlayer) 	-- Nature's Grasp (Rank 5)
+AddUserFlags(Private, 16689, OnPlayer) 	-- Nature's Grasp (Rank 6)
+AddUserFlags(Private, 16864, OnPlayer + NoCombat + Warn) 	-- Omen of Clarity (Buff)
+AddUserFlags(Private, 16870, OnPlayer + NoCombat + Warn) 	-- Omen of Clarity (Proc)
+AddUserFlags(Private,   467, ByPlayer + NoCombat + Warn) 	-- Thorns (Rank 1)
+AddUserFlags(Private,   782, ByPlayer + NoCombat + Warn) 	-- Thorns (Rank 2)
+AddUserFlags(Private,  1075, ByPlayer + NoCombat + Warn) 	-- Thorns (Rank 3)
+AddUserFlags(Private,  8914, ByPlayer + NoCombat + Warn) 	-- Thorns (Rank 4)
+AddUserFlags(Private,  9756, ByPlayer + NoCombat + Warn) 	-- Thorns (Rank 5)
+AddUserFlags(Private,  9910, ByPlayer + NoCombat + Warn) 	-- Thorns (Rank 6)
 
-AddFlags(Private, 00000, OnTarget) 	-- Faerie Fire (Rank 2)
-AddFlags(Private, 00000, OnTarget) 	-- Faerie Fire (Rank 3)
-AddFlags(Private, 00000, OnTarget) 	-- Faerie Fire (Rank 4)
+AddUserFlags(Private, 00000, OnTarget) 	-- Faerie Fire (Rank 2)
+AddUserFlags(Private, 00000, OnTarget) 	-- Faerie Fire (Rank 3)
+AddUserFlags(Private, 00000, OnTarget) 	-- Faerie Fire (Rank 4)
 
-AddFlags(Private, 00000, OnTarget) 	-- Moonfire (Rank 1)
-AddFlags(Private, 00000, OnTarget) 	-- Moonfire (Rank 1)
-AddFlags(Private, 00000, OnTarget) 	-- Moonfire (Rank 3)
-AddFlags(Private, 00000, OnTarget) 	-- Moonfire (Rank 4)
-AddFlags(Private, 00000, OnTarget) 	-- Moonfire (Rank 5)
-AddFlags(Private, 00000, OnTarget) 	-- Moonfire (Rank 6)
+AddUserFlags(Private, 00000, OnTarget) 	-- Moonfire (Rank 1)
+AddUserFlags(Private, 00000, OnTarget) 	-- Moonfire (Rank 1)
+AddUserFlags(Private, 00000, OnTarget) 	-- Moonfire (Rank 3)
+AddUserFlags(Private, 00000, OnTarget) 	-- Moonfire (Rank 4)
+AddUserFlags(Private, 00000, OnTarget) 	-- Moonfire (Rank 5)
+AddUserFlags(Private, 00000, OnTarget) 	-- Moonfire (Rank 6)
 
-AddFlags(Private, 00000, OnTarget) 	-- Hurricane (Rank 1)
+AddUserFlags(Private, 00000, OnTarget) 	-- Hurricane (Rank 1)
 
 -- Druid (Feral)
 ------------------------------------------------------------------------
-AddFlags(Private,  1066, Never) 	-- Aquatic Form
-AddFlags(Private,  8983, OnTarget) 	-- Bash
-AddFlags(Private,   768, Never) 	-- Cat Form
-AddFlags(Private,  5209, OnTarget) 	-- Challenging Roar (Taunt)
-AddFlags(Private,  9821, OnPlayer) 	-- Dash
-AddFlags(Private,  9634, Never) 	-- Dire Bear Form
-AddFlags(Private,  5229, OnPlayer) 	-- Enrage
-AddFlags(Private, 16857, ByPlayer) 	-- Faerie Fire (Feral)
-AddFlags(Private, 22896, OnPlayer) 	-- Frenzied Regeneration
-AddFlags(Private,  6795, OnTarget) 	-- Growl (Taunt)
-AddFlags(Private, 24932, Never) 	-- Leader of the Pack
-AddFlags(Private,  9007, ByPlayer) 	-- Pounce Bleed (Rank 1)
-AddFlags(Private,  9824, ByPlayer) 	-- Pounce Bleed (Rank 2)
-AddFlags(Private,  9826, ByPlayer) 	-- Pounce Bleed (Rank 3)
-AddFlags(Private,  5215, OnPlayer) 	-- Prowl (Rank 1)
-AddFlags(Private,  6783, OnPlayer) 	-- Prowl (Rank 2)
-AddFlags(Private,  9913, OnPlayer) 	-- Prowl (Rank 3)
-AddFlags(Private,  9904, ByPlayer) 	-- Rake
-AddFlags(Private,  9894, ByPlayer) 	-- Rip
-AddFlags(Private,  9845, OnPlayer) 	-- Tiger's Fury
-AddFlags(Private,   783, Never) 	-- Travel Form
+AddUserFlags(Private,  1066, Never) 	-- Aquatic Form
+AddUserFlags(Private,  8983, OnTarget) 	-- Bash
+AddUserFlags(Private,   768, Never) 	-- Cat Form
+AddUserFlags(Private,  5209, OnTarget) 	-- Challenging Roar (Taunt)
+AddUserFlags(Private,  9821, OnPlayer) 	-- Dash
+AddUserFlags(Private,  9634, Never) 	-- Dire Bear Form
+AddUserFlags(Private,  5229, OnPlayer) 	-- Enrage
+AddUserFlags(Private, 16857, ByPlayer) 	-- Faerie Fire (Feral)
+AddUserFlags(Private, 22896, OnPlayer) 	-- Frenzied Regeneration
+AddUserFlags(Private,  6795, OnTarget) 	-- Growl (Taunt)
+AddUserFlags(Private, 24932, Never) 	-- Leader of the Pack
+AddUserFlags(Private,  9007, ByPlayer) 	-- Pounce Bleed (Rank 1)
+AddUserFlags(Private,  9824, ByPlayer) 	-- Pounce Bleed (Rank 2)
+AddUserFlags(Private,  9826, ByPlayer) 	-- Pounce Bleed (Rank 3)
+AddUserFlags(Private,  5215, OnPlayer) 	-- Prowl (Rank 1)
+AddUserFlags(Private,  6783, OnPlayer) 	-- Prowl (Rank 2)
+AddUserFlags(Private,  9913, OnPlayer) 	-- Prowl (Rank 3)
+AddUserFlags(Private,  9904, ByPlayer) 	-- Rake
+AddUserFlags(Private,  9894, ByPlayer) 	-- Rip
+AddUserFlags(Private,  9845, OnPlayer) 	-- Tiger's Fury
+AddUserFlags(Private,   783, Never) 	-- Travel Form
 
 -- Druid (Restoration)
 ------------------------------------------------------------------------
-AddFlags(Private,  2893, ByPlayer) 			-- Abolish Poison
-AddFlags(Private, 29166, ByPlayer) 			-- Innervate
-AddFlags(Private,  1126, ByPlayer + NoCombat + Warn) 	-- Mark of the Wild (Rank 1)
-AddFlags(Private,  5232, ByPlayer + NoCombat + Warn) 	-- Mark of the Wild (Rank 2)
-AddFlags(Private,  6756, ByPlayer + NoCombat + Warn) 	-- Mark of the Wild (Rank 3)
-AddFlags(Private,  5234, ByPlayer + NoCombat + Warn) 	-- Mark of the Wild (Rank 4)
-AddFlags(Private,  8907, ByPlayer + NoCombat + Warn) 	-- Mark of the Wild (Rank 5)
-AddFlags(Private,  9884, ByPlayer + NoCombat + Warn) 	-- Mark of the Wild (Rank 6)
-AddFlags(Private,  9885, ByPlayer + NoCombat + Warn) 	-- Mark of the Wild (Rank 7)
-AddFlags(Private,  8936, ByPlayer) 	-- Regrowth (Rank 1)
-AddFlags(Private,  8938, ByPlayer) 	-- Regrowth (Rank 2)
-AddFlags(Private,  8939, ByPlayer) 	-- Regrowth (Rank 3)
-AddFlags(Private,  8940, ByPlayer) 	-- Regrowth (Rank 4)
-AddFlags(Private,  8941, ByPlayer) 	-- Regrowth (Rank 5)
-AddFlags(Private,  9750, ByPlayer) 	-- Regrowth (Rank 6)
-AddFlags(Private,  9856, ByPlayer) 	-- Regrowth (Rank 7)
-AddFlags(Private,  9857, ByPlayer) 	-- Regrowth (Rank 8)
-AddFlags(Private,  9858, ByPlayer) 	-- Regrowth (Rank 9)
-AddFlags(Private,   774, ByPlayer) 	-- Rejuvenation (Rank 1)
-AddFlags(Private,  1058, ByPlayer) 	-- Rejuvenation (Rank 2)
-AddFlags(Private,  1430, ByPlayer) 	-- Rejuvenation (Rank 3)
-AddFlags(Private,  2090, ByPlayer) 	-- Rejuvenation (Rank 4)
-AddFlags(Private,  2091, ByPlayer) 	-- Rejuvenation (Rank 5)
-AddFlags(Private,  3627, ByPlayer) 	-- Rejuvenation (Rank 6)
-AddFlags(Private,  8910, ByPlayer) 	-- Rejuvenation (Rank 7)
-AddFlags(Private,  9839, ByPlayer) 	-- Rejuvenation (Rank 8)
-AddFlags(Private,  9840, ByPlayer) 	-- Rejuvenation (Rank 9)
-AddFlags(Private,  9841, ByPlayer) 	-- Rejuvenation (Rank 10)
-AddFlags(Private,   740, ByPlayer) 	-- Tranquility (Rank 1)
-AddFlags(Private,  8918, ByPlayer) 	-- Tranquility (Rank 2)
-AddFlags(Private,  9862, ByPlayer) 	-- Tranquility (Rank 3)
-AddFlags(Private,  9863, ByPlayer) 	-- Tranquility (Rank 4)
+AddUserFlags(Private,  2893, ByPlayer) 			-- Abolish Poison
+AddUserFlags(Private, 29166, ByPlayer) 			-- Innervate
+AddUserFlags(Private,  1126, ByPlayer + NoCombat + Warn) 	-- Mark of the Wild (Rank 1)
+AddUserFlags(Private,  5232, ByPlayer + NoCombat + Warn) 	-- Mark of the Wild (Rank 2)
+AddUserFlags(Private,  6756, ByPlayer + NoCombat + Warn) 	-- Mark of the Wild (Rank 3)
+AddUserFlags(Private,  5234, ByPlayer + NoCombat + Warn) 	-- Mark of the Wild (Rank 4)
+AddUserFlags(Private,  8907, ByPlayer + NoCombat + Warn) 	-- Mark of the Wild (Rank 5)
+AddUserFlags(Private,  9884, ByPlayer + NoCombat + Warn) 	-- Mark of the Wild (Rank 6)
+AddUserFlags(Private,  9885, ByPlayer + NoCombat + Warn) 	-- Mark of the Wild (Rank 7)
+AddUserFlags(Private,  8936, ByPlayer) 	-- Regrowth (Rank 1)
+AddUserFlags(Private,  8938, ByPlayer) 	-- Regrowth (Rank 2)
+AddUserFlags(Private,  8939, ByPlayer) 	-- Regrowth (Rank 3)
+AddUserFlags(Private,  8940, ByPlayer) 	-- Regrowth (Rank 4)
+AddUserFlags(Private,  8941, ByPlayer) 	-- Regrowth (Rank 5)
+AddUserFlags(Private,  9750, ByPlayer) 	-- Regrowth (Rank 6)
+AddUserFlags(Private,  9856, ByPlayer) 	-- Regrowth (Rank 7)
+AddUserFlags(Private,  9857, ByPlayer) 	-- Regrowth (Rank 8)
+AddUserFlags(Private,  9858, ByPlayer) 	-- Regrowth (Rank 9)
+AddUserFlags(Private,   774, ByPlayer) 	-- Rejuvenation (Rank 1)
+AddUserFlags(Private,  1058, ByPlayer) 	-- Rejuvenation (Rank 2)
+AddUserFlags(Private,  1430, ByPlayer) 	-- Rejuvenation (Rank 3)
+AddUserFlags(Private,  2090, ByPlayer) 	-- Rejuvenation (Rank 4)
+AddUserFlags(Private,  2091, ByPlayer) 	-- Rejuvenation (Rank 5)
+AddUserFlags(Private,  3627, ByPlayer) 	-- Rejuvenation (Rank 6)
+AddUserFlags(Private,  8910, ByPlayer) 	-- Rejuvenation (Rank 7)
+AddUserFlags(Private,  9839, ByPlayer) 	-- Rejuvenation (Rank 8)
+AddUserFlags(Private,  9840, ByPlayer) 	-- Rejuvenation (Rank 9)
+AddUserFlags(Private,  9841, ByPlayer) 	-- Rejuvenation (Rank 10)
+AddUserFlags(Private,   740, ByPlayer) 	-- Tranquility (Rank 1)
+AddUserFlags(Private,  8918, ByPlayer) 	-- Tranquility (Rank 2)
+AddUserFlags(Private,  9862, ByPlayer) 	-- Tranquility (Rank 3)
+AddUserFlags(Private,  9863, ByPlayer) 	-- Tranquility (Rank 4)
 
 -- Warrior (Arms)
 ------------------------------------------------------------------------
-AddFlags(Private,  7922, OnTarget) 	-- Charge Stun (Rank 1)
-AddFlags(Private,   772, OnTarget) 	-- Rend (Rank 1)
-AddFlags(Private,  6343, OnTarget) 	-- Thunder Clap (Rank 1)
+AddUserFlags(Private,  7922, OnTarget) 	-- Charge Stun (Rank 1)
+AddUserFlags(Private,   772, OnTarget) 	-- Rend (Rank 1)
+AddUserFlags(Private,  6343, OnTarget) 	-- Thunder Clap (Rank 1)
 
 -- Warrior (Fury)
 ------------------------------------------------------------------------
-AddFlags(Private,  6673, OnPlayer) 	-- Battle Shout (Rank 1)
+AddUserFlags(Private,  6673, OnPlayer) 	-- Battle Shout (Rank 1)
