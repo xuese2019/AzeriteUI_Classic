@@ -1,0 +1,12 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
+
+<!-- Add support for LibStub libraries -->
+<Script file='external\LibStub\LibStub.lua'/>
+<Script file='external\CallbackHandler-1.0\CallbackHandler-1.0.lua'/>
+
+<!-- Classic Aura Durations -->
+<Include file='external\LibClassicDurations\LibClassicDurations.xml'/>
+<Script file='external\LibAuraTypes\LibAuraTypes.lua'/>
+<Script file='external\LibSpellLocks\LibSpellLocks.lua'/>
+
+</Ui>
