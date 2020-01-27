@@ -1,6 +1,13 @@
-local LibAura = Wheel:Set("LibAura", 22)
-if (not LibAura) then	
+local LibAura = Wheel:Set("LibAura", 25)
+if (not LibAura) then
 	return
+end
+
+-- Add in support for LibClassicDurations.
+local LCD = LibStub and LibStub("LibClassicDurations", true)
+if (LCD) then
+	local ADDON, Private = ...
+	LCD:RegisterFrame(Private)
 end
 
 local LibMessage = Wheel("LibMessage")
@@ -74,8 +81,8 @@ local AuraCacheByGUID = LibAura.auraCacheByGUID -- dynamic aura info from the co
 local UnitHasAuraWatch = LibAura.auraWatches -- dynamic list of tracked units
 
 -- WoW Constants
-local COMBATLOG_OBJECT_TYPE_PLAYER = _G.COMBATLOG_OBJECT_TYPE_PLAYER
-local COMBATLOG_OBJECT_REACTION_FRIENDLY = _G.COMBATLOG_OBJECT_REACTION_FRIENDLY
+local COMBATLOG_OBJECT_TYPE_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER
+local COMBATLOG_OBJECT_REACTION_FRIENDLY = COMBATLOG_OBJECT_REACTION_FRIENDLY
 
 -- Library Constants
 local DRResetTime = 18.4
@@ -195,8 +202,9 @@ local UnregisterEvent = Frame_MT.__index.UnregisterEvent
 local UnregisterAllEvents = Frame_MT.__index.UnregisterAllEvents
 
 Frame.OnEvent = function(self, event, unit, ...)
-	if (event == "PLAYER_TARGET_CHANGED") then 
-		return Frame:OnEvent("UNIT_POWER_UPDATE", "player", "COMBO_POINTS")
+	if (event == "PLAYER_TARGET_CHANGED") then
+		comboCacheOld = comboCache
+		comboCache = GetComboPoints("player", "target")
 
 	elseif (event == "UNIT_POWER_UPDATE") then 
 		local powerType = ... 
@@ -229,14 +237,10 @@ Frame.OnEvent = function(self, event, unit, ...)
 		LibAura:SendMessage("GP_UNIT_AURA", unit)
 
 	elseif (event == "COMBAT_LOG_EVENT_UNFILTERED") then 
-		return Frame:OnEvent("CLEU", CombatLogGetCurrentEventInfo())
-
-	elseif (event == "CLEU") then 
-
-		local timestamp, eventType, hideCaster, 
-			sourceGUID, sourceName, sourceFlags, sourceRaidFlags, 
+		local timestamp, eventType, hideCaster,
+			sourceGUID, sourceName, sourceFlags, sourceRaidFlags,
 			destGUID, destName, destFlags, destRaidFlags,
-			spellID, arg2, arg3, arg4, arg5 = ...
+			spellID, arg2, arg3, arg4, arg5 = CombatLogGetCurrentEventInfo()
 
 		-- We're only interested in who the aura is applied to.
 		local cacheByGUID
@@ -276,26 +280,30 @@ Frame.OnEvent = function(self, event, unit, ...)
 		end
 
 		if (eventType == "UNIT_DIED") then
-			if (isHunterGUID(dstGUID)) then
+			if (isHunterGUID(destGUID)) then
 				local isDestFriendly = bit_band(destFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) > 0
 				if (not isDestFriendly) or (isFriendlyFeigning(destGUID)) then
 					return
 				end
 			end
-
-
-			
 		end
-
-	end 
+	end
 end
 
 LibAura.CacheUnitBuffsByFilter = function(self, unit, filter)
-	return self:CacheUnitAurasByFilter(unit, "HELPFUL" .. (filter or ""))
+	if (filter) then 
+		return self:CacheUnitAurasByFilter(unit, "HELPFUL " .. filter)
+	else 
+		return self:CacheUnitAurasByFilter(unit, "HELPFUL")
+	end
 end 
 
 LibAura.CacheUnitDebuffsByFilter = function(self, unit, filter)
-	return self:CacheUnitAurasByFilter(unit, "HARMFUL" .. (filter or ""))
+	if (filter) then 
+		return self:CacheUnitAurasByFilter(unit, "HARMFUL " .. filter)
+	else 
+		return self:CacheUnitAurasByFilter(unit, "HARMFUL")
+	end
 end 
 
 LibAura.CacheUnitAurasByFilter = function(self, unit, filter)
@@ -306,7 +314,7 @@ LibAura.CacheUnitAurasByFilter = function(self, unit, filter)
 	end
 
 	-- Enable the aura watch for this unit and filter if it hasn't been already
-	-- This also creates the relevant tables for us. 
+	-- This also creates the relevant tables for us.
 	if (not UnitHasAuraWatch[unit]) or (not AuraCache[unit][filter]) then 
 		LibAura:RegisterAuraWatch(unit, filter)
 	end 
@@ -338,6 +346,14 @@ LibAura.CacheUnitAurasByFilter = function(self, unit, filter)
 			break
 		end
 
+		if (LCD) then 
+			local durationNew, expirationTimeNew = LCD:GetAuraDurationByUnit(unit, spellId, caster)
+			if ((not duration) or (duration == 0)) and (durationNew) then
+				duration = durationNew
+				expirationTime = expirationTimeNew
+			end
+		end
+
 		-- Cache up the values for the aura index.
 		-- *Only ever replace the whole table on its initial creation, 
 		-- always reuse the existing ones at all other times. 
@@ -364,11 +380,6 @@ LibAura.CacheUnitAurasByFilter = function(self, unit, filter)
 		else 
 			cache[i] = { name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 }
 		end 
-
-		-- Anything retrieved from the combat log?
-		if (auraCacheByGUID and auraCacheByGUID[spellId]) then 
-
-		end
 
 		counter = counter + 1
 	end 
