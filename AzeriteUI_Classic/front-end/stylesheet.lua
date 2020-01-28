@@ -3368,10 +3368,10 @@ Layouts.UnitFrameParty = setmetatable({
 		showDurations = true, 
 		showLongDurations = true,
 		tooltipDefaultPosition = false, 
-		tooltipPoint = "TOPRIGHT",
+		tooltipPoint = "TOPLEFT",
 		tooltipAnchor = nil,
-		tooltipRelPoint = "BOTTOMRIGHT",
-		tooltipOffsetX = -8,
+		tooltipRelPoint = "BOTTOMLEFT",
+		tooltipOffsetX = 8,
 		tooltipOffsetY = -16
 	},
 	AuraFrameSize = { 30*3 + 2*5, 30*2 + 5  }, 
