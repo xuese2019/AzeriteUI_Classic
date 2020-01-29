@@ -1310,27 +1310,16 @@ local SmallFrame_AlphaPostUpdate = function(self)
 	end
 end
 
--- Dropping this, it's not working. Doing it in the module instead.
 local SmallFrame_BarTextPostUpdate = function(element, unit)
 	local self = element._owner
 	local cast = self.Cast
-	local castName = self.Cast.Name
 	local healthValue = self.Health.ValuePercent
-
-	-- Seems to be some flickering going on,
-	-- will attempt to fix it by wiping texts when hidden.
 	if (UnitIsDeadOrGhost(unit)) then
-		castName:SetText("")
-		castName:Hide()
 		healthValue:SetText(DEAD)
 		healthValue:Show()
 	elseif (cast.casting or cast.channeling) then
-		healthValue:SetText("")
 		healthValue:Hide()
-		castName:Show()
 	else
-		castName:SetText("")
-		castName:Hide()
 		healthValue:Show()
 	end
 end
@@ -1474,7 +1463,7 @@ local Template_SmallFrame = {
 	CastBarNameSize = { Constant.SmallBar[1] - 20, Constant.SmallBar[2] }, 
 	CastBarOrientation = "RIGHT", 
 	CastBarPlace = { "CENTER", 0, 0 },
-	--CastBarPostUpdate =	SmallFrame_BarTextPostUpdate,
+	CastBarPostUpdate =	SmallFrame_BarTextPostUpdate,
 	CastBarSize = Constant.SmallBar,
 	CastBarSmoothingFrequency = .15,
 	CastBarSmoothingMode = "bezier-fast-in-slow-out", 
@@ -1505,7 +1494,7 @@ local Template_SmallFrame = {
 	HealthBackdropTexture = GetMedia("cast_back"), 
 	HealthBarTexture = Constant.SmallBarTexture, 
 	HealthBarOrientation = "RIGHT", 
-	--HealthBarPostUpdate = SmallFrame_BarTextPostUpdate, 
+	HealthBarPostUpdate = SmallFrame_BarTextPostUpdate, 
 	HealthBarSetFlippedHorizontally = false, 
 	HealthBarSparkMap = {
 		top = {
@@ -1597,9 +1586,8 @@ local Template_SmallFrame_Auras = setmetatable({
 
 -- Used for ToT.
 local Template_SmallFrameReversed = setmetatable({
-	CastBarSize = nil, -- remove it for now to avoid the flickering. It's only ToT.
-	--CastBarOrientation = "LEFT", 
-	--CastBarSetFlippedHorizontally = true, 
+	CastBarOrientation = "LEFT", 
+	CastBarSetFlippedHorizontally = true, 
 	HealthBarOrientation = "LEFT", 
 	HealthBarSetFlippedHorizontally = true 
 }, { __index = Template_SmallFrame })
