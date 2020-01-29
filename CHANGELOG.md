@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.92-RC] 2020-01-29
+### Fixed
+- Party aura tooltips show now grow towards the right, instead of towards the left and straight out of the screen. Now you can read them.
+
 ## [1.0.91-RC] 2020-01-28
 ### Added
 - First draft of aura durations added. Better filtering and display coming this week! Yay!
