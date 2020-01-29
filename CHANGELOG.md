@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.93-RC] 2020-01-29
+### Changed
+- 5 player party frames will no longer be used when player is in a raid group, even if that raid group has less than 5 total members. Party frames by default only show the raid subgroup you're in, leaving people placed in other groups invisible. This behavior was unintended, so we're sticking to party frames with portraits for parties, and smaller raid frames for any and all raid groups. 
+
+### Fixed
+- Finally fixed the small frame flickering after interrupted casts. This was an issue related to the frequent updates of frames lacking distinct unit events, like the ToT frame.
+
 ## [1.0.92-RC] 2020-01-29
 ### Fixed
 - Party aura tooltips show now grow towards the right, instead of towards the left and straight out of the screen. Now you can read them.
