@@ -1,4 +1,4 @@
-local LibUnitFrame = Wheel:Set("LibUnitFrame", 68)
+local LibUnitFrame = Wheel:Set("LibUnitFrame", 69)
 if (not LibUnitFrame) then	
 	return
 end
@@ -38,6 +38,7 @@ local unpack = unpack
 -- Blizzard API
 local CreateFrame = CreateFrame
 local FriendsDropDown = FriendsDropDown
+local SecureCmdOptionParse = SecureCmdOptionParse
 local ShowBossFrameWhenUninteractable = ShowBossFrameWhenUninteractable
 local ToggleDropDownMenu = ToggleDropDownMenu
 local UnitExists = UnitExists
@@ -374,9 +375,31 @@ LibUnitFrame.GetUnitFrameVisibilityDriver = function(self, unit)
 	if (unit == "player") then 
 		visDriver = "[@player,exists][mounted]show;hide"
 	else
-		visDriver = string_format("[@%s,exists]show;hide", unit)
+		local partyID = unit:match("^party(%d+)")
+		if (partyID) then 
+			visDriver = string_format("[nogroup:raid,@%s,exists]show;hide", unit)
+		else 
+			visDriver = string_format("[@%s,exists]show;hide", unit)
+		end
 	end
 	return visDriver
+end 
+
+LibUnitFrame.GetUnitFrameUnitDriver = function(self, unit)
+	local unitDriver
+	-- The below is just for retail. Leaving it for reference.
+	--[[
+	if (unit == "player") then 
+		unitDriver = "[nooverridebar,vehicleui]pet;[overridebar,@vehicle,exists]vehicle;player"
+	elseif (unit == "pet") then 
+		unitDriver = "[nooverridebar,vehicleui]player;pet"
+	elseif (unit:match("^party(%d+)")) then 
+		unitDriver = string_format("[unithasvehicleui,@%s]%s;%s", unit, unit.."pet", unit)
+	elseif (unit:match("^raid(%d+)")) then 
+		unitDriver = string_format("[unithasvehicleui,@%s]%s;%s", unit, unit.."pet", unit)
+	end
+	--]]
+	return unitDriver
 end 
 
 -- spawn and style a new unitframe
@@ -453,6 +476,22 @@ LibUnitFrame.SpawnUnitFrame = function(self, unit, parent, styleFunc, ...)
 	end
 
 	frame:SetAttribute("unit", unit)
+
+	local unitDriver = LibUnitFrame:GetUnitFrameUnitDriver(unit)
+	if unitDriver then 
+		local vehicleSwitcher = CreateFrame("Frame", nil, nil, "SecureHandlerAttributeTemplate")
+		vehicleSwitcher:SetFrameRef("UnitFrame", frame)
+		vehicleSwitcher:SetAttribute("unit", unit)
+		vehicleSwitcher:SetAttribute("_onattributechanged", [=[
+			local frame = self:GetFrameRef("UnitFrame"); 
+			frame:SetAttribute("unit", value); 
+		]=])
+		frame.realUnit = unit
+		frame:SetAttribute("unit", SecureCmdOptionParse(unitDriver))
+		RegisterAttributeDriver(vehicleSwitcher, "state-vehicleswitch", unitDriver)
+	else
+		frame:SetAttribute("unit", unit)
+	end 
 
 	local visDriver = LibUnitFrame:GetUnitFrameVisibilityDriver(unit)
 	if frame.visibilityOverrideDriver then 
