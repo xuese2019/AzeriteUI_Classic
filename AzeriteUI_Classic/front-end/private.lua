@@ -492,6 +492,11 @@ Private.GetMedia = function(name, type) return ([[Interface\AddOns\%s\media\%s.%
 ------------------------------------------------------------------------
 AddUserFlags(Private, 17670, Never) 		-- Argent Dawn Commission
 
+-- General NoCombat Blacklist
+-- Auras listed here won't be shown while in combat.
+------------------------------------------------------------------------
+AddUserFlags(Private, 26013, NoCombat) 		-- Deserter
+
 -- Nameplate Blacklist
 ------------------------------------------------------------------------
 -- Auras listed here will be excluded from the nameplates.
