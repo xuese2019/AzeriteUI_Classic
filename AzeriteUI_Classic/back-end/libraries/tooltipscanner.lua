@@ -1,4 +1,4 @@
-local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 46)
+local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 47)
 if (not LibTooltipScanner) then	
 	return
 end
@@ -71,6 +71,23 @@ local ScannerName = LibTooltipScanner.scannerName
 
 -- Constants
 local playerClass = UnitClass("player")
+local pvpRanks = {
+	[ 1] = { 	PVP_RANK_5_0, 	PVP_RANK_5_1, 	136766 },
+	[ 2] = { 	PVP_RANK_6_0,	PVP_RANK_6_1, 	136767 },
+	[ 3] = { 	PVP_RANK_7_0, 	PVP_RANK_7_1, 	136768 },
+	[ 4] = { 	PVP_RANK_8_0, 	PVP_RANK_8_1, 	136769 },
+	[ 5] = { 	PVP_RANK_9_0, 	PVP_RANK_9_1, 	136770 },
+	[ 6] = { 	PVP_RANK_10_0, 	PVP_RANK_10_1, 	136771 },
+	[ 7] = { 	PVP_RANK_11_0, 	PVP_RANK_11_1, 	136772 },
+	[ 8] = { 	PVP_RANK_12_0, 	PVP_RANK_12_1, 	136773 },
+	[ 9] = { 	PVP_RANK_13_0, 	PVP_RANK_13_1, 	136774 },
+	[10] = { 	PVP_RANK_14_0, 	PVP_RANK_14_1, 	136775 },
+	[11] = { 	PVP_RANK_15_0, 	PVP_RANK_15_1, 	136776 },
+	[12] = { 	PVP_RANK_16_0, 	PVP_RANK_16_1, 	136777 },
+	[13] = { 	PVP_RANK_17_0, 	PVP_RANK_17_1, 	136778 },
+	[14] = { 	PVP_RANK_18_0, 	PVP_RANK_18_1, 	136779 },
+	[15] = { 	PVP_RANK_19_0, 	PVP_RANK_19_1, 	136780 },
+}
 
 -- Scanning Constants & Patterns
 ---------------------------------------------------------
@@ -1547,6 +1564,17 @@ LibTooltipScanner.GetTooltipDataForUnit = function(self, unit, tbl)
 			local isFFA = UnitIsPVPFreeForAll(unit)
 			local pvpName = UnitPVPName(unit)
 			local pvpRankName, pvpRankNumber = GetPVPRankInfo(UnitPVPRank(unit))
+
+			-- Correct the rank names according to faction,
+			-- as the above function only returns the names
+			-- of your own faction's PvP ranks.
+			if (pvpRankNumber and pvpRanks[pvpRankNumber]) then
+				if (englishFaction == "Horde") then
+					pvpRankName = pvpRanks[pvpRankNumber][1]
+				elseif (englishFaction == "Alliance") then 
+					pvpRankName = pvpRanks[pvpRankNumber][2]
+				end
+			end
 
 			tbl.playerFaction = englishFaction
 			tbl.englishFaction = englishFaction
