@@ -4,7 +4,7 @@ if (not Core) then
 	return 
 end
 
-local Module = Core:NewModule("BlizzardChatFrames", "LibMessage", "LibEvent", "LibDB", "LibFrame", "LibHook", "LibSecureHook", "LibChatWindow")
+local Module = Core:NewModule("BlizzardChatFrames", "LibMessage", "LibEvent", "LibDB", "LibFrame", "LibHook", "LibSecureHook", "LibChatWindow", "LibFader")
 Module:SetIncompatible("Prat-3.0")
 
 -- Lua API
@@ -30,12 +30,70 @@ local GetConfig = Private.GetConfig
 local GetLayout = Private.GetLayout
 
 local alphaLocks = {}
-local scaffolds = {}
-	
+
+
+-- OnUpdate Handler
+-------------------------------------------------------
+local HZ = 1/60
+local OnUpdate = function(frame, elapsed)
+
+	-- Throttle these updates
+	frame.elapsed = frame.elapsed + elapsed
+	if (frame.elapsed < HZ) then
+		return
+	end
+
+	local self = frame.module
+	local isMouseOver, fadeIn, fadeOut
+
+	-- Set the flag if the frame is currently mouseovered.
+	if (frame:IsMouseOver(40,-60,-70,20)) then
+		isMouseOver = true
+	end
+
+	-- When frame is mouseovered,
+	-- but the flag isn't set.
+	if (isMouseOver) then
+		if (not frame.isMouseOver) then
+			frame.isMouseOver = true
+		end
+		
+		-- set flag to initiate fade-in
+		fadeIn = true
+
+	-- When the mouseover flag is set,
+	-- but no actual hovering occurring.
+	else
+		if (frame.isMouseOver) then
+			frame.isMouseOver = nil
+		end
+
+		-- set flag to initiate fade-out
+		-- *don't do this if editbox is open
+		fadeOut = true
+
+	end
+
+	if (fadeIn) then
+		
+		self:UpdateMainWindowButtonDisplay(true)
+		self:UpdateChatWindowAlpha(ChatFrame1)
+
+	elseif (fadeOut) then
+
+		self:UpdateMainWindowButtonDisplay()
+		self:UpdateChatWindowAlpha(ChatFrame1)
+
+	end
+
+	frame.elapsed = 0
+end
+
+-- API
+-------------------------------------------------------
 Module.UpdateChatWindowAlpha = function(self, frame)
-	local editBox = self:GetChatWindowCurrentEditBox(frame)
 	local alpha
-	if editBox:IsShown() then
+	if self:GetChatWindowCurrentEditBox(frame):IsShown() then
 		alpha = 0.25
 	else
 		alpha = 0
@@ -50,6 +108,79 @@ Module.UpdateChatWindowAlpha = function(self, frame)
 		end
 	end
 end 
+
+Module.UpdateMainWindowButtonDisplay = function(self, forced)
+
+	local show = forced
+	local frame = self:GetSelectedChatFrame()
+	local channelButton = self:GetChatWindowChannelButton()
+	local deafenButton = self:GetChatWindowVoiceDeafenButton()
+	local muteButton =self:GetChatWindowVoiceMuteButton()
+	local menuButton = self:GetChatWindowMenuButton()
+
+	if (frame and frame.isDocked) then
+		local editBox = self:GetChatWindowEditBox(frame)
+		if (editBox and editBox:IsShown()) then
+			show = true
+		end
+	end
+
+	if show then 
+
+		local buttonFrame = self:GetChatWindowButtonFrame(frame)
+		if buttonFrame then
+			buttonFrame:Show()
+			buttonFrame:SetAlpha(1)
+		end
+
+		if channelButton then 
+			channelButton:Show()
+		end 
+
+		if VoiceChat_IsLoggedIn() then 
+			if deafenButton then 
+				deafenButton:Show()
+			end 
+			if muteButton then 
+				muteButton:Show()
+			end 
+		else 
+			if deafenButton then 
+				deafenButton:Hide()
+			end 
+			if muteButton then 
+				muteButton:Hide()
+			end 
+		end 
+
+		if menuButton then 
+			menuButton:Show()
+		end
+
+	else
+		
+		local buttonFrame = self:GetChatWindowButtonFrame(frame)
+		if buttonFrame then
+			buttonFrame:Hide()
+		end
+
+		if channelButton then 
+			channelButton:Hide()
+		end 
+		
+		if deafenButton then 
+			deafenButton:Hide()
+		end 
+
+		if muteButton then 
+			muteButton:Hide()
+		end 
+
+		if menuButton then 
+			menuButton:Hide()
+		end 
+	end 
+end
 
 Module.UpdateChatWindowScale = function(self, frame)
 	local targetScale = self:GetFrame("UICenter"):GetEffectiveScale()
@@ -108,60 +239,6 @@ end
 
 Module.UpdateChatWindowPositions = function(self)
 end 
-
-Module.UpdateMainWindowButtonDisplay = function(self)
-
-	local show
-
-	local frame = self:GetSelectedChatFrame()
-	if frame and frame.isDocked then 
-		local editBox = self:GetChatWindowEditBox(frame)
-		show = editBox and editBox:IsShown()
-	end 
-
-	local channelButton = self:GetChatWindowChannelButton()
-	local deafenButton = self:GetChatWindowVoiceDeafenButton()
-	local muteButton =self:GetChatWindowVoiceMuteButton()
-	local menuButton = self:GetChatWindowMenuButton()
-
-	if show then 
-		if channelButton then 
-			channelButton:Show()
-		end 
-		if VoiceChat_IsLoggedIn() then 
-			if deafenButton then 
-				deafenButton:Show()
-			end 
-			if muteButton then 
-				muteButton:Show()
-			end 
-		else 
-			if deafenButton then 
-				deafenButton:Hide()
-			end 
-			if muteButton then 
-				muteButton:Hide()
-			end 
-		end 
-		if menuButton then 
-			menuButton:Show()
-		end
-
-	else
-		if channelButton then 
-			channelButton:Hide()
-		end 
-		if deafenButton then 
-			deafenButton:Hide()
-		end 
-		if muteButton then 
-			muteButton:Hide()
-		end 
-		if menuButton then 
-			menuButton:Hide()
-		end 
-	end 
-end
 
 Module.PostCreateTemporaryChatWindow = function(self, frame, ...)
 	local chatType, chatTarget, sourceChatFrame, selectWindow = ...
@@ -237,18 +314,21 @@ Module.PostCreateChatWindow = function(self, frame)
 
 	-- Toggle tab text visibility on hover
 	tab:HookScript("OnEnter", function() 
-		tabText:Show() 
+		frame.isMouseOverTab = true
+		tabText:Show()
 		if tabIcon and frame.isTemporary then 
 			tabIcon:Show()
 		end
 	end)
 	tab:HookScript("OnLeave", function() 
+		frame.isMouseOverTab = false
 		tabText:Hide() 
 		if tabIcon and frame.isTemporary then 
 			tabIcon:Hide()
 		end
 	end)
 	tab:HookScript("OnClick", function() 
+		frame.isMouseOverTab = false
 		-- We need to hide both tabs and button frames here, 
 		-- but it must depend on visible editBoxes. 
 		local frame = self:GetSelectedChatFrame()
@@ -336,14 +416,7 @@ Module.PostCreateChatWindow = function(self, frame)
 	editBox:HookScript("OnShow", function() 
 		local frame = self:GetSelectedChatFrame()
 		if frame then
-			local buttonFrame = self:GetChatWindowButtonFrame(frame)
-			if buttonFrame then
-				buttonFrame:Show()
-				buttonFrame:SetAlpha(1)
-			end
-			if frame.isDocked then
-				self:UpdateMainWindowButtonDisplay(true)
-			end
+			self:UpdateMainWindowButtonDisplay()
 			self:UpdateChatWindowAlpha(frame)
 
 			-- Hook all editbox chat sizes to the same as ChatFrame1
@@ -384,13 +457,7 @@ Module.PostCreateChatWindow = function(self, frame)
 	editBox:HookScript("OnHide", function() 
 		local frame = self:GetSelectedChatFrame()
 		if frame then
-			local buttonFrame = self:GetChatWindowButtonFrame(frame)
-			if buttonFrame then
-				buttonFrame:Hide()
-			end
-			if frame.isDocked then
-				self:UpdateMainWindowButtonDisplay(false)
-			end
+			self:UpdateMainWindowButtonDisplay()
 			self:UpdateChatWindowAlpha(frame)
 		end
 	end)
@@ -407,9 +474,9 @@ Module.PostCreateChatWindow = function(self, frame)
 			local editBox = self:GetChatWindowCurrentEditBox(frame)
 			if editBox then 
 				if editBox:IsShown() then
-					buttonFrame:SetAlpha(1) 
+			--		buttonFrame:SetAlpha(1) 
 				else
-					buttonFrame:SetAlpha(0)
+			--		buttonFrame:SetAlpha(0)
 				end 
 			end 
 			alphaLocks[buttonFrame] = false
@@ -530,6 +597,15 @@ Module.SetUpMainFrames = function(self)
 
 	self:HandleAllChatWindows()
 	self:SetChatWindowAsSlaveTo(ChatFrame1, frame)
+
+	frame.module = self
+	frame.elapsed = 0
+	frame.fading = nil
+	frame.fadeDirection = nil
+	frame.fadeDelay = 0
+	frame.fadeDuration = 0
+	frame.timeFading = 0
+	frame:SetScript("OnUpdate", OnUpdate)
 
 	FCF_SetWindowColor(ChatFrame1, 0, 0, 0, 0)
 	FCF_SetWindowAlpha(ChatFrame1, 0, 1)
