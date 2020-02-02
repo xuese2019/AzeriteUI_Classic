@@ -1715,9 +1715,13 @@ Defaults.ActionBarMain = {
 
 	-- Valid range is 0 to 17. anything outside will be limited to this range. 
 	extraButtonsCount = 5, -- default this to a full standard bar, just to make it slightly easier for people
+	petBarEnabled = true, 
+	stanceBarEnabled = true, 
 
 	-- Valid values are 'always','hover','combat'
 	extraButtonsVisibility = "combat", -- defaulting this to combat, so new users can access their full default bar
+	petBarVisibility = "hover",
+	stanceBarVisibility = "hover",
 
 	-- Whether actions are performed when pressing the button or releasing it
 	castOnDown = true,
@@ -1731,11 +1735,6 @@ Defaults.ActionBarMain = {
 	dragRequireCtrl = true, 
 	dragRequireShift = true, 
 
-	petBarEnabled = true, 
-	petBarVisibility = "hover",
-
-	stanceBarEnabled = true, 
-	stanceBarVisibility = "hover"
 }
 
 Defaults.Minimap = {
@@ -1974,7 +1973,102 @@ Layouts.BlizzardTooltips = {
 Layouts.BlizzardWorldMap = {}
 
 -- ActionBars
+local pm = 3/4
 Layouts.ActionBarMain = {
+
+	PetBackdropColor = { 2/3, 2/3, 2/3, 1 },
+	PetBackdropDrawLayer = { "BACKGROUND", 1 },
+	PetBackdropPlace = { "CENTER", 0, 0 },
+	PetBackdropSize = { 64/(122/256)*pm, 64/(122/256)*pm },
+	PetBackdropTexture = GetMedia("actionbutton-backdrop"),
+	PetBorderColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3], 1 },
+	PetBorderDrawLayer = { "BORDER", 1 },
+	PetBorderPlace = { "CENTER", 0, 0 },
+	PetBorderSize = { 64/(122/256)*pm, 64/(122/256)*pm },
+	PetBorderTexture = GetMedia("actionbutton-border"),
+	PetButtonHitRects = { -4, -4, -4, -4 },
+	PetButtonSize = { 64*pm, 64*pm },
+	PetChargeCooldownBlingColor = { 0, 0, 0, 0 },
+	PetChargeCooldownBlingTexture = GetMedia("blank"),
+	PetChargeCooldownPlace = { "CENTER", 0, 0 },
+	PetChargeCooldownSize = { 44*pm, 44*pm },
+	PetChargeCooldownSwipeColor = { 0, 0, 0, .5 },
+	PetChargeCooldownSwipeTexture = GetMedia("actionbutton_circular_mask"),
+	PetCheckedBlendMode = "ADD",
+	PetCheckedColor = { .9, .8, .1, .3 },
+	PetCheckedDrawLayer = { "ARTWORK", 2 },
+	PetCheckedPlace = { "CENTER", 0, 0 },
+	PetCheckedSize = { 44, 44 },
+	PetCooldownBlingColor = { 0, 0, 0 , 0 },
+	PetCooldownBlingTexture = GetMedia("blank"),
+	PetCooldownCountColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .85 },
+	PetCooldownCountFont = GetFont(16, true),
+	PetCooldownCountJustifyH = "CENTER",
+	PetCooldownCountJustifyV = "MIDDLE",
+	PetCooldownCountPlace = { "CENTER", 1, 0 },
+	PetCooldownCountShadowOffset = { 0, 0 },
+	PetCooldownCountShadowColor = { 0, 0, 0, 1 },
+	PetCooldownPlace = { "CENTER", 0, 0 },
+	PetCooldownSize = { 44*pm, 44*pm },
+	PetCooldownSwipeColor = { 0, 0, 0, .75 },
+	PetCooldownSwipeTexture = GetMedia("actionbutton_circular_mask"),
+	PetCountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
+	PetCountFont = GetFont(11, true),
+	PetCountJustifyH = "CENTER",
+	PetCountJustifyV = "BOTTOM",
+	PetCountMaxDisplayed = 99,
+	PetCountPlace = { "BOTTOMRIGHT", -3, 3 },
+	PetCountPostUpdate = ActionButton_StackCount_PostUpdate, 
+	PetCountShadowColor = { 0, 0, 0, 1 },
+	PetCountShadowOffset = { 0, 0 },
+	PetFlashColor = { 1, 0, 0, .25 },
+	PetFlashDrawLayer = { "ARTWORK", 2 },
+	PetFlashPlace = { "CENTER", 0, 0 },
+	PetFlashSize = { 44*pm, 44*pm },
+	PetFlashTexture = [[Interface\ChatFrame\ChatFrameBackground]],
+	PetGlowBlendMode = "ADD",
+	PetGlowColor = { 1, 1, 1, .5 },
+	PetGlowDrawLayer = { "ARTWORK", 1 },
+	PetGlowPlace = { "CENTER", 0, 0 },
+	PetGlowSize = { 44/(122/256)*pm,44/(122/256)*pm },
+	PetGlowTexture = GetMedia("actionbutton-glow-white"),
+	PetIconPlace = { "CENTER", 0, 0 },
+	PetIconSize = { 44*pm, 44*pm },
+	PetKeybindColor = { Colors.quest.gray[1], Colors.quest.gray[2], Colors.quest.gray[3], .75 },
+	PetKeybindFont = GetFont(12, true),
+	PetKeybindJustifyH = "CENTER",
+	PetKeybindJustifyV = "BOTTOM",
+	PetKeybindPlace = { "TOPLEFT", 0, 0 },
+	PetKeybindShadowColor = { 0, 0, 0, 1 },
+	PetKeybindShadowOffset = { 0, 0 },
+	PetMaskTexture = GetMedia("actionbutton_circular_mask"),
+	PetPushedBlendMode = "ADD",
+	PetPushedColor = { 1, 1, 1, .15 },
+	PetPushedDrawLayer = { "ARTWORK", 1 },
+	PetPushedPlace = { "CENTER", 0, 0 },
+	PetPushedSize = { 44*pm, 44*pm },
+	PetShowChargeCooldownBling = false,
+	PetShowChargeCooldownSwipe = true,
+	PetShowCooldownSwipe = true,
+	PetShowCooldownBling = true,
+	PetSpellAutoCastAntsColor = { Colors.cast[1], Colors.cast[2], Colors.cast[3] },
+	PetSpellAutoCastAntsTexture = GetMedia("actionbutton-ants-small"),
+	PetSpellAutoCastGlowColor = { Colors.cast[1], Colors.cast[2], Colors.cast[3] },
+	PetSpellAutoCastGlowTexture = GetMedia("actionbutton-ants-small-glow"),
+	PetSpellAutoCastPlace = { "CENTER", 0, 0 },
+	PetSpellAutoCastSize = { 64/(122/256)*pm, 64/(122/256)*pm },
+	PetSpellHighlightPlace = { "CENTER", 0, 0 },
+	PetSpellHighlightSize = { 64/(122/256)*pm, 64/(122/256)*pm },
+	PetSpellHighlightTexture = GetMedia("actionbutton-spellhighlight"),
+	PetSpellHighlightColor = { 255/255, 225/255, 125/255, .75 },
+	PetTooltipColorNameAsSpellWithUse = true, -- color item name as a spell (not by rarity) when it has a Use effect
+	PetTooltipHideBindsWithUse = true, -- hide item bind status when it has a Use effect
+	PetTooltipHideEquipTypeWithUse = false, -- hide item equip location and item type with Use effect
+	PetTooltipHideItemLevelWithUse = true, -- hide item level when it has a Use effect 
+	PetTooltipHideStatsWithUse = true, -- hide item stats when it has a Use effect
+	PetTooltipHideUniqueWithUse = true, -- hide item unique status when it has a Use effect
+
+	BackdropColor = { 2/3, 2/3, 2/3, 1 },
 	BackdropDrawLayer = { "BACKGROUND", 1 },
 	BackdropPlace = { "CENTER", 0, 0 },
 	BackdropSize = { 64/(122/256), 64/(122/256) },
@@ -2785,7 +2879,7 @@ Layouts.UnitFramePlayerHUD = {
 	CastBarNameJustifyH = "CENTER",
 	CastBarNameJustifyV = "MIDDLE",
 	CastBarNamePlace = { "TOP", 0, -(12 + 14) },
-	CastBarPlace = { "BOTTOM", "UICenter", "BOTTOM", 0, 250 }, -- CENTER, 0, -133
+	CastBarPlace = { "BOTTOM", "UICenter", "BOTTOM", 0, 250 + 40 }, -- CENTER, 0, -133
 	CastBarSize = Constant.SmallBar,
 	CastBarShieldColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
 	CastBarShieldDrawLayer = { "BACKGROUND", 1 }, 
@@ -2806,7 +2900,7 @@ Layouts.UnitFramePlayerHUD = {
 			{ keyPercent = 128/128, offset = -16/32 }
 		}
 	},
-	CastBarSpellQueuePlace = { "BOTTOM", "UICenter", "BOTTOM", 0, 250 }, 
+	CastBarSpellQueuePlace = { "BOTTOM", "UICenter", "BOTTOM", 0, 250 + 40 }, 
 	CastBarSpellQueueSize = Constant.SmallBar,
 	CastBarSpellQueueTexture = Constant.SmallBarTexture, 
 	CastBarSpellQueueColor = { 1, 1, 1, .5 },

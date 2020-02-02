@@ -1,5 +1,5 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 72)
-if (not LibSecureButton) then	
+local LibSecureButton = Wheel:Set("LibSecureButton", 74)
+if (not LibSecureButton) then
 	return
 end
 
@@ -45,30 +45,31 @@ local tostring = tostring
 local type = type
 
 -- WoW API
-local CursorHasItem = _G.CursorHasItem
-local CursorHasSpell = _G.CursorHasSpell
-local FlyoutHasSpell = _G.FlyoutHasSpell
-local GetActionCharges = _G.GetActionCharges
-local GetActionCooldown = _G.GetActionCooldown
-local GetActionInfo = _G.GetActionInfo
-local GetActionLossOfControlCooldown = _G.GetActionLossOfControlCooldown
-local GetActionCount = _G.GetActionCount
-local GetActionTexture = _G.GetActionTexture
-local GetBindingKey = _G.GetBindingKey 
-local GetCursorInfo = _G.GetCursorInfo
-local GetMacroSpell = _G.GetMacroSpell
-local GetSpellInfo = _G.GetSpellInfo
-local GetSpellSubtext = _G.GetSpellSubtext
-local GetTime = _G.GetTime
-local HasAction = _G.HasAction
-local IsActionInRange = _G.IsActionInRange
-local IsAutoCastPetAction = _G.C_ActionBar.IsAutoCastPetAction
-local IsConsumableAction = _G.IsConsumableAction
-local IsEnabledAutoCastPetAction = _G.C_ActionBar.IsEnabledAutoCastPetAction
-local IsStackableAction = _G.IsStackableAction
-local IsUsableAction = _G.IsUsableAction
-local SetClampedTextureRotation = _G.SetClampedTextureRotation
-local UnitClass = _G.UnitClass
+local CursorHasItem = CursorHasItem
+local CursorHasSpell = CursorHasSpell
+local FlyoutHasSpell = FlyoutHasSpell
+local GetActionCharges = GetActionCharges
+local GetActionCooldown = GetActionCooldown
+local GetActionInfo = GetActionInfo
+local GetActionLossOfControlCooldown = GetActionLossOfControlCooldown
+local GetActionCount = GetActionCount
+local GetActionTexture = GetActionTexture
+local GetBindingKey = GetBindingKey 
+local GetCursorInfo = GetCursorInfo
+local GetMacroSpell = GetMacroSpell
+local GetPetActionInfo = GetPetActionInfo
+local GetSpellInfo = GetSpellInfo
+local GetSpellSubtext = GetSpellSubtext
+local GetTime = GetTime
+local HasAction = HasAction
+local IsActionInRange = IsActionInRange
+local IsAutoCastPetAction = C_ActionBar.IsAutoCastPetAction
+local IsConsumableAction = IsConsumableAction
+local IsEnabledAutoCastPetAction = C_ActionBar.IsEnabledAutoCastPetAction
+local IsStackableAction = IsStackableAction
+local IsUsableAction = IsUsableAction
+local SetClampedTextureRotation = SetClampedTextureRotation
+local UnitClass = UnitClass
 
 -- Will implement this through the back-end
 --local IsSpellOverlayed = function() end
@@ -423,13 +424,42 @@ local UpdatePetButton = function(self, event, ...)
 	elseif (event == "PLAYER_FARSIGHT_FOCUS_CHANGED") then
 		self:Update()
 	elseif (event == "PET_BAR_UPDATE_COOLDOWN") then
-		self:UpdateCooldown()
+		--self:UpdateCooldown()
 	elseif (event == "PET_BAR_SHOWGRID") then
-		self:ShowGrid()
+		--self:ShowGrid()
 	elseif (event == "PET_BAR_HIDEGRID") then
-		self:HideGrid()
+		--self:HideGrid()
 	elseif (event == "UPDATE_BINDINGS") then
+		print("updating pet binds")
 		self:UpdateBinding()
+	end
+end
+
+local UpdateStanceButton = function(self, event, ...)
+	local arg1 = ...
+
+	if (event == "PLAYER_ENTERING_WORLD") then
+		self:Update()
+
+	elseif (event == "PLAYER_REGEN_ENABLED") then
+		self:UnregisterEvent("PLAYER_REGEN_ENABLED", UpdateStanceButton)
+		self:UpdateMaxButtons()
+
+	elseif (event == "UPDATE_SHAPESHIFT_FORMS") then
+		if (InCombatLockdown()) then 
+			self:RegisterEvent("PLAYER_REGEN_ENABLED", UpdateStanceButton)
+		else
+			self:UpdateMaxButtons()
+		end
+
+	elseif (event == "UPDATE_SHAPESHIFT_COOLDOWN") then
+		self:UpdateCooldown()
+
+	elseif (event == "UPDATE_SHAPESHIFT_USABLE") then
+		self:UpdateUsable()
+
+	elseif (event == "UPDATE_SHAPESHIFT_FORM") then
+	elseif (event == "ACTIONBAR_PAGE_CHANGED") then
 	end
 end
 
@@ -439,6 +469,14 @@ local UpdateTooltip = function(self)
 	tooltip:SetDefaultAnchor(self)
 	tooltip:SetMinimumWidth(280)
 	tooltip:SetAction(self.buttonAction)
+end 
+
+local UpdatePetTooltip = function(self)
+	local tooltip = self:GetTooltip()
+	tooltip:Hide()
+	tooltip:SetDefaultAnchor(self)
+	tooltip:SetMinimumWidth(20)
+	tooltip:SetPetAction(self.id)
 end 
 
 local OnCooldownDone = function(cooldown)
@@ -822,21 +860,35 @@ ActionButton.UpdateFlyout = function(self)
 end
 
 ActionButton.UpdateGrid = function(self)
-	if self.showGrid then 
-		return self:SetAlpha(1)
-	elseif (self:IsShown()) then 
-		if HasAction(self.buttonAction) and (self:GetSpellID() ~= 0) then 
-			return self:SetAlpha(1)
-		elseif (CursorHasSpell() or CursorHasItem()) then 
-			return self:SetAlpha(1)
+	if (self:IsShown()) then 
+		if (self:HasContent()) then
+			self:SetAlpha(1)
+		elseif (CursorHasSpell() or CursorHasItem()) then
+			self:SetAlpha(1)
 		else 
 			local cursor = GetCursorInfo()
-			if cursor == "petaction" or cursor == "spell" or cursor == "macro" or cursor == "mount" or cursor == "item" or cursor == "battlepet" then 
-				return self:SetAlpha(1)
+			if (cursor == "petaction") or (cursor == "spell") or (cursor == "macro") or (cursor == "mount") or (cursor == "item") or (cursor == "battlepet") then 
+				self:SetAlpha(1)
+			else
+				if (self.showGrid) then 
+					self:SetAlpha(self.overrideAlphaWhenEmpty or 1)
+				else 
+					self:SetAlpha(0)
+				end 
 			end 
-		end 
-	end 
-	self:SetAlpha(0)
+		end
+	else
+		self:SetAlpha(0)
+	end
+end
+
+-- Strict true/false check for button content
+ActionButton.HasContent = function(self)
+	if (HasAction(self.buttonAction) and (self:GetSpellID() ~= 0)) then
+		return true
+	else 
+		return false
+	end
 end
 
 -- Called when the usable state of the button changes
@@ -1094,12 +1146,53 @@ PetButton.RegisterMessage = ActionButton.RegisterMessage
 -- PetButton Updates
 ----------------------------------------------------
 PetButton.Update = function(self)
+	local name, texture, isToken, isActive, autoCastAllowed, autoCastEnabled, spellID = GetPetActionInfo(self.id)
+
+	if (name) then 
+		self.hasAction = true
+		self.Icon:SetTexture((not isToken) and texture or _G[texture])
+		self:SetAlpha(1)
+	else
+		self.hasAction = false
+		self.Icon:SetTexture(nil) 
+	end 
+	if isActive then
+		self:SetChecked(true)
+
+		if IsPetAttackAction(self.id) then
+			-- start flash
+		end
+	else
+		self:SetChecked(false)
+
+		if IsPetAttackAction(self.id) then
+			-- stop flash
+		end
+	end
+
+	self:UpdateBinding()
+	--self:UpdateCount()
+	--self:UpdateCooldown()
+	--self:UpdateFlash()
+	--self:UpdateUsable()
+	--self:UpdateGrid()
+	--self:UpdateAutoCast()
+
+	if self.PostUpdate then 
+		self:PostUpdate()
+	end 
 
 end
 
 PetButton.UpdateAutoCast = ActionButton.UpdateAutoCast
+PetButton.UpdateBinding = ActionButton.UpdateBinding
 
--- Script Handlers
+-- Getters
+----------------------------------------------------
+PetButton.GetBindingText = ActionButton.GetBindingText
+PetButton.GetTooltip = ActionButton.GetTooltip
+
+-- PetButton Script Handlers
 ----------------------------------------------------
 PetButton.OnEnable = function(self)
 	self:RegisterEvent("PLAYER_CONTROL_LOST", UpdatePetButton)
@@ -1117,14 +1210,94 @@ PetButton.OnEnable = function(self)
 end
 
 PetButton.OnDisable = function(self)
+	self:UnregisterEvent("PLAYER_CONTROL_LOST", UpdatePetButton)
+	self:UnregisterEvent("PLAYER_CONTROL_GAINED", UpdatePetButton)
+	self:UnregisterEvent("PLAYER_ENTERING_WORLD", UpdatePetButton)
+	self:UnregisterEvent("PLAYER_FARSIGHT_FOCUS_CHANGED", UpdatePetButton)
+	self:UnregisterEvent("UNIT_PET", UpdatePetButton)
+	self:UnregisterEvent("UNIT_FLAGS", UpdatePetButton)
+	self:UnregisterEvent("UNIT_AURA", UpdatePetButton)
+	self:UnregisterEvent("UPDATE_BINDINGS", UpdatePetButton)
+	self:UnregisterEvent("PET_BAR_UPDATE", UpdatePetButton)
+	self:UnregisterEvent("PET_BAR_UPDATE_COOLDOWN", UpdatePetButton)
+	self:UnregisterEvent("PET_BAR_SHOWGRID", UpdatePetButton)
+	self:UnregisterEvent("PET_BAR_HIDEGRID", UpdatePetButton)
+end
+
+PetButton.OnEnter = function(self) 
+	self.isMouseOver = true
+
+	-- Don't fire off tooltip updates if the button has no content
+	if (not GetPetActionInfo(self.id)) then 
+		self.UpdateTooltip = nil
+		self:GetTooltip():Hide()
+	else
+		self.UpdateTooltip = UpdatePetTooltip
+		self:UpdateTooltip()
+	end 
+
+	if self.PostEnter then 
+		self:PostEnter()
+	end 
+end
+
+PetButton.OnLeave = function(self) 
+	self.isMouseOver = nil
+	self.UpdateTooltip = nil
+
+	local tooltip = self:GetTooltip()
+	tooltip:Hide()
+
+	if self.PostLeave then 
+		self:PostLeave()
+	end 
 end
 
 PetButton.OnEvent = ActionButton.OnEvent
 
+-- StanceButton Template
+-- *Note that generic methods will be
+--  borrowed from the ActionButton template.
+----------------------------------------------------
+local StanceButton = LibSecureButton:CreateFrame("CheckButton")
+local StanceButton_MT = { __index = StanceButton }
+
+-- StanceButton Event Handling
+----------------------------------------------------
+StanceButton.RegisterEvent = ActionButton.RegisterEvent
+StanceButton.UnregisterEvent = ActionButton.UnregisterEvent
+StanceButton.UnregisterAllEvents = ActionButton.UnregisterAllEvents
+StanceButton.RegisterMessage = ActionButton.RegisterMessage
+
+-- StanceButton Updates
+----------------------------------------------------
+StanceButton.Update = function(self)
+
+end
+
+StanceButton.UpdateCooldown = function(self)
+end
+
+StanceButton.UpdateMaxButtons = function(self)
+end
+
+StanceButton.UpdateUsable = function(self)
+end
+
+-- StanceButton Script Handlers
+----------------------------------------------------
+StanceButton.OnEnable = function(self)
+	self:RegisterEvent("ACTIONBAR_PAGE_CHANGED", UpdateStanceButton)
+	self:RegisterEvent("UPDATE_SHAPESHIFT_COOLDOWN", UpdateStanceButton)
+	self:RegisterEvent("UPDATE_SHAPESHIFT_FORM", UpdateStanceButton)
+	self:RegisterEvent("UPDATE_SHAPESHIFT_FORMS", UpdateStanceButton)
+	self:RegisterEvent("UPDATE_SHAPESHIFT_USABLE", UpdateStanceButton)
+	self:RegisterEvent("PLAYER_ENTERING_WORLD", UpdateStanceButton)
+end
 
 -- Library API
 ----------------------------------------------------
-LibSecureButton.CreateButtonLayers = function(self, button)
+LibSecureButton.CreateButtonLayers = function(self, button, buttonType)
 
 	local icon = button:CreateTexture()
 	icon:SetDrawLayer("BACKGROUND", 2)
@@ -1145,8 +1318,8 @@ LibSecureButton.CreateButtonLayers = function(self, button)
 
 	local pushed = button:CreateTexture(nil, "OVERLAY")
 	pushed:SetDrawLayer("ARTWORK", 1)
-	pushed:SetAllPoints(icon)
 	pushed:SetColorTexture(1, 1, 1, .15)
+	pushed:SetAllPoints(icon)
 	button.Pushed = pushed
 
 	-- We're letting blizzard handle this one,
@@ -1371,22 +1544,131 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 		end
 	end
 
-	-- Add a page driver layer, basically a fake bar for the current button
-	local page = visibility:CreateFrame("Frame", nil, "SecureHandlerAttributeTemplate")
-	page.id = barID
-	page.AddDebugMessage = DEBUG_ENABLED and self.AddDebugMessageFormatted or nil
-	page:SetID(barID) 
-	page:SetAttribute("_onattributechanged", DEBUG_ENABLED and SECURE.Page_OnAttributeChanged_Debug or SECURE.Page_OnAttributeChanged)
-	
 	local button
 	if (buttonType == "pet") then 
-		button = setmetatable(page:CreateFrame("CheckButton", name, "PetActionButtonTemplate"), PetButton_MT)
+		button = setmetatable(visibility:CreateFrame("CheckButton", name, "SecureActionButtonTemplate"), PetButton_MT) -- PetActionButtonTemplate
+		button:SetFrameStrata("LOW")
+
+		-- Link the button to the visibility layer
+		visibility:SetFrameRef("Button", button)
+
+		-- Create button layers
+		LibSecureButton:CreateButtonLayers(button, buttonType)
+		LibSecureButton:CreateButtonOverlay(button)
+		LibSecureButton:CreateButtonCooldowns(button)
+		LibSecureButton:CreateButtonCount(button)
+		LibSecureButton:CreateButtonKeybind(button)
+		LibSecureButton:CreateButtonAutoCast(button)
+
+		button:RegisterForDrag("LeftButton", "RightButton")
+		button:RegisterForClicks("AnyUp")
+
+		button:SetID(buttonID)
+		button:SetAttribute("type", "pet")
+		--button:SetAttribute("unit", "pettarget")
+		button:SetAttribute("action", buttonID)
+		button:SetAttribute("buttonLock", true)
+		button.id = buttonID
+		button._owner = visibility
+
+		button:SetScript("OnEnter", PetButton.OnEnter)
+		button:SetScript("OnLeave", PetButton.OnLeave)
+
+		-- This allows drag functionality, but stops the casting, 
+		-- thus allowing us to drag spells even with cast on down, wohoo! 
+		-- Doesn't currently appear to be a way to make this work without the modifier, though, 
+		-- since the override bindings we use work by sending mouse events to the listeners, 
+		-- meaning there's no way to separate keys and mouse buttons. 
+		button:SetAttribute("alt-ctrl-shift-type*", "stop")
+
+		-- A little magic to allow us to toggle autocasting of pet abilities
+		visibility:WrapScript(button, "PreClick", [[
+			if (button ~= "RightButton") then 
+				if (self:GetAttribute("type2")) then 
+					self:SetAttribute("type2", nil); 
+				end 
+				return 
+			end
+			local actionpage = self:GetAttribute("actionpage"); 
+			if (not actionpage) then
+				if (self:GetAttribute("type2")) then 
+					self:SetAttribute("type2", nil); 
+				end 
+				return
+			end
+			local id = self:GetID(); 
+			local action = (actionpage > 1) and ((actionpage - 1)*12 + id) or id; 
+			local actionType, id, subType = GetActionInfo(action);
+			if (subType == "pet") and (id ~= 0) then 
+				self:SetAttribute("type2", "macro"); 
+			else 
+				if (self:GetAttribute("type2")) then 
+					self:SetAttribute("type2", nil); 
+				end 
+			end 
+		]]) 
+		
+		button:SetAttribute("OnDragStart", [[
+			local id = self:GetID(); 
+			local buttonLock = self:GetAttribute("buttonLock"); 
+			if ( (not buttonLock) or (IsShiftKeyDown() and IsAltKeyDown() and IsControlKeyDown()) ) then
+				return "petaction", id
+			end
+		]])
+		
+		-- When a spell is dragged from a button
+		-- *This never fires when cast on down is enabled. ARGH! 
+		visibility:WrapScript(button, "OnDragStart", [[
+			return self:RunAttribute("OnDragStart")
+		]])
+
+		-- Bartender says: 
+		-- Wrap twice, because the post-script is not run when the pre-script causes a pickup (doh)
+		-- we also need some phony message, or it won't work =/
+		visibility:WrapScript(button, "OnDragStart", [[
+			return "message", "update"
+		]])
+
+		-- When a spell is dropped onto a button
+		visibility:WrapScript(button, "OnReceiveDrag", [[
+			local kind, value, subtype, extra = ...
+			if ((not kind) or (not value)) then 
+				return false 
+			end
+			local button = self:GetFrameRef("Button"); 
+			local buttonLock = button and button:GetAttribute("buttonLock"); 
+			local id = self:GetID(); 
+			if id and ((not buttonLock) or (IsShiftKeyDown() and IsAltKeyDown() and IsControlKeyDown())) then
+				return "petaction", id
+			end 
+		]])
+		visibility:WrapScript(button, "OnReceiveDrag", [[
+			return "message", "update"
+		]])
+
+		local visibilityDriver = "[@pet,exists]show;hide"
+		
+		-- enable the visibility driver
+		RegisterAttributeDriver(visibility, "state-vis", visibilityDriver)
+
+
+	elseif (buttonType == "stance") then
+		button = setmetatable(visibility:CreateFrame("CheckButton", name, "StanceButtonTemplate"), StanceButton_MT)
+		button:SetFrameStrata("LOW")
+
 	else 
+		-- Add a page driver layer, basically a fake bar for the current button
+		local page = visibility:CreateFrame("Frame", nil, "SecureHandlerAttributeTemplate")
+		page.id = barID
+		page.AddDebugMessage = DEBUG_ENABLED and self.AddDebugMessageFormatted or nil
+		page:SetID(barID) 
+		page:SetAttribute("_onattributechanged", DEBUG_ENABLED and SECURE.Page_OnAttributeChanged_Debug or SECURE.Page_OnAttributeChanged)
+
 		button = setmetatable(page:CreateFrame("CheckButton", name, "SecureActionButtonTemplate"), ActionButton_MT)
 		button:SetFrameStrata("LOW")
 
 		-- Create button layers
-		LibSecureButton:CreateButtonLayers(button)
+		LibSecureButton:CreateButtonLayers(button, buttonType)
 		LibSecureButton:CreateButtonOverlay(button)
 		LibSecureButton:CreateButtonCooldowns(button)
 		LibSecureButton:CreateButtonCount(button)
@@ -1632,7 +1914,6 @@ end
 
 -- Modules should call this at UPDATE_BINDINGS and the first PLAYER_ENTERING_WORLD
 LibSecureButton.UpdateActionButtonBindings = function(self)
-	-- "BONUSACTIONBUTTON%.0f" -- pet bar
 	-- "SHAPESHIFTBUTTON%.0f" -- stance bar
 	for button in self:GetAllActionButtonsByType("action") do 
 
@@ -1675,7 +1956,36 @@ LibSecureButton.UpdateActionButtonBindings = function(self)
 				SetOverrideBindingClick(pager, false, key, button:GetName(), "CLICK: LeftButton") -- assign the key to our own button
 			end	
 		end
-	end 
+	end
+
+	for button in self:GetAllActionButtonsByType("pet") do
+
+		local visibility = button._owner
+
+		-- clear current overridebindings
+		ClearOverrideBindings(visibility) 
+
+		-- retrieve button id
+		local buttonID = button:GetID()
+
+		-- figure out the binding action
+		local bindingAction = ("BONUSACTIONBUTTON%.0f"):format(buttonID)
+
+		-- store the binding action name on the button
+		button.bindingAction = bindingAction
+
+		-- iterate through the registered keys for the action
+		for keyNumber = 1, select("#", GetBindingKey(bindingAction)) do 
+
+			-- get a key for the action
+			local key = select(keyNumber, GetBindingKey(bindingAction)) 
+			if (key and (key ~= "")) then
+				-- this is why we need named buttons
+				SetOverrideBindingClick(visibility, false, key, button:GetName(), "CLICK: LeftButton") -- assign the key to our own button
+			end	
+		end
+		
+	end
 end 
 
 -- This will cause multiple updates when library is updated. Hmm....

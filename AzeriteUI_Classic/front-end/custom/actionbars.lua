@@ -32,6 +32,7 @@ local UnitRace = _G.UnitRace
 local Colors = Private.Colors
 local GetConfig = Private.GetConfig
 local GetLayout = Private.GetLayout
+local GetMedia = Private.GetMedia
 
 -- Blizzard textures for generic styling
 local BLANK_TEXTURE = [[Interface\ChatFrame\ChatFrameBackground]]
@@ -57,11 +58,12 @@ local secureSnippets = {
 
 		local UICenter = self:GetFrameRef("UICenter"); 
 		local extraButtonsCount = tonumber(self:GetAttribute("extraButtonsCount")) or 0;
+		local useSmallerExtraButtons = self:GetAttribute("useAlternativeLayout") or false;
 	
 		local buttonSize, buttonSpacing, iconSize = 64, 8, 44; 
 		local row2mod = -2/5; -- horizontal offset for upper row 
 
-		for id, button in ipairs(Buttons) do 
+		for id,button in ipairs(Buttons) do 
 			local buttonID = button:GetID(); 
 			local barID = Pagers[id]:GetID(); 
 
@@ -71,7 +73,7 @@ local secureSnippets = {
 				if (buttonID > 10) then
 					button:SetPoint("BOTTOMLEFT", UICenter, "BOTTOMLEFT", 60 + ((buttonID-2-1 + row2mod) * (buttonSize + buttonSpacing)), 42 + buttonSize + buttonSpacing)
 				else
-					button:SetPoint("BOTTOMLEFT", UICenter, "BOTTOMLEFT", 60 + ((buttonID-1) * (buttonSize + buttonSpacing)), 42 )
+					button:SetPoint("BOTTOMLEFT", UICenter, "BOTTOMLEFT", 60 + ((buttonID-1) * (buttonSize + buttonSpacing)), 42)
 				end 
 
 			elseif (barID == self:GetAttribute("BOTTOMLEFT_ACTIONBAR_PAGE")) then 
@@ -98,6 +100,18 @@ local secureSnippets = {
 		-- lua callback to update the hover frame anchors to the current layout
 		self:CallMethod("UpdateFadeAnchors"); 
 	
+	]=],
+
+	arrangePetButtons = [=[
+		local UICenter = self:GetFrameRef("UICenter");
+		local buttonSize, buttonSpacing = 64*3/4, 2;
+		local startX, startY = -(buttonSize*10 + buttonSpacing*9)/2, 200;
+
+		for id,button in ipairs(PetButtons) do
+			button:ClearAllPoints();
+			button:SetPoint("BOTTOMLEFT", UICenter, "BOTTOM", startX + ((id-1) * (buttonSize + buttonSpacing)), startY);
+		end
+
 	]=],
 
 	attributeChanged = [=[
@@ -552,6 +566,7 @@ ActionButton.PostCreate = function(self, ...)
 	self.Backdrop:SetPoint(unpack(layout.BackdropPlace))
 	self.Backdrop:SetDrawLayer(unpack(layout.BackdropDrawLayer))
 	self.Backdrop:SetTexture(layout.BackdropTexture)
+	self.Backdrop:SetVertexColor(unpack(layout.BackdropColor))
 
 	self.Darken = self:CreateTexture()
 	self.Darken:SetDrawLayer("BACKGROUND", 3)
@@ -594,6 +609,165 @@ ActionButton.PostUpdateChargeCooldown = function(self, cooldown)
 	cooldown:SetSwipeColor(unpack(layout.ChargeCooldownSwipeColor))
 end
 
+-- PetButton Template
+----------------------------------------------------
+local PetButton = {}
+
+PetButton.PostCreate = function(self, ...)
+	local layout = Module.layout
+
+	self:SetSize(unpack(layout.PetButtonSize))
+	self:SetHitRectInsets(unpack(layout.PetButtonHitRects))
+
+	-- Assign our own global custom colors
+	self.colors = Colors
+
+	-- Restyle the blizz layers
+	-----------------------------------------------------
+	self.Icon:SetSize(unpack(layout.PetIconSize))
+	self.Icon:ClearAllPoints()
+	self.Icon:SetPoint(unpack(layout.PetIconPlace))
+
+	-- If SetTexture hasn't been called, the mask and probably texcoords won't stick. 
+	-- This started happening in build 8.1.0.29600 (March 5th, 2019), or at least that's when I noticed.
+	-- Does not appear to be related to whether GetTexture() has a return value or not. 
+	self.Icon:SetTexture("") 
+	self.Icon:SetMask(layout.PetMaskTexture)
+
+	self.Pushed:SetDrawLayer(unpack(layout.PetPushedDrawLayer))
+	self.Pushed:SetSize(unpack(layout.PetPushedSize))
+	self.Pushed:ClearAllPoints()
+	self.Pushed:SetPoint(unpack(layout.PetPushedPlace))
+	self.Pushed:SetMask(layout.PetMaskTexture)
+	self.Pushed:SetColorTexture(unpack(layout.PetPushedColor))
+	self:SetPushedTexture(self.Pushed)
+	self:GetPushedTexture():SetBlendMode(layout.PetPushedBlendMode)
+		
+	-- We need to put it back in its correct drawlayer, 
+	-- or Blizzard will set it to ARTWORK which can lead 
+	-- to it randomly being drawn behind the icon texture. 
+	self:GetPushedTexture():SetDrawLayer(unpack(layout.PetPushedDrawLayer)) 
+
+	self.Checked = self:CreateTexture()
+	self.Checked:SetDrawLayer(unpack(layout.PetCheckedDrawLayer))
+	self.Checked:SetSize(unpack(layout.PetCheckedSize))
+	self.Checked:ClearAllPoints()
+	self.Checked:SetPoint(unpack(layout.PetCheckedPlace))
+	self.Checked:SetTexture(layout.PetMaskTexture)
+	self.Checked:SetVertexColor(unpack(layout.PetCheckedColor))
+	self.Checked:SetBlendMode(layout.PetCheckedBlendMode)
+	self:SetCheckedTexture(self.Checked)
+	self:GetCheckedTexture():SetBlendMode(layout.PetCheckedBlendMode)
+
+	self.Flash:SetDrawLayer(unpack(layout.PetFlashDrawLayer))
+	self.Flash:SetSize(unpack(layout.PetFlashSize))
+	self.Flash:ClearAllPoints()
+	self.Flash:SetPoint(unpack(layout.PetFlashPlace))
+	self.Flash:SetTexture(layout.PetFlashTexture)
+	self.Flash:SetVertexColor(unpack(layout.PetFlashColor))
+	self.Flash:SetMask(layout.PetMaskTexture)
+
+	self.Cooldown:SetSize(unpack(layout.PetCooldownSize))
+	self.Cooldown:ClearAllPoints()
+	self.Cooldown:SetPoint(unpack(layout.PetCooldownPlace))
+	self.Cooldown:SetSwipeTexture(layout.PetCooldownSwipeTexture)
+	self.Cooldown:SetSwipeColor(unpack(layout.PetCooldownSwipeColor))
+	self.Cooldown:SetDrawSwipe(layout.PetShowCooldownSwipe)
+	self.Cooldown:SetBlingTexture(layout.PetCooldownBlingTexture, unpack(layout.PetCooldownBlingColor)) 
+	self.Cooldown:SetDrawBling(layout.PetShowCooldownBling)
+
+	self.ChargeCooldown:SetSize(unpack(layout.PetChargeCooldownSize))
+	self.ChargeCooldown:ClearAllPoints()
+	self.ChargeCooldown:SetPoint(unpack(layout.PetChargeCooldownPlace))
+	self.ChargeCooldown:SetSwipeTexture(layout.PetChargeCooldownSwipeTexture, unpack(layout.PetChargeCooldownSwipeColor))
+	self.ChargeCooldown:SetSwipeColor(unpack(layout.PetChargeCooldownSwipeColor))
+	self.ChargeCooldown:SetBlingTexture(layout.PetChargeCooldownBlingTexture, unpack(layout.PetChargeCooldownBlingColor)) 
+	self.ChargeCooldown:SetDrawSwipe(layout.PetShowChargeCooldownSwipe)
+	self.ChargeCooldown:SetDrawBling(layout.PetShowChargeCooldownBling)
+
+	self.CooldownCount:ClearAllPoints()
+	self.CooldownCount:SetPoint(unpack(layout.PetCooldownCountPlace))
+	self.CooldownCount:SetFontObject(layout.PetCooldownCountFont)
+	self.CooldownCount:SetJustifyH(layout.PetCooldownCountJustifyH)
+	self.CooldownCount:SetJustifyV(layout.PetCooldownCountJustifyV)
+	self.CooldownCount:SetShadowOffset(unpack(layout.PetCooldownCountShadowOffset))
+	self.CooldownCount:SetShadowColor(unpack(layout.PetCooldownCountShadowColor))
+	self.CooldownCount:SetTextColor(unpack(layout.PetCooldownCountColor))
+
+	self.Count:ClearAllPoints()
+	self.Count:SetPoint(unpack(layout.PetCountPlace))
+	self.Count:SetFontObject(layout.PetCountFont)
+	self.Count:SetJustifyH(layout.PetCountJustifyH)
+	self.Count:SetJustifyV(layout.PetCountJustifyV)
+	self.Count:SetShadowOffset(unpack(layout.PetCountShadowOffset))
+	self.Count:SetShadowColor(unpack(layout.PetCountShadowColor))
+	self.Count:SetTextColor(unpack(layout.PetCountColor))
+
+	self.Keybind:ClearAllPoints()
+	self.Keybind:SetPoint(unpack(layout.PetKeybindPlace))
+	self.Keybind:SetFontObject(layout.PetKeybindFont)
+	self.Keybind:SetJustifyH(layout.PetKeybindJustifyH)
+	self.Keybind:SetJustifyV(layout.PetKeybindJustifyV)
+	self.Keybind:SetShadowOffset(unpack(layout.PetKeybindShadowOffset))
+	self.Keybind:SetShadowColor(unpack(layout.PetKeybindShadowColor))
+	self.Keybind:SetTextColor(unpack(layout.PetKeybindColor))
+
+	self.SpellAutoCast:ClearAllPoints()
+	self.SpellAutoCast:SetPoint(unpack(layout.PetSpellAutoCastPlace))
+	self.SpellAutoCast:SetSize(unpack(layout.PetSpellAutoCastSize))
+	self.SpellAutoCast.Ants:SetTexture(layout.PetSpellAutoCastAntsTexture)
+	self.SpellAutoCast.Ants:SetVertexColor(unpack(layout.PetSpellAutoCastAntsColor))	
+	self.SpellAutoCast.Glow:SetTexture(layout.PetSpellAutoCastGlowTexture)
+	self.SpellAutoCast.Glow:SetVertexColor(unpack(layout.PetSpellAutoCastGlowColor))	
+
+	self.Backdrop = self:CreateTexture()
+	self.Backdrop:SetSize(unpack(layout.PetBackdropSize))
+	self.Backdrop:SetPoint(unpack(layout.PetBackdropPlace))
+	self.Backdrop:SetDrawLayer(unpack(layout.PetBackdropDrawLayer))
+	self.Backdrop:SetTexture(layout.PetBackdropTexture)
+	self.Backdrop:SetVertexColor(unpack(layout.PetBackdropColor))
+
+	self.Darken = self:CreateTexture()
+	self.Darken:SetDrawLayer("BACKGROUND", 3)
+	self.Darken:SetSize(unpack(layout.PetIconSize))
+	self.Darken:SetAllPoints(self.Icon)
+	self.Darken:SetMask(layout.PetMaskTexture)
+	self.Darken:SetTexture(BLANK_TEXTURE)
+	self.Darken:SetVertexColor(0, 0, 0)
+	self.Darken.highlight = 0
+	self.Darken.normal = .15
+
+	self.BorderFrame = self:CreateFrame("Frame")
+	self.BorderFrame:SetFrameLevel(self:GetFrameLevel() + 5)
+	self.BorderFrame:SetAllPoints(self)
+
+	self.Border = self.BorderFrame:CreateTexture()
+	self.Border:SetPoint(unpack(layout.PetBorderPlace))
+	self.Border:SetDrawLayer(unpack(layout.PetBorderDrawLayer))
+	self.Border:SetSize(unpack(layout.PetBorderSize))
+	self.Border:SetTexture(layout.PetBorderTexture)
+	self.Border:SetVertexColor(unpack(layout.PetBorderColor))
+
+	self.Glow = self.Overlay:CreateTexture()
+	self.Glow:SetDrawLayer(unpack(layout.PetGlowDrawLayer))
+	self.Glow:SetSize(unpack(layout.PetGlowSize))
+	self.Glow:SetPoint(unpack(layout.PetGlowPlace))
+	self.Glow:SetTexture(layout.PetGlowTexture)
+	self.Glow:SetVertexColor(unpack(layout.PetGlowColor))
+	self.Glow:SetBlendMode(layout.PetGlowBlendMode)
+	self.Glow:Hide()
+end 
+
+PetButton.PostUpdate = function(self)
+	self:UpdateMouseOver()
+end
+
+PetButton.GetBindingTextAbbreviated = ActionButton.GetBindingTextAbbreviated
+PetButton.UpdateBinding = ActionButton.UpdateBinding
+PetButton.UpdateMouseOver = ActionButton.UpdateMouseOver
+PetButton.PostEnter = ActionButton.PostEnter
+PetButton.PostLeave = ActionButton.PostLeave
+
 -- Module API
 ----------------------------------------------------
 -- Just a proxy for the secure method. Only call out of combat. 
@@ -601,6 +775,7 @@ Module.ArrangeButtons = function(self)
 	local Proxy = self:GetSecureUpdater()
 	if Proxy then
 		Proxy:Execute(Proxy:GetAttribute("arrangeButtons"))
+		Proxy:Execute(Proxy:GetAttribute("arrangePetButtons"))
 	end
 end
 
@@ -662,43 +837,72 @@ Module.SpawnButtons = function(self)
 	local db = self.db
 	local proxy = self:GetSecureUpdater()
 
-	local buttons, hover = {}, {} 
-	local FORCED = false -- Private test mode to show all
+	-- Private test mode to show all
+	local FORCED = false 
 
+	local buttonID = 0 -- current buttonID when spawning
+	local numPrimary = 7 -- Number of primary buttons always visible
+	local firstHiddenID = db.extraButtonsCount + numPrimary -- first buttonID to be hidden
+	local buttons, stance, pet = {}, {}, {} -- indexed button tables where the button is the value
+	local hover = {} -- hashed hover table, where the button is the key
+
+	-- Spawn Primary ActionBar
 	for id = 1,NUM_ACTIONBAR_BUTTONS do 
-		local id2 = id + NUM_ACTIONBAR_BUTTONS
-		
-		-- Store all buttons
-		buttons[id] = self:SpawnActionButton("action", self.frame, ActionButton, 1, id)
-		buttons[id2] = self:SpawnActionButton("action", self.frame, ActionButton, _G.BOTTOMLEFT_ACTIONBAR_PAGE, id)
-
-		-- Store the buttons that have hover options
-		hover[buttons[id]] = id > 7 
-		hover[buttons[id2]] = true
-	
-		-- Link the buttons and their pagers 
-		proxy:SetFrameRef("Button"..id, buttons[id])
-		proxy:SetFrameRef("Button"..id2, buttons[id2])
-		proxy:SetFrameRef("Pager"..id, buttons[id]:GetPager())
-		proxy:SetFrameRef("Pager"..id2, buttons[id2]:GetPager())
+		buttonID = buttonID + 1
+		buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButton, 1, id)
+		hover[buttons[buttonID]] = buttonID > numPrimary
 	end 
 
-	for id,button in ipairs(buttons) do 
+	-- Spawn Secondary ActionBar
+	for id = 1,NUM_ACTIONBAR_BUTTONS do 
+		buttonID = buttonID + 1
+		buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButton, BOTTOMLEFT_ACTIONBAR_PAGE, id)
+		hover[buttons[buttonID]] = true
+	end 
+
+	-- Apply common settings to the action buttons.
+	for buttonID,button in ipairs(buttons) do 
+	
 		-- Apply saved buttonLock setting
 		button:SetAttribute("buttonLock", db.buttonLock)
+
+		-- Link the buttons and their pagers 
+		proxy:SetFrameRef("Button"..buttonID, buttons[buttonID])
+		proxy:SetFrameRef("Pager"..buttonID, buttons[buttonID]:GetPager())
 
 		-- Reference all buttons in our menu callback frame
 		proxy:Execute(([=[
 			table.insert(Buttons, self:GetFrameRef("Button"..%.0f)); 
 			table.insert(Pagers, self:GetFrameRef("Pager"..%.0f)); 
-		]=]):format(id, id))
+		]=]):format(buttonID, buttonID))
 
 		-- Hide buttons beyond our current maximum visible
-		if (hover[button] and (id > db.extraButtonsCount + 7)) then 
+		if (hover[button] and (buttonID > firstHiddenID)) then 
 			button:GetPager():Hide()
 		end 
 	end 
 
+	-- Spawn the Pet Bar
+	for id = 1,NUM_PET_ACTION_SLOTS do
+		pet[id] = self:SpawnActionButton("pet", self.frame, PetButton, nil, id)
+	end
+
+	-- Apply common stuff to the pet buttons
+	for id,button in pairs(pet) do
+		-- Apply saved buttonLock setting
+		button:SetAttribute("buttonLock", db.buttonLock)
+
+		-- Link the buttons and their pagers 
+		proxy:SetFrameRef("PetButton"..id, pet[id])
+
+		-- Reference all buttons in our menu callback frame
+		proxy:Execute(([=[
+			table.insert(PetButtons, self:GetFrameRef("PetButton"..%.0f)); 
+		]=]):format(id, id))
+		
+	end
+
+	self.petbuttons = petbuttons
 	self.buttons = buttons
 	self.hover = hover
 
@@ -847,11 +1051,44 @@ Module.UpdateFadeAnchors = function(self)
 		self.hoverFrame:SetPoint("RIGHT", self.buttons[right], "RIGHT", 0, 0)
 	end
 
+	self:UpdateButtonGrids()
 end
 
 Module.UpdateButtonCount = function(self)
+	-- Update our smart button grids
+	self:UpdateButtonGrids()
+
 	-- Announce the updated button count to the world
 	self:SendMessage("GP_UPDATE_ACTIONBUTTON_COUNT")
+end
+
+Module.UpdateButtonGrids = function(self)
+	local db = self.db 
+	local numButtons = db.extraButtonsCount + 7
+	local button, buttonHasContent, forceGrid
+
+	-- Counting backwards from the end
+	-- to find the last button with content.
+	for buttonID = numButtons,1,-1 do
+		button = self.buttons[buttonID]
+		buttonHasContent = button:HasContent()
+
+		-- Check if the button has content,
+		-- and if so start forcing the grids.
+		if (not forceGrid) and (buttonHasContent) then
+			forceGrid = true
+		end
+
+		if (forceGrid) then 
+			button.showGrid = true
+			button.overrideAlphaWhenEmpty = .95
+		else 
+			button.showGrid = nil
+			button.overrideAlphaWhenEmpty = nil
+		end
+
+		button:UpdateGrid()
+	end
 end
 
 Module.UpdateCastOnDown = function(self)
@@ -873,8 +1110,6 @@ Module.UpdateConsolePortBindings = function(self)
 	if (not CP) then 
 		return 
 	end 
-
-	
 end
 
 Module.UpdateBindings = function(self)
@@ -907,12 +1142,14 @@ end
 Module.OnEvent = function(self, event, ...)
 	if (event == "UPDATE_BINDINGS") then 
 		self:UpdateBindings()
-	elseif (event == "PLAYER_ENTERING_WORLD") then 
+	elseif (event == "PLAYER_ENTERING_WORLD") then
 		self:UpdateBindings()
 	elseif (event == "PLAYER_REGEN_DISABLED") then
 		IN_COMBAT = true 
-	elseif (event == "PLAYER_REGEN_ENABLED") then 
+	elseif (event == "PLAYER_REGEN_ENABLED") then
 		IN_COMBAT = false
+	elseif (event == "ACTIONBAR_SLOT_CHANGED") then
+		self:UpdateButtonGrids()
 	end 
 end 
 
@@ -982,19 +1219,41 @@ Module.OnInit = function(self)
 	self.layout = GetLayout(self:GetName())
 	self.frame = self:CreateFrame("Frame", nil, "UICenter")
 
+	-- Secure frame used by the menu system to interact with our secure buttons.
 	local proxy = self:CreateFrame("Frame", nil, parent, "SecureHandlerAttributeTemplate")
-	proxy.UpdateCastOnDown = function(proxy) self:UpdateCastOnDown() end
-	proxy.UpdateFading = function(proxy) self:UpdateFading() end
-	proxy.UpdateFadeAnchors = function(proxy) self:UpdateFadeAnchors() end
-	proxy.UpdateButtonCount = function(proxy) self:UpdateButtonCount() end
+
+	-- Add some module methods to the proxy.
+	for _,method in pairs({
+		"UpdateCastOnDown",
+		"UpdateFading",
+		"UpdateFadeAnchors",
+		"UpdateButtonCount"
+	}) do
+		proxy[method] = function() self[method](self) end
+	end
+
+	-- Copy all saved settings to our secure proxy frame.
 	for key,value in pairs(self.db) do 
 		proxy:SetAttribute(key,value)
 	end 
-	proxy:Execute([=[ Buttons = table.new(); Pagers = table.new(); ]=])
+
+	-- Create tables to hold the buttons
+	-- within the restricted environment.
+	proxy:Execute([=[ 
+		Buttons = table.new();
+		Pagers = table.new();
+		PetButtons = table.new();
+		StanceButtons = table.new();
+	]=])
+
+	-- Apply references and attributes used for updates.
 	proxy:SetFrameRef("UICenter", self:GetFrame("UICenter"))
-	proxy:SetAttribute("BOTTOMLEFT_ACTIONBAR_PAGE", _G.BOTTOMLEFT_ACTIONBAR_PAGE);
+	proxy:SetAttribute("BOTTOMLEFT_ACTIONBAR_PAGE", BOTTOMLEFT_ACTIONBAR_PAGE);
 	proxy:SetAttribute("arrangeButtons", secureSnippets.arrangeButtons)
+	proxy:SetAttribute("arrangePetButtons", secureSnippets.arrangePetButtons)
 	proxy:SetAttribute("_onattributechanged", secureSnippets.attributeChanged)
+
+	-- Reference it for later use
 	self.proxyUpdater = proxy
 
 	-- Spawn the buttons
@@ -1016,4 +1275,5 @@ Module.OnEnable = function(self)
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
 	self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
 	self:RegisterEvent("PLAYER_REGEN_DISABLED", "OnEvent")
+	self:RegisterEvent("ACTIONBAR_SLOT_CHANGED", "OnEvent")
 end
