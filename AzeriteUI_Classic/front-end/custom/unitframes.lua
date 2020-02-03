@@ -2150,9 +2150,9 @@ UnitFrameRaid.OnInit = function(self)
 		self:DisableUIWidget("UnitFrameRaid") 
 	end
 
-	-- Only show it in raids of 6 or more players 
+	-- Only show it in raids, not parties.
 	-- Use an attribute driver to do it so the normal unitframe visibility handler can remain unchanged
-	local visDriver = dev and "[@player,exists]show;hide" or "[@raid6,exists]show;hide"
+	local visDriver = dev and "[@player,exists]show;hide" or "[group:raid]show;hide"
 	RegisterAttributeDriver(self.frame, "state-vis", self.db.enableRaidFrames and visDriver or "hide")
 
 	local style = function(frame, unit, id, _, ...)
