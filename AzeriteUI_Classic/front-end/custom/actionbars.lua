@@ -112,6 +112,9 @@ local secureSnippets = {
 			button:SetPoint("BOTTOMLEFT", UICenter, "BOTTOM", startX + ((id-1) * (buttonSize + buttonSpacing)), startY);
 		end
 
+		-- lua callback to update the hover frame anchors to the current layout
+		self:CallMethod("UpdatePetFadeAnchors"); 
+
 	]=],
 
 	attributeChanged = [=[
@@ -152,6 +155,26 @@ local secureSnippets = {
 		elseif (name == "change-castondown") then 
 			self:SetAttribute("castOnDown", value and true or false); 
 			self:CallMethod("UpdateCastOnDown"); 
+
+		elseif (name == "change-petbarenabled") then 
+			self:SetAttribute("petBarEnabled", value and true or false); 
+
+			for i = 1,10 do
+				local pager = PetPagers[i]; 
+				if value then 
+					if (not pager:IsShown()) then 
+						pager:Show(); 
+					end 
+				else 
+					if pager:IsShown() then 
+						pager:Hide(); 
+					end 
+				end 
+			end
+
+			-- lua callback to update the hover frame anchors to the current layout
+			self:CallMethod("UpdatePetFadeAnchors"); 
+			
 		elseif (name == "change-buttonlock") then 
 			self:SetAttribute("buttonLock", value and true or false); 
 
@@ -894,15 +917,22 @@ Module.SpawnButtons = function(self)
 
 		-- Link the buttons and their pagers 
 		proxy:SetFrameRef("PetButton"..id, pet[id])
+		proxy:SetFrameRef("PetPager"..id, pet[id]:GetPager())
 
+		if (not db.petBarEnabled) then
+			pet[id]:GetPager():Hide()
+		end
+		
 		-- Reference all buttons in our menu callback frame
 		proxy:Execute(([=[
 			table.insert(PetButtons, self:GetFrameRef("PetButton"..%.0f)); 
+			table.insert(PetPagers, self:GetFrameRef("PetPager"..%.0f)); 
 		]=]):format(id, id))
 		
 	end
 
-	self.petbuttons = petbuttons
+	self.petFrame = self.frame:CreateFrame("Frame")
+	self.petbuttons = pet
 	self.buttons = buttons
 	self.hover = hover
 
@@ -998,7 +1028,7 @@ Module.UpdateFadeAnchors = function(self)
 	local db = self.db
 
 	self.frame:ClearAllPoints()
-	self.hoverFrame:ClearAllPoints() 
+	self.hoverFrame:ClearAllPoints()
 
 	-- Parse buttons for hoverbutton IDs
 	local first, last, left, right, top, bottom, mLeft, mRight, mTop, mBottom
@@ -1052,6 +1082,17 @@ Module.UpdateFadeAnchors = function(self)
 	end
 
 	self:UpdateButtonGrids()
+end
+
+Module.UpdatePetFadeAnchors = function(self)
+	local db = self.db
+	self.petFrame:ClearAllPoints()
+	if (self.db.petBarEnabled) then
+		self.petFrame:SetPoint("TOPLEFT", self.petbuttons[1], "TOPLEFT")
+		self.petFrame:SetPoint("BOTTOMRIGHT", self.petbuttons[10], "BOTTOMRIGHT")
+	else
+		self.petFrame:SetAllPoints(self.frame)
+	end
 end
 
 Module.UpdateButtonCount = function(self)
@@ -1135,6 +1176,7 @@ Module.UpdateSettings = function(self, event, ...)
 	local db = self.db
 	self:UpdateFading()
 	self:UpdateFadeAnchors()
+	self:UpdatePetFadeAnchors()
 	self:UpdateCastOnDown()
 	self:UpdateTooltipSettings()
 end 
@@ -1227,6 +1269,7 @@ Module.OnInit = function(self)
 		"UpdateCastOnDown",
 		"UpdateFading",
 		"UpdateFadeAnchors",
+		"UpdatePetFadeAnchors",
 		"UpdateButtonCount"
 	}) do
 		proxy[method] = function() self[method](self) end
@@ -1243,6 +1286,7 @@ Module.OnInit = function(self)
 		Buttons = table.new();
 		Pagers = table.new();
 		PetButtons = table.new();
+		PetPagers = table.new();
 		StanceButtons = table.new();
 	]=])
 
