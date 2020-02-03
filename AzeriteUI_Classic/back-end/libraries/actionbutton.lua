@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 74)
+local LibSecureButton = Wheel:Set("LibSecureButton", 75)
 if (not LibSecureButton) then
 	return
 end
@@ -1176,7 +1176,7 @@ PetButton.Update = function(self)
 	--self:UpdateFlash()
 	--self:UpdateUsable()
 	--self:UpdateGrid()
-	--self:UpdateAutoCast()
+	self:UpdateAutoCast()
 
 	if self.PostUpdate then 
 		self:PostUpdate()
@@ -1184,11 +1184,42 @@ PetButton.Update = function(self)
 
 end
 
-PetButton.UpdateAutoCast = ActionButton.UpdateAutoCast
+PetButton.UpdateAutoCast = function(self)
+	local name, texture, isToken, isActive, autoCastAllowed, autoCastEnabled, spellID = GetPetActionInfo(self.id)
+
+	if (name and autoCastAllowed) then 
+		if (autoCastEnabled) then 
+			if (not self.SpellAutoCast.Ants.Anim:IsPlaying()) then
+				self.SpellAutoCast.Ants.Anim:Play()
+				self.SpellAutoCast.Glow.Anim:Play()
+			end
+			self.SpellAutoCast:SetAlpha(1)
+		else 
+			if (self.SpellAutoCast.Ants.Anim:IsPlaying()) then
+				self.SpellAutoCast.Ants.Anim:Pause()
+				self.SpellAutoCast.Glow.Anim:Pause()
+			end
+			self.SpellAutoCast:SetAlpha(.5)
+		end 
+		self.SpellAutoCast:Show()
+	else 
+		self.SpellAutoCast:Hide()
+	end 
+end
+
 PetButton.UpdateBinding = ActionButton.UpdateBinding
 
 -- Getters
 ----------------------------------------------------
+PetButton.GetPager = function(self)
+	return self._pager
+end 
+
+PetButton.GetSpellID = function(self)
+	local name, texture, isToken, isActive, autoCastAllowed, autoCastEnabled, spellID = GetPetActionInfo(self.id)
+	return spellID
+end
+
 PetButton.GetBindingText = ActionButton.GetBindingText
 PetButton.GetTooltip = ActionButton.GetTooltip
 
@@ -1546,7 +1577,14 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 
 	local button
 	if (buttonType == "pet") then 
-		button = setmetatable(visibility:CreateFrame("CheckButton", name, "SecureActionButtonTemplate"), PetButton_MT) -- PetActionButtonTemplate
+		-- Add a page driver layer, basically a fake bar for the current button
+		local page = visibility:CreateFrame("Frame", nil, "SecureHandlerAttributeTemplate")
+		--page.id = 0
+		page.AddDebugMessage = DEBUG_ENABLED and self.AddDebugMessageFormatted or nil
+		--page:SetID(0) 
+		--page:SetAttribute("_onattributechanged", DEBUG_ENABLED and SECURE.Page_OnAttributeChanged_Debug or SECURE.Page_OnAttributeChanged)
+
+		button = setmetatable(page:CreateFrame("CheckButton", name, "SecureActionButtonTemplate"), PetButton_MT) -- PetActionButtonTemplate
 		button:SetFrameStrata("LOW")
 
 		-- Link the button to the visibility layer
@@ -1570,6 +1608,7 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 		button:SetAttribute("buttonLock", true)
 		button.id = buttonID
 		button._owner = visibility
+		button._pager = page
 
 		button:SetScript("OnEnter", PetButton.OnEnter)
 		button:SetScript("OnLeave", PetButton.OnLeave)
@@ -1582,7 +1621,7 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 		button:SetAttribute("alt-ctrl-shift-type*", "stop")
 
 		-- A little magic to allow us to toggle autocasting of pet abilities
-		visibility:WrapScript(button, "PreClick", [[
+		page:WrapScript(button, "PreClick", [[
 			if (button ~= "RightButton") then 
 				if (self:GetAttribute("type2")) then 
 					self:SetAttribute("type2", nil); 
@@ -1608,6 +1647,10 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 			end 
 		]]) 
 		
+		page:SetFrameRef("Visibility", visibility)
+		page:SetFrameRef("Button", button)
+		visibility:SetFrameRef("Page", page)
+
 		button:SetAttribute("OnDragStart", [[
 			local id = self:GetID(); 
 			local buttonLock = self:GetAttribute("buttonLock"); 
@@ -1618,19 +1661,19 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 		
 		-- When a spell is dragged from a button
 		-- *This never fires when cast on down is enabled. ARGH! 
-		visibility:WrapScript(button, "OnDragStart", [[
+		page:WrapScript(button, "OnDragStart", [[
 			return self:RunAttribute("OnDragStart")
 		]])
 
 		-- Bartender says: 
 		-- Wrap twice, because the post-script is not run when the pre-script causes a pickup (doh)
 		-- we also need some phony message, or it won't work =/
-		visibility:WrapScript(button, "OnDragStart", [[
+		page:WrapScript(button, "OnDragStart", [[
 			return "message", "update"
 		]])
 
 		-- When a spell is dropped onto a button
-		visibility:WrapScript(button, "OnReceiveDrag", [[
+		page:WrapScript(button, "OnReceiveDrag", [[
 			local kind, value, subtype, extra = ...
 			if ((not kind) or (not value)) then 
 				return false 
@@ -1642,7 +1685,7 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 				return "petaction", id
 			end 
 		]])
-		visibility:WrapScript(button, "OnReceiveDrag", [[
+		page:WrapScript(button, "OnReceiveDrag", [[
 			return "message", "update"
 		]])
 
@@ -1651,6 +1694,12 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 		-- enable the visibility driver
 		RegisterAttributeDriver(visibility, "state-vis", visibilityDriver)
 
+		-- not run by a page driver
+		page:SetAttribute("state-page", "0") 
+
+		-- just in case we're not run by a header, default to state 0
+		button:SetAttribute("state", "0")
+		
 
 	elseif (buttonType == "stance") then
 		button = setmetatable(visibility:CreateFrame("CheckButton", name, "StanceButtonTemplate"), StanceButton_MT)
