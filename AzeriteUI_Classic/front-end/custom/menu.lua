@@ -801,6 +801,13 @@ Module.CreateMenuTable = function(self)
 					}
 				},
 				{
+					enabledTitle = L_ENABLED:format(TUTORIAL_TITLE61_HUNTER),
+					disabledTitle = L_DISABLED:format(TUTORIAL_TITLE61_HUNTER),
+					type = "TOGGLE_VALUE", hasWindow = false, 
+					configDB = "ActionBarMain", configKey = "petBarEnabled", 
+					proxyModule = "ActionBarMain"
+				},
+				{
 					enabledTitle = L_ENABLED:format(L["Cast on Down"]),
 					disabledTitle = L_DISABLED:format(L["Cast on Down"]),
 					type = "TOGGLE_VALUE", hasWindow = false, 
