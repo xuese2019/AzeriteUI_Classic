@@ -61,6 +61,12 @@ Module.AttachModuleFrame = function(self, moduleName)
 		if frame then 
 			self:RegisterObjectFade(frame)
 		end 
+		-- Can't get less elegant than this nonsense.
+		if (moduleName == "ActionBarMain") then
+			if (module.petFrame) then
+				self:RegisterObjectFade(module.petFrame)
+			end
+		end
 	end 
 end 
 
@@ -71,6 +77,11 @@ Module.DetachModuleFrame = function(self, moduleName)
 		if frame then 
 			self:UnregisterObjectFade(frame)
 		end 
+		if (moduleName == "ActionBarMain") then
+			if (module.petFrame) then
+				self:UnregisterObjectFade(module.petFrame)
+			end
+		end
 	end 
 end 
 
