@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.94-RC] 2020-02-03
+### Added
+- Added the first draft of the pet bar. Finally you can order your pet around, do something else than just stand there while mindcontrolling opposing players, and even finish killing Emberstrife for your UBRS attunement quest without having to disable the addon mid fight. 
+
+### Changed
+- Primary chat window buttons will now become visible when hovering over the window.
+- Empty backdrops of actionbuttons will now be visible if there are visible buttons with content farther down along the bars. This is to prevent "holes" in the layout.
+
+### Fixed
+- PvP rank names in unit tooltips should no longer show your own faction's rank names on players from the opposite faction.
+
 ## [1.0.93-RC] 2020-01-29
 ### Changed
 - 5 player party frames will no longer be used when player is in a raid group, even if that raid group has less than 5 total members. Party frames by default only show the raid subgroup you're in, leaving people placed in other groups invisible. This behavior was unintended, so we're sticking to party frames with portraits for parties, and smaller raid frames for any and all raid groups. 
