@@ -1,4 +1,4 @@
-local LibBlizzard = Wheel:Set("LibBlizzard", 40)
+local LibBlizzard = Wheel:Set("LibBlizzard", 41)
 if (not LibBlizzard) then 
 	return
 end
@@ -140,7 +140,9 @@ UIWidgets["ActionBars"] = function(self)
 
 	for _,object in pairs({
 		"MainMenuBarVehicleLeaveButton",
+		"MainMenuExpBar",
 		"PetActionBarFrame",
+		"ReputationWatchBar",
 		"StanceBarFrame",
 		"TutorialFrameAlertButton1",
 		"TutorialFrameAlertButton2",
@@ -171,6 +173,7 @@ UIWidgets["ActionBars"] = function(self)
 		"MultiBarLeft",
 		"MultiBarRight",
 		"PetActionBarFrame",
+		"ReputationWatchBar",
 		"StanceBarFrame",
 		"StreamingIcon"
 	}) do 
