@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.95-RC] 2020-02-06
+### Added
+- The pet buttons have been added to the `/bind` mode.
+
+### Changed
+- Actionbutton backdrops no longer become visible when you're holding a pet ability on the cursor. This was a remnant from retail where it's possible to put pet abilities on normal actionbars, something we cannot do in Classic.
+
+### Fixed
+- You should now be able to toggle autocasting of pet abilities by right-clicking the ability on the pet bar, or using your keybind.
+- The Blizzard reputation watch bar should no longer invisibly interfere with your ability to click the bottom part of the action bars when you are tracking a reputation.
+
 ## [1.0.94-RC] 2020-02-03
 ### Added
 - Added the first draft of the pet bar. Finally you can order your pet around, do something else than just stand there while mindcontrolling opposing players, and even finish killing Emberstrife for your UBRS attunement quest without having to disable the addon mid fight. 
