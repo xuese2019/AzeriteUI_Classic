@@ -444,9 +444,10 @@ local OnTooltipSetUnit = function(tooltip)
 				end
 			end
 		end
-		if (data.pvpRankName) then 
+		if (data.pvpRankName) then
 			displayName = displayName .. Colors.quest.gray.colorCode.. " (" .. data.pvpRankName .. ")|r"
 		end
+
 	else 
 		if data.isBoss then
 			displayName = BOSS_TEXTURE .. " " .. displayName
