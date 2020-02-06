@@ -670,6 +670,9 @@ Module.OnInit = function(self)
 		for id,button in ActionBarMain:GetButtons() do 
 			self:RegisterButton(button)
 		end
+		for id,button in ActionBarMain:GetPetButtons() do 
+			self:RegisterButton(button)
+		end
 	end 
 end 
 

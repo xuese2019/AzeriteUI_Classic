@@ -340,10 +340,14 @@ local BindMode_MenuButton_PostUpdate = Core_MenuButton_Layers_PostUpdate
 
 -- BindButton PostCreate 
 local BindMode_BindButton_PostCreate = function(self)
+	--print("self,bind", self.button:GetWidth(), self:GetWidth())
+
+	local width, height = self.button:GetSize()
+	
 	self.bg:ClearAllPoints()
 	self.bg:SetPoint("CENTER", 0, 0)
 	self.bg:SetTexture(GetMedia("actionbutton_circular_mask"))
-	self.bg:SetSize(64 + 8, 64 + 8) -- icon is 44, 44
+	self.bg:SetSize(width + 8, height + 8) -- icon is 44, 44
 	self.bg:SetVertexColor(.4, .6, .9, .75)
 	self.msg:SetFontObject(GetFont(16, true))
 end

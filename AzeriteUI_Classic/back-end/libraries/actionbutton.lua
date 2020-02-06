@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 75)
+local LibSecureButton = Wheel:Set("LibSecureButton", 76)
 if (not LibSecureButton) then
 	return
 end
@@ -81,10 +81,24 @@ LibSecureButton.allbuttons = LibSecureButton.allbuttons or {}
 LibSecureButton.callbacks = LibSecureButton.callbacks or {} 
 LibSecureButton.numButtons = LibSecureButton.numButtons or 0 -- total number of spawned buttons 
 
+-- Frame to securely hide items
+if (not LibSecureButton.frame) then
+	local frame = CreateFrame("Frame", nil, UIParent, "SecureHandlerAttributeTemplate")
+	frame:Hide()
+	frame:SetPoint("TOPLEFT", 0, 0)
+	frame:SetPoint("BOTTOMRIGHT", 0, 0)
+	frame.children = {}
+	RegisterAttributeDriver(frame, "state-visibility", "hide")
+
+	-- Attach it to our library
+	LibSecureButton.frame = frame
+end
+
 -- Shortcuts
 local AllButtons = LibSecureButton.allbuttons
 local Buttons = LibSecureButton.buttons
 local Callbacks = LibSecureButton.callbacks
+local UIHider = LibSecureButton.frame
 
 -- Cache of reagent IDs by SpellIDs that require them.
 local ReagentBySpellID = {}
@@ -352,12 +366,8 @@ local UpdateActionButton = function(self, event, ...)
 		--self:UpdateCheckedState()
 
 	elseif (event == "CURSOR_UPDATE") 
-		or (event == "ACTIONBAR_SHOWGRID") or (event == "PET_BAR_SHOWGRID") 
-		or (event == "ACTIONBAR_HIDEGRID") or (event == "PET_BAR_HIDEGRID") then 
+		or (event == "ACTIONBAR_SHOWGRID") or (event == "ACTIONBAR_HIDEGRID") then 
 			self:UpdateGrid()
-
-	elseif (event == "PET_BAR_UPDATE") then 
-		self:UpdateAutoCast()
 
 	elseif (event == "LOSS_OF_CONTROL_ADDED") then
 		self:UpdateCooldown()
@@ -430,7 +440,6 @@ local UpdatePetButton = function(self, event, ...)
 	elseif (event == "PET_BAR_HIDEGRID") then
 		--self:HideGrid()
 	elseif (event == "UPDATE_BINDINGS") then
-		print("updating pet binds")
 		self:UpdateBinding()
 	end
 end
@@ -867,7 +876,7 @@ ActionButton.UpdateGrid = function(self)
 			self:SetAlpha(1)
 		else 
 			local cursor = GetCursorInfo()
-			if (cursor == "petaction") or (cursor == "spell") or (cursor == "macro") or (cursor == "mount") or (cursor == "item") or (cursor == "battlepet") then 
+			if (cursor == "spell") or (cursor == "macro") or (cursor == "mount") or (cursor == "item") or (cursor == "battlepet") then 
 				self:SetAlpha(1)
 			else
 				if (self.showGrid) then 
@@ -1037,9 +1046,9 @@ ActionButton.OnEnable = function(self)
 	self:RegisterEvent("CURSOR_UPDATE", UpdateActionButton)
 	self:RegisterEvent("LOSS_OF_CONTROL_ADDED", UpdateActionButton)
 	self:RegisterEvent("LOSS_OF_CONTROL_UPDATE", UpdateActionButton)
-	self:RegisterEvent("PET_BAR_HIDEGRID", UpdateActionButton)
-	self:RegisterEvent("PET_BAR_SHOWGRID", UpdateActionButton)
-	self:RegisterEvent("PET_BAR_UPDATE", UpdateActionButton)
+	--self:RegisterEvent("PET_BAR_HIDEGRID", UpdateActionButton)
+	--self:RegisterEvent("PET_BAR_SHOWGRID", UpdateActionButton)
+	--self:RegisterEvent("PET_BAR_UPDATE", UpdateActionButton)
 	self:RegisterEvent("PLAYER_ENTER_COMBAT", UpdateActionButton)
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", UpdateActionButton)
 	self:RegisterEvent("PLAYER_LEAVE_COMBAT", UpdateActionButton)
@@ -1068,9 +1077,9 @@ ActionButton.OnDisable = function(self)
 	self:UnregisterEvent("CURSOR_UPDATE", UpdateActionButton)
 	self:UnregisterEvent("LOSS_OF_CONTROL_ADDED", UpdateActionButton)
 	self:UnregisterEvent("LOSS_OF_CONTROL_UPDATE", UpdateActionButton)
-	self:UnregisterEvent("PET_BAR_HIDEGRID", UpdateActionButton)
-	self:UnregisterEvent("PET_BAR_SHOWGRID", UpdateActionButton)
-	self:UnregisterEvent("PET_BAR_UPDATE", UpdateActionButton)
+	--self:UnregisterEvent("PET_BAR_HIDEGRID", UpdateActionButton)
+	--self:UnregisterEvent("PET_BAR_SHOWGRID", UpdateActionButton)
+	--self:UnregisterEvent("PET_BAR_UPDATE", UpdateActionButton)
 	self:UnregisterEvent("PLAYER_ENTER_COMBAT", UpdateActionButton)
 	self:UnregisterEvent("PLAYER_ENTERING_WORLD", UpdateActionButton)
 	self:UnregisterEvent("PLAYER_LEAVE_COMBAT", UpdateActionButton)
@@ -1124,6 +1133,7 @@ ActionButton.OnLeave = function(self)
 end
 
 ActionButton.PreClick = function(self) 
+	self:SetChecked(false)
 end
 
 ActionButton.PostClick = function(self) 
@@ -1284,6 +1294,18 @@ PetButton.OnLeave = function(self)
 	end 
 end
 
+PetButton.OnDragStart = function(self)
+	self:SetChecked(false)
+end
+
+PetButton.OnReceiveDrag = function(self)
+	self:SetChecked(false)
+end
+
+PetButton.PreClick = function(self) 
+	self:SetChecked(false)
+end
+
 PetButton.OnEvent = ActionButton.OnEvent
 
 -- StanceButton Template
@@ -1328,7 +1350,7 @@ end
 
 -- Library API
 ----------------------------------------------------
-LibSecureButton.CreateButtonLayers = function(self, button, buttonType)
+LibSecureButton.CreateButtonLayers = function(self, button)
 
 	local icon = button:CreateTexture()
 	icon:SetDrawLayer("BACKGROUND", 2)
@@ -1519,6 +1541,36 @@ LibSecureButton.CreateButtonSpellHighlight = function(self, button)
 	button.SpellHighlight.Texture = texture
 end
 
+-- Prepare a Blizzard Pet Button for our usage
+LibSecureButton.PrepareButton = function(self, button)
+	local name = button:GetName()
+
+	button:UnregisterAllEvents()
+	button:SetScript("OnEvent", nil)
+	button:SetScript("OnDragStart",nil)
+	button:SetScript("OnReceiveDrag",nil)
+	button:SetScript("OnUpdate",nil)
+	button:SetNormalTexture("")
+	button.SpellHighlightAnim:Stop()
+	for _,element in pairs({
+		_G[name.."AutoCastable"],
+		_G[name.."Cooldown"],
+		_G[name.."Flash"],
+		_G[name.."HotKey"],
+		_G[name.."Icon"],
+		_G[name.."Shine"],
+		button.SpellHighlightTexture,
+		button:GetNormalTexture(),
+		button:GetPushedTexture(),
+		button:GetHighlightTexture()
+	}) do
+		element:SetParent(UIHider)
+	end
+
+
+	return button
+end
+
 -- Public API
 ----------------------------------------------------
 LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTemplate, ...)
@@ -1584,14 +1636,14 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 		--page:SetID(0) 
 		--page:SetAttribute("_onattributechanged", DEBUG_ENABLED and SECURE.Page_OnAttributeChanged_Debug or SECURE.Page_OnAttributeChanged)
 
-		button = setmetatable(page:CreateFrame("CheckButton", name, "SecureActionButtonTemplate"), PetButton_MT) -- PetActionButtonTemplate
+		button = setmetatable(LibSecureButton:PrepareButton(page:CreateFrame("CheckButton", name, "PetActionButtonTemplate")), PetButton_MT)
 		button:SetFrameStrata("LOW")
 
 		-- Link the button to the visibility layer
 		visibility:SetFrameRef("Button", button)
 
 		-- Create button layers
-		LibSecureButton:CreateButtonLayers(button, buttonType)
+		LibSecureButton:CreateButtonLayers(button)
 		LibSecureButton:CreateButtonOverlay(button)
 		LibSecureButton:CreateButtonCooldowns(button)
 		LibSecureButton:CreateButtonCount(button)
@@ -1612,6 +1664,8 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 
 		button:SetScript("OnEnter", PetButton.OnEnter)
 		button:SetScript("OnLeave", PetButton.OnLeave)
+		button:SetScript("OnDragStart", PetButton.OnDragStart)
+		button:SetScript("OnReceiveDrag", PetButton.OnReceiveDrag)
 
 		-- This allows drag functionality, but stops the casting, 
 		-- thus allowing us to drag spells even with cast on down, wohoo! 
@@ -1619,33 +1673,6 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 		-- since the override bindings we use work by sending mouse events to the listeners, 
 		-- meaning there's no way to separate keys and mouse buttons. 
 		button:SetAttribute("alt-ctrl-shift-type*", "stop")
-
-		-- A little magic to allow us to toggle autocasting of pet abilities
-		page:WrapScript(button, "PreClick", [[
-			if (button ~= "RightButton") then 
-				if (self:GetAttribute("type2")) then 
-					self:SetAttribute("type2", nil); 
-				end 
-				return 
-			end
-			local actionpage = self:GetAttribute("actionpage"); 
-			if (not actionpage) then
-				if (self:GetAttribute("type2")) then 
-					self:SetAttribute("type2", nil); 
-				end 
-				return
-			end
-			local id = self:GetID(); 
-			local action = (actionpage > 1) and ((actionpage - 1)*12 + id) or id; 
-			local actionType, id, subType = GetActionInfo(action);
-			if (subType == "pet") and (id ~= 0) then 
-				self:SetAttribute("type2", "macro"); 
-			else 
-				if (self:GetAttribute("type2")) then 
-					self:SetAttribute("type2", nil); 
-				end 
-			end 
-		]]) 
 		
 		page:SetFrameRef("Visibility", visibility)
 		page:SetFrameRef("Button", button)
@@ -1654,7 +1681,7 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 		button:SetAttribute("OnDragStart", [[
 			local id = self:GetID(); 
 			local buttonLock = self:GetAttribute("buttonLock"); 
-			if ( (not buttonLock) or (IsShiftKeyDown() and IsAltKeyDown() and IsControlKeyDown()) ) then
+			if ((not buttonLock) or (IsShiftKeyDown() and IsAltKeyDown() and IsControlKeyDown())) then
 				return "petaction", id
 			end
 		]])
@@ -1679,9 +1706,9 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 				return false 
 			end
 			local button = self:GetFrameRef("Button"); 
-			local buttonLock = button and button:GetAttribute("buttonLock"); 
-			local id = self:GetID(); 
-			if id and ((not buttonLock) or (IsShiftKeyDown() and IsAltKeyDown() and IsControlKeyDown())) then
+			local buttonLock = button:GetAttribute("buttonLock"); 
+			local id = button:GetID(); 
+			if ((not buttonLock) or (IsShiftKeyDown() and IsAltKeyDown() and IsControlKeyDown())) then
 				return "petaction", id
 			end 
 		]])
@@ -1696,8 +1723,6 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 
 		-- not run by a page driver
 		page:SetAttribute("state-page", "0") 
-
-		-- just in case we're not run by a header, default to state 0
 		button:SetAttribute("state", "0")
 		
 
@@ -1717,7 +1742,7 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 		button:SetFrameStrata("LOW")
 
 		-- Create button layers
-		LibSecureButton:CreateButtonLayers(button, buttonType)
+		LibSecureButton:CreateButtonLayers(button)
 		LibSecureButton:CreateButtonOverlay(button)
 		LibSecureButton:CreateButtonCooldowns(button)
 		LibSecureButton:CreateButtonCount(button)

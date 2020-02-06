@@ -182,6 +182,11 @@ local secureSnippets = {
 			for id, button in ipairs(Buttons) do 
 				button:SetAttribute("buttonLock", value);
 			end
+
+			-- change all pet button attributes
+			for id, button in ipairs(PetButtons) do 
+				button:SetAttribute("buttonLock", value);
+			end
 		end 
 
 	]=]
@@ -980,7 +985,7 @@ Module.SpawnButtons = function(self)
 	hoverFrame:SetScript("OnEvent", function(self, event, ...) 
 		if (event == "ACTIONBAR_SHOWGRID") then 
 			self.forced = true
-		elseif (event == "ACTIONBAR_HIDEGRID") then
+		elseif (event == "buttonLock") then
 			self.forced = nil
 		end 
 	end)
@@ -998,6 +1003,10 @@ end
 
 Module.GetButtons = function(self)
 	return pairs(self.buttons)
+end
+
+Module.GetPetButtons = function(self)
+	return pairs(self.petbuttons)
 end
 
 Module.SetForcedVisibility = function(self, force)
