@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 76)
+local LibSecureButton = Wheel:Set("LibSecureButton", 77)
 if (not LibSecureButton) then
 	return
 end
@@ -434,7 +434,7 @@ local UpdatePetButton = function(self, event, ...)
 	elseif (event == "PLAYER_FARSIGHT_FOCUS_CHANGED") then
 		self:Update()
 	elseif (event == "PET_BAR_UPDATE_COOLDOWN") then
-		--self:UpdateCooldown()
+		self:UpdateCooldown()
 	elseif (event == "PET_BAR_SHOWGRID") then
 		--self:ShowGrid()
 	elseif (event == "PET_BAR_HIDEGRID") then
@@ -1182,13 +1182,13 @@ PetButton.Update = function(self)
 
 	self:UpdateBinding()
 	--self:UpdateCount()
-	--self:UpdateCooldown()
+	self:UpdateCooldown()
 	--self:UpdateFlash()
 	--self:UpdateUsable()
 	--self:UpdateGrid()
 	self:UpdateAutoCast()
 
-	if self.PostUpdate then 
+	if (self.PostUpdate) then 
 		self:PostUpdate()
 	end 
 
@@ -1215,6 +1215,18 @@ PetButton.UpdateAutoCast = function(self)
 	else 
 		self.SpellAutoCast:Hide()
 	end 
+end
+
+PetButton.UpdateCooldown = function(self)
+	local Cooldown = self.Cooldown
+	if Cooldown then
+		local start, duration, enable = GetPetActionCooldown(self.id)
+		SetCooldown(Cooldown, start, duration, enable, false, 1)
+
+		if (self.PostUpdateCooldown) then 
+			return self:PostUpdateCooldown(self.Cooldown)
+		end 
+	end
 end
 
 PetButton.UpdateBinding = ActionButton.UpdateBinding
