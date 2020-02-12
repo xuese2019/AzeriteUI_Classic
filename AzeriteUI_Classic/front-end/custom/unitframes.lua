@@ -1271,7 +1271,7 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, layout, ...)
 	local prefix = "CombatIndicator"
 	local day = tonumber(date("%d"))
 	local month = tonumber(date("%m"))
-	if ((month == 2) and (day >= 12) and (day <= 26)) then 
+	if ((month == 2) and (day >= 11) and (day <= 16)) then 
 		prefix = "Love"..prefix
 	end
 	combat:SetSize(unpack(layout[prefix.."Size"]))
@@ -1749,7 +1749,7 @@ UnitStyles.StyleTargetFrame = function(self, unit, id, layout, ...)
 	local prefix = "TargetIndicator"
 	local day = tonumber(date("%d"))
 	local month = tonumber(date("%m"))
-	if ((month == 2) and (day >= 12) and (day <= 26)) then 
+	if ((month == 2) and (day >= 11) and (day <= 16)) then 
 		prefix = "Love"..prefix
 	end
 
