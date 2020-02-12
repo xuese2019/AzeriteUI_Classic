@@ -959,7 +959,7 @@ Module.SpawnButtons = function(self)
 					end 
 				end 
 			else 
-				if self.isMouseOver then 
+				if (self.isMouseOver) then 
 					self.isMouseOver = nil
 					if (not self.fadeOutTime) then 
 						self.fadeOutTime = fadeOutTime
@@ -985,7 +985,7 @@ Module.SpawnButtons = function(self)
 	hoverFrame:SetScript("OnEvent", function(self, event, ...) 
 		if (event == "ACTIONBAR_SHOWGRID") then 
 			self.forced = true
-		elseif (event == "buttonLock") then
+		elseif (event == "ACTIONBAR_HIDEGRID") or (event == "buttonLock") then
 			self.forced = nil
 		end 
 	end)
@@ -1036,9 +1036,6 @@ end
 Module.UpdateFadeAnchors = function(self)
 	local db = self.db
 
-	self.frame:ClearAllPoints()
-	self.hoverFrame:ClearAllPoints()
-
 	-- Parse buttons for hoverbutton IDs
 	local first, last, left, right, top, bottom, mLeft, mRight, mTop, mBottom
 	for id,button in ipairs(self.buttons) do 
@@ -1077,6 +1074,7 @@ Module.UpdateFadeAnchors = function(self)
 	end 
 
 	-- Setup main frame anchors for explorer mode! 
+	self.frame:ClearAllPoints()
 	self.frame:SetPoint("TOP", self.buttons[mTop], "TOP", 0, 0)
 	self.frame:SetPoint("BOTTOM", self.buttons[mBottom], "BOTTOM", 0, 0)
 	self.frame:SetPoint("LEFT", self.buttons[mLeft], "LEFT", 0, 0)
@@ -1084,6 +1082,7 @@ Module.UpdateFadeAnchors = function(self)
 
 	-- If we have hoverbuttons, setup the anchors
 	if (left and right and top and bottom) then 
+		self.hoverFrame:ClearAllPoints()
 		self.hoverFrame:SetPoint("TOP", self.buttons[top], "TOP", 0, 0)
 		self.hoverFrame:SetPoint("BOTTOM", self.buttons[bottom], "BOTTOM", 0, 0)
 		self.hoverFrame:SetPoint("LEFT", self.buttons[left], "LEFT", 0, 0)
@@ -1194,6 +1193,7 @@ Module.OnEvent = function(self, event, ...)
 	if (event == "UPDATE_BINDINGS") then 
 		self:UpdateBindings()
 	elseif (event == "PLAYER_ENTERING_WORLD") then
+		IN_COMBAT = false
 		self:UpdateBindings()
 	elseif (event == "PLAYER_REGEN_DISABLED") then
 		IN_COMBAT = true 
