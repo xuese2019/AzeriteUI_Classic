@@ -524,7 +524,7 @@ Update = function(self, event, unit, ...)
 		element:SetMinMaxValues(0, element.max)
 		element:SetValue(duration)
 	
-	elseif (event == "Forced") then
+	elseif (event == "Forced") or (event == "PLAYER_TARGET_CHANGED") then
 		if (LibCast:UnitCastingInfo(unit)) then
 			if (unit == "player") then 
 				return Update(self, "UNIT_SPELLCAST_START", unit)
@@ -630,5 +630,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 37)
+	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 38)
 end 
