@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.96-RC] 2020-02-12
+### Added
+- Added cooldowns to the pet bar.
+
+### Changed
+- Updated love festival dates for 2020.
+
+### Fixed
+- May or may not have fixed an issue with additional action buttons not fading properly.
+
 ## [1.0.95-RC] 2020-02-06
 ### Added
 - The pet buttons have been added to the `/bind` mode.
