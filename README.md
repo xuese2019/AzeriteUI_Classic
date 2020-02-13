@@ -1,7 +1,10 @@
 [ ![Become a Patreon](http://larsnorbergofficial.com/img/social-media-buttons-patreon-small.jpg) ](https://www.patreon.com/goldpawsstuff) 
 
-This is a Classic port of our custom user interface originally made for World of Warcraft: Battle For Azeroth! 
-Looking for AzeriteUI for WoW Retail? Get it [here](https://www.curseforge.com/wow/addons/azeriteui)!
+This is a custom user interface for WoW: Classic, with a fresh new design and brand new custom codebase at its core. Designed by Daniel "Blakmane" Troko & coded by Lars "Goldpaw" Norberg. 
+
+The motivation of this user interface is immersion, and a more simplified gaming experience then what the "norm" has turned into. This game has SO much information that if not handled carefully becomes cumbersome, therefore blocking the most important asset of the game, the world. The best interface is no interface at all, but in a game such as this that is not possible. But if we have to block away parts of the game world to see information about the game mechanics, then at least let’s make it dynamic, beautiful and in sync with the game's aesthetics. Let's make it Warcraft!  
+
+Looking for AzeriteUI for WoW: Battle For Azeroth? Get it [here](https://www.curseforge.com/wow/addons/azeriteui)!
 
 ## **Pledge to my work:**  
 * Patreon: [www.patreon.com/goldpawsstuff](https://www.patreon.com/goldpawsstuff)  
