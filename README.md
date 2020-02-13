@@ -24,8 +24,8 @@ Looking for AzeriteUI for WoW Retail? Get it [here](https://www.curseforge.com/w
 ### **How can I move things?**  
 * You can't. This is as much UX as UI, meaning the interface is designed around a concept, this isn't meant to be a pretty skin over your current interface, it's instead a full user experience system where how you interact with the game is affected. 
 
-### **How can I get more action buttons, and where are the pet- and stance bars?**  
-* The stance bar will be introduced as an optional feature in an upcoming update, as will the pet bar. If you need them right away, you can always use Bartender for it along with our [our Masque skin](https://www.curseforge.com/wow/addons/masque-azerite). 
+### **How can I get more action buttons, and where is the stance bar?**  
+* The stance bar will be introduced as an optional feature in an upcoming update. If you need it right away, you can always use Bartender for it along with our [our Masque skin](https://www.curseforge.com/wow/addons/masque-azerite). 
 * For more buttons, right-click the cogwheel icon in the bottom right corner of the screen. You can have a maximum of 24 buttons, which in effect is the main actionbar and the bar known in the default interface as the "bottom left multi action bar". 
 
 ### **How can I disable the actionbars?**
