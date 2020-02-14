@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.98-RC] 2020-02-14
+### Added
+- The pet bar now has similar fading options as the additional action buttons. So in addition to fully being able to toggle the pet bar, you can now choose its visibility between always, in combat and mouseover, or only on mouseover.
+
 ## [1.0.97-RC] 2020-02-14
 ### Changed
 - Player and target unit frames should now display two rows of auras, up from one.
