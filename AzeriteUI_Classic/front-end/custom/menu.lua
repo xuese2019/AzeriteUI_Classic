@@ -804,13 +804,6 @@ Module.CreateMenuTable = function(self)
 					title = L["Pet Bar"], type = nil, hasWindow = true, 
 					buttons = {
 						{
-							enabledTitle = L["Enabled"],
-							disabledTitle = L["Disabled"],
-							type = "TOGGLE_VALUE", hasWindow = false, 
-							configDB = "ActionBarMain", configKey = "petBarEnabled", 
-							proxyModule = "ActionBarMain"
-						},
-						{
 							title = L["Pet Bar Visibility"], type = nil, hasWindow = true, 
 							buttons = {
 								{
@@ -833,6 +826,13 @@ Module.CreateMenuTable = function(self)
 								}
 							}
 						},
+						{
+							enabledTitle = L["Enabled"],
+							disabledTitle = L["Disabled"],
+							type = "TOGGLE_VALUE", hasWindow = false, 
+							configDB = "ActionBarMain", configKey = "petBarEnabled", 
+							proxyModule = "ActionBarMain"
+						}
 					},
 				},
 				{
