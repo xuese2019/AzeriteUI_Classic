@@ -122,8 +122,8 @@ local secureSnippets = {
 			button:SetPoint("BOTTOMLEFT", UICenter, "BOTTOM", startX + ((id-1) * (buttonSize + buttonSpacing)), startY);
 		end
 
-		-- lua callback to update the hover frame anchors to the current layout
-		self:CallMethod("UpdatePetFadeAnchors"); 
+		-- lua callback to update the explorer mode anchors to the current layout
+		self:CallMethod("UpdateExplorerModeAnchors"); 
 
 	]=],
 
@@ -182,8 +182,8 @@ local secureSnippets = {
 				end 
 			end
 
-			-- lua callback to update the hover frame anchors to the current layout
-			self:CallMethod("UpdatePetFadeAnchors"); 
+			-- lua callback to update the explorer mode anchors to the current layout
+			self:CallMethod("UpdateExplorerModeAnchors"); 
 			
 		elseif (name == "change-buttonlock") then 
 			self:SetAttribute("buttonLock", value and true or false); 
@@ -335,7 +335,7 @@ local deprecated = {
 	visibilityPet = 1
 }
 
--- ActionButton Template
+-- ActionButton Template (Custom Methods)
 ----------------------------------------------------
 local ActionButton = {}
 
@@ -632,7 +632,7 @@ ActionButton.PostUpdateChargeCooldown = function(self, cooldown)
 	cooldown:SetSwipeColor(unpack(layout.ChargeCooldownSwipeColor))
 end
 
--- PetButton Template
+-- PetButton Template (Custom Methods)
 ----------------------------------------------------
 local PetButton = {}
 
@@ -791,17 +791,8 @@ PetButton.UpdateMouseOver = ActionButton.UpdateMouseOver
 PetButton.PostEnter = ActionButton.PostEnter
 PetButton.PostLeave = ActionButton.PostLeave
 
--- Module API
+-- Bar Creation
 ----------------------------------------------------
--- Just a proxy for the secure method. Only call out of combat.
-Module.ArrangeButtons = function(self)
-	local proxy = self:GetSecureUpdater()
-	if (proxy) then
-		proxy:Execute(proxy:GetAttribute("arrangeButtons"))
-		proxy:Execute(proxy:GetAttribute("arrangePetButtons"))
-	end
-end
-
 Module.SpawnExitButton = function(self)
 	local layout = self.layout
 
@@ -933,63 +924,19 @@ Module.SpawnPetBar = function(self)
 		]=]):format(id, id))
 		
 	end
-
-	self.petFrame = self.frame:CreateFrame("Frame")
 end
 
+-- Getters
+----------------------------------------------------
 Module.GetButtons = function(self)
 	return pairs(Buttons)
 end
 
-Module.GetPetButtons = function(self)
-	return pairs(PetButtons)
+Module.GetExplorerModeFrameAnchors = function(self)
+	return self:GetOverlayFrame(), self:GetOverlayFramePet()
 end
 
-Module.GetSecureUpdater = function(self)
-	if (not self.proxyUpdater) then
-		-- Secure frame used by the menu system to interact with our secure buttons.
-		local proxy = self:CreateFrame("Frame", nil, parent, "SecureHandlerAttributeTemplate")
-
-		-- Add some module methods to the proxy.
-		for _,method in pairs({
-			"UpdateCastOnDown",
-			"UpdateFading",
-			"UpdateFadeAnchors",
-			"UpdatePetFadeAnchors",
-			"UpdateButtonCount"
-		}) do
-			proxy[method] = function() self[method](self) end
-		end
-	
-		-- Copy all saved settings to our secure proxy frame.
-		for key,value in pairs(self.db) do 
-			proxy:SetAttribute(key,value)
-		end 
-	
-		-- Create tables to hold the buttons
-		-- within the restricted environment.
-		proxy:Execute([=[ 
-			Buttons = table.new();
-			Pagers = table.new();
-			PetButtons = table.new();
-			PetPagers = table.new();
-			StanceButtons = table.new();
-		]=])
-	
-		-- Apply references and attributes used for updates.
-		proxy:SetFrameRef("UICenter", self:GetFrame("UICenter"))
-		proxy:SetAttribute("BOTTOMLEFT_ACTIONBAR_PAGE", BOTTOMLEFT_ACTIONBAR_PAGE);
-		proxy:SetAttribute("arrangeButtons", secureSnippets.arrangeButtons)
-		proxy:SetAttribute("arrangePetButtons", secureSnippets.arrangePetButtons)
-		proxy:SetAttribute("_onattributechanged", secureSnippets.attributeChanged)
-	
-		-- Reference it for later use
-		self.proxyUpdater = proxy
-	end
-	return self.proxyUpdater
-end
-
-Module.GetActionBarHoverFrame = function(self)
+Module.GetFadeFrame = function(self)
 	if (not ActionBarHoverFrame) then 
 		ActionBarHoverFrame = self:CreateFrame("Frame")
 		ActionBarHoverFrame.timeLeft = 0
@@ -1053,12 +1000,70 @@ Module.GetActionBarHoverFrame = function(self)
 	return ActionBarHoverFrame
 end
 
-Module.GetPetBarHoverFrame = function(self)
+Module.GetFadeFramePet = function(self)
 	if (not self.petHoverFrame) then 
 	end
 	return self.petHoverFrame
 end
 
+Module.GetOverlayFrame = function(self)
+	return self.frame
+end
+
+Module.GetOverlayFramePet = function(self)
+	return self.frameOverlayPet
+end
+
+Module.GetPetButtons = function(self)
+	return pairs(PetButtons)
+end
+
+Module.GetSecureUpdater = function(self)
+	if (not self.proxyUpdater) then
+		-- Secure frame used by the menu system to interact with our secure buttons.
+		local proxy = self:CreateFrame("Frame", nil, parent, "SecureHandlerAttributeTemplate")
+
+		-- Add some module methods to the proxy.
+		for _,method in pairs({
+			"UpdateCastOnDown",
+			"UpdateFading",
+			"UpdateFadeAnchors",
+			"UpdateExplorerModeAnchors",
+			"UpdateButtonCount"
+		}) do
+			proxy[method] = function() self[method](self) end
+		end
+	
+		-- Copy all saved settings to our secure proxy frame.
+		for key,value in pairs(self.db) do 
+			proxy:SetAttribute(key,value)
+		end 
+	
+		-- Create tables to hold the buttons
+		-- within the restricted environment.
+		proxy:Execute([=[ 
+			Buttons = table.new();
+			Pagers = table.new();
+			PetButtons = table.new();
+			PetPagers = table.new();
+			StanceButtons = table.new();
+		]=])
+	
+		-- Apply references and attributes used for updates.
+		proxy:SetFrameRef("UICenter", self:GetFrame("UICenter"))
+		proxy:SetAttribute("BOTTOMLEFT_ACTIONBAR_PAGE", BOTTOMLEFT_ACTIONBAR_PAGE);
+		proxy:SetAttribute("arrangeButtons", secureSnippets.arrangeButtons)
+		proxy:SetAttribute("arrangePetButtons", secureSnippets.arrangePetButtons)
+		proxy:SetAttribute("_onattributechanged", secureSnippets.attributeChanged)
+	
+		-- Reference it for later use
+		self.proxyUpdater = proxy
+	end
+	return self.proxyUpdater
+end
+
+-- Setters
+----------------------------------------------------
 Module.SetForcedVisibility = function(self, force)
 	if (not ActionBarHoverFrame) then 
 		return 
@@ -1070,6 +1075,8 @@ Module.SetForcedVisibility = function(self, force)
 	end 
 end
 
+-- Updates
+----------------------------------------------------
 Module.UpdateFading = function(self)
 	local db = self.db
 	local combat = db.extraButtonsVisibility == "combat"
@@ -1078,6 +1085,19 @@ Module.UpdateFading = function(self)
 	ActionBarHoverFrame.incombat = combat
 	ActionBarHoverFrame.always = always
 end 
+
+Module.UpdateExplorerModeAnchors = function(self)
+	local db = self.db
+	local frame = self:GetOverlayFramePet()
+	if (self.db.petBarEnabled) then
+		frame:ClearAllPoints()
+		frame:SetPoint("TOPLEFT", PetButtons[1], "TOPLEFT")
+		frame:SetPoint("BOTTOMRIGHT", PetButtons[10], "BOTTOMRIGHT")
+	else
+		frame:ClearAllPoints()
+		frame:SetAllPoints(self:GetFrame())
+	end
+end
 
 Module.UpdateFadeAnchors = function(self)
 	local db = self.db
@@ -1128,7 +1148,7 @@ Module.UpdateFadeAnchors = function(self)
 
 	-- If we have hoverbuttons, setup the anchors
 	if (left and right and top and bottom) then 
-		local hover = self:GetActionBarHoverFrame()
+		local hover = self:GetFadeFrame()
 		hover:ClearAllPoints()
 		hover:SetPoint("TOP", Buttons[top], "TOP", 0, 0)
 		hover:SetPoint("BOTTOM", Buttons[bottom], "BOTTOM", 0, 0)
@@ -1137,17 +1157,6 @@ Module.UpdateFadeAnchors = function(self)
 	end
 
 	self:UpdateButtonGrids()
-end
-
-Module.UpdatePetFadeAnchors = function(self)
-	local db = self.db
-	self.petFrame:ClearAllPoints()
-	if (self.db.petBarEnabled) then
-		self.petFrame:SetPoint("TOPLEFT", PetButtons[1], "TOPLEFT")
-		self.petFrame:SetPoint("BOTTOMRIGHT", PetButtons[10], "BOTTOMRIGHT")
-	else
-		self.petFrame:SetAllPoints(self.frame)
-	end
 end
 
 Module.UpdateButtonCount = function(self)
@@ -1187,6 +1196,16 @@ Module.UpdateButtonGrids = function(self)
 	end
 end
 
+-- Just a proxy for the secure arrangement method.
+-- Only ever call this out of combat, as it does not check for it.
+Module.UpdateButtonLayout = function(self)
+	local proxy = self:GetSecureUpdater()
+	if (proxy) then
+		proxy:Execute(proxy:GetAttribute("arrangeButtons"))
+		proxy:Execute(proxy:GetAttribute("arrangePetButtons"))
+	end
+end
+
 Module.UpdateCastOnDown = function(self)
 	if InCombatLockdown() then 
 		return self:RegisterEvent("PLAYER_REGEN_ENABLED", "UpdateSettings")
@@ -1195,7 +1214,7 @@ Module.UpdateCastOnDown = function(self)
 		self:UnregisterEvent("PLAYER_REGEN_ENABLED", "UpdateSettings")
 	end 
 	local db = self.db
-	for button in self:GetAllActionButtonsOrdered() do 
+	for button in self:GetAllActionButtonsOrdered() do
 		button:RegisterForClicks(db.castOnDown and "AnyDown" or "AnyUp")
 		button:Update()
 	end 
@@ -1231,26 +1250,13 @@ Module.UpdateSettings = function(self, event, ...)
 	local db = self.db
 	self:UpdateFading()
 	self:UpdateFadeAnchors()
-	self:UpdatePetFadeAnchors()
+	self:UpdateExplorerModeAnchors()
 	self:UpdateCastOnDown()
 	self:UpdateTooltipSettings()
 end 
 
-Module.OnEvent = function(self, event, ...)
-	if (event == "UPDATE_BINDINGS") then 
-		self:UpdateBindings()
-	elseif (event == "PLAYER_ENTERING_WORLD") then
-		IN_COMBAT = false
-		self:UpdateBindings()
-	elseif (event == "PLAYER_REGEN_DISABLED") then
-		IN_COMBAT = true 
-	elseif (event == "PLAYER_REGEN_ENABLED") then
-		IN_COMBAT = false
-	elseif (event == "ACTIONBAR_SLOT_CHANGED") then
-		self:UpdateButtonGrids()
-	end 
-end 
-
+-- Initialization
+----------------------------------------------------
 Module.ParseSavedSettings = function(self)
 	local db = GetConfig(self:GetName())
 
@@ -1312,12 +1318,30 @@ Module.ParseSavedSettings = function(self)
 	return db
 end
 
+Module.OnEvent = function(self, event, ...)
+	if (event == "UPDATE_BINDINGS") then 
+		self:UpdateBindings()
+	elseif (event == "PLAYER_ENTERING_WORLD") then
+		IN_COMBAT = false
+		self:UpdateBindings()
+	elseif (event == "PLAYER_REGEN_DISABLED") then
+		IN_COMBAT = true 
+	elseif (event == "PLAYER_REGEN_ENABLED") then
+		IN_COMBAT = false
+	elseif (event == "ACTIONBAR_SLOT_CHANGED") then
+		self:UpdateButtonGrids()
+	end 
+end 
+
 Module.OnInit = function(self)
 	self.db = self:ParseSavedSettings()
 	self.layout = GetLayout(self:GetName())
 
-	-- Spawn a master frame for everything to hook into
+	-- Create master frame
 	self.frame = self:CreateFrame("Frame", nil, "UICenter")
+
+	-- Create additional overlay frames
+	self.frameOverlayPet = self:CreateFrame("Frame", nil, "UICenter")
 
 	-- Spawn the bars
 	self:SpawnActionBars()
@@ -1325,7 +1349,7 @@ Module.OnInit = function(self)
 	self:SpawnExitButton()
 
 	-- Arrange buttons
-	self:ArrangeButtons()
+	self:UpdateButtonLayout()
 
 	-- Update saved settings
 	self:UpdateBindings()
