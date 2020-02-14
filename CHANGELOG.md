@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.97-RC] 2020-02-14
+### Changed
+- Player and target unit frames should now display two rows of auras, up from one.
+
 ## [1.0.96-RC] 2020-02-12
 ### Added
 - Added cooldowns to the pet bar.
