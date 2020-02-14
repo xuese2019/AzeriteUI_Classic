@@ -44,11 +44,21 @@ local fullXPString = "%s / %s (%s)"
 local restedString = " (%s%% %s)"
 local shortLevelString = "%s %.0f"
 
--- Cache of buttons and ranks
-local Cache = {}
+-- Cache of buttons
+local Cache = {} -- cache buttons to separate different ranks of same spell
+local Buttons = {} -- all action buttons
+local PetButtons = {} -- all pet buttons
+local HoverButtons = {} -- all action buttons that can fade out
 
--- Is ConsolePort loaded?
-local CONSOLEPORT = Module:IsAddOnEnabled("ConsolePort")
+-- Hover frames
+local ActionBarHoverFrame, PetBarHoverFrame
+local FadeOutHZ, FadeOutDuration = 1/20, 1/5
+
+-- Is ConsolePort enabled in the addon listing?
+local IsConsolePortEnabled = Module:IsAddOnEnabled("ConsolePort")
+
+-- Track combat status
+local IN_COMBAT
 
 -- Secure Code Snippets
 local secureSnippets = {
@@ -192,41 +202,8 @@ local secureSnippets = {
 	]=]
 }
 
--- Old removed settings we need to purge from old databases
-local deprecated = {
-	buttonsPrimary = 1, 
-	buttonsComplimentary = 1, 
-	editMode = true, 
-	enableComplimentary = false, 
-	enableStance = false, 
-	enablePet = false, 
-	showBinds = true, 
-	showCooldown = true, 
-	showCooldownCount = true,
-	showNames = false,
-	visibilityPrimary = 1,
-	visibilityComplimentary = 1,
-	visibilityStance = 1, 
-	visibilityPet = 1
-}
-
-local IN_COMBAT
-
-local short = function(value)
-	value = tonumber(value)
-	if (not value) then return "" end
-	if (value >= 1e9) then
-		return ("%.1fb"):format(value / 1e9):gsub("%.?0+([kmb])$", "%1")
-	elseif value >= 1e6 then
-		return ("%.1fm"):format(value / 1e6):gsub("%.?0+([kmb])$", "%1")
-	elseif value >= 1e3 or value <= -1e3 then
-		return ("%.1fk"):format(value / 1e3):gsub("%.?0+([kmb])$", "%1")
-	else
-		return tostring(math_floor(value))
-	end	
-end
-
-local L_KEY = {
+-- Keybind abbrevations. Do not localize these.
+local ShortKey = {
 	-- Keybinds (visible on the actionbuttons)
 	["Alt"] = "A",
 	["Left Alt"] = "LA",
@@ -300,45 +277,63 @@ local getBindingKeyText = function(key)
 		key = key:upper()
 		key = key:gsub(" ", "")
 
-		key = key:gsub("ALT%-", L_KEY["Alt"])
-		key = key:gsub("CTRL%-", L_KEY["Ctrl"])
-		key = key:gsub("SHIFT%-", L_KEY["Shift"])
-		key = key:gsub("NUMPAD", L_KEY["NumPad"])
+		key = key:gsub("ALT%-", ShortKey["Alt"])
+		key = key:gsub("CTRL%-", ShortKey["Ctrl"])
+		key = key:gsub("SHIFT%-", ShortKey["Shift"])
+		key = key:gsub("NUMPAD", ShortKey["NumPad"])
 
 		key = key:gsub("PLUS", "%+")
 		key = key:gsub("MINUS", "%-")
 		key = key:gsub("MULTIPLY", "%*")
 		key = key:gsub("DIVIDE", "%/")
 
-		key = key:gsub("BACKSPACE", L_KEY["Backspace"])
+		key = key:gsub("BACKSPACE", ShortKey["Backspace"])
 
 		for i = 1,31 do
-			key = key:gsub("BUTTON" .. i, L_KEY["Button" .. i])
+			key = key:gsub("BUTTON" .. i, ShortKey["Button" .. i])
 		end
 
-		key = key:gsub("CAPSLOCK", L_KEY["Capslock"])
-		key = key:gsub("CLEAR", L_KEY["Clear"])
-		key = key:gsub("DELETE", L_KEY["Delete"])
-		key = key:gsub("END", L_KEY["End"])
-		key = key:gsub("HOME", L_KEY["Home"])
-		key = key:gsub("INSERT", L_KEY["Insert"])
-		key = key:gsub("MOUSEWHEELDOWN", L_KEY["Mouse Wheel Down"])
-		key = key:gsub("MOUSEWHEELUP", L_KEY["Mouse Wheel Up"])
-		key = key:gsub("NUMLOCK", L_KEY["Num Lock"])
-		key = key:gsub("PAGEDOWN", L_KEY["Page Down"])
-		key = key:gsub("PAGEUP", L_KEY["Page Up"])
-		key = key:gsub("SCROLLLOCK", L_KEY["Scroll Lock"])
-		key = key:gsub("SPACEBAR", L_KEY["Spacebar"])
-		key = key:gsub("TAB", L_KEY["Tab"])
+		key = key:gsub("CAPSLOCK", ShortKey["Capslock"])
+		key = key:gsub("CLEAR", ShortKey["Clear"])
+		key = key:gsub("DELETE", ShortKey["Delete"])
+		key = key:gsub("END", ShortKey["End"])
+		key = key:gsub("HOME", ShortKey["Home"])
+		key = key:gsub("INSERT", ShortKey["Insert"])
+		key = key:gsub("MOUSEWHEELDOWN", ShortKey["Mouse Wheel Down"])
+		key = key:gsub("MOUSEWHEELUP", ShortKey["Mouse Wheel Up"])
+		key = key:gsub("NUMLOCK", ShortKey["Num Lock"])
+		key = key:gsub("PAGEDOWN", ShortKey["Page Down"])
+		key = key:gsub("PAGEUP", ShortKey["Page Up"])
+		key = key:gsub("SCROLLLOCK", ShortKey["Scroll Lock"])
+		key = key:gsub("SPACEBAR", ShortKey["Spacebar"])
+		key = key:gsub("TAB", ShortKey["Tab"])
 
-		key = key:gsub("DOWNARROW", L_KEY["Down Arrow"])
-		key = key:gsub("LEFTARROW", L_KEY["Left Arrow"])
-		key = key:gsub("RIGHTARROW", L_KEY["Right Arrow"])
-		key = key:gsub("UPARROW", L_KEY["Up Arrow"])
+		key = key:gsub("DOWNARROW", ShortKey["Down Arrow"])
+		key = key:gsub("LEFTARROW", ShortKey["Left Arrow"])
+		key = key:gsub("RIGHTARROW", ShortKey["Right Arrow"])
+		key = key:gsub("UPARROW", ShortKey["Up Arrow"])
 
 		return key
 	end
 end
+
+-- Old removed settings we need to purge from old databases
+local deprecated = {
+	buttonsPrimary = 1, 
+	buttonsComplimentary = 1, 
+	editMode = true, 
+	enableComplimentary = false, 
+	enableStance = false, 
+	enablePet = false, 
+	showBinds = true, 
+	showCooldown = true, 
+	showCooldownCount = true,
+	showNames = false,
+	visibilityPrimary = 1,
+	visibilityComplimentary = 1,
+	visibilityStance = 1, 
+	visibilityPet = 1
+}
 
 -- ActionButton Template
 ----------------------------------------------------
@@ -798,12 +793,12 @@ PetButton.PostLeave = ActionButton.PostLeave
 
 -- Module API
 ----------------------------------------------------
--- Just a proxy for the secure method. Only call out of combat. 
+-- Just a proxy for the secure method. Only call out of combat.
 Module.ArrangeButtons = function(self)
-	local Proxy = self:GetSecureUpdater()
-	if Proxy then
-		Proxy:Execute(Proxy:GetAttribute("arrangeButtons"))
-		Proxy:Execute(Proxy:GetAttribute("arrangePetButtons"))
+	local proxy = self:GetSecureUpdater()
+	if (proxy) then
+		proxy:Execute(proxy:GetAttribute("arrangeButtons"))
+		proxy:Execute(proxy:GetAttribute("arrangePetButtons"))
 	end
 end
 
@@ -861,7 +856,7 @@ Module.SpawnExitButton = function(self)
 	self.VehicleExitButton = button
 end
 
-Module.SpawnButtons = function(self)
+Module.SpawnActionBars = function(self)
 	local db = self.db
 	local proxy = self:GetSecureUpdater()
 
@@ -871,32 +866,30 @@ Module.SpawnButtons = function(self)
 	local buttonID = 0 -- current buttonID when spawning
 	local numPrimary = 7 -- Number of primary buttons always visible
 	local firstHiddenID = db.extraButtonsCount + numPrimary -- first buttonID to be hidden
-	local buttons, stance, pet = {}, {}, {} -- indexed button tables where the button is the value
-	local hover = {} -- hashed hover table, where the button is the key
-
+	
 	-- Spawn Primary ActionBar
 	for id = 1,NUM_ACTIONBAR_BUTTONS do 
 		buttonID = buttonID + 1
-		buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButton, 1, id)
-		hover[buttons[buttonID]] = buttonID > numPrimary
+		Buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButton, 1, id)
+		HoverButtons[Buttons[buttonID]] = buttonID > numPrimary
 	end 
 
 	-- Spawn Secondary ActionBar
 	for id = 1,NUM_ACTIONBAR_BUTTONS do 
 		buttonID = buttonID + 1
-		buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButton, BOTTOMLEFT_ACTIONBAR_PAGE, id)
-		hover[buttons[buttonID]] = true
+		Buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButton, BOTTOMLEFT_ACTIONBAR_PAGE, id)
+		HoverButtons[Buttons[buttonID]] = true
 	end 
 
 	-- Apply common settings to the action buttons.
-	for buttonID,button in ipairs(buttons) do 
+	for buttonID,button in ipairs(Buttons) do 
 	
 		-- Apply saved buttonLock setting
 		button:SetAttribute("buttonLock", db.buttonLock)
 
 		-- Link the buttons and their pagers 
-		proxy:SetFrameRef("Button"..buttonID, buttons[buttonID])
-		proxy:SetFrameRef("Pager"..buttonID, buttons[buttonID]:GetPager())
+		proxy:SetFrameRef("Button"..buttonID, Buttons[buttonID])
+		proxy:SetFrameRef("Pager"..buttonID, Buttons[buttonID]:GetPager())
 
 		-- Reference all buttons in our menu callback frame
 		proxy:Execute(([=[
@@ -905,27 +898,32 @@ Module.SpawnButtons = function(self)
 		]=]):format(buttonID, buttonID))
 
 		-- Hide buttons beyond our current maximum visible
-		if (hover[button] and (buttonID > firstHiddenID)) then 
+		if (HoverButtons[button] and (buttonID > firstHiddenID)) then 
 			button:GetPager():Hide()
 		end 
 	end 
+end
 
+Module.SpawnPetBar = function(self)
+	local db = self.db
+	local proxy = self:GetSecureUpdater()
+	
 	-- Spawn the Pet Bar
 	for id = 1,NUM_PET_ACTION_SLOTS do
-		pet[id] = self:SpawnActionButton("pet", self.frame, PetButton, nil, id)
+		PetButtons[id] = self:SpawnActionButton("pet", self.frame, PetButton, nil, id)
 	end
 
 	-- Apply common stuff to the pet buttons
-	for id,button in pairs(pet) do
+	for id,button in pairs(PetButtons) do
 		-- Apply saved buttonLock setting
 		button:SetAttribute("buttonLock", db.buttonLock)
 
 		-- Link the buttons and their pagers 
-		proxy:SetFrameRef("PetButton"..id, pet[id])
-		proxy:SetFrameRef("PetPager"..id, pet[id]:GetPager())
+		proxy:SetFrameRef("PetButton"..id, PetButtons[id])
+		proxy:SetFrameRef("PetPager"..id, PetButtons[id]:GetPager())
 
 		if (not db.petBarEnabled) then
-			pet[id]:GetPager():Hide()
+			PetButtons[id]:GetPager():Hide()
 		end
 		
 		-- Reference all buttons in our menu callback frame
@@ -937,91 +935,139 @@ Module.SpawnButtons = function(self)
 	end
 
 	self.petFrame = self.frame:CreateFrame("Frame")
-	self.petbuttons = pet
-	self.buttons = buttons
-	self.hover = hover
-
-	local fadeOutTime = 1/5 -- has to be fast, or layers will blend weirdly
-	local hoverFrame = self:CreateFrame("Frame")
-	hoverFrame.timeLeft = 0
-	hoverFrame.elapsed = 0
-	hoverFrame:SetScript("OnUpdate", function(self, elapsed) 
-		self.elapsed = self.elapsed + elapsed
-		self.timeLeft = self.timeLeft - elapsed
-
-		if (self.timeLeft <= 0) then
-			if FORCED or self.FORCED or self.always or (self.incombat and IN_COMBAT) or self.forced or self.flyout or self:IsMouseOver(0,0,0,0) then
-				if (not self.isMouseOver) then 
-					self.isMouseOver = true
-					self.alpha = 1
-					for id = 8,24 do 
-						buttons[id]:GetPager():SetAlpha(self.alpha)
-					end 
-				end 
-			else 
-				if (self.isMouseOver) then 
-					self.isMouseOver = nil
-					if (not self.fadeOutTime) then 
-						self.fadeOutTime = fadeOutTime
-					end 
-				end 
-				if self.fadeOutTime then 
-					self.fadeOutTime = self.fadeOutTime - self.elapsed
-					if (self.fadeOutTime > 0) then 
-						self.alpha = self.fadeOutTime / fadeOutTime
-					else 
-						self.alpha = 0
-						self.fadeOutTime = nil
-					end 
-					for id = 8,24 do 
-						buttons[id]:GetPager():SetAlpha(self.alpha)
-					end 
-				end 
-			end 
-			self.elapsed = 0
-			self.timeLeft = .05
-		end 
-	end) 
-	hoverFrame:SetScript("OnEvent", function(self, event, ...) 
-		if (event == "ACTIONBAR_SHOWGRID") then 
-			self.forced = true
-		elseif (event == "ACTIONBAR_HIDEGRID") or (event == "buttonLock") then
-			self.forced = nil
-		end 
-	end)
-	hoverFrame:RegisterEvent("ACTIONBAR_HIDEGRID")
-	hoverFrame:RegisterEvent("ACTIONBAR_SHOWGRID")
-	hoverFrame.isMouseOver = true -- Set this to initiate the first fade-out
-	self.hoverFrame = hoverFrame
-
-	hooksecurefunc("ActionButton_UpdateFlyout", function(self) 
-		if hover[self] then 
-			hoverFrame.flyout = self:IsFlyoutShown()
-		end
-	end)
-end 
+end
 
 Module.GetButtons = function(self)
-	return pairs(self.buttons)
+	return pairs(Buttons)
 end
 
 Module.GetPetButtons = function(self)
-	return pairs(self.petbuttons)
-end
-
-Module.SetForcedVisibility = function(self, force)
-	if (not self.hoverFrame) then 
-		return 
-	end 
-	if (force) then 
-		self.hoverFrame.FORCED = true
-	else 
-		self.hoverFrame.FORCED = nil
-	end 
+	return pairs(PetButtons)
 end
 
 Module.GetSecureUpdater = function(self)
+	if (not self.proxyUpdater) then
+		-- Secure frame used by the menu system to interact with our secure buttons.
+		local proxy = self:CreateFrame("Frame", nil, parent, "SecureHandlerAttributeTemplate")
+
+		-- Add some module methods to the proxy.
+		for _,method in pairs({
+			"UpdateCastOnDown",
+			"UpdateFading",
+			"UpdateFadeAnchors",
+			"UpdatePetFadeAnchors",
+			"UpdateButtonCount"
+		}) do
+			proxy[method] = function() self[method](self) end
+		end
+	
+		-- Copy all saved settings to our secure proxy frame.
+		for key,value in pairs(self.db) do 
+			proxy:SetAttribute(key,value)
+		end 
+	
+		-- Create tables to hold the buttons
+		-- within the restricted environment.
+		proxy:Execute([=[ 
+			Buttons = table.new();
+			Pagers = table.new();
+			PetButtons = table.new();
+			PetPagers = table.new();
+			StanceButtons = table.new();
+		]=])
+	
+		-- Apply references and attributes used for updates.
+		proxy:SetFrameRef("UICenter", self:GetFrame("UICenter"))
+		proxy:SetAttribute("BOTTOMLEFT_ACTIONBAR_PAGE", BOTTOMLEFT_ACTIONBAR_PAGE);
+		proxy:SetAttribute("arrangeButtons", secureSnippets.arrangeButtons)
+		proxy:SetAttribute("arrangePetButtons", secureSnippets.arrangePetButtons)
+		proxy:SetAttribute("_onattributechanged", secureSnippets.attributeChanged)
+	
+		-- Reference it for later use
+		self.proxyUpdater = proxy
+	end
 	return self.proxyUpdater
+end
+
+Module.GetActionBarHoverFrame = function(self)
+	if (not ActionBarHoverFrame) then 
+		ActionBarHoverFrame = self:CreateFrame("Frame")
+		ActionBarHoverFrame.timeLeft = 0
+		ActionBarHoverFrame.elapsed = 0
+		ActionBarHoverFrame:SetScript("OnUpdate", function(self, elapsed) 
+			self.elapsed = self.elapsed + elapsed
+			self.timeLeft = self.timeLeft - elapsed
+	
+			if (self.timeLeft <= 0) then
+				if FORCED or self.FORCED or self.always or (self.incombat and IN_COMBAT) or self.forced or self.flyout or self:IsMouseOver(0,0,0,0) then
+					if (not self.isMouseOver) then 
+						self.isMouseOver = true
+						self.alpha = 1
+						for id = 8,24 do 
+							Buttons[id]:GetPager():SetAlpha(self.alpha)
+						end 
+					end 
+				else 
+					if (self.isMouseOver) then 
+						self.isMouseOver = nil
+						if (not self.fadeOutTime) then 
+							self.fadeOutTime = FadeOutDuration
+						end 
+					end 
+					if (self.fadeOutTime) then 
+						self.fadeOutTime = self.fadeOutTime - self.elapsed
+						if (self.fadeOutTime > 0) then 
+							self.alpha = self.fadeOutTime / FadeOutDuration
+						else 
+							self.alpha = 0
+							self.fadeOutTime = nil
+						end 
+						for id = 8,24 do 
+							Buttons[id]:GetPager():SetAlpha(self.alpha)
+						end 
+					end 
+				end 
+				self.elapsed = 0
+				self.timeLeft = FadeOutHZ
+			end 
+		end) 
+
+		ActionBarHoverFrame:SetScript("OnEvent", function(self, event, ...) 
+			if (event == "ACTIONBAR_SHOWGRID") then 
+				self.forced = true
+			elseif (event == "ACTIONBAR_HIDEGRID") or (event == "buttonLock") then
+				self.forced = nil
+			end 
+		end)
+
+		hooksecurefunc("ActionButton_UpdateFlyout", function(self) 
+			if (HoverButtons[self]) then 
+				ActionBarHoverFrame.flyout = self:IsFlyoutShown()
+			end
+		end)
+
+		ActionBarHoverFrame:RegisterEvent("ACTIONBAR_HIDEGRID")
+		ActionBarHoverFrame:RegisterEvent("ACTIONBAR_SHOWGRID")
+		ActionBarHoverFrame.isMouseOver = true -- Set this to initiate the first fade-out
+	end
+	return ActionBarHoverFrame
+end
+
+Module.GetPetBarHoverFrame = function(self)
+	if (not self.petHoverFrame) then 
+	end
+	return self.petHoverFrame
+end
+
+Module.SetForcedVisibility = function(self, force)
+	if (not ActionBarHoverFrame) then 
+		return 
+	end 
+	if (force) then 
+		ActionBarHoverFrame.FORCED = true
+	else 
+		ActionBarHoverFrame.FORCED = nil
+	end 
 end
 
 Module.UpdateFading = function(self)
@@ -1029,8 +1075,8 @@ Module.UpdateFading = function(self)
 	local combat = db.extraButtonsVisibility == "combat"
 	local always = db.extraButtonsVisibility == "always"
 
-	self.hoverFrame.incombat = combat
-	self.hoverFrame.always = always
+	ActionBarHoverFrame.incombat = combat
+	ActionBarHoverFrame.always = always
 end 
 
 Module.UpdateFadeAnchors = function(self)
@@ -1038,7 +1084,7 @@ Module.UpdateFadeAnchors = function(self)
 
 	-- Parse buttons for hoverbutton IDs
 	local first, last, left, right, top, bottom, mLeft, mRight, mTop, mBottom
-	for id,button in ipairs(self.buttons) do 
+	for id,button in ipairs(Buttons) do 
 		-- If we pass number of visible hoverbuttons, just bail out
 		if (id > db.extraButtonsCount + 7) then 
 			break 
@@ -1049,7 +1095,7 @@ Module.UpdateFadeAnchors = function(self)
 		local bTop = button:GetTop()
 		local bBottom = button:GetBottom()
 		
-		if self.hover[button] then 
+		if HoverButtons[button] then 
 			-- Only counting the first encountered as the first
 			if (not first) then 
 				first = id 
@@ -1059,34 +1105,35 @@ Module.UpdateFadeAnchors = function(self)
 			last = id 
 
 			-- Figure out hoverframe anchor buttons
-			left = left and (self.buttons[left]:GetLeft() < bLeft) and left or id
-			right = right and (self.buttons[right]:GetRight() > bRight) and right or id
-			top = top and (self.buttons[top]:GetTop() > bTop) and top or id
-			bottom = bottom and (self.buttons[bottom]:GetBottom() < bBottom) and bottom or id
+			left = left and (Buttons[left]:GetLeft() < bLeft) and left or id
+			right = right and (Buttons[right]:GetRight() > bRight) and right or id
+			top = top and (Buttons[top]:GetTop() > bTop) and top or id
+			bottom = bottom and (Buttons[bottom]:GetBottom() < bBottom) and bottom or id
 		end 
 
 		-- Figure out main frame anchor buttons, 
 		-- as we need this for the explorer mode fade anchors!
-		mLeft = mLeft and (self.buttons[mLeft]:GetLeft() < bLeft) and mLeft or id
-		mRight = mRight and (self.buttons[mRight]:GetRight() > bRight) and mRight or id
-		mTop = mTop and (self.buttons[mTop]:GetTop() > bTop) and mTop or id
-		mBottom = mBottom and (self.buttons[mBottom]:GetBottom() < bBottom) and mBottom or id
+		mLeft = mLeft and (Buttons[mLeft]:GetLeft() < bLeft) and mLeft or id
+		mRight = mRight and (Buttons[mRight]:GetRight() > bRight) and mRight or id
+		mTop = mTop and (Buttons[mTop]:GetTop() > bTop) and mTop or id
+		mBottom = mBottom and (Buttons[mBottom]:GetBottom() < bBottom) and mBottom or id
 	end 
 
 	-- Setup main frame anchors for explorer mode! 
 	self.frame:ClearAllPoints()
-	self.frame:SetPoint("TOP", self.buttons[mTop], "TOP", 0, 0)
-	self.frame:SetPoint("BOTTOM", self.buttons[mBottom], "BOTTOM", 0, 0)
-	self.frame:SetPoint("LEFT", self.buttons[mLeft], "LEFT", 0, 0)
-	self.frame:SetPoint("RIGHT", self.buttons[mRight], "RIGHT", 0, 0)
+	self.frame:SetPoint("TOP", Buttons[mTop], "TOP", 0, 0)
+	self.frame:SetPoint("BOTTOM", Buttons[mBottom], "BOTTOM", 0, 0)
+	self.frame:SetPoint("LEFT", Buttons[mLeft], "LEFT", 0, 0)
+	self.frame:SetPoint("RIGHT", Buttons[mRight], "RIGHT", 0, 0)
 
 	-- If we have hoverbuttons, setup the anchors
 	if (left and right and top and bottom) then 
-		self.hoverFrame:ClearAllPoints()
-		self.hoverFrame:SetPoint("TOP", self.buttons[top], "TOP", 0, 0)
-		self.hoverFrame:SetPoint("BOTTOM", self.buttons[bottom], "BOTTOM", 0, 0)
-		self.hoverFrame:SetPoint("LEFT", self.buttons[left], "LEFT", 0, 0)
-		self.hoverFrame:SetPoint("RIGHT", self.buttons[right], "RIGHT", 0, 0)
+		local hover = self:GetActionBarHoverFrame()
+		hover:ClearAllPoints()
+		hover:SetPoint("TOP", Buttons[top], "TOP", 0, 0)
+		hover:SetPoint("BOTTOM", Buttons[bottom], "BOTTOM", 0, 0)
+		hover:SetPoint("LEFT", Buttons[left], "LEFT", 0, 0)
+		hover:SetPoint("RIGHT", Buttons[right], "RIGHT", 0, 0)
 	end
 
 	self:UpdateButtonGrids()
@@ -1096,8 +1143,8 @@ Module.UpdatePetFadeAnchors = function(self)
 	local db = self.db
 	self.petFrame:ClearAllPoints()
 	if (self.db.petBarEnabled) then
-		self.petFrame:SetPoint("TOPLEFT", self.petbuttons[1], "TOPLEFT")
-		self.petFrame:SetPoint("BOTTOMRIGHT", self.petbuttons[10], "BOTTOMRIGHT")
+		self.petFrame:SetPoint("TOPLEFT", PetButtons[1], "TOPLEFT")
+		self.petFrame:SetPoint("BOTTOMRIGHT", PetButtons[10], "BOTTOMRIGHT")
 	else
 		self.petFrame:SetAllPoints(self.frame)
 	end
@@ -1119,7 +1166,7 @@ Module.UpdateButtonGrids = function(self)
 	-- Counting backwards from the end
 	-- to find the last button with content.
 	for buttonID = numButtons,1,-1 do
-		button = self.buttons[buttonID]
+		button = Buttons[buttonID]
 		buttonHasContent = button:HasContent()
 
 		-- Check if the button has content,
@@ -1162,7 +1209,7 @@ Module.UpdateConsolePortBindings = function(self)
 end
 
 Module.UpdateBindings = function(self)
-	if (CONSOLEPORT) then 
+	if (IsConsolePortEnabled) then 
 		self:UpdateConsolePortBindings()
 	else
 		self:UpdateActionButtonBindings()
@@ -1268,54 +1315,16 @@ end
 Module.OnInit = function(self)
 	self.db = self:ParseSavedSettings()
 	self.layout = GetLayout(self:GetName())
+
+	-- Spawn a master frame for everything to hook into
 	self.frame = self:CreateFrame("Frame", nil, "UICenter")
 
-	-- Secure frame used by the menu system to interact with our secure buttons.
-	local proxy = self:CreateFrame("Frame", nil, parent, "SecureHandlerAttributeTemplate")
-
-	-- Add some module methods to the proxy.
-	for _,method in pairs({
-		"UpdateCastOnDown",
-		"UpdateFading",
-		"UpdateFadeAnchors",
-		"UpdatePetFadeAnchors",
-		"UpdateButtonCount"
-	}) do
-		proxy[method] = function() self[method](self) end
-	end
-
-	-- Copy all saved settings to our secure proxy frame.
-	for key,value in pairs(self.db) do 
-		proxy:SetAttribute(key,value)
-	end 
-
-	-- Create tables to hold the buttons
-	-- within the restricted environment.
-	proxy:Execute([=[ 
-		Buttons = table.new();
-		Pagers = table.new();
-		PetButtons = table.new();
-		PetPagers = table.new();
-		StanceButtons = table.new();
-	]=])
-
-	-- Apply references and attributes used for updates.
-	proxy:SetFrameRef("UICenter", self:GetFrame("UICenter"))
-	proxy:SetAttribute("BOTTOMLEFT_ACTIONBAR_PAGE", BOTTOMLEFT_ACTIONBAR_PAGE);
-	proxy:SetAttribute("arrangeButtons", secureSnippets.arrangeButtons)
-	proxy:SetAttribute("arrangePetButtons", secureSnippets.arrangePetButtons)
-	proxy:SetAttribute("_onattributechanged", secureSnippets.attributeChanged)
-
-	-- Reference it for later use
-	self.proxyUpdater = proxy
-
-	-- Spawn the buttons
-	self:SpawnButtons()
-
-	-- Spawn the Exit button
+	-- Spawn the bars
+	self:SpawnActionBars()
+	self:SpawnPetBar()
 	self:SpawnExitButton()
 
-	-- Arrange buttons 
+	-- Arrange buttons
 	self:ArrangeButtons()
 
 	-- Update saved settings
