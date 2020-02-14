@@ -57,14 +57,14 @@ end
 Module.AttachModuleFrame = function(self, moduleName)
 	local module = Core:GetModule(moduleName, true)
 	if module and not(module:IsIncompatible() or module:DependencyFailed()) then 
-		local frame = module:GetFrame()
-		if frame then 
-			self:RegisterObjectFade(frame)
-		end 
-		-- Can't get less elegant than this nonsense.
-		if (moduleName == "ActionBarMain") then
-			if (module.petFrame) then
-				self:RegisterObjectFade(module.petFrame)
+		if (module.GetExplorerModeFrameAnchors) then
+			for _,frame in ipairs({ module:GetExplorerModeFrameAnchors() }) do
+				self:RegisterObjectFade(frame)
+			end
+		else
+			local frame = module:GetFrame()
+			if frame then 
+				self:RegisterObjectFade(frame)
 			end
 		end
 	end 
@@ -73,17 +73,18 @@ end
 Module.DetachModuleFrame = function(self, moduleName)
 	local module = Core:GetModule(moduleName, true)
 	if module and not(module:IsIncompatible() or module:DependencyFailed()) then 
-		local frame = module:GetFrame()
-		if frame then 
-			self:UnregisterObjectFade(frame)
-		end 
-		if (moduleName == "ActionBarMain") then
-			if (module.petFrame) then
-				self:UnregisterObjectFade(module.petFrame)
+		if (module.GetExplorerModeFrameAnchors) then
+			for _,frame in ipairs({ module:GetExplorerModeFrameAnchors() }) do
+				self:UnregisterObjectFade(frame)
+			end
+		else
+			local frame = module:GetFrame()
+			if frame then 
+				self:UnregisterObjectFade(frame)
 			end
 		end
-	end 
-end 
+	end
+end
 
 Module.OnInit = function(self)
 	self.db = self:ParseSavedSettings()
