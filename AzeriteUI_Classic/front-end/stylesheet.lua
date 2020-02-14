@@ -1715,12 +1715,12 @@ Defaults.BlizzardFloaterHUD = {
 Defaults.ActionBarMain = {
 
 	-- unlock buttons
-	buttonLock = true, 
+	buttonLock = true,
 
 	-- Valid range is 0 to 17. anything outside will be limited to this range. 
 	extraButtonsCount = 5, -- default this to a full standard bar, just to make it slightly easier for people
-	petBarEnabled = true, 
-	stanceBarEnabled = true, 
+	petBarEnabled = true,
+	stanceBarEnabled = true,
 
 	-- Valid values are 'always','hover','combat'
 	extraButtonsVisibility = "combat", -- defaulting this to combat, so new users can access their full default bar
@@ -1732,13 +1732,9 @@ Defaults.ActionBarMain = {
 
 	-- TODO! 
 	-- *Options below are not yet implemented!
-
-	-- Modifier keys required to drag spells, 
-	-- if none are selected, buttons aren't locked. 
-	dragRequireAlt = true, 
-	dragRequireCtrl = true, 
-	dragRequireShift = true, 
-
+	dragRequireAlt = true,
+	dragRequireCtrl = true,
+	dragRequireShift = true
 }
 
 Defaults.Minimap = {
