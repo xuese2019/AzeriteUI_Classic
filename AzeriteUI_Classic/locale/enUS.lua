@@ -116,6 +116,7 @@ L["MouseOver + Combat"] = true
 L["Always Visible"] = true
 L["Stance Bar"] = true
 L["Pet Bar"] = true
+L["Pet Bar Visibility"] = true
 L["UnitFrames"] = true
 L["Party Frames"] = true
 L["Raid Frames"] = true

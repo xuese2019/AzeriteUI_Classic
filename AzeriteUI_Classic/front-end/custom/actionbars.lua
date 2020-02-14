@@ -137,7 +137,11 @@ local secureSnippets = {
 		if (name == "change-extrabuttonsvisibility") then 
 			self:SetAttribute("extraButtonsVisibility", value); 
 			self:CallMethod("UpdateFading"); 
-
+		
+		elseif (name == "change-petbarvisibility") then 
+				self:SetAttribute("petBarVisibility", value); 
+				self:CallMethod("UpdateFading"); 
+	
 		elseif (name == "change-extrabuttonscount") then 
 			local extraButtonsCount = tonumber(value) or 0; 
 			local visible = extraButtonsCount + 7; 
@@ -1001,9 +1005,62 @@ Module.GetFadeFrame = function(self)
 end
 
 Module.GetFadeFramePet = function(self)
-	if (not self.petHoverFrame) then 
+	if (not PetBarHoverFrame) then
+		PetBarHoverFrame = self:CreateFrame("Frame")
+		PetBarHoverFrame.timeLeft = 0
+		PetBarHoverFrame.elapsed = 0
+		PetBarHoverFrame:SetScript("OnUpdate", function(self, elapsed) 
+			self.elapsed = self.elapsed + elapsed
+			self.timeLeft = self.timeLeft - elapsed
+	
+			if (self.timeLeft <= 0) then
+				if FORCED or self.FORCED or self.always or (self.incombat and IN_COMBAT) or self.forced or self.flyout or self:IsMouseOver(0,0,0,0) then
+					if (not self.isMouseOver) then 
+						self.isMouseOver = true
+						self.alpha = 1
+						for id in pairs(PetButtons) do
+							PetButtons[id]:GetPager():SetAlpha(self.alpha)
+						end 
+					end
+				else 
+					if (self.isMouseOver) then 
+						self.isMouseOver = nil
+						if (not self.fadeOutTime) then 
+							self.fadeOutTime = FadeOutDuration
+						end 
+					end 
+					if (self.fadeOutTime) then 
+						self.fadeOutTime = self.fadeOutTime - self.elapsed
+						if (self.fadeOutTime > 0) then 
+							self.alpha = self.fadeOutTime / FadeOutDuration
+						else 
+							self.alpha = 0
+							self.fadeOutTime = nil
+						end 
+						for id in pairs(PetButtons) do
+							PetButtons[id]:GetPager():SetAlpha(self.alpha)
+						end 
+					end 
+				end 
+				self.elapsed = 0
+				self.timeLeft = FadeOutHZ
+			end 
+		end) 
+
+		PetBarHoverFrame:SetScript("OnEvent", function(self, event, ...) 
+			if (event == "PET_BAR_SHOWGRID") then 
+				self.forced = true
+			elseif (event == "PET_BAR_HIDEGRID") or (event == "buttonLock") then
+				self.forced = nil
+			end 
+		end)
+
+
+		PetBarHoverFrame:RegisterEvent("PET_BAR_SHOWGRID")
+		PetBarHoverFrame:RegisterEvent("PET_BAR_HIDEGRID")
+		PetBarHoverFrame.isMouseOver = true -- Set this to initiate the first fade-out
 	end
-	return self.petHoverFrame
+	return PetBarHoverFrame
 end
 
 Module.GetOverlayFrame = function(self)
@@ -1079,11 +1136,14 @@ end
 ----------------------------------------------------
 Module.UpdateFading = function(self)
 	local db = self.db
-	local combat = db.extraButtonsVisibility == "combat"
-	local always = db.extraButtonsVisibility == "always"
 
-	ActionBarHoverFrame.incombat = combat
-	ActionBarHoverFrame.always = always
+	-- Set action bar hover settings
+	ActionBarHoverFrame.incombat = db.extraButtonsVisibility == "combat"
+	ActionBarHoverFrame.always = db.extraButtonsVisibility == "always"
+
+	-- We're hardcoding these until options can be added
+	PetBarHoverFrame.incombat = db.petBarVisibility == "combat"
+	PetBarHoverFrame.always = db.petBarVisibility == "always"
 end 
 
 Module.UpdateExplorerModeAnchors = function(self)
@@ -1154,6 +1214,16 @@ Module.UpdateFadeAnchors = function(self)
 		hover:SetPoint("BOTTOM", Buttons[bottom], "BOTTOM", 0, 0)
 		hover:SetPoint("LEFT", Buttons[left], "LEFT", 0, 0)
 		hover:SetPoint("RIGHT", Buttons[right], "RIGHT", 0, 0)
+	end
+
+	local hover = self:GetFadeFramePet()
+	if (self.db.petBarEnabled) then
+		hover:ClearAllPoints()
+		hover:SetPoint("TOPLEFT", PetButtons[1], "TOPLEFT")
+		hover:SetPoint("BOTTOMRIGHT", PetButtons[10], "BOTTOMRIGHT")
+	else
+		hover:ClearAllPoints()
+		hover:SetAllPoints(self:GetFrame())
 	end
 
 	self:UpdateButtonGrids()

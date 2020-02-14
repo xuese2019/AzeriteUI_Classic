@@ -801,11 +801,39 @@ Module.CreateMenuTable = function(self)
 					}
 				},
 				{
-					enabledTitle = L_ENABLED:format(TUTORIAL_TITLE61_HUNTER),
-					disabledTitle = L_DISABLED:format(TUTORIAL_TITLE61_HUNTER),
-					type = "TOGGLE_VALUE", hasWindow = false, 
-					configDB = "ActionBarMain", configKey = "petBarEnabled", 
-					proxyModule = "ActionBarMain"
+					title = L["Pet Bar"], type = nil, hasWindow = true, 
+					buttons = {
+						{
+							enabledTitle = L["Enabled"],
+							disabledTitle = L["Disabled"],
+							type = "TOGGLE_VALUE", hasWindow = false, 
+							configDB = "ActionBarMain", configKey = "petBarEnabled", 
+							proxyModule = "ActionBarMain"
+						},
+						{
+							title = L["Pet Bar Visibility"], type = nil, hasWindow = true, 
+							buttons = {
+								{
+									title = L["MouseOver"], 
+									type = "SET_VALUE", 
+									configDB = "ActionBarMain", configKey = "petBarVisibility", optionArgs = { "hover" }, 
+									proxyModule = "ActionBarMain"
+								},
+								{
+									title = L["MouseOver + Combat"], 
+									type = "SET_VALUE", 
+									configDB = "ActionBarMain", configKey = "petBarVisibility", optionArgs = { "combat" }, 
+									proxyModule = "ActionBarMain"
+								},
+								{
+									title = L["Always Visible"], 
+									type = "SET_VALUE", 
+									configDB = "ActionBarMain", configKey = "petBarVisibility", optionArgs = { "always" }, 
+									proxyModule = "ActionBarMain"
+								}
+							}
+						},
+					},
 				},
 				{
 					enabledTitle = L_ENABLED:format(L["Cast on Down"]),
