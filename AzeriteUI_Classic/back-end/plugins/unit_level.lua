@@ -3,18 +3,12 @@
 local _G = _G
 
 -- WoW API
-local GetExpansionLevel = _G.GetExpansionLevel
-local UnitBattlePetLevel = _G.UnitBattlePetLevel
-local UnitCanAttack = _G.UnitCanAttack
-local UnitEffectiveLevel = _G.UnitEffectiveLevel
-local UnitIsBattlePetCompanion = _G.UnitIsBattlePetCompanion
-local UnitIsCorpse = _G.UnitIsCorpse
-local UnitIsUnit = _G.UnitIsUnit
-local UnitIsWildBattlePet = _G.UnitIsWildBattlePet
-local UnitLevel = _G.UnitLevel
+local GetExpansionLevel = GetExpansionLevel
+local UnitCanAttack = UnitCanAttack
+local UnitLevel = UnitLevel
 
 -- WoW Objects
-local MAX_PLAYER_LEVEL_TABLE = _G.MAX_PLAYER_LEVEL_TABLE
+local MAX_PLAYER_LEVEL_TABLE = MAX_PLAYER_LEVEL_TABLE
 
 local Update = function(self, event, unit)
 	if (not unit) or (unit ~= self.unit) then 
@@ -29,9 +23,7 @@ local Update = function(self, event, unit)
 	local dead = element.Dead
 	local skull = element.Skull
 
-	-- Damn you blizzard and your effective level nonsense!
 	local unitLevel = UnitLevel(unit)
-	local unitEffectiveLevel = UnitEffectiveLevel and UnitEffectiveLevel(unit) or unitLevel
 
 	if element.visibilityFilter then 
 		if (not element:visibilityFilter(unit)) then 
@@ -65,33 +57,14 @@ local Update = function(self, event, unit)
 				skull:Hide()
 			end
 		elseif skull then 
-			skull:Show()			
+			skull:Show()
 		end 
 		if badge then 
 			badge:Show()
 		end 
-
-	-- Battle pets 
-	elseif ((UnitIsWildBattlePet and UnitIsWildBattlePet(unit)) or (UnitIsBattlePetCompanion and UnitIsBattlePetCompanion(unit))) then 
-		unitLevel = UnitBattlePetLevel(unit)
-		element:SetText(unitLevel)
-		if element.defaultColor then 
-			element:SetTextColor(element.defaultColor[1], element.defaultColor[2], element.defaultColor[3], element.defaultColor[4] or element.alpha or 1)
-		else 
-			element:SetTextColor(.94, .94, .94, level.alpha or 1)
-		end 
-		if badge then 
-			badge:Show()
-		end 
-		if skull then 
-			skull:Hide()
-		end 
-		if dead then 
-			dead:Hide()
-		end
 
 	-- Hide capped and above, if so chosen ny the module
-	elseif (element.hideCapped and (unitEffectiveLevel >= MAX_PLAYER_LEVEL_TABLE[GetExpansionLevel()])) then 
+	elseif (element.hideCapped and (unitLevel >= MAX_PLAYER_LEVEL_TABLE[GetExpansionLevel()])) then 
 		element:SetText("")
 		if badge then 
 			badge:Hide()
@@ -104,7 +77,7 @@ local Update = function(self, event, unit)
 		end
 
 	-- Hide floored units (level 1 mobs and criters)
-	elseif (element.hideFloored and (unitEffectiveLevel == 1)) then 
+	elseif (element.hideFloored and (unitLevel == 1)) then 
 		element:SetText("")
 		if badge then 
 			badge:Hide()
@@ -117,13 +90,13 @@ local Update = function(self, event, unit)
 		end
 
 	-- Normal creatures in a level range we can read
-	elseif (unitEffectiveLevel > 0) then 
-		element:SetText(unitEffectiveLevel)
+	elseif (unitLevel > 0) then 
+		element:SetText(unitLevel)
 		if UnitCanAttack("player", unit) then 
-			local color = GetCreatureDifficultyColor(unitEffectiveLevel)
+			local color = GetCreatureDifficultyColor(unitLevel)
 			element:SetVertexColor(color.r, color.g, color.b, element.alpha or 1)
 		else 
-			if (unitEffectiveLevel ~= unitLevel) then 
+			if (unitLevel ~= unitLevel) then 
 				if element.scaledColor then
 					element:SetTextColor(element.scaledColor[1], element.scaledColor[2], element.scaledColor[3], element.scaledColor[4] or element.alpha or 1)
 				else 
@@ -167,7 +140,7 @@ local Update = function(self, event, unit)
 	end
 
 	if element.PostUpdate then 
-		return element:PostUpdate(unit, unitLevel, unitEffectiveLevel)
+		return element:PostUpdate(unit, unitLevel)
 	end
 end 
 
@@ -204,5 +177,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Level", Enable, Disable, Proxy, 7)
+	Lib:RegisterElement("Level", Enable, Disable, Proxy, 8)
 end 
