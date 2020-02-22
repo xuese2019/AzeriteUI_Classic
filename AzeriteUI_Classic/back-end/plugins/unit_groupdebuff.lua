@@ -1,29 +1,47 @@
+local LibAura = Wheel("LibAura")
+assert(LibAura, "UnitGroupDebuff requires LibAura to be loaded.")
+
 -- Lua API
 local _G = _G
 local math_ceil = math.ceil
 local select = select
 
 -- WoW API
-local GetTime = _G.GetTime
-local UnitAura = _G.UnitAura
-local UnitClass = _G.UnitClass
+local GetTime = GetTime
+local UnitCanAttack = UnitCanAttack
+local UnitClass = UnitClass
+local UnitIsCharmed = UnitIsCharmed
 
-local playerClass = select(2, UnitClass("player"))
+-- Player Constants
+local _,playerClass = UnitClass("player")
+local playerLevel = UnitLevel("player")
 
--- Default aura types to parse for dispel classes
-local classFilter = ({
-	DRUID 		= { HARMFUL = { Boss = true, Magic = false, Curse =  true, Poison =  true, Disease = false } },
-	PALADIN 	= { HARMFUL = { Boss = true, Magic =  true, Curse = false, Poison =  true, Disease =  true } },
-	PRIEST 		= { HARMFUL = { Boss = true, Magic =  true, Curse = false, Poison = false, Disease =  true }, HELPFUL = { Custom = true } },
-	SHAMAN 		= { HARMFUL = { Boss = true, Magic = false, Curse = false, Poison =  true, Disease =  true } },
-})[playerClass] or { HARMFUL = { Boss = true } } 
+-- Default aura types to parse for dispel classes.
+local levelFilter = ({
+	DRUID 		= { HARMFUL = { Boss = 1, Curse = 24, Poison = 14 } },
+	MAGE 		= { HARMFUL = { Boss = 1, Curse = 18 } },
+	PALADIN 	= { HARMFUL = { Boss = 1, Magic = 42, Poison = 8, Disease = 8 } },
+	PRIEST 		= { HARMFUL = { Boss = 1, Magic = 18, Disease = 14 } },
+	SHAMAN 		= { HARMFUL = { Boss = 1, Poison = 16, Disease = 22 } },
+	WARLOCK 	= { HARMFUL = { Boss = 1, Magic = 30 } } -- requires felhunter.
+})[playerClass] or { HARMFUL = { Boss = 1 } }
+
+local classFilter = { HARMFUL = {}, HELPFUL = {} }
+local UpdateClassFilter = function(level)
+	if (not levelFilter) then
+		return
+	end
+	for filterType,allowedSchools in pairs(levelFilter) do
+		for school,thresholdLevel in pairs(allowedSchools) do
+			classFilter[filterType][school] = (thresholdLevel >= level)
+		end
+	end
+end
+UpdateClassFilter(playerLevel)
 
 -- SpellIDs that will have their type overridden, 
 -- to allow for specific auras to be tracked through our system. 
 local spellTypeOverride = {
-	[194384] = "Custom", -- Atonement
-	[214206] = "Custom", -- Atonement PvP
-
 	-- Tests (Require Custom to be enabled for Druids to try out)
 	--[  8936] = "Custom"  -- Regrowth 
 }
@@ -32,12 +50,12 @@ local spellTypeOverride = {
 -- Higher means higher.
 local PRIORITY_NONE = -1
 local priorities = {
-	Boss 	= 9999999,
 	Magic   = 4,
 	Curse   = 3,
 	Disease = 2,
 	Poison  = 1,
-	Custom 	= 0 
+	Boss 	= 0, -- put dispellable before boss
+	Custom 	= -1 -- put custom last
 }
 
 -- Utility Functions
@@ -201,15 +219,29 @@ local Aura_SetTimer = function(element, fullDuration, expirationTime)
 	end
 end
 
-local Update = function(self, event, unit)
-	if (not unit) or (unit ~= self.unit) then 
-		return 
-	end 
-
+local Update = function(self, event, unit, ...)
+	if (event == "PLAYER_LEVEL_UP") then 
+		local level = ...
+		if (level and (level ~= playerLevel)) then
+			playerLevel = level
+			if ((not playerLevel) or (playerLevel < level)) then
+				playerLevel = level
+			end
+			UpdateClassFilter(playerLevel)
+		end
+	else
+		if (not unit) or (unit ~= self.unit) then 
+			return 
+		end 
+	end
+	
 	local element = self.GroupAura
 	if element.PreUpdate then
 		element:PreUpdate(unit)
 	end
+
+	local canAttack = UnitCanAttack("player", unit)
+	local isCharmed = UnitIsCharmed(unit)
 
 	local newID, newPriority, newType, newDebuffType, newFilter, newSpellID
 	local newIcon, newCount, newDuration, newExpirationTime
@@ -227,7 +259,9 @@ local Update = function(self, event, unit)
 		while true do
 			auraID = auraID + 1
 
-			local name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = UnitAura(unit, auraID, filterType)
+			--local name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = UnitAura(unit, auraID, filterType)
+
+			local name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = LibAura:GetUnitAura(unit, auraID, filterType)
 
 			if (not name) then 
 				break 
@@ -236,29 +270,32 @@ local Update = function(self, event, unit)
 			-- Clunky, but still shortest current way to bake the overrides into the system 
 			local auraType = isBossDebuff and "Boss" or spellTypeOverride[spellID] or debuffType
 
-			-- Do we have a priority for the current aura?
-			local prio = allowedSchools[auraType] and priorities[auraType]
-			if (prio and (prio > currentPrio)) then
-				newID = auraID
-				newPriority = prio
-				newType = auraType
-				newDebuffType = debuffType
-				newFilter = filterType
-				newSpellID = spellID
-				newIcon = icon
-				newCount = count 
-				newDuration = duration 
-				newExpirationTime = expirationTime
+			-- Don't show if the unit is mindcontrolled or attackable for some reason.
+			if (auraType and (not isCharmed) and (not canAttack)) then
 
-				-- Update our local prio tracker
-				currentPrio = prio
+				-- Do we have a priority for the current aura?
+				local prio = allowedSchools[auraType] and priorities[auraType]
+				if (prio and (prio > currentPrio)) then
+					newID = auraID
+					newPriority = prio
+					newType = auraType
+					newDebuffType = debuffType
+					newFilter = filterType
+					newSpellID = spellID
+					newIcon = icon
+					newCount = count 
+					newDuration = duration 
+					newExpirationTime = expirationTime
+
+					-- Update our local prio tracker
+					currentPrio = prio
+				end
 			end
-
 		end
 	end
 
 	-- Update the element
-	if newID then 
+	if (newID) then 
 
 		-- Too much?
 		--element:Hide()
@@ -309,11 +346,10 @@ local Update = function(self, event, unit)
 		element.spellID = nil
 		element.duration = nil
 		element.expirationTime = nil
-
 	end
 	
 	-- Run module post updates.
-	if element.PostUpdate then
+	if (element.PostUpdate) then
 		return element:PostUpdate(unit)
 	end	
 end 
@@ -328,7 +364,7 @@ end
 
 local Enable = function(self)
 	local element = self.GroupAura
-	if element then
+	if (element) then
 		local unit = self.unit
 
 		element._owner = self
@@ -340,7 +376,7 @@ local Enable = function(self)
 
 		-- Let the modules decide whether or not 
 		-- we will use tooltips and mouse capture. 
-		if element.disableMouse then 
+		if (element.disableMouse) then 
 			element:EnableMouse(false)
 			element:SetScript("OnEnter", nil)
 			element:SetScript("OnLeave", nil)
@@ -349,7 +385,9 @@ local Enable = function(self)
 			element:SetScript("OnEnter", Aura_OnEnter)
 			element:SetScript("OnLeave", Aura_OnLeave)
 		end
-		self:RegisterEvent("UNIT_AURA", Proxy)
+
+		self:RegisterMessage("GP_UNIT_AURA", Proxy)
+		self:RegisterEvent("PLAYER_LEVEL_UP", UpdateClassFilter, true)
 
 		return true
 	end
@@ -357,8 +395,9 @@ end
 
 local Disable = function(self)
 	local element = self.GroupAura
-	if element then
-		self:UnregisterEvent("UNIT_AURA", Proxy)
+	if (element) then
+		self:UnregisterMessage("UNIT_AURA", Proxy)
+		self:UnregisterEvent("PLAYER_LEVEL_UP", UpdateClassFilter)
 		element:Hide()
 		element:SetScript("OnUpdate", nil)
 	end
@@ -366,5 +405,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("GroupAura", Enable, Disable, Proxy, 12)
+	Lib:RegisterElement("GroupAura", Enable, Disable, Proxy, 14)
 end 
