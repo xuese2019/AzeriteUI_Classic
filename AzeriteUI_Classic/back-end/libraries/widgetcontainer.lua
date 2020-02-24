@@ -1,4 +1,4 @@
-local LibWidgetContainer = Wheel:Set("LibWidgetContainer", 22)
+local LibWidgetContainer = Wheel:Set("LibWidgetContainer", 23)
 if (not LibWidgetContainer) then	
 	return
 end
@@ -174,6 +174,15 @@ WidgetFrame.OnAttributeChanged = function(self, attribute, value)
 
 			-- The above updates frame.unit
 			UpdateAllElements(self, "Forced", self.unit)
+
+			-- Update tooltip to new unit
+			if (self.isMouseOver) then
+				local OnEnter = self:GetScript("OnEnter")
+				if (OnEnter) then
+					OnEnter(self)
+				end
+			end
+
 			return true
 		end 
 	end
