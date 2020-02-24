@@ -40,6 +40,7 @@ locale\zhTW.lua
 
 # Addon specific data tables and methods. 
 front-end\private.lua
+front-end\changelog.lua
 
 # Addon specific layout and design. 
 front-end\stylesheet.lua
@@ -69,7 +70,11 @@ front-end\custom\chatfilters.lua
 front-end\custom\explorer.lua
 front-end\custom\floaters.lua
 front-end\custom\grouptools.lua
-front-end\custom\menu.lua
 front-end\custom\nameplates.lua
 front-end\custom\tooltips.lua
 front-end\custom\unitframes.lua
+
+# Configuration & Help
+front-end\custom\changelog.lua
+front-end\custom\mainmenu.lua
+front-end\custom\menu.lua
