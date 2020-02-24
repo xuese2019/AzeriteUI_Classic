@@ -435,6 +435,7 @@ LibCast.OnInit = function(self)
 	end 
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "COMBAT_LOG_EVENT_UNFILTERED")
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
+	self:RegisterEvent("PLAYER_TARGET_CHANGED", "OnEvent")
 end
 
 LibCast:UnregisterAllEvents()

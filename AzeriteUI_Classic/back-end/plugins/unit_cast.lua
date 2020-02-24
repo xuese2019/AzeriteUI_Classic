@@ -538,7 +538,7 @@ Update = function(self, event, unit, ...)
 				return Update(self, "GP_SPELL_CAST_CHANNEL_START", unitGUID)
 			end 
 		end
-		if not(element.casting or element.channeling or element.tradeskill or element.failedMessageTimer) then 
+		if (event == "PLAYER_TARGET_CHANGED") or not(element.casting or element.channeling or element.tradeskill or element.failedMessageTimer) then 
 			clear(element)
 			element:Hide()
 			element:SetScript("OnUpdate", nil)
@@ -582,6 +582,9 @@ local Enable = function(self)
 			self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE", Proxy)
 			self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP", Proxy)
 		else
+			if (unit == "target") or (unit == "targettarget") then
+				self:RegisterEvent("PLAYER_TARGET_CHANGED", Proxy, true)
+			end
 			self:RegisterMessage("GP_SPELL_CAST_START", Proxy)
 			self:RegisterMessage("GP_SPELL_CAST_STOP", Proxy)
 			self:RegisterMessage("GP_SPELL_CAST_FAILED", Proxy)
@@ -611,6 +614,7 @@ local Disable = function(self)
 		self:UnregisterEvent("UNIT_SPELLCAST_CHANNEL_START", Proxy)
 		self:UnregisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE", Proxy)
 		self:UnregisterEvent("UNIT_SPELLCAST_CHANNEL_STOP", Proxy)
+		self:UnregisterEvent("PLAYER_TARGET_CHANGED", Proxy)
 
 		self:UnregisterMessage("GP_SPELL_CAST_START", Proxy)
 		self:UnregisterMessage("GP_SPELL_CAST_STOP", Proxy)
@@ -630,5 +634,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 38)
+	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 39)
 end 
