@@ -13,13 +13,11 @@ local table_remove = table.remove
 local table_wipe = table.wipe
 
 -- WoW API
-local CancelUnitBuff = _G.CancelUnitBuff
-local GetTime = _G.GetTime
-local InCombatLockdown = _G.InCombatLockdown
-local UnitBuff = _G.UnitBuff
-local UnitDebuff = _G.UnitDebuff
-local UnitExists = _G.UnitExists
-local UnitHasVehicleUI = _G.UnitHasVehicleUI
+local CancelUnitBuff = CancelUnitBuff
+local GetTime = GetTime
+local InCombatLockdown = InCombatLockdown
+local UnitExists = UnitExists
+local UnitHasVehicleUI = UnitHasVehicleUI
 
 -- Blizzard Textures
 local EDGE_LOC_TEXTURE = [[Interface\Cooldown\edge-LoC]]
