@@ -1,4 +1,4 @@
-local LibUnitFrame = Wheel:Set("LibUnitFrame", 69)
+local LibUnitFrame = Wheel:Set("LibUnitFrame", 70)
 if (not LibUnitFrame) then	
 	return
 end
@@ -326,6 +326,12 @@ UnitFrame.OverrideAllElements = function(self, event, ...)
 	if (not unit) or (not UnitExists(unit) and not ShowBossFrameWhenUninteractable(unit)) then 
 		return 
 	end
+	if (self.isMouseOver) then
+		local OnEnter = self:GetScript("OnEnter")
+		if (OnEnter) then
+			OnEnter(self)
+		end
+	end
 	return self:UpdateAllElements(event, ...)
 end
 
@@ -339,6 +345,12 @@ UnitFrame.OverrideAllElementsOnChangedGUID = function(self, event, ...)
 	local currentGUID = UnitGUID(unit)
 	if currentGUID and (self.unitGUID ~= currentGUID) then 
 		self.unitGUID = currentGUID
+		if (self.isMouseOver) then
+			local OnEnter = self:GetScript("OnEnter")
+			if (OnEnter) then
+				OnEnter(self)
+			end
+		end
 		return self:UpdateAllElements(event, ...)
 	end
 end
