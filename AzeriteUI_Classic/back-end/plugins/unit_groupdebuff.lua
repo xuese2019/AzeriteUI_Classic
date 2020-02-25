@@ -33,7 +33,7 @@ local UpdateClassFilter = function(level)
 	end
 	for filterType,allowedSchools in pairs(levelFilter) do
 		for school,thresholdLevel in pairs(allowedSchools) do
-			classFilter[filterType][school] = (thresholdLevel >= level)
+			classFilter[filterType][school] = (thresholdLevel <= level)
 		end
 	end
 end
@@ -405,5 +405,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("GroupAura", Enable, Disable, Proxy, 14)
+	Lib:RegisterElement("GroupAura", Enable, Disable, Proxy, 15)
 end 
