@@ -724,7 +724,7 @@ end
 local NamePlates_Auras_PostUpdateButton = function(element, button)
 	local colors = element._owner.colors
 	local layout = element._owner.layout
-	if UnitIsFriend("player", button.unit) then 
+	if UnitIsFriend("player", button.unit) then
 		if button.isBuff then 
 			local color = layout.AuraBorderBackdropBorderColor
 			if color then 
@@ -748,7 +748,8 @@ local NamePlates_Auras_PostUpdateButton = function(element, button)
 				button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
 			end 
 		else
-			local color = colors.debuff[button.debuffType or "none"] or layout.AuraBorderBackdropBorderColor
+			--local color = colors.debuff[button.debuffType or "none"] or layout.AuraBorderBackdropBorderColor
+			local color = colors.debuff.none or layout.AuraBorderBackdropBorderColor
 			if color then 
 				button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
 			end 
