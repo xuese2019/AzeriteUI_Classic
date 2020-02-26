@@ -198,17 +198,20 @@ local Slow = createColor(116/255, 156/255, 255/255)
 local Angry = createColor(156/255, 116/255, 255/255)
 
 -- Crystal Power Colors
-colorDB.power.ENERGY_CRYSTAL = Fast -- Rogues, Druids, Monks
+colorDB.power.ENERGY_CRYSTAL = Fast -- Rogues, Druids
 colorDB.power.FOCUS_CRYSTAL = Slow -- Hunters Pets (?)
 colorDB.power.RAGE_CRYSTAL = Angry -- Druids, Warriors
 
+-- Only occurs when the orb is manually disabled by the player.
+colorDB.power.MANA_CRYSTAL = createColor(101/255, 93/255, 191/255) -- Druid, Hunter, Mage, Paladin, Priest, Shaman, Warlock
+
 -- Orb Power Colors
-colorDB.power.MANA_ORB = createColor(135/255, 125/255, 255/255) -- Druid, Mage, Monk, Paladin, Priest, Shaman, Warlock
+colorDB.power.MANA_ORB = createColor(135/255, 125/255, 255/255) -- Druid, Hunter, Mage, Paladin, Priest, Shaman, Warlock
 
 -- Standard Power Colors
-colorDB.power.ENERGY = createColor(254/255, 245/255, 145/255) -- Rogues, Druids, Monks
-colorDB.power.FOCUS = createColor(125/255, 168/255, 195/255) -- Hunters and Hunter Pets
-colorDB.power.MANA = createColor(80/255, 116/255, 255/255) -- Druid, Mage, Paladin, Priest, Shaman, Warlock
+colorDB.power.ENERGY = createColor(254/255, 245/255, 145/255) -- Rogues, Druids
+colorDB.power.FOCUS = createColor(125/255, 168/255, 195/255) -- Hunter Pets
+colorDB.power.MANA = createColor(80/255, 116/255, 255/255) -- Druid, Hunter, Mage, Paladin, Priest, Shaman, Warlock
 colorDB.power.RAGE = createColor(215/255, 7/255, 7/255) -- Druids, Warriors
 
 -- Secondary Resource Colors
