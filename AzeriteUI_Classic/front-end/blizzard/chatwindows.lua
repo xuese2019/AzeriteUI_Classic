@@ -44,7 +44,7 @@ local OnUpdate = function(frame, elapsed)
 			if (frame.clearSpamDisableDelay < 0) then
 				frame.clearSpam = nil
 				frame.clearSpamDisableDelay = nil
-				frame.showGMotDDelay = 10
+				frame.showGMotDDelay = 10 -- seems to require this long to be available.
 			end
 		end
 	end
