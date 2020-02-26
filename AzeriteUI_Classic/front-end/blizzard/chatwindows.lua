@@ -10,6 +10,7 @@ Module:SetIncompatible("Prat-3.0")
 -- Lua API
 local _G = _G
 local math_floor = math.floor
+local string_format = string.format
 local string_len = string.len
 local string_sub = string.sub 
 
@@ -55,7 +56,11 @@ local OnUpdate = function(frame, elapsed)
 			frame.showGMotDDelay = nil
 			local gmotd = GetGuildRosterMOTD()
 			if (gmotd) and (gmotd ~= "") then 
-				ChatFrame1:AddMessage(gmotd, Colors.quest.green[1], Colors.quest.green[2], Colors.quest.green[3])
+				local info = ChatTypeInfo["GUILD"]
+				local string = string_format(GUILD_MOTD_TEMPLATE, gmotd)
+				ChatFrame1:AddMessage(string, info.r, info.g, info.b, info.id)
+		
+				--ChatFrame1:AddMessage(gmotd, Colors.quest.green[1], Colors.quest.green[2], Colors.quest.green[3])
 			end
 		end 
 	end
