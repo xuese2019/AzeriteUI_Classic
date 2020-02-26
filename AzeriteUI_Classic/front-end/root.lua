@@ -238,301 +238,324 @@ Core.UnloadDebugConsole = function(self)
 	ReloadUI()
 end
 
+-- The contents of this method are all relatively new features
+-- I haven't yet decided whether to put into modules or the back-end.
 Core.ApplyExperimentalFeatures = function(self)
 
 	-- Attempt to hook the bag bar to the bags
-	-- Retrieve the first slot button and the backpack
-	local firstSlot = CharacterBag0Slot
-	local backpack = ContainerFrame1
+	do
+		-- Retrieve the first slot button and the backpack
+		local firstSlot = CharacterBag0Slot
+		local backpack = ContainerFrame1
 
-	-- These should always exist, but Blizz do have a way of changing things,
-	-- and I prefer having functionality not be applied in a future update 
-	-- rather than having the UI break from nil bugs. 
-	if (firstSlot and backpack) then 
-		firstSlot:ClearAllPoints()
-		firstSlot:SetPoint("TOPRIGHT", backpack, "BOTTOMRIGHT", -6, 0)
+		-- These should always exist, but Blizz do have a way of changing things,
+		-- and I prefer having functionality not be applied in a future update 
+		-- rather than having the UI break from nil bugs. 
+		if (firstSlot and backpack) then 
+			firstSlot:ClearAllPoints()
+			firstSlot:SetPoint("TOPRIGHT", backpack, "BOTTOMRIGHT", -6, 0)
 
-		local strata = backpack:GetFrameStrata()
-		local level = backpack:GetFrameLevel()
-		local slotSize = 30
-		local previous
+			local strata = backpack:GetFrameStrata()
+			local level = backpack:GetFrameLevel()
+			local slotSize = 30
+			local previous
 
-		for i = 0,3 do 
-			-- Always check for existence, 
-			-- because nothing is ever guaranteed. 
-			local slot = _G["CharacterBag"..i.."Slot"]
-			local tex = _G["CharacterBag"..i.."SlotNormalTexture"]
-			if slot then 
-				slot:SetParent(backpack)
-				slot:SetSize(slotSize,slotSize) 
-				slot:SetFrameStrata(strata)
-				slot:SetFrameLevel(level)
+			for i = 0,3 do 
+				-- Always check for existence, 
+				-- because nothing is ever guaranteed. 
+				local slot = _G["CharacterBag"..i.."Slot"]
+				local tex = _G["CharacterBag"..i.."SlotNormalTexture"]
+				if slot then 
+					slot:SetParent(backpack)
+					slot:SetSize(slotSize,slotSize) 
+					slot:SetFrameStrata(strata)
+					slot:SetFrameLevel(level)
 
-				-- Remove that fugly outer border
-				if tex then 
-					tex:SetTexture("")
-					tex:SetAlpha(0)
-				end
-				
-				-- Re-anchor the slots to remove space
-				if (i == 0) then
-					slot:ClearAllPoints()
-					slot:SetPoint("TOPRIGHT", backpack, "BOTTOMRIGHT", -6, 4)
-				else 
-					slot:ClearAllPoints()
-					slot:SetPoint("RIGHT", previous, "LEFT", 0, 0)
-				end
-				previous = slot
+					-- Remove that fugly outer border
+					if tex then 
+						tex:SetTexture("")
+						tex:SetAlpha(0)
+					end
+					
+					-- Re-anchor the slots to remove space
+					if (i == 0) then
+						slot:ClearAllPoints()
+						slot:SetPoint("TOPRIGHT", backpack, "BOTTOMRIGHT", -6, 4)
+					else 
+						slot:ClearAllPoints()
+						slot:SetPoint("RIGHT", previous, "LEFT", 0, 0)
+					end
+					previous = slot
+				end 
 			end 
-		end 
 
-		local keyring = KeyRingButton
-		if (keyring) then 
-			keyring:SetParent(backpack)
-			keyring:SetHeight(slotSize) 
-			keyring:SetFrameStrata(strata)
-			keyring:SetFrameLevel(level)
-			keyring:ClearAllPoints()
-			keyring:SetPoint("RIGHT", previous, "LEFT", 0, 0)
-			previous = keyring
-		end
-	end 
+			local keyring = KeyRingButton
+			if (keyring) then 
+				keyring:SetParent(backpack)
+				keyring:SetHeight(slotSize) 
+				keyring:SetFrameStrata(strata)
+				keyring:SetFrameLevel(level)
+				keyring:ClearAllPoints()
+				keyring:SetPoint("RIGHT", previous, "LEFT", 0, 0)
+				previous = keyring
+			end
+		end 
+	end
 
 	-- Register addon specific aura filters.
 	-- These can be accessed by the other modules by calling 
 	-- the relevant methods on the 'Core' module object. 
-	local auraFlags = Private.AuraFlags
-	if auraFlags then 
-		for spellID,flags in pairs(auraFlags) do 
-			self:AddAuraUserFlags(spellID,flags)
-		end 
-	end
-
-	local commands = {
-		SLASH_STOPWATCH_PARAM_PLAY1 = "play",
-		SLASH_STOPWATCH_PARAM_PLAY2 = "play",
-		SLASH_STOPWATCH_PARAM_PAUSE1 = "pause",
-		SLASH_STOPWATCH_PARAM_PAUSE2 = "pause",
-		SLASH_STOPWATCH_PARAM_STOP1 = "stop",
-		SLASH_STOPWATCH_PARAM_STOP2 = "clear",
-		SLASH_STOPWATCH_PARAM_STOP3 = "reset",
-		SLASH_STOPWATCH_PARAM_STOP4 = "stop",
-		SLASH_STOPWATCH_PARAM_STOP5 = "clear",
-		SLASH_STOPWATCH_PARAM_STOP6 = "reset"
-	}
-
-	-- try to match a command
-	local matchCommand = function(param, text)
-		local i, compare
-		i = 1
-		repeat
-			compare = commands[param..i]
-			if (compare and compare == text) then
-				return true
-			end
-			i = i + 1
-		until (not compare)
-		return false
-	end
-
-	local stopWatch = function(_,msg)
-		if (not IsAddOnLoaded("Blizzard_TimeManager")) then
-			UIParentLoadAddOn("Blizzard_TimeManager")
+	do
+		local auraFlags = Private.AuraFlags
+		if auraFlags then 
+			for spellID,flags in pairs(auraFlags) do 
+				self:AddAuraUserFlags(spellID,flags)
+			end 
 		end
-		if (StopwatchFrame) then
-			local text = string_match(msg, "%s*([^%s]+)%s*")
-			if (text) then
-				text = string_lower(text)
-	
-				-- in any of the following cases, the stopwatch will be shown
-				StopwatchFrame:Show()
-	
-				if (matchCommand("SLASH_STOPWATCH_PARAM_PLAY", text)) then
-					Stopwatch_Play()
-					return
+	end
+
+	-- Add back retail like stop watch commands
+	do
+		local commands = {
+			SLASH_STOPWATCH_PARAM_PLAY1 = "play",
+			SLASH_STOPWATCH_PARAM_PLAY2 = "play",
+			SLASH_STOPWATCH_PARAM_PAUSE1 = "pause",
+			SLASH_STOPWATCH_PARAM_PAUSE2 = "pause",
+			SLASH_STOPWATCH_PARAM_STOP1 = "stop",
+			SLASH_STOPWATCH_PARAM_STOP2 = "clear",
+			SLASH_STOPWATCH_PARAM_STOP3 = "reset",
+			SLASH_STOPWATCH_PARAM_STOP4 = "stop",
+			SLASH_STOPWATCH_PARAM_STOP5 = "clear",
+			SLASH_STOPWATCH_PARAM_STOP6 = "reset"
+		}
+
+		-- try to match a command
+		local matchCommand = function(param, text)
+			local i, compare
+			i = 1
+			repeat
+				compare = commands[param..i]
+				if (compare and compare == text) then
+					return true
 				end
-				if (matchCommand("SLASH_STOPWATCH_PARAM_PAUSE", text)) then
-					Stopwatch_Pause()
-					return
-				end
-				if (matchCommand("SLASH_STOPWATCH_PARAM_STOP", text)) then
-					Stopwatch_Clear()
-					return
-				end
-				-- try to match a countdown
-				-- kinda ghetto, but hey, it's simple and it works =)
-				local hour, minute, second = string_match(msg, "(%d+):(%d+):(%d+)")
-				if (not hour) then
-					minute, second = string_match(msg, "(%d+):(%d+)")
-					if (not minute) then
-						second = string_match(msg, "(%d+)")
+				i = i + 1
+			until (not compare)
+			return false
+		end
+
+		local stopWatch = function(_,msg)
+			if (not IsAddOnLoaded("Blizzard_TimeManager")) then
+				UIParentLoadAddOn("Blizzard_TimeManager")
+			end
+			if (StopwatchFrame) then
+				local text = string_match(msg, "%s*([^%s]+)%s*")
+				if (text) then
+					text = string_lower(text)
+		
+					-- in any of the following cases, the stopwatch will be shown
+					StopwatchFrame:Show()
+		
+					if (matchCommand("SLASH_STOPWATCH_PARAM_PLAY", text)) then
+						Stopwatch_Play()
+						return
 					end
+					if (matchCommand("SLASH_STOPWATCH_PARAM_PAUSE", text)) then
+						Stopwatch_Pause()
+						return
+					end
+					if (matchCommand("SLASH_STOPWATCH_PARAM_STOP", text)) then
+						Stopwatch_Clear()
+						return
+					end
+					-- try to match a countdown
+					-- kinda ghetto, but hey, it's simple and it works =)
+					local hour, minute, second = string_match(msg, "(%d+):(%d+):(%d+)")
+					if (not hour) then
+						minute, second = string_match(msg, "(%d+):(%d+)")
+						if (not minute) then
+							second = string_match(msg, "(%d+)")
+						end
+					end
+					Stopwatch_StartCountdown(tonumber(hour), tonumber(minute), tonumber(second))
+				else
+					Stopwatch_Toggle()
 				end
-				Stopwatch_StartCountdown(tonumber(hour), tonumber(minute), tonumber(second))
-			else
-				Stopwatch_Toggle()
 			end
 		end
+		self:RegisterChatCommand("stopwatch", stopWatch)
 	end
 
+	-- Add a command to clear the main chat frame
 	self:RegisterChatCommand("clear", function() ChatFrame1:Clear() end)
+
+	-- Add a command to manually update macro icons
 	self:RegisterChatCommand("fix", fixMacroIcons)
-	self:RegisterChatCommand("stopwatch", stopWatch)
 
 	-- Workaround for the completely random bg popup taints in 1.13.3.
 	-- Going with Tukz way of completely hiding the broken popup,
 	-- instead of just modifying the button away as I initially did.
 	-- No point adding more sources of taint to the tainted element.
-	local battleground = self:CreateFrame("Frame", nil, "UICenter")
-	battleground:SetSize(574, 40)
-	battleground:Place("TOP", 0, -29)
-	battleground:Hide()
-	battleground.Text = battleground:CreateFontString(nil, "OVERLAY")
-	battleground.Text:SetFontObject(GetFont(18,true))
-	battleground.Text:SetText(L["You can now enter a new battleground, right-click the green eye on the minimap to enter or leave!"])
-	battleground.Text:SetPoint("TOP")
-	battleground.Text:SetJustifyH("CENTER")
-	battleground.Text:SetWidth(battleground:GetWidth())
-	battleground.Text:SetTextColor(1, 0, 0)
-
-	local animation = battleground:CreateAnimationGroup()
-	animation:SetLooping("BOUNCE")
-
-	local fadeOut = animation:CreateAnimation("Alpha")
-	fadeOut:SetFromAlpha(1)
-	fadeOut:SetToAlpha(.3)
-	fadeOut:SetDuration(.5)
-	fadeOut:SetSmoothing("IN_OUT")
-
-	self:RegisterEvent("UPDATE_BATTLEFIELD_STATUS", function() 
-		for i = 1, MAX_BATTLEFIELD_QUEUES do
-			local status, map, instanceID = GetBattlefieldStatus(i)
-			
-			if (status == "confirm") then
-				StaticPopup_Hide("CONFIRM_BATTLEFIELD_ENTRY")
-				
-				battleground:Show()
-				animation:Play()
-				
-				return
-			end
-		end
+	do
+		local battleground = self:CreateFrame("Frame", nil, "UICenter")
+		battleground:SetSize(574, 40)
+		battleground:Place("TOP", 0, -29)
 		battleground:Hide()
-		animation:Stop()
-	end)
+		battleground.Text = battleground:CreateFontString(nil, "OVERLAY")
+		battleground.Text:SetFontObject(GetFont(18,true))
+		battleground.Text:SetText(L["You can now enter a new battleground, right-click the green eye on the minimap to enter or leave!"])
+		battleground.Text:SetPoint("TOP")
+		battleground.Text:SetJustifyH("CENTER")
+		battleground.Text:SetWidth(battleground:GetWidth())
+		battleground.Text:SetTextColor(1, 0, 0)
+
+		local animation = battleground:CreateAnimationGroup()
+		animation:SetLooping("BOUNCE")
+
+		local fadeOut = animation:CreateAnimation("Alpha")
+		fadeOut:SetFromAlpha(1)
+		fadeOut:SetToAlpha(.3)
+		fadeOut:SetDuration(.5)
+		fadeOut:SetSmoothing("IN_OUT")
+
+		self:RegisterEvent("UPDATE_BATTLEFIELD_STATUS", function() 
+			for i = 1, MAX_BATTLEFIELD_QUEUES do
+				local status, map, instanceID = GetBattlefieldStatus(i)
+				
+				if (status == "confirm") then
+					StaticPopup_Hide("CONFIRM_BATTLEFIELD_ENTRY")
+					
+					battleground:Show()
+					animation:Play()
+					
+					return
+				end
+			end
+			battleground:Hide()
+			animation:Stop()
+		end)
+	end
 
 	-- Let's fake spell highlights!
-	local spellHighlights = {} -- [auraID] = { spellID, spellID, ... }
-	spellHighlights[16870] = { -- Omen of Clarity (Proc)
-		 6807, -- Maul (Rank 1)
-		 6808, -- Maul (Rank 2)
-		 6809, -- Maul (Rank 3)
-		 8972, -- Maul (Rank 4)
-		 9745, -- Maul (Rank 5)
-		 9880, -- Maul (Rank 6)
-		 9881, -- Maul (Rank 7)
-		 6785, -- Ravage (Rank 1)
-		 6787, -- Ravage (Rank 2)
-		 9866, -- Ravage (Rank 3)
-		 9867, -- Ravage (Rank 4)
-		 8936, -- Regrowth (Rank 1)
-		 8938, -- Regrowth (Rank 2)
-		 8939, -- Regrowth (Rank 3)
-		 8940, -- Regrowth (Rank 4)
-		 8941, -- Regrowth (Rank 5)
-		 9750, -- Regrowth (Rank 6)
-		 9856, -- Regrowth (Rank 7)
-		 9857, -- Regrowth (Rank 8)
-		 9858, -- Regrowth (Rank 9)
-		 5221, -- Shred (Rank 1)
-		 6800, -- Shred (Rank 2)
-		 8992, -- Shred (Rank 3)
-		 9829, -- Shred (Rank 4)
-		 9830  -- Shred (Rank 5)
-	}
+	do
+		local spellHighlights = {} -- [auraID] = { spellID, spellID, ... }
+		spellHighlights[16870] = { -- Omen of Clarity (Proc)
+			6807, -- Maul (Rank 1)
+			6808, -- Maul (Rank 2)
+			6809, -- Maul (Rank 3)
+			8972, -- Maul (Rank 4)
+			9745, -- Maul (Rank 5)
+			9880, -- Maul (Rank 6)
+			9881, -- Maul (Rank 7)
+			6785, -- Ravage (Rank 1)
+			6787, -- Ravage (Rank 2)
+			9866, -- Ravage (Rank 3)
+			9867, -- Ravage (Rank 4)
+			8936, -- Regrowth (Rank 1)
+			8938, -- Regrowth (Rank 2)
+			8939, -- Regrowth (Rank 3)
+			8940, -- Regrowth (Rank 4)
+			8941, -- Regrowth (Rank 5)
+			9750, -- Regrowth (Rank 6)
+			9856, -- Regrowth (Rank 7)
+			9857, -- Regrowth (Rank 8)
+			9858, -- Regrowth (Rank 9)
+			5221, -- Shred (Rank 1)
+			6800, -- Shred (Rank 2)
+			8992, -- Shred (Rank 3)
+			9829, -- Shred (Rank 4)
+			9830  -- Shred (Rank 5)
+		}
 
-	local currentHighlights = {}
-	local activeHighlights = {}
+		local currentHighlights = {}
+		local activeHighlights = {}
 
 
-	-- Update spellhighlights
-	local UpdateHighlights = function(_, event, unit)
-		if (event == "GP_UNIT_AURA") and (unit ~= "player") then
-			return
-		end
-
-		-- Wipe any leftovers of the current highlights
-		for id in pairs(currentHighlights) do
-			currentHighlights[id] = nil
-		end
-
-		-- Iterate for current highlights
-		for i = 1, BUFF_MAX_DISPLAY do 
-
-			-- Retrieve buff information
-			local name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = self:GetUnitBuff("player", i, "HELPFUL PLAYER")
-
-			-- No name means no more buffs matching the filter
-			if (not name) then
-				break
+		-- Update spellhighlights
+		local UpdateHighlights = function(_, event, unit)
+			if (event == "GP_UNIT_AURA") and (unit ~= "player") then
+				return
 			end
 
-			for id,highlights in pairs(spellHighlights) do
-				if (id == spellId) then
+			-- Wipe any leftovers of the current highlights
+			for id in pairs(currentHighlights) do
+				currentHighlights[id] = nil
+			end
 
-					-- Add it to current highlights.
-					currentHighlights[id] = true
+			-- Iterate for current highlights
+			for i = 1, BUFF_MAX_DISPLAY do 
 
-					-- Add to active and send an actication message if needed.
-					if (not activeHighlights[id]) then
-						activeHighlights[id] = true
-						for _,spellID in pairs(highlights) do
-							self:SendMessage("GP_SPELL_ACTIVATION_OVERLAY_GLOW_SHOW", spellID)
+				-- Retrieve buff information
+				local name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = self:GetUnitBuff("player", i, "HELPFUL PLAYER")
+
+				-- No name means no more buffs matching the filter
+				if (not name) then
+					break
+				end
+
+				for id,highlights in pairs(spellHighlights) do
+					if (id == spellId) then
+
+						-- Add it to current highlights.
+						currentHighlights[id] = true
+
+						-- Add to active and send an actication message if needed.
+						if (not activeHighlights[id]) then
+							activeHighlights[id] = true
+							for _,spellID in pairs(highlights) do
+								self:SendMessage("GP_SPELL_ACTIVATION_OVERLAY_GLOW_SHOW", spellID)
+							end
 						end
+					end
+				end
+			end
+
+			-- Disable active highlights that no longer match the current ones
+			for id in pairs(activeHighlights) do
+				if (not currentHighlights[id]) then
+					activeHighlights[id] = nil
+					for _,spellID in pairs(spellHighlights[id]) do
+						self:SendMessage("GP_SPELL_ACTIVATION_OVERLAY_GLOW_HIDE", spellID)
 					end
 				end
 			end
 		end
 
-		-- Disable active highlights that no longer match the current ones
-		for id in pairs(activeHighlights) do
-			if (not currentHighlights[id]) then
-				activeHighlights[id] = nil
+		-- Not loving that we're making this a global,
+		-- but it does auto-fake it for the back-end.
+		_G.IsSpellOverlayed = function(spellId)
+			for id in pairs(activeHighlights) do
 				for _,spellID in pairs(spellHighlights[id]) do
-					self:SendMessage("GP_SPELL_ACTIVATION_OVERLAY_GLOW_HIDE", spellID)
+					if (spellId == spellID) then
+						return true
+					end
 				end
 			end
 		end
-	end
 
-	IsSpellOverlayed = function(spellId)
-		for id in pairs(activeHighlights) do
-			for _,spellID in pairs(spellHighlights[id]) do
-				if (spellId == spellID) then
-					return true
-				end
-			end
-		end
+		self:RegisterEvent("PLAYER_ENTERING_WORLD", UpdateHighlights)
+		self:RegisterMessage("GP_UNIT_AURA", UpdateHighlights)
 	end
-
-	self:RegisterEvent("PLAYER_ENTERING_WORLD", UpdateHighlights)
-	self:RegisterMessage("GP_UNIT_AURA", UpdateHighlights)
 
 	-- Little trick to show the layout and dimensions
 	-- of the Minimap blip icons on-screen in-game, 
 	-- whenever blizzard decide to update those. 
-	
-	-- By setting a single point, but not any sizes, 
-	-- the texture is shown in its original size and dimensions!
-	--local f = UIParent:CreateTexture()
-	--f:SetTexture([[Interface\MiniMap\ObjectIconsAtlas.blp]])
-	--f:SetPoint("CENTER")
+	do
+		-- Change this rather than comment/uncomment
+		if (false) then
+			-- By setting a single point, but not any sizes, 
+			-- the texture is shown in its original size and dimensions!
+			local f = UIParent:CreateTexture()
+			f:SetTexture([[Interface\MiniMap\ObjectIconsAtlas.blp]])
+			f:SetPoint("CENTER")
 
-	-- Add a little backdrop for easy
-	-- copy & paste from screenshots!
-	--local g = UIParent:CreateTexture()
-	--g:SetColorTexture(0,.7,0,.25)
-	--g:SetAllPoints(f)
+			-- Add a little backdrop for easy
+			-- copy & paste from screenshots!
+			local g = UIParent:CreateTexture()
+			g:SetColorTexture(0,.7,0,.25)
+			g:SetAllPoints(f)
+		end
+	end
+	
 end
 
 -- We could add this into the back-end, leaving it here for now, though. 
