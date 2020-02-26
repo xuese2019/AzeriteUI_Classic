@@ -14,18 +14,19 @@ local string_len = string.len
 local string_sub = string.sub 
 
 -- WoW API
-local FCF_GetButtonSide = _G.FCF_GetButtonSide
-local FCF_SetWindowAlpha = _G.FCF_SetWindowAlpha
-local FCF_SetWindowColor = _G.FCF_SetWindowColor
-local FCF_Tab_OnClick = _G.FCF_Tab_OnClick
-local FCF_UpdateButtonSide = _G.FCF_UpdateButtonSide
-local IsShiftKeyDown = _G.IsShiftKeyDown
-local UIFrameFadeRemoveFrame = _G.UIFrameFadeRemoveFrame
-local UIFrameIsFading = _G.UIFrameIsFading
-local UnitAffectingCombat = _G.UnitAffectingCombat
-local VoiceChat_IsLoggedIn = _G.C_VoiceChat and _G.C_VoiceChat.IsLoggedIn
+local FCF_GetButtonSide = FCF_GetButtonSide
+local FCF_SetWindowAlpha = FCF_SetWindowAlpha
+local FCF_SetWindowColor = FCF_SetWindowColor
+local FCF_Tab_OnClick = FCF_Tab_OnClick
+local FCF_UpdateButtonSide = FCF_UpdateButtonSide
+local IsShiftKeyDown = IsShiftKeyDown
+local UIFrameFadeRemoveFrame = UIFrameFadeRemoveFrame
+local UIFrameIsFading = UIFrameIsFading
+local UnitAffectingCombat = UnitAffectingCombat
+local VoiceChat_IsLoggedIn = C_VoiceChat and C_VoiceChat.IsLoggedIn
 
 -- Private API
+local Colors = Private.Colors
 local GetConfig = Private.GetConfig
 local GetLayout = Private.GetLayout
 
@@ -36,6 +37,28 @@ local alphaLocks = {}
 -------------------------------------------------------
 local HZ = 1/60
 local OnUpdate = function(frame, elapsed)
+	if (frame.clearSpam) or (frame.clearSpamDisableDelay) then
+		ChatFrame1:Clear()
+		if (frame.clearSpamDisableDelay) then
+			frame.clearSpamDisableDelay = frame.clearSpamDisableDelay - elapsed
+			if (frame.clearSpamDisableDelay < 0) then
+				frame.clearSpam = nil
+				frame.clearSpamDisableDelay = nil
+				frame.showGMotDDelay = 10
+			end
+		end
+	end
+
+	if (frame.showGMotDDelay) then
+		frame.showGMotDDelay = frame.showGMotDDelay - elapsed
+		if (frame.showGMotDDelay < 0) then 
+			frame.showGMotDDelay = nil
+			local gmotd = GetGuildRosterMOTD()
+			if (gmotd) and (gmotd ~= "") then 
+				ChatFrame1:AddMessage(gmotd, Colors.quest.green[1], Colors.quest.green[2], Colors.quest.green[3])
+			end
+		end 
+	end
 
 	-- Throttle these updates
 	frame.elapsed = frame.elapsed + elapsed
@@ -599,6 +622,8 @@ Module.SetUpMainFrames = function(self)
 	self:SetChatWindowAsSlaveTo(ChatFrame1, frame)
 
 	frame.module = self
+	frame.clearSpam = true
+	frame.clearSpamDisableDelay = nil
 	frame.elapsed = 0
 	frame.fading = nil
 	frame.fadeDirection = nil
@@ -722,6 +747,12 @@ Module.OnModeToggle = function(self, modeName)
 end
 
 Module.OnEvent = function(self, event, ...)
+	if (event == "PLAYER_ENTERING_WORLD") then
+		self.frame.clearSpam = true
+		self.frame.clearSpamDisableDelay = 1.5
+		self.frame.showGMotDDelay = nil
+	end
+
 	self:UpdateMainWindowButtonDisplay()
 
 	-- Do this cause taint? Shouldn't, but you never know. 
@@ -743,6 +774,7 @@ end
 
 Module.OnEnable = function(self)
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
+	self:RegisterEvent("GUILD_MOTD", "OnEvent")
 	self:RegisterEvent("VOICE_CHAT_LOGIN", "OnEvent")
 	self:RegisterEvent("VOICE_CHAT_LOGOUT", "OnEvent")
 	self:RegisterEvent("VOICE_CHAT_MUTED_CHANGED", "OnEvent")
