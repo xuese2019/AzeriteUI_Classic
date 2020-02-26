@@ -34,6 +34,8 @@ local GetLayout = Private.GetLayout
 local Layout = GetLayout(ADDON)
 local L = Wheel("LibLocale"):GetLocale(ADDON)
 
+local _,PlayerClass = UnitClass("player")
+
 -- Secure script snippets
 local secureSnippets = {
 	menuToggle = [=[
@@ -932,6 +934,19 @@ Module.CreateMenuTable = function(self)
 			proxyModule = "UnitFrameRaid"
 		})
 	end
+
+	if (PlayerClass == "DRUID") or (PlayerClass == "HUNTER") 
+				 or (PlayerClass == "PALADIN") or (PlayerClass == "SHAMAN")
+				 or (PlayerClass == "MAGE") or (PlayerClass == "PRIEST") or (PlayerClass == "WARLOCK") then
+		table_insert(UnitFrameMenu.buttons, {
+			enabledTitle = L_ENABLED:format(L["Use Mana Orb"]),
+			disabledTitle = L_DISABLED:format(L["Use Mana Orb"]),
+			type = "TOGGLE_VALUE", 
+			configDB = "UnitFramePlayer", configKey = "enablePlayerManaOrb", 
+			proxyModule = "UnitFramePlayer"
+		})
+	end
+
 	table_insert(MenuTable, UnitFrameMenu)
 
 	-- HUD

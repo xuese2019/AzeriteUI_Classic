@@ -1752,6 +1752,10 @@ Defaults.NamePlates = {
 	clickThroughSelf = false
 }
 
+Defaults.UnitFramePlayer = {
+	enablePlayerManaOrb = true
+}
+
 Defaults.UnitFramePlayerHUD = {
 	enableCast = true,
 	enableClassPower = true

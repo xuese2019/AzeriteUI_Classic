@@ -16,7 +16,7 @@ if (not Core) then
 end
 
 -- Primary Units
-local UnitFramePlayer = Core:NewModule("UnitFramePlayer", "LibEvent", "LibUnitFrame", "LibFrame")
+local UnitFramePlayer = Core:NewModule("UnitFramePlayer", "LibDB", "LibEvent", "LibUnitFrame", "LibFrame")
 local UnitFramePlayerHUD = Core:NewModule("UnitFramePlayerHUD", "LibDB", "LibEvent", "LibUnitFrame", "LibFrame")
 local UnitFrameTarget = Core:NewModule("UnitFrameTarget", "LibEvent", "LibUnitFrame", "LibSound")
 
@@ -82,6 +82,21 @@ local SECURE = {
 	FrameTable_InsertCurrentFrame = [=[ 
 		local frame = self:GetFrameRef("CurrentFrame"); 
 		table.insert(Frames, frame); 
+	]=],
+
+	Player_SecureCallback = [=[
+		if name then 
+			name = string.lower(name); 
+		end 
+		if (name == "change-enableplayermanaorb") then 
+			local owner = self:GetFrameRef("Owner"); 
+			self:SetAttribute("enablePlayerManaOrb", value); 
+			if (value) then 
+				owner:CallMethod("EnableManaOrb"); 
+			else 
+				owner:CallMethod("DisableManaOrb"); 
+			end 
+		end
 	]=],
 
 	-- Called on the HUD callback frame
@@ -1880,13 +1895,33 @@ end
 -- Player
 -----------------------------------------------------------
 UnitFramePlayer.OnInit = function(self)
+	self.db = GetConfig(self:GetName())
 	self.layout = GetLayout(self:GetName())
 	self.frame = self:SpawnUnitFrame("player", "UICenter", function(frame, unit, id, _, ...)
 		return UnitStyles.StylePlayerFrame(frame, unit, id, self.layout, ...)
 	end)
+
+	self.frame.EnableManaOrb = function()
+		self.frame.Power.ignoredResource = self.layout.PowerIgnoredResource
+		self.frame.Power:ForceUpdate()
+		self.frame:EnableElement("ExtraPower")
+		self.frame.ExtraPower:ForceUpdate()
+	end
+
+	self.frame.DisableManaOrb = function()
+		self.frame.Power.ignoredResource = nil
+		self.frame.Power:ForceUpdate()
+		self.frame:DisableElement("ExtraPower")
+	end
+
+	-- Create a secure proxy updater for the menu system
+	local callbackFrame = CreateSecureCallbackFrame(self, self.frame, self.db, SECURE.Player_SecureCallback)
 end 
 
 UnitFramePlayer.OnEnable = function(self)
+	if (not self.db.enablePlayerManaOrb) then
+		self.frame:DisableManaOrb()
+	end
 	self:RegisterEvent("PLAYER_ALIVE", "OnEvent")
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
 	self:RegisterEvent("DISABLE_XP_GAIN", "OnEvent")

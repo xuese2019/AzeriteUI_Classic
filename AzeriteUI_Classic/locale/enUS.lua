@@ -121,6 +121,7 @@ L["UnitFrames"] = true
 L["Party Frames"] = true
 L["Raid Frames"] = true
 L["PvP Frames"] = true
+L["Use Mana Orb"] = true
 L["HUD"] = true
 L["CastBar"] = true
 L["ClassPower"] = true
