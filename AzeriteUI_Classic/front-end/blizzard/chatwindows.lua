@@ -632,7 +632,7 @@ Module.SetUpMainFrames = function(self)
 	self:SetChatWindowAsSlaveTo(ChatFrame1, frame)
 
 	frame.module = self
-	frame.clearSpam = true
+	frame.clearSpam = nil
 	frame.clearSpamDisableDelay = nil
 	frame.elapsed = 0
 	frame.fading = nil
@@ -758,9 +758,14 @@ end
 
 Module.OnEvent = function(self, event, ...)
 	if (event == "PLAYER_ENTERING_WORLD") then
-		self.frame.clearSpam = true
-		self.frame.clearSpamDisableDelay = 1.5
-		self.frame.showGMotDDelay = nil
+		-- Initiate chat clearing on login and manual reloads,
+		-- but not when zoning in or out of instances.
+		local isInitialLogin, isReloadingUi = ...
+		if (isInitialLogin) or (isReloadingUi) then
+			self.frame.clearSpam = true
+			self.frame.clearSpamDisableDelay = 1.5
+			self.frame.showGMotDDelay = nil
+		end
 	end
 
 	self:UpdateMainWindowButtonDisplay()
