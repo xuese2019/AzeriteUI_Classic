@@ -1,4 +1,4 @@
-local LibNamePlate = Wheel:Set("LibNamePlate", 40)
+local LibNamePlate = Wheel:Set("LibNamePlate", 41)
 if (not LibNamePlate) then	
 	return
 end
@@ -150,29 +150,32 @@ local FADE_IN = .75 -- time in seconds to fade in
 local FADE_OUT = .05 -- time in seconds to fade out
 local FADE_DOWN = .25 -- time in seconds to fade down, but not out
 
+local ALPHA_FULL = 1
+local ALPHA_VERYHIGH = .85
+local ALPHA_HIGH = .75
+local ALPHA_LOW = .5
+local ALPHA_VERYLOW = .25
+local ALPHA_LOWEST = .1
+local ALPHA_NONE = 0
+
+local ALPHA_FULL_INDEX = 1
+local ALPHA_VERYHIGH_INDEX = 2
+local ALPHA_HIGH_INDEX = 3
+local ALPHA_LOW_INDEX = 4
+local ALPHA_VERYLOW_INDEX = 5
+local ALPHA_LOWEST_INDEX = 6
+local ALPHA_NONE_INDEX = 0
+
 -- Opacity Settings
 -- *From library build 25 we're keeping these local
 local ALPHA = {
-	-- Opacity while engaged in combat
-	InCombat = {
-		[0] = 0, 	-- Not visible.  
-		[1] = 1, 	-- For the current target, if any
-		[2] = .85, 	-- For players when not having a target, also for World Bosses when not targeted
-		[3] = .7, 	-- For non-targeted players when having a target
-		[4] = .35, 	-- For non-targeted trivial mobs
-		[5] = .25, 	-- For non-targeted friendly NPCs 
-		[6] = .1
-	},
-	-- Opacity while not in combat
-	NoCombat = {
-		[0] = 0, 	-- Not visible.
-		[1] = 1, 	-- For the current target, if any
-		[2] = .7, 	-- For players when not having a target, also for World Bosses when not targeted
-		[3] = .35, 	-- For non-targeted players when having a target
-		[4] = .25, 	-- For non-targeted trivial mobs
-		[5] = .15, 	-- For non-targeted friendly NPCs 
-		[6] = .1
-	}
+	[ALPHA_NONE_INDEX] 		= ALPHA_NONE, 		-- Not visible.  
+	[ALPHA_FULL_INDEX] 		= ALPHA_FULL, 		-- For the current target, if any
+	[ALPHA_VERYHIGH_INDEX] 	= ALPHA_VERYHIGH, 	-- For players when not having a target, also for World Bosses when not targeted
+	[ALPHA_HIGH_INDEX] 		= ALPHA_HIGH, 		-- For non-targeted players when having a target
+	[ALPHA_LOW_INDEX] 		= ALPHA_LOW, 		-- For non-targeted trivial mobs
+	[ALPHA_VERYLOW_INDEX] 	= ALPHA_VERYLOW, 	-- For non-targeted friendly NPCs 
+	[ALPHA_LOWEST_INDEX] 	= ALPHA_LOWEST
 }
 
 -- New from build 29
@@ -311,46 +314,112 @@ NamePlate.UpdateAlpha = function(self)
 	if (not UnitExists(unit)) then
 		return 
 	end
-	local alphaLevel = 0
+	local alphaLevel = ALPHA_NONE_INDEX
 	if visiblePlates[self] then
 		if (self.OverrideAlpha) then 
 			return self:OverrideAlpha(unit)
 		end 
-		if self.isTarget or self.isYou then
-			alphaLevel = 1
+		
+		local alphaReduction
+
+		if (self.isTarget or self.isYou) then
+			alphaLevel = ALPHA_FULL_INDEX
 		else
+			-- When you have a target, all else will be lowered by blizzard.
 			if HAS_TARGET then
-				if self.isTrivial then 
-					alphaLevel = 5
-				elseif self.isPlayer then
-					alphaLevel = 3
-				elseif self.isFriend then
-					alphaLevel = 5
+
+				-- Players
+				if (self.isPlayer) then
+
+					-- Enemy Players
+					if (self.isEnemy) then
+						alphaLevel = ALPHA_HIGH_INDEX
+
+					-- Friendly Players
+				elseif (self.isFriend) then
+						alphaLevel = ALPHA_HIGH_INDEX
+						alphaReduction = true
+					end
 				else
-					if self.isElite or self.isRare or self.isBoss then
-						alphaLevel = 2
+
+					-- Important NPCs
+					if (self.isElite or self.isRare or self.isBoss) then
+						if (self.isFriend) then 
+							alphaLevel = ALPHA_FULL_INDEX
+							alphaReduction = true
+						else
+							alphaLevel = ALPHA_FULL_INDEX
+						end
+
+					-- Enemy NPCs
+					elseif (self.isEnemy) then
+						alphaLevel = ALPHA_VERYHIGH_INDEX
+
+					-- Friendly NPCs
+					elseif (self.isFriend) then
+						alphaLevel = ALPHA_VERYLOW_INDEX
+
+					-- Trivial NPCs (do the even exist in Classic?)
+					elseif (self.isTrivial) then 
+						alphaLevel = ALPHA_VERYLOW_INDEX
 					else
-						alphaLevel = 3
-					end	
+						-- Those that fall inbetween. Neutral NPCs?
+						alphaLevel = ALPHA_HIGH_INDEX
+					end
 				end
-			elseif self.isTrivial then 
-				alphaLevel = 4
-			elseif self.isPlayer then
-				alphaLevel = 2
-			elseif self.isFriend then
-				alphaLevel = 5
+
 			else
-				if self.isElite or self.isRare or self.isBoss then
-					alphaLevel = 1
+
+				-- Players
+				if (self.isPlayer) then
+
+					-- Enemy Players
+					if (self.isEnemy) then
+						alphaLevel = ALPHA_VERYHIGH_INDEX
+
+					-- Friendly Players
+					elseif (self.isFriend) then
+						alphaLevel = ALPHA_HIGH_INDEX
+						alphaReduction = true
+					end
 				else
-					alphaLevel = 3
-				end	
+
+					-- Important NPCs
+					if (self.isElite or self.isRare or self.isBoss) then
+						if (self.isFriend) then 
+							alphaLevel = ALPHA_VERYHIGH_INDEX
+							alphaReduction = true
+						else
+							alphaLevel = ALPHA_VERYHIGH_INDEX
+						end
+
+					-- Enemy NPCs
+					elseif (self.isEnemy) then
+						alphaLevel = ALPHA_HIGH_INDEX
+
+					-- Friendly NPCs
+					elseif (self.isFriend) then
+						alphaLevel = ALPHA_LOW_INDEX
+
+					-- Trivial NPCs (do the even exist in Classic?)
+					elseif (self.isTrivial) then 
+						alphaLevel = ALPHA_VERYLOW_INDEX
+					else
+						-- Those that fall inbetween. Neutral NPCs?
+						alphaLevel = ALPHA_HIGH_INDEX
+					end
+				end
 			end
 		end
 	end
 
 	-- Multiply with the blizzard alpha, to piggyback on their line of sight occluded alpha
-	self.targetAlpha = self.baseFrame:GetAlpha() * ALPHA[IN_COMBAT and "InCombat" or "NoCombat"][alphaLevel]
+	--self.targetAlpha = self.baseFrame:GetAlpha() * ALPHA.NoCombat[alphaLevel]
+	self.targetAlpha = self.baseFrame:GetAlpha() * ALPHA[alphaLevel]
+
+	if (alphaReduction) then
+		self.targetAlpha = self.targetAlpha * (not IN_COMBAT) and .5 or 1
+	end
 
 	if (self.PostUpdateAlpha) then 
 		self:PostUpdateAlpha(unit, self.targetAlpha, alphaLevel)
@@ -410,6 +479,7 @@ NamePlate.OnShow = function(self)
 	self.isYou = UnitIsUnit(unit, "player")
 	self.isTarget = UnitIsUnit(unit, "target") -- gotta update this on target changes... 
 	self.isPlayer = UnitIsPlayer(unit)
+	self.isEnemy = UnitIsEnemy(unit, "player")
 	self.isFriend = UnitIsFriend("player", unit)
 	self.isTrivial = UnitIsTrivial(unit)
 	self.isBoss = (self.unitClassificiation == "worldboss") or (self.unitLevel and self.unitLevel < 1)
@@ -445,6 +515,7 @@ NamePlate.OnHide = function(self)
 	self.isTarget = nil
 	self.isPlayer = nil
 	self.isFriend = nil
+	self.isEnemy = nil
 	self.isTrivial = nil
 	self.isBoss = nil
 	self.isRare = nil
@@ -750,6 +821,7 @@ LibNamePlate.CreateNamePlate = function(self, baseFrame, name)
 	plate:SetFrameStrata("BACKGROUND")
 	plate:SetFrameLevel(plate.frameLevel)
 	plate:SetAlpha(plate.currentAlpha)
+	plate:SetIgnoreParentAlpha(true)
 	plate:UpdateScale()
 
 	-- Make sure the visible part of the Blizzard frame remains hidden
