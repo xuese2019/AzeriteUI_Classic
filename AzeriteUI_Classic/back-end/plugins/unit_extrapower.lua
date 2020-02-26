@@ -7,13 +7,13 @@ local tostring = tostring
 local unpack = unpack
 
 -- WoW API
-local UnitIsConnected = _G.UnitIsConnected
-local UnitIsDeadOrGhost = _G.UnitIsDeadOrGhost
-local UnitIsTapDenied = _G.UnitIsTapDenied 
-local UnitPlayerControlled = _G.UnitPlayerControlled
-local UnitPower = _G.UnitPower
-local UnitPowerMax = _G.UnitPowerMax
-local UnitPowerType = _G.UnitPowerType
+local UnitIsConnected = UnitIsConnected
+local UnitIsDeadOrGhost = UnitIsDeadOrGhost
+local UnitIsTapDenied = UnitIsTapDenied 
+local UnitPlayerControlled = UnitPlayerControlled
+local UnitPower = UnitPower
+local UnitPowerMax = UnitPowerMax
+local UnitPowerType = UnitPowerType
 
 -- Number abbreviations
 ---------------------------------------------------------------------	
@@ -32,9 +32,9 @@ local short = function(value)
 	if (not value) then return "" end
 	if (value >= 1e9) then
 		return ("%.1fb"):format(value / 1e9):gsub("%.?0+([kmb])$", "%1")
-	elseif value >= 1e6 then
+	elseif (value >= 1e6) then
 		return ("%.1fm"):format(value / 1e6):gsub("%.?0+([kmb])$", "%1")
-	elseif value >= 1e3 or value <= -1e3 then
+	elseif (value >= 1e3) or (value <= -1e3) then
 		return ("%.1fk"):format(value / 1e3):gsub("%.?0+([kmb])$", "%1")
 	else
 		return tostring(math_floor(value))
@@ -49,7 +49,7 @@ if (gameLocale == "zhCN") then
 		if (not value) then return "" end
 		if (value >= 1e8) then
 			return ("%.1f亿"):format(value / 1e8):gsub("%.?0+([km])$", "%1")
-		elseif value >= 1e4 or value <= -1e3 then
+		elseif (value >= 1e4) or (value <= -1e3) then
 			return ("%.1f万"):format(value / 1e4):gsub("%.?0+([km])$", "%1")
 		else
 			return tostring(math_floor(value))
@@ -120,14 +120,14 @@ local Update = function(self, event, unit)
 	end 
 
 	local element = self.ExtraPower
-	if element.PreUpdate then
+	if (element.PreUpdate) then
 		element:PreUpdate(unit)
 	end
 
 	local powerID, powerType = UnitPowerType(unit)
 
 	-- Check if the element is exclusive to a certain power type
-	if element.exclusiveResource then 
+	if (element.exclusiveResource) then 
 
 		-- If the new powertype isn't the one tracked, 
 		-- we hide the element.
@@ -141,7 +141,7 @@ local Update = function(self, event, unit)
 		-- but the current one is, we need to show the element again. 
 		elseif (element.powerType ~= element.exclusiveResource) then 
 			element.powerType = powerType
-			element:Show()
+			--element:Show()
 		end 
 
 	-- Check if the min should be hidden on a certain resource type
@@ -159,8 +159,8 @@ local Update = function(self, event, unit)
 		-- but the current is something else, 
 		-- we need to show the element again. 
 		elseif (element.powerType == element.ignoredResource) then 
-			element:Show()
-		end  
+			--element:Show()
+		end 
 	end 
 
 	if (element.powerType ~= powerType) then
@@ -178,8 +178,12 @@ local Update = function(self, event, unit)
 	element:SetValue(min)
 	element:UpdateColor(unit, min, max, powerType, powerID, disconnected, dead, tapped)
 	element:UpdateValue(unit, min, max, powerType, powerID, disconnected, dead, tapped)
-			
-	if element.PostUpdate then
+
+	if (not element:IsShown()) then
+		element:Show()
+	end
+
+	if (element.PostUpdate) then
 		return element:PostUpdate(unit, min, max, powerType, powerID)
 	end	
 end 
@@ -245,5 +249,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("ExtraPower", Enable, Disable, Proxy, 5)
+	Lib:RegisterElement("ExtraPower", Enable, Disable, Proxy, 6)
 end 
