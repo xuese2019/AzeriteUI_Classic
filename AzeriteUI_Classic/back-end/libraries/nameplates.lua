@@ -1,4 +1,4 @@
-local LibNamePlate = Wheel:Set("LibNamePlate", 41)
+local LibNamePlate = Wheel:Set("LibNamePlate", 42)
 if (not LibNamePlate) then	
 	return
 end
@@ -43,26 +43,26 @@ local tostring = tostring
 local unpack = unpack
 
 -- WoW API
-local GetNamePlateForUnit = _G.C_NamePlate.GetNamePlateForUnit
-local CreateFrame = _G.CreateFrame
-local InCombatLockdown = _G.InCombatLockdown
-local IsLoggedIn = _G.IsLoggedIn
-local UnitClass = _G.UnitClass
-local UnitClassification = _G.UnitClassification
-local UnitExists = _G.UnitExists
-local UnitHealth = _G.UnitHealth
-local UnitHealthMax = _G.UnitHealthMax
-local UnitIsFriend = _G.UnitIsFriend
-local UnitIsPlayer = _G.UnitIsPlayer
-local UnitIsTapDenied = _G.UnitIsTapDenied
-local UnitIsTrivial = _G.UnitIsTrivial
-local UnitIsUnit = _G.UnitIsUnit
-local UnitLevel = _G.UnitLevel
-local UnitName = _G.UnitName
-local UnitReaction = _G.UnitReaction
+local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
+local CreateFrame = CreateFrame
+local InCombatLockdown = InCombatLockdown
+local IsLoggedIn = IsLoggedIn
+local UnitClass = UnitClass
+local UnitClassification = UnitClassification
+local UnitExists = UnitExists
+local UnitHealth = UnitHealth
+local UnitHealthMax = UnitHealthMax
+local UnitIsFriend = UnitIsFriend
+local UnitIsPlayer = UnitIsPlayer
+local UnitIsTapDenied = UnitIsTapDenied
+local UnitIsTrivial = UnitIsTrivial
+local UnitIsUnit = UnitIsUnit
+local UnitLevel = UnitLevel
+local UnitName = UnitName
+local UnitReaction = UnitReaction
 
 -- WoW Frames & Objects
-local WorldFrame = _G.WorldFrame
+local WorldFrame = WorldFrame
 
 -- Plate Registries
 LibNamePlate.allPlates = LibNamePlate.allPlates or {}
@@ -333,11 +333,11 @@ NamePlate.UpdateAlpha = function(self)
 
 					-- Enemy Players
 					if (self.isEnemy) then
-						alphaLevel = ALPHA_HIGH_INDEX
+						alphaLevel = ALPHA_VERYHIGH_INDEX
 
 					-- Friendly Players
 				elseif (self.isFriend) then
-						alphaLevel = ALPHA_HIGH_INDEX
+						alphaLevel = ALPHA_VERYHIGH_INDEX
 						alphaReduction = true
 					end
 				else
@@ -375,7 +375,7 @@ NamePlate.UpdateAlpha = function(self)
 
 					-- Enemy Players
 					if (self.isEnemy) then
-						alphaLevel = ALPHA_VERYHIGH_INDEX
+						alphaLevel = ALPHA_HIGH_INDEX
 
 					-- Friendly Players
 					elseif (self.isFriend) then
@@ -399,7 +399,7 @@ NamePlate.UpdateAlpha = function(self)
 
 					-- Friendly NPCs
 					elseif (self.isFriend) then
-						alphaLevel = ALPHA_LOW_INDEX
+						alphaLevel = ALPHA_VERYLOW_INDEX
 
 					-- Trivial NPCs (do the even exist in Classic?)
 					elseif (self.isTrivial) then 
