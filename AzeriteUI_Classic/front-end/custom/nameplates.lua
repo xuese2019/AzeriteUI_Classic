@@ -86,6 +86,7 @@ Module.PostUpdateNamePlateOptions = function(self, isInInstace)
 	-- Setting the base size involves changing the size of secure unit buttons, 
 	-- but since we're using our out of combat wrapper, we should be safe.
 	-- Default size 110, 45
+	-- Note: No freaking effect at all in classic. >:(
 	C_NamePlate.SetNamePlateFriendlySize(unpack(layout.Size))
 	C_NamePlate.SetNamePlateEnemySize(unpack(layout.Size))
 	C_NamePlate.SetNamePlateSelfSize(unpack(layout.Size))
