@@ -74,6 +74,13 @@ local OnUpdate = function(frame, elapsed)
 		isMouseOver = true
 	end
 
+	if (not isMouseOver) then
+		local chatFrame = self:GetSelectedChatFrame()
+		if (chatFrame) and (not chatFrame:AtBottom()) then 
+			isMouseOver = true
+		end
+	end
+
 	-- When frame is mouseovered,
 	-- but the flag isn't set.
 	if (isMouseOver) then
@@ -94,7 +101,6 @@ local OnUpdate = function(frame, elapsed)
 		-- set flag to initiate fade-out
 		-- *don't do this if editbox is open
 		fadeOut = true
-
 	end
 
 	if (fadeIn) then
@@ -141,11 +147,15 @@ Module.UpdateMainWindowButtonDisplay = function(self, forced)
 	local muteButton =self:GetChatWindowVoiceMuteButton()
 	local menuButton = self:GetChatWindowMenuButton()
 
-	if (frame and frame.isDocked) then
+	if (not show) and (frame and frame.isDocked) then
 		local editBox = self:GetChatWindowEditBox(frame)
 		if (editBox and editBox:IsShown()) then
 			show = true
 		end
+	end
+
+	if (not show) and (frame and not frame:AtBottom()) then
+		show = true
 	end
 
 	if show then 
