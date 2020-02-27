@@ -1406,7 +1406,12 @@ end
 local UnitFrame_Aura_PostUpdateButton = function(element, button)
 	local colors = element._owner.colors
 	local layout = element._owner.layout
-	if UnitIsFriend("player", button.unit) then
+
+	local isEnemy = UnitIsEnemy(button.unit, "player")
+	local isFriend = UnitIsFriend("player", button.unit)
+	local isYou = UnitIsUnit("player", button.unit)
+
+	if (isFriend) then
 		if button.isBuff then 
 			local color = layout.AuraBorderBackdropBorderColor
 			if color then 
@@ -1419,7 +1424,7 @@ local UnitFrame_Aura_PostUpdateButton = function(element, button)
 			end 
 		end
 	else 
-		if button.isStealable then 
+		if (button.isStealable) then 
 			local color = colors.power.ARCANE_CHARGES or layout.AuraBorderBackdropBorderColor
 			if color then 
 				button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
@@ -1437,6 +1442,30 @@ local UnitFrame_Aura_PostUpdateButton = function(element, button)
 			end 
 		end
 	end 
+	-- Icon
+	if (isYou) then
+		button.Icon:SetDesaturated(false)
+	elseif (isFriend) then
+		if (button.isBuff) then
+			if button.isCastByPlayer then 
+				button.Icon:SetDesaturated(false)
+			else
+				button.Icon:SetDesaturated(true)
+			end
+		else
+			button.Icon:SetDesaturated(false)
+		end
+	else
+		if (button.isBuff) then 
+			button.Icon:SetDesaturated(false)
+		else
+			if button.isCastByPlayer then 
+				button.Icon:SetDesaturated(false)
+			else
+				button.Icon:SetDesaturated(true)
+			end
+		end
+	end
 end
 
 ------------------------------------------------------------------
