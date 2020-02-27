@@ -20,6 +20,7 @@ local FCF_SetWindowAlpha = FCF_SetWindowAlpha
 local FCF_SetWindowColor = FCF_SetWindowColor
 local FCF_Tab_OnClick = FCF_Tab_OnClick
 local FCF_UpdateButtonSide = FCF_UpdateButtonSide
+local GetGuildRosterMOTD = GetGuildRosterMOTD
 local IsShiftKeyDown = IsShiftKeyDown
 local UIFrameFadeRemoveFrame = UIFrameFadeRemoveFrame
 local UIFrameIsFading = UIFrameIsFading
@@ -32,7 +33,6 @@ local GetConfig = Private.GetConfig
 local GetLayout = Private.GetLayout
 
 local alphaLocks = {}
-
 
 -- OnUpdate Handler
 -------------------------------------------------------
@@ -59,8 +59,6 @@ local OnUpdate = function(frame, elapsed)
 				local info = ChatTypeInfo["GUILD"]
 				local string = string_format(GUILD_MOTD_TEMPLATE, gmotd)
 				ChatFrame1:AddMessage(string, info.r, info.g, info.b, info.id)
-		
-				--ChatFrame1:AddMessage(gmotd, Colors.quest.green[1], Colors.quest.green[2], Colors.quest.green[3])
 			end
 		end 
 	end
@@ -79,6 +77,9 @@ local OnUpdate = function(frame, elapsed)
 		isMouseOver = true
 	end
 
+	-- Pretend the selected chatframe is mouseovered
+	-- if it's not currently at the bottom/current chat.
+	-- This is to force the buttons visible easily.
 	if (not isMouseOver) then
 		local chatFrame = self:GetSelectedChatFrame()
 		if (chatFrame) and (not chatFrame:AtBottom()) then 
@@ -92,34 +93,26 @@ local OnUpdate = function(frame, elapsed)
 		if (not frame.isMouseOver) then
 			frame.isMouseOver = true
 		end
-		
 		-- set flag to initiate fade-in
 		fadeIn = true
-
-	-- When the mouseover flag is set,
-	-- but no actual hovering occurring.
 	else
+		-- When the mouseover flag is set,
+		-- but no actual hovering occurring.
 		if (frame.isMouseOver) then
 			frame.isMouseOver = nil
 		end
-
 		-- set flag to initiate fade-out
 		-- *don't do this if editbox is open
 		fadeOut = true
 	end
-
 	if (fadeIn) then
-		
 		self:UpdateMainWindowButtonDisplay(true)
 		self:UpdateChatWindowAlpha(ChatFrame1)
 
 	elseif (fadeOut) then
-
 		self:UpdateMainWindowButtonDisplay()
 		self:UpdateChatWindowAlpha(ChatFrame1)
-
 	end
-
 	frame.elapsed = 0
 end
 
