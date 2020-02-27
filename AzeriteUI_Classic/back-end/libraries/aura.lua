@@ -1,4 +1,4 @@
-local LibAura = Wheel:Set("LibAura", 25)
+local LibAura = Wheel:Set("LibAura", 26)
 if (not LibAura) then
 	return
 end
@@ -168,7 +168,11 @@ local UnregisterEvent = Frame_MT.__index.UnregisterEvent
 local UnregisterAllEvents = Frame_MT.__index.UnregisterAllEvents
 
 Frame.OnEvent = function(self, event, unit, ...)
-	if (event == "UNIT_AURA") then 
+	-- This fires before the aura events
+	if (event == "COMBAT_LOG_EVENT_UNFILTERED") then 
+		return LibAura:CombatLogHandler(CombatLogGetCurrentEventInfo()) 
+	
+	elseif (event == "UNIT_AURA") then 
 		-- don't bother caching up anything we haven't got a registered aurawatch or cache for
 		if (not UnitHasAuraWatch[unit]) then 
 			return 
@@ -187,42 +191,59 @@ Frame.OnEvent = function(self, event, unit, ...)
 
 		-- Send a message to anybody listening
 		LibAura:SendMessage("GP_UNIT_AURA", unit)
+	end
+end
 
-	elseif (event == "COMBAT_LOG_EVENT_UNFILTERED") then 
-		local timestamp, eventType, hideCaster,
-			sourceGUID, sourceName, sourceFlags, sourceRaidFlags,
-			destGUID, destName, destFlags, destRaidFlags,
-			spellID, arg2, arg3, arg4, arg5 = CombatLogGetCurrentEventInfo()
+LibAura.CombatLogHandler = function(self, ...)
+	local timestamp, eventType, hideCaster,
+	sourceGUID, sourceName, sourceFlags, sourceRaidFlags,
+	destGUID, destName, destFlags, destRaidFlags,
+	spellID, spellName, spellSchool, auraType = ...
 
-		if (spellName == sunderArmorName) then
-			if (eventType == "SPELL_CAST_SUCCESS") then
-				eventType = "SPELL_AURA_REFRESH"
-				auraType = "DEBUFF"
-			end
+	local unitGUID = destGUID or sourceGUID
+	if (not unitGUID) or (not spellName) then 
+		return -- this ever happens?
+	end 
+
+	if (spellName == sunderArmorName) then
+		if (eventType == "SPELL_CAST_SUCCESS") then
+			eventType = "SPELL_AURA_REFRESH"
+			auraType = "DEBUFF"
 		end
+	end
 
-		-- We're only interested in who the aura is applied to.
-		local cacheByGUID
-		local cacheGUID = destGUID or sourceGUID
-		if (cacheGUID) then 
-			if (not AuraCacheByGUID[cacheGUID]) then 
-				AuraCacheByGUID[cacheGUID] = {}
+	if (auraType == "BUFF") or (auraType == "DEBUFF") then
+		if (eventType == "SPELL_AURA_REFRESH" or eventType == "SPELL_AURA_APPLIED") then
+			if (not AuraCacheByGUID[unitGUID]) then 
+				AuraCacheByGUID[unitGUID] = {}
 			end
-			cacheByGUID = AuraCacheByGUID[cacheGUID]
-			for i in pairs(cacheByGUID) do 
-				cacheByGUID[i] = nil
+			local unitCache = AuraCacheByGUID[unitGUID]
+			if (not unitCache[spellName]) then
+				unitCache[spellName] = {}
 			end
-		end 
-
-		if (cacheByGUID) then 
-			cacheByGUID.timestamp = timestamp
-			cacheByGUID.eventType = eventType
-			cacheByGUID.sourceFlags = sourceFlags
-			cacheByGUID.sourceRaidFlags = sourceRaidFlags
-			cacheByGUID.destFlags = destFlags
-			cacheByGUID.destRaidFlags = destRaidFlags
-			cacheByGUID.isCastByPlayer = sourceGUID == playerGUID
-			cacheByGUID.unitCaster = sourceName
+			local spellCache = unitCache[spellName]
+			if (not spellCache[sourceGUID]) then
+				spellCache[sourceGUID] = {}
+			end
+			spellCache.timestamp = timestamp
+			spellCache.eventType = eventType
+			spellCache.sourceFlags = sourceFlags
+			spellCache.sourceRaidFlags = sourceRaidFlags
+			spellCache.destFlags = destFlags
+			spellCache.destRaidFlags = destRaidFlags
+			spellCache.isCastByPlayer = sourceGUID == playerGUID
+			spellCache.unitCaster = sourceName
+	
+		elseif (eventType == "SPELL_AURA_REMOVED") then
+			local unitCache = AuraCacheByGUID[unitGUID]
+			if (unitCache) then
+				local spellCache = unitCache[spellName]
+				if (spellCache) then
+					for i in pairs(spellCache) do 
+						spellCache[i] = nil
+					end
+				end
+			end
 		end
 	end
 end
@@ -283,12 +304,23 @@ LibAura.CacheUnitAurasByFilter = function(self, unit, filter)
 			break
 		end
 
+		-- Add aura duration info
 		if (LCD) then 
 			local durationNew, expirationTimeNew = LCD:GetAuraDurationByUnit(unit, spellId, caster)
 			if ((not duration) or (duration == 0)) and (durationNew) then
 				duration = durationNew
 				expirationTime = expirationTimeNew
 			end
+		end
+
+		-- Add combat log parsed info
+		local spellCache = auraCacheByGUID and auraCacheByGUID[name]
+		if (spellCache) then
+			unitCaster = spellCache.unitCaster
+			isCastByPlayer = spellCache.isCastByPlayer
+		else
+			unitCaster = unit
+			isCastByPlayer = unit == "player"
 		end
 
 		-- Cache up the values for the aura index.
