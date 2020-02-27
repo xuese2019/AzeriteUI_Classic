@@ -916,6 +916,36 @@ local Tooltip_PostCreate = function(tooltip)
 	tooltip.PostUpdateStatusBar = Tooltip_StatusBar_PostUpdate
 end
 
+-- Custom aura sorting for the player frame.
+local PlayerFrame_AuraSortFunction = function(a,b)
+	if (a) and (b) then
+		if (a.expirationTime == b.expirationTime) then
+			if (a.name) and (b.name) then
+				return (a.name > b.name)
+			end
+		else
+			return (a.expirationTime > b.expirationTime)
+		end
+	end
+end
+
+-- Custom aura sorting for the target frame.
+local TargetFrame_AuraSortFunction = function(a,b)
+	if (a) and (b) then
+		if (a.isCastByPlayer == b.isCastByPlayer) then
+			if (a.expirationTime == b.expirationTime) then
+				if (a.name) and (b.name) then
+					return (a.name > b.name)
+				end
+			else
+				return (a.expirationTime > b.expirationTime)
+			end
+		else
+			return a.isCastByPlayer
+		end 
+	end
+end
+
 local PlayerFrame_CastBarPostUpdate = function(element, unit)
 	local self = element._owner
 	local cast = self.Cast
@@ -2629,6 +2659,7 @@ Layouts.UnitFramePlayer = {
 		auraHeight = nil, 
 		auraSize = 40, 
 		auraWidth = nil, 
+		customSort = PlayerFrame_AuraSortFunction,
 		debuffsFirst = true, 
 		disableMouse = false, 
 		filter = nil, 
@@ -2993,6 +3024,7 @@ Layouts.UnitFrameTarget = {
 		auraHeight = nil, 
 		auraSize = 40, 
 		auraWidth = nil, 
+		customSort = TargetFrame_AuraSortFunction,
 		debuffsFirst = true, 
 		disableMouse = false, 
 		filter = nil, 
