@@ -349,6 +349,10 @@ auraFilters.player = function(element, isBuff, unit, isOwnedByPlayer, name, icon
 			return nil, nil, hideFilteredSpellID
 		elseif (UnitAffectingCombat("player") and HasUserFlags(Private, spellID, NoCombat)) then 
 			if (isBuff and HasUserFlags(Private, spellID, Warn)) then 
+				local timeLeft 
+				if (expirationTime and expirationTime > 0) then 
+					timeLeft = expirationTime - GetTime()
+				end
 				if (timeLeft and (timeLeft > 0) and (timeLeft < buffDurationThreshold)) or (duration and (duration > 0) and (duration < buffDurationThreshold)) then
 					return true, nil, hideFilteredSpellID
 				else 
@@ -395,6 +399,10 @@ auraFilters.target = function(element, isBuff, unit, isOwnedByPlayer, name, icon
 			return nil, nil, hideFilteredSpellID
 		elseif (UnitAffectingCombat("player") and HasUserFlags(Private, spellID, NoCombat)) then 
 			if (isBuff and HasUserFlags(Private, spellID, Warn)) then 
+				local timeLeft 
+				if (expirationTime and expirationTime > 0) then 
+					timeLeft = expirationTime - GetTime()
+				end
 				if (timeLeft and (timeLeft > 0) and (timeLeft < buffDurationThreshold)) or (duration and (duration > 0) and (duration < buffDurationThreshold)) then
 					return true, nil, hideFilteredSpellID
 				else 
