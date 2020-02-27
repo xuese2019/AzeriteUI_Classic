@@ -10,6 +10,7 @@ local math_ceil = math.ceil
 local math_floor = math.floor
 local table_insert = table.insert
 local table_remove = table.remove
+local table_sort = table.sort
 local table_wipe = table.wipe
 
 -- WoW API
@@ -278,7 +279,7 @@ local CreateAuraButton = function(element)
 	return button
 end 
 
-local SetAuraButtonPosition = function(element, button, order)
+local SetAuraButtonPosition = function(element, button, buttonNum)
 
 	-- Get the accurate size of the container
 	local elementW, elementH = element:GetSize()
@@ -298,7 +299,7 @@ local SetAuraButtonPosition = function(element, button, order)
 	numRows = numRows - numRows%1
 
 	-- No room for this aura, return in panic!
-	if (order > numCols*numRows) then 
+	if (buttonNum > numCols*numRows) then 
 		return true
 	end 
 
@@ -306,9 +307,9 @@ local SetAuraButtonPosition = function(element, button, order)
 	local point = ((element.growthY == "UP") and "BOTTOM" or (element.growthY == "DOWN") and "TOP") .. ((element.growthX == "RIGHT") and "LEFT" or (element.growthX == "LEFT") and "RIGHT")
 
 	-- Figure out the positions in the grid
-	order = order - 1 
-	local posX = order%numCols
-	local posY = order/numCols - order/numCols%1
+	buttonNum = buttonNum - 1 
+	local posX = buttonNum%numCols
+	local posY = buttonNum/numCols - buttonNum/numCols%1
 
 	-- Figure out where to grow
 	local offsetX = posX * width * (element.growthX == "LEFT" and -1 or 1)
@@ -319,9 +320,26 @@ local SetAuraButtonPosition = function(element, button, order)
 	button:SetPoint(point, offsetX, offsetY)
 end 
 
+-- Let's keep the sorting as simplistic as possible.
+local auraSortFunction = function(a,b)
+	if (a) and (b) then
+		if (a.isCastByPlayer == b.isCastByPlayer) then
+			if (a.expirationTime == b.expirationTime) then
+				if (a.name) and (b.name) then
+					return (a.name > b.name)
+				end
+			else
+				return (a.expirationTime > b.expirationTime)
+			end
+		else
+			return a.isCastByPlayer
+		end 
+	end
+end
+
 local IterateBuffs = function(element, unit, filter, customFilter, visible)
-	local visibleBuffs = 0
-	local visible = visible or 0
+	local visibleBuffs = 0 -- total number of visible buffs
+	local visible = visible or 0 -- total number of visible auras so far
 
 	-- Iterate helpful auras
 	for i = 1, BUFF_MAX_DISPLAY do 
@@ -401,9 +419,7 @@ local IterateBuffs = function(element, unit, filter, customFilter, visible)
 			Aura_SetTimer(button, duration, expirationTime)
 
 			-- Position the button
-			if SetAuraButtonPosition(element, button, visible) then 
-				break
-			end 
+			--SetAuraButtonPosition(element, button, visible)
 
 			-- Run module post updates
 			if element.PostUpdateButton then
@@ -416,17 +432,40 @@ local IterateBuffs = function(element, unit, filter, customFilter, visible)
 			end
 
 		end 
-
 	end 
+
+	local offset = visible - visibleBuffs
+
+	-- Sort them
+	local cache = Cache[element]
+	for i = 1,visibleBuffs do
+		local position = offset + i
+		local index = tostring(position)
+		cache[i] = element[index]
+	end
+	for i = visibleBuffs+1,#cache do
+		cache[i] = nil
+	end
+	table_sort(cache, element.customSort or auraSortFunction)
+
+	-- Position them all
+	for i = 1,visibleBuffs do
+		local position = offset + i
+		local index = tostring(position)
+		local button = cache[i]
+
+		-- Position the button
+		SetAuraButtonPosition(element, button, position)
+	end
 
 	return visible, visibleBuffs
 end
 
 local IterateDebuffs = function(element, unit, filter, customFilter, visible)
 
-	local visibleDebuffs = 0
-	local visible = visible or 0
-
+	local visibleDebuffs = 0 -- total number of visible debuffs
+	local visible = visible or 0 -- total number of visible auras so far
+	
 	local debuffCache = LibAura:GetUnitDebuffCacheByFilter(unit, filter)
 
 	-- Iterate harmful auras
@@ -508,9 +547,7 @@ local IterateDebuffs = function(element, unit, filter, customFilter, visible)
 			Aura_SetTimer(button, duration, expirationTime)
 
 			-- Position the button
-			if SetAuraButtonPosition(element, button, visible) then 
-				break
-			end 
+			--SetAuraButtonPosition(element, button, visible)
 
 			-- Run module post updates
 			if element.PostUpdateButton then
@@ -523,6 +560,20 @@ local IterateDebuffs = function(element, unit, filter, customFilter, visible)
 			end
 		end 
 	end 
+
+
+
+	-- Position them all
+	local visibleOffset = visible - visibleDebuffs
+	for i = 1,visibleDebuffs do
+		local positionIndex = visibleOffset + i
+		local visibleKey = tostring(positionIndex)
+		local button = element[visibleKey]
+
+		-- Position the button
+		SetAuraButtonPosition(element, button, positionIndex)
+	end
+	
 	return visible, visibleDebuffs
 end 
 
@@ -623,9 +674,6 @@ local Update = function(self, event, unit, ...)
 		
 		local buffFilter = Buffs.buffFilterString or Buffs.auraFilterString or Buffs.filter
 		local buffFilterFunc = Buffs.buffFilterFunc or Buffs.auraFilterFunc
-
-		local debuffFilter = Buffs.debuffFilterString or Buffs.auraFilterString or Buffs.filter
-		local debuffFilterFunc = Buffs.debuffFilterFunc or Buffs.auraFilterFunc
 
 		-- Forcefully register aura watches for the relevant filters
 		-- This is to ensure force updates actually have the right filters and fully updated caches
@@ -772,5 +820,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Auras", Enable, Disable, Proxy, 50)
+	Lib:RegisterElement("Auras", Enable, Disable, Proxy, 51)
 end 
