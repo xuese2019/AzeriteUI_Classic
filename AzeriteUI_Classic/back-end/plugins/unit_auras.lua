@@ -561,17 +561,28 @@ local IterateDebuffs = function(element, unit, filter, customFilter, visible)
 		end 
 	end 
 
+	local offset = visible - visibleDebuffs
 
+	-- Sort them
+	local cache = Cache[element]
+	for i = 1,visibleDebuffs do
+		local position = offset + i
+		local index = tostring(position)
+		cache[i] = element[index]
+	end
+	for i = visibleDebuffs+1,#cache do
+		cache[i] = nil
+	end
+	table_sort(cache, element.customSort or auraSortFunction)
 
 	-- Position them all
-	local visibleOffset = visible - visibleDebuffs
 	for i = 1,visibleDebuffs do
-		local positionIndex = visibleOffset + i
-		local visibleKey = tostring(positionIndex)
-		local button = element[visibleKey]
+		local position = offset + i
+		local index = tostring(position)
+		local button = cache[i]
 
 		-- Position the button
-		SetAuraButtonPosition(element, button, positionIndex)
+		SetAuraButtonPosition(element, button, position)
 	end
 	
 	return visible, visibleDebuffs
@@ -820,5 +831,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Auras", Enable, Disable, Proxy, 51)
+	Lib:RegisterElement("Auras", Enable, Disable, Proxy, 52)
 end 
