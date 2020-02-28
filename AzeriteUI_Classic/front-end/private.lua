@@ -333,6 +333,7 @@ local Warn 				= 2^20 -- Show when there is 30 secs left or less
 
 local hideUnfilteredSpellID, hideFilteredSpellID = false, false
 local buffDurationThreshold, debuffDurationThreshold = 61, 601
+local shortBuffDurationThreshold, shortDebuffDurationThreshold = 31, 31
 
 -- Aura Filter Functions
 -----------------------------------------------------------------
@@ -466,24 +467,23 @@ end
 
 auraFilters.party = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
 
-	-- Well this obviously doesn't work.
+	local all = element.all
+	local hasFlags = not not GetUserFlags(Private)[spellID]
+	if (hasFlags) then 
+		if (HasUserFlags(Private, spellID, NeverOnPlate)) then 
+			return nil, nil, hideFilteredSpellID
+		end
+	end 
 	local timeLeft 
 	if (expirationTime and expirationTime > 0) then 
 		timeLeft = expirationTime - GetTime()
-	end
-	if (isBuff) then 
-		if (timeLeft and (timeLeft > 0) and (timeLeft < buffDurationThreshold)) then
+		if (timeLeft and (timeLeft > 0) and (timeLeft < buffDurationThreshold)) or (duration and (duration > 0) and (duration < buffDurationThreshold)) then
 			return true, nil, hideUnfilteredSpellID
 		else 
 			return nil, nil, hideUnfilteredSpellID
 		end
-	else 
-		if (timeLeft and (timeLeft > 0) and (timeLeft < debuffDurationThreshold)) then 
-			return true, nil, hideUnfilteredSpellID
-		else
-			return nil, nil, hideUnfilteredSpellID
-		end
-	end 
+	end
+	return nil, nil, hideUnfilteredSpellID
 
 end
 
@@ -535,6 +535,7 @@ AddUserFlags(Private, 26013, NoCombat) 		-- Deserter
 -- Many similar to these will be excluded by default filters too,
 -- but we still with to eventually include all relevant ones.
 ------------------------------------------------------------------------
+AddUserFlags(Private, 26013, NeverOnPlate) 	-- Deserter
 
 -- Proximity Auras
 AddUserFlags(Private, 13159, NeverOnPlate) 	-- Aspect of the Pack
