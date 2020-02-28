@@ -1270,6 +1270,22 @@ local TargetFrame_TexturesPostUpdate = function(self)
 		return 
 	end 
 
+	-- Update aura layouts
+	-- A little hardcoded for now.
+	if (targetStyle == "Boss") then 
+		if (self.currentStyle ~= "Boss") then
+			self.Auras.maxVisible = 20
+			self.Auras:SetSize(unpack(self.layout.AuraFrameSizeBoss))
+			self.Auras:ForceUpdate()
+		end
+	else
+		if (self.currentStyle == "Boss") then
+			self.Auras.maxVisible = 14
+			self.Auras:SetSize(unpack(self.layout.AuraFrameSize))
+			self.Auras:ForceUpdate()
+		end
+	end
+
 	-- Store the new style
 	self.currentStyle = targetStyle
 
@@ -3045,6 +3061,7 @@ Layouts.UnitFrameTarget = {
 	AuraCountPlace = { "BOTTOMRIGHT", 9, -6 },
 	AuraFramePlace = { "TOPRIGHT", -(27 + 10), -(27 + 40 + 20) },
 	AuraFrameSize = { 40*7 + 6*6, 40*2 + 6 },
+	AuraFrameSizeBoss = { 40*10 + 6*9, 40*2 + 6 },
 	AuraIconPlace = { "CENTER", 0, 0 },
 	AuraIconSize = { 40 - 6, 40 - 6 },
 	AuraIconTexCoord = { 5/64, 59/64, 5/64, 59/64 }, 
