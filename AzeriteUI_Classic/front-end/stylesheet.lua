@@ -1395,10 +1395,10 @@ local TinyFrame_PowerBarPostUpdate = function(element, unit, min, max, powerType
 	else
 		local _,class = UnitClass(unit)
 		if (class == "DRUID") or (class == "PALADIN") or (class == "PRIEST") or (class == "SHAMAN") then
-			if (min/max < .95) or (min == 0) or (max == 0) then
-				element:SetAlpha(0)
-			else
+			if (min/max < .9) then
 				element:SetAlpha(.75)
+			else
+				element:SetAlpha(0)
 			end
 		elseif (class == "MAGE") or (class == "WARLOCK") then
 			if (min/max < .5) then
