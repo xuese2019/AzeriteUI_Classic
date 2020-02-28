@@ -626,6 +626,29 @@ local StylePartyFrame = function(self, unit, id, layout, ...)
 	-- Health Value Callback
 	self:RegisterEvent("PLAYER_FLAGS_CHANGED", TinyFrame_OnEvent)
 	
+	-- Power 
+	-----------------------------------------------------------
+	local power = overlay:CreateStatusBar()
+	power:SetSize(unpack(layout.PowerSize))
+	power:Place(unpack(layout.PowerPlace))
+	power:SetStatusBarTexture(layout.PowerBarTexture)
+	power:SetOrientation(layout.PowerBarOrientation)
+	power:SetSmoothingMode(layout.PowerBarSmoothingMode)
+	power:SetSmoothingFrequency(layout.PowerBarSmoothingFrequency or .5)
+	power:SetSparkMap(layout.PowerBarSparkMap)
+	power.frequent = true
+	power.exclusiveResource = "MANA"
+	self.Power = power
+	self.Power.PostUpdate = layout.PowerBarPostUpdate
+
+	local powerBg = power:CreateTexture()
+	powerBg:SetDrawLayer(unpack(layout.PowerBackgroundDrawLayer))
+	powerBg:SetSize(unpack(layout.PowerBackgroundSize))
+	powerBg:SetPoint(unpack(layout.PowerBackgroundPlace))
+	powerBg:SetTexture(layout.PowerBackgroundTexture)
+	powerBg:SetVertexColor(unpack(layout.PowerBackgroundColor)) 
+	self.Power.Bg = powerBg
+
 	-- Range
 	-----------------------------------------------------------
 	self.Range = { outsideAlpha = layout.RangeOutsideAlpha }
@@ -877,6 +900,29 @@ local StyleRaidFrame = function(self, unit, id, layout, ...)
 	healthBg:SetTexture(layout.HealthBackdropTexture)
 	healthBg:SetVertexColor(unpack(layout.HealthBackdropColor))
 	self.Health.Bg = healthBg
+
+	-- Power 
+	-----------------------------------------------------------
+	local power = overlay:CreateStatusBar()
+	power:SetSize(unpack(layout.PowerSize))
+	power:Place(unpack(layout.PowerPlace))
+	power:SetStatusBarTexture(layout.PowerBarTexture)
+	power:SetOrientation(layout.PowerBarOrientation)
+	power:SetSmoothingMode(layout.PowerBarSmoothingMode)
+	power:SetSmoothingFrequency(layout.PowerBarSmoothingFrequency or .5)
+	power:SetSparkMap(layout.PowerBarSparkMap)
+	power.frequent = true
+	power.exclusiveResource = "MANA"
+	self.Power = power
+	self.Power.PostUpdate = layout.PowerBarPostUpdate
+
+	local powerBg = power:CreateTexture()
+	powerBg:SetDrawLayer(unpack(layout.PowerBackgroundDrawLayer))
+	powerBg:SetSize(unpack(layout.PowerBackgroundSize))
+	powerBg:SetPoint(unpack(layout.PowerBackgroundPlace))
+	powerBg:SetTexture(layout.PowerBackgroundTexture)
+	powerBg:SetVertexColor(unpack(layout.PowerBackgroundColor)) 
+	self.Power.Bg = powerBg
 
 	-- Cast Bar
 	-----------------------------------------------------------

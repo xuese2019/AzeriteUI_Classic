@@ -1389,6 +1389,34 @@ local TinyFrame_OverrideHealthValue = function(element, unit, min, max, disconne
 	end 
 end 
 
+local TinyFrame_PowerBarPostUpdate = function(element, unit, min, max, powerType, powerID)
+	if (min == 0) or (max == 0) then
+		element:SetAlpha(0)
+	else
+		local _,class = UnitClass(unit)
+		if (class == "DRUID") or (class == "PALADIN") or (class == "PRIEST") or (class == "SHAMAN") then
+			if (min/max < .95) or (min == 0) or (max == 0) then
+				element:SetAlpha(0)
+			else
+				element:SetAlpha(.75)
+			end
+		elseif (class == "MAGE") or (class == "WARLOCK") then
+			if (min/max < .5) then
+				element:SetAlpha(.75)
+			else
+				element:SetAlpha(0)
+			end
+		else
+			-- The threshold for the "oom" message is .25
+			if (min/max < .25) then
+				element:SetAlpha(.75)
+			else
+				element:SetAlpha(0)
+			end
+		end
+	end
+end
+
 local UnitFrame_Aura_PostCreateButton = function(element, button)
 	local layout = element._owner.layout
 
@@ -3478,6 +3506,20 @@ Layouts.UnitFrameParty = setmetatable({
 	HealthValueColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
 	HealthShowPercent = true, 
 
+	PowerBackgroundColor = { 0, 0, 0, .75 },
+	PowerBackgroundDrawLayer = { "BACKGROUND", -2 },
+	PowerBackgroundSize = { 74, 3 },
+	PowerBackgroundPlace = { "CENTER", 0, 0 },
+	PowerBackgroundTexture = [[Interface\ChatFrame\ChatFrameBackground]], -- GetMedia("statusbar_normal"),
+	PowerBarOrientation = "RIGHT",
+	PowerBarSmoothingFrequency = .45,
+	PowerBarSmoothingMode = "bezier-fast-in-slow-out",
+	PowerBarTexCoord = nil, --{ 14/256,(256-14)/256,14/64,(64-14)/64 },
+	PowerBarTexture = [[Interface\ChatFrame\ChatFrameBackground]], --GetMedia("statusbar_normal"),
+	PowerPlace = { "BOTTOM", 0, -1.5 },
+	PowerSize = { 72, 1 },
+	PowerBarPostUpdate = TinyFrame_PowerBarPostUpdate,
+
 	PortraitPlace = { "BOTTOM", 0, 22 },
 	PortraitSize = { 70, 73 }, 
 	PortraitAlpha = .85, 
@@ -3776,6 +3818,20 @@ Layouts.UnitFrameRaid = setmetatable({
 	HealthColorPetAsPlayer = true, -- color your pet as you 
 	HealthColorReaction = true, -- color NPCs by their reaction standing with us
 	HealthColorHealth = true, -- color anything else in the default health color
+
+	PowerBackgroundColor = { 0, 0, 0, .75 },
+	PowerBackgroundDrawLayer = { "BACKGROUND", -2 },
+	PowerBackgroundSize = { 68, 3 },
+	PowerBackgroundPlace = { "CENTER", 0, 0 },
+	PowerBackgroundTexture = [[Interface\ChatFrame\ChatFrameBackground]], -- GetMedia("statusbar_normal"),
+	PowerBarOrientation = "RIGHT",
+	PowerBarSmoothingFrequency = .45,
+	PowerBarSmoothingMode = "bezier-fast-in-slow-out",
+	PowerBarTexCoord = nil, --{ 14/256,(256-14)/256,14/64,(64-14)/64 },
+	PowerBarTexture = [[Interface\ChatFrame\ChatFrameBackground]], --GetMedia("statusbar_normal"),
+	PowerPlace = { "BOTTOM", 0, -.5 },
+	PowerSize = { 66, 1 },
+	PowerBarPostUpdate = TinyFrame_PowerBarPostUpdate,
 
 	NamePlace = { "TOP", 0, 1 - 2 }, 
 	NameDrawLayer = { "ARTWORK", 1 },
