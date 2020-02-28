@@ -2,13 +2,28 @@ local ADDON, Private = ...
 local Changelog = {
 	{
 		tag = "1.0.99-RC",
-		date = "2020-02-25",
+		date = "2020-02-28",
 		entries = {
+			{
+				header = "Added",
+				items = {
+					[[Mana users now now have the option to use the azerite crystal for all power types, instead of the mana orb.]],
+					[[There are now mana bars visible for mana users on the group frames. Note that for non-healer units the bars will only become visible when the unit is running really low on mana.]],
+					[[Chat spam on logon or manual reloads is now suppressed. This is a forced setting. The Guild Message of the Day will be shown after roughly 10-12 seconds after logging in or reloading the interface. Messages after zoning in or out of instances and other portals are not affected.]]
+				}
+			},
 			{
 				header = "Changed",
 				items = {
+					[[Most non-targeted nameplates should be more visible both in and out of combat now, making tanking and healing easier.]],
 					[[The dispellable debuff display on group frames now checks if the character has high enough level to actually do the dispel.]],
-					[[Debuffs on unit frames belonging to hostile units are now all colored red, as displaying the debuff type using color should only be used for dispelling purposes.]]
+					[[Debuffs on unit frames belonging to hostile units are now all colored red, as displaying the debuff type using color should only be used for dispelling purposes.]],
+					[[Debuffs on hostile units not cast by the player is now desaturated.]],
+					[[Buffs on friendly units not cast by the player is now desaturated.]],
+					[[Auras are now sorted.]],
+					[[Auras on the target frame when you target a boss now take advantage of the larger width of the frame. ]],
+					[[The chat frame buttons should now always be visible if the frame isn't currently scrolled to the bottom of its content.]],
+					[[When just having reached a new level, or reputation level if that is what you're current tracking, the minimap badge text should now be an asterisk `*`, and not the word "New". The latter was never intended, as we used a graphical exclamation mark in the retail version of this addon, but Blizzard changed that to the text "New" to better reflect how their quest dialogs looked in vanilla.]]
 				}
 			},
 			{
