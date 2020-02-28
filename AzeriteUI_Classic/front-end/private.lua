@@ -411,11 +411,32 @@ auraFilters.target = function(element, isBuff, unit, isOwnedByPlayer, name, icon
 			else
 				return nil, nil, hideFilteredSpellID
 			end
-		elseif (HasUserFlags(Private, spellID, OnPlayer)) then 
+		elseif (HasUserFlags(Private, spellID, OnTarget)) then 
 			return true, nil, hideFilteredSpellID
 		end
 	end 
-	return true, nil, hideUnfilteredSpellID
+	
+	if (UnitAffectingCombat("player")) then 
+		local timeLeft 
+		if (expirationTime and expirationTime > 0) then 
+			timeLeft = expirationTime - GetTime()
+		end
+		if (isBuff) then 
+			if (timeLeft and (timeLeft > 0) and (timeLeft < buffDurationThreshold)) or (duration and (duration > 0) and (duration < buffDurationThreshold)) then
+				return true, nil, hideUnfilteredSpellID
+			else 
+				return nil, nil, hideUnfilteredSpellID
+			end
+		else 
+			if (timeLeft and (timeLeft > 0) and (timeLeft < debuffDurationThreshold)) then 
+				return true, nil, hideUnfilteredSpellID
+			else
+				return nil, nil, hideUnfilteredSpellID
+			end
+		end 
+	else 
+		return true, nil, hideUnfilteredSpellID
+	end 
 end
 
 auraFilters.nameplate = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
