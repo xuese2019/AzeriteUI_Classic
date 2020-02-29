@@ -141,7 +141,9 @@ local Update = function(self, event, unit)
 		-- but the current one is, we need to show the element again. 
 		elseif (element.powerType ~= element.exclusiveResource) then 
 			element.powerType = powerType
-			--element:Show()
+			if (self:IsElementEnabled("ExtraPower")) then
+				element:Show()
+			end
 		end 
 
 	-- Check if the min should be hidden on a certain resource type
@@ -155,11 +157,13 @@ local Update = function(self, event, unit)
 			element:Hide()
 			return
 
-		-- If the previous powertype was the ignored type, 
+		-- If the previous powertype was the ignored type,
 		-- but the current is something else, 
 		-- we need to show the element again. 
 		elseif (element.powerType == element.ignoredResource) then 
-			--element:Show()
+			if (self:IsElementEnabled("ExtraPower")) then
+				element:Show()
+			end
 		end 
 	end 
 
@@ -179,8 +183,10 @@ local Update = function(self, event, unit)
 	element:UpdateColor(unit, min, max, powerType, powerID, disconnected, dead, tapped)
 	element:UpdateValue(unit, min, max, powerType, powerID, disconnected, dead, tapped)
 
-	if (not element:IsShown()) then
-		element:Show()
+	if (self:IsElementEnabled("ExtraPower")) then
+		if (not element:IsShown()) then
+			element:Show()
+		end
 	end
 
 	if (element.PostUpdate) then
@@ -249,5 +255,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("ExtraPower", Enable, Disable, Proxy, 6)
+	Lib:RegisterElement("ExtraPower", Enable, Disable, Proxy, 7)
 end 
