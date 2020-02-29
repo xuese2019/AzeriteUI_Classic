@@ -36,6 +36,7 @@
 <Script file='libraries\chatbubble.lua'/>
 <Script file='libraries\chatframe.lua'/>
 <Script file='libraries\fader.lua'/>
+<Script file='libraries\spellhighlight.lua'/>
 
 <!-- media widget libs -->
 <Script file='libraries\orb.lua'/>
