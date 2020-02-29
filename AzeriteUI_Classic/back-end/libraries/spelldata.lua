@@ -30,6 +30,7 @@ LibSpellData.castTimeDecrease = LibSpellData.castTimeDecrease or {}
 LibSpellData.castTimeIncrease = LibSpellData.castTimeIncrease or {}
 LibSpellData.channeled = LibSpellData.channeled or {}
 LibSpellData.crowdControl = LibSpellData.crowdControl or {}
+LibSpellData.reagentBySpellID = LibSpellData.reagentBySpellID or {}
 
 -- Quality of Life
 ---------------------------------------------------------------------	
@@ -38,6 +39,7 @@ local CastDecrease = LibSpellData.castTimeDecrease
 local CastIncrease = LibSpellData.castTimeIncrease
 local Channeled = LibSpellData.channeled
 local CrowdControl = LibSpellData.crowdControl
+local ReagentBySpellID = LibSpellData.reagentBySpellID
 
 -- Local constants & tables
 ---------------------------------------------------------------------	
@@ -129,13 +131,18 @@ LibSpellData.CanAuraInterruptSpellCast = function(self, spellName)
 	return CrowdControl[spellName]
 end
 
+LibSpellData.GetReagentBySpellID = function(self, spellID)
+	return ReagentBySpellID[spellID]
+end
+
 local embedMethods = {
-	CanAuraInterruptSpellCast = true, 
-	GetSpellCastTimeDecrease = true, 
-	GetSpellCastTimeIncrease = true, 
-	GetSpellChannelInfo = true, 
-	GetSpellID = true, 
-	GetSpellInfo = true, 
+	CanAuraInterruptSpellCast = true,
+	GetReagentBySpellID = true,
+	GetSpellCastTimeDecrease = true,
+	GetSpellCastTimeIncrease = true,
+	GetSpellChannelInfo = true,
+	GetSpellID = true,
+	GetSpellInfo = true,
 	GetSpellRank = true
 }
 
@@ -3086,4 +3093,100 @@ do
 	Set(CrowdControl,  4066, 1) -- Small Bronze Bomb
 	Set(CrowdControl,    56, 1) -- Stun (Weapon Proc)
 	Set(CrowdControl, 15283, 1) -- Stunning Blow (Weapon Proc)
+end
+
+-- List of ReagentID indexed by SpellID
+-- *Kind thanks to Alexander Heubner for compiling this list!
+--------------------------------------------------------------
+do
+	-- General Spells
+	ReagentBySpellID[  818] =  4470 -- Campfire
+
+	-- Druid
+	ReagentBySpellID[21849] = 17021 -- Gift of the Wild (Rank 1)
+	ReagentBySpellID[21850] = 17026 -- Gift of the Wild (Rank 2)
+	ReagentBySpellID[20484] = 17034 -- Rebirth (Rank 1)
+	ReagentBySpellID[20739] = 17035 -- Rebirth (Rank 2)
+	ReagentBySpellID[20742] = 17036 -- Rebirth (Rank 3)
+	ReagentBySpellID[20747] = 17037 -- Rebirth (Rank 4)
+	ReagentBySpellID[20748] = 17038 -- Rebirth (Rank 5)
+
+	-- Mage
+	ReagentBySpellID[23028] = 17020 -- Arcane Brilliance
+	ReagentBySpellID[11419] = 17032 -- Portal (DN)
+	ReagentBySpellID[11416] = 17032 -- Portal (IF)
+	ReagentBySpellID[11417] = 17032 -- Portal (OG)
+	ReagentBySpellID[10059] = 17032 -- Portal (SW)
+	ReagentBySpellID[11420] = 17032 -- Portal (TB)
+	ReagentBySpellID[11418] = 17032 -- Portal (UC)
+	ReagentBySpellID[  130] = 17056 -- Slow fall
+	ReagentBySpellID[ 3565] = 17031 -- Teleport (DN)
+	ReagentBySpellID[ 3562] = 17031 -- Teleport (IF)
+	ReagentBySpellID[ 3567] = 17031 -- Teleport (OG)
+	ReagentBySpellID[ 3561] = 17031 -- Teleport (SW)
+	ReagentBySpellID[ 3566] = 17031 -- Teleport (TB)
+	ReagentBySpellID[ 3563] = 17031 -- Teleport (UC)
+
+	-- Paladin
+	ReagentBySpellID[19752] = 17033 -- Divine Intervention
+	ReagentBySpellID[25898] = 21177 -- Greater Blessing of Kings
+	ReagentBySpellID[25890] = 21177 -- Greater Blessing of Light
+	ReagentBySpellID[25782] = 21177 -- Greater Blessing of Might (Rank 1)
+	ReagentBySpellID[25916] = 21177 -- Greater Blessing of Might (Rank 2)
+	ReagentBySpellID[25895] = 21177 -- Greater Blessing of Salvation
+	ReagentBySpellID[25899] = 21177 -- Greater Blessing of Sanctuary
+	ReagentBySpellID[25894] = 21177 -- Greater Blessing of Wisdom (Rank 1)
+	ReagentBySpellID[25918] = 21177 -- Greater Blessing of Wisdom (Rank 2)
+
+	-- Priest
+	ReagentBySpellID[ 1706] = 17056 -- Levitate
+	ReagentBySpellID[21562] = 17028 -- Prayer of Fortitude (Rank 1)
+	ReagentBySpellID[21564] = 17029 -- Prayer of Fortitude (Rank 2)
+	ReagentBySpellID[27683] = 17029 -- Prayer of Shadow Protection
+	ReagentBySpellID[27681] = 17029 -- Prayer of Spirit
+
+	-- Rogue
+	ReagentBySpellID[ 2094] =  5530 -- Blind
+	ReagentBySpellID[ 1856] =  5140 -- Vanish (Rank 1)
+	ReagentBySpellID[ 1857] =  5140 -- Vanish (Rank 2)
+
+	-- Shaman
+	ReagentBySpellID[  131] = 17057 -- Water Breathing
+	ReagentBySpellID[  546] = 17058 -- Water Walking
+
+	-- Warlock
+	ReagentBySpellID[ 1098] =  6265 -- Enslave Demon (Rank 1)
+	ReagentBySpellID[11725] =  6265 -- Enslave Demon (Rank 2)
+	ReagentBySpellID[11726] =  6265 -- Enslave Demon (Rank 3)
+	ReagentBySpellID[ 6366] =  6265 -- Firestone (Lesser)
+	ReagentBySpellID[17951] =  6265 -- Firestone
+	ReagentBySpellID[17952] =  6265 -- Firestone (Greater)
+	ReagentBySpellID[17953] =  6265 -- Firestone (Major)
+	ReagentBySpellID[ 1122] =  5565 -- Inferno
+	ReagentBySpellID[18540] = 16583 -- Ritual of Doom
+	ReagentBySpellID[  698] =  6265 -- Ritual of Summoning
+	ReagentBySpellID[ 6201] =  6265 -- Healthstone (Minor)
+	ReagentBySpellID[ 6202] =  6265 -- Healthstone (Lesser)
+	ReagentBySpellID[ 5699] =  6265 -- Healthstone
+	ReagentBySpellID[11729] =  6265 -- Healthstone (Greater)
+	ReagentBySpellID[11730] =  6265 -- Healthstone (Major)
+	ReagentBySpellID[17877] =  6265 -- Shadowburn (Rank 1)
+	ReagentBySpellID[18867] =  6265 -- Shadowburn (Rank 2)
+	ReagentBySpellID[18868] =  6265 -- Shadowburn (Rank 3)
+	ReagentBySpellID[18869] =  6265 -- Shadowburn (Rank 4)
+	ReagentBySpellID[18870] =  6265 -- Shadowburn (Rank 5)
+	ReagentBySpellID[18871] =  6265 -- Shadowburn (Rank 6)
+	ReagentBySpellID[ 6353] =  6265 -- Soul Fire (Rank 1)
+	ReagentBySpellID[17924] =  6265 -- Soul Fire (Rank 2)
+	ReagentBySpellID[  693] =  6265 -- Soulstone (Minor)
+	ReagentBySpellID[20752] =  6265 -- Soulstone (Lesser)
+	ReagentBySpellID[20755] =  6265 -- Soulstone
+	ReagentBySpellID[20756] =  6265 -- Soulstone (Greater)
+	ReagentBySpellID[20757] =  6265 -- Soulstone (Major)
+	ReagentBySpellID[ 2362] =  6265 -- Spellstone
+	ReagentBySpellID[17727] =  6265 -- Spellstone (Greater)
+	ReagentBySpellID[17728] =  6265 -- Spellstone (Major)
+	ReagentBySpellID[  691] =  6265 -- Summon Felhunter
+	ReagentBySpellID[  712] =  6265 -- Summon Succubus
+	ReagentBySpellID[  697] =  6265 -- Summon Voidwalker
 end
