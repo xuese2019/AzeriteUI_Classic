@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.100-RC] 2020-02-29
+### Changed
+- Actionbutton spell highlight alerts have been moved to a new back-end of its own. 
+- Actionbutton spell highlights have gotten new coloring. Clearcasts are now blue, reactive abilities bright yellow, finishing moves range.
+- Added Shadow Bolt highlighting when Warlock Shadow Trance is active.
+
+### Fixed
+- Fixed an issue in the mana orb plugin that would sometimes cause it to be forcefully reshown even though the element had been disabled.
+- Fixed an issue where a custom styling method would overwrite the minimap module's ring bar text display, and people hitting new experience- or reputation levels would still be seeing the "New" text.
+
 ## [1.0.99-RC] 2020-02-28
 ### Added
 - Mana users now now have the option to use the azerite crystal for all power types, instead of the mana orb.
