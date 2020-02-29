@@ -1225,7 +1225,7 @@ Module.UpdateBars = function(self, event, ...)
 		if (first and second) then
 
 			-- Setup the bars and backdrops for dual bar mode
-			if self.spinnerMode ~= "Dual" then 
+			if (self.spinnerMode ~= "Dual") then 
 
 				-- Set the backdrop to the two bar backdrop
 				Handler.Toggle.Frame.Bg:SetTexture(layout.RingFrameBackdropDoubleTexture)
@@ -1234,10 +1234,9 @@ Module.UpdateBars = function(self, event, ...)
 				Spinner[1]:SetStatusBarTexture(layout.RingFrameOuterRingTexture)
 				Spinner[1]:SetSparkSize(unpack(layout.RingFrameOuterRingSparkSize))
 				Spinner[1]:SetSparkInset(unpack(layout.RingFrameOuterRingSparkInset))
+				Spinner[1].PostUpdate = nil
 
 				layout.RingFrameOuterRingValueFunc(Spinner[1].Value, Handler)
-
-				Spinner[1].PostUpdate = nil
 			end
 
 			-- Assign the spinners to the elements
@@ -1247,15 +1246,8 @@ Module.UpdateBars = function(self, event, ...)
 				self:DisableMinimapElement(first)
 
 				-- Link the correct spinner
+				Spinner[1].OverrideValue = (first == "XP") and layout.XP_OverrideValue or (first == "Reputation") and layout.Rep_OverrideValue
 				Handler[first] = Spinner[1]
-
-				-- Assign the correct post updates
-				if (first == "XP") then 
-					Handler[first].OverrideValue = layout.XP_OverrideValue
-	
-				elseif (first == "Reputation") then 
-					Handler[first].OverrideValue = layout.Rep_OverrideValue
-				end 
 
 				-- Enable the updated element 
 				self:EnableMinimapElement(first)
@@ -1286,6 +1278,7 @@ Module.UpdateBars = function(self, event, ...)
 				-- Run an update
 				Handler[second]:ForceUpdate()
 			end
+
 			-- Store the current modes
 			self.spinnerMode = "Dual"
 			self.spinner1 = first
@@ -1293,6 +1286,12 @@ Module.UpdateBars = function(self, event, ...)
 
 		-- Single bar
 		else
+
+			-- Disable any previously active secondary element
+			if self.spinner2 and Handler[self.spinner2] then 
+				self:DisableMinimapElement(self.spinner2)
+				Handler[self.spinner2] = nil
+			end 
 
 			-- Setup the bars and backdrops for single bar mode
 			if (self.spinnerMode ~= "Single") then 
@@ -1310,21 +1309,20 @@ Module.UpdateBars = function(self, event, ...)
 				-- Hide 2nd spinner values
 				Spinner[2].Value:SetText("")
 				Spinner[2].Value.Percent:SetText("")
-			end 		
+			end 
 
-			-- Disable any previously active secondary element
-			if self.spinner2 and Handler[self.spinner2] then 
-				self:DisableMinimapElement(self.spinner2)
-				Handler[self.spinner2] = nil
+			-- If the second spinner is still shown, hide it!
+			if (Spinner[2]:IsShown()) then 
+				Spinner[2]:Hide()
 			end 
 
 			-- Update the element if needed
 			if (self.spinner1 ~= first) then 
 
 				-- Update pointers and callbacks to the active element
+				Spinner[1].OverrideValue = hasXP and layout.XP_OverrideValue or hasRep and layout.Rep_OverrideValue
+				Spinner[1].PostUpdate = hasXP and XP_PostUpdate or hasRep and Rep_PostUpdate
 				Handler[first] = Spinner[1]
-				Handler[first].OverrideValue = hasXP and layout.XP_OverrideValue or hasRep and layout.Rep_OverrideValue
-				Handler[first].PostUpdate = hasXP and XP_PostUpdate or hasRep and Rep_PostUpdate
 
 				-- Enable the active element
 				self:EnableMinimapElement(first)
@@ -1335,10 +1333,7 @@ Module.UpdateBars = function(self, event, ...)
 				-- Update the visible element
 				Handler[first]:ForceUpdate()
 			end 
-			-- If the second spinner is still shown, hide it!
-			if (Spinner[2]:IsShown()) then 
-				Spinner[2]:Hide()
-			end 
+
 			-- Store the current modes
 			self.spinnerMode = "Single"
 			self.spinner1 = first
@@ -1423,7 +1418,7 @@ Module.OnEnable = function(self)
 	self:RegisterEvent("PLAYER_ALIVE", "OnEvent")
 	self:RegisterEvent("PLAYER_FLAGS_CHANGED", "OnEvent")
 	self:RegisterEvent("PLAYER_LEVEL_UP", "OnEvent")
-	self:RegisterEvent("PLAYER_XP_UPDATE", "OnEvent")
+	--self:RegisterEvent("PLAYER_XP_UPDATE", "OnEvent")
 	self:RegisterEvent("UPDATE_FACTION", "OnEvent")
 	self:EnableAllElements()
 end 
