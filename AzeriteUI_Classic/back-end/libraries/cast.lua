@@ -1,4 +1,4 @@
-local LibCast = Wheel:Set("LibCast", 4)
+local LibCast = Wheel:Set("LibCast", 5)
 if (not LibCast) then
 	return
 end
@@ -39,6 +39,7 @@ local type = type
 -- WoW API
 local CastingInfo = CastingInfo
 local ChannelInfo = ChannelInfo
+local CombatLogGetCurrentEventInfo = CombatLogGetCurrentEventInfo
 local GetSpellInfo = GetSpellInfo
 local GetSpellTexture = GetSpellTexture
 local GetTime = GetTime
