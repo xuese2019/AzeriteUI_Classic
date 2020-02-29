@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 77)
+local LibSecureButton = Wheel:Set("LibSecureButton", 78)
 if (not LibSecureButton) then
 	return
 end
@@ -18,12 +18,20 @@ assert(LibSound, "LibSecureButton requires LibSound to be loaded.")
 local LibTooltip = Wheel("LibTooltip")
 assert(LibTooltip, "LibSecureButton requires LibTooltip to be loaded.")
 
+local LibSpellData = Wheel("LibSpellData")
+assert(LibSpellData, "LibSecureButton requires LibSpellData to be loaded.")
+
+local LibSpellHighlight = Wheel("LibSpellHighlight")
+assert(LibSpellHighlight, "LibSecureButton requires LibSpellHighlight to be loaded.")
+
 -- Embed functionality into this
 LibEvent:Embed(LibSecureButton)
 LibMessage:Embed(LibSecureButton)
 LibFrame:Embed(LibSecureButton)
 LibSound:Embed(LibSecureButton)
 LibTooltip:Embed(LibSecureButton)
+LibSpellData:Embed(LibSecureButton)
+LibSpellHighlight:Embed(LibSecureButton)
 
 -- Lua API
 local _G = _G
@@ -71,9 +79,6 @@ local IsUsableAction = IsUsableAction
 local SetClampedTextureRotation = SetClampedTextureRotation
 local UnitClass = UnitClass
 
--- Will implement this through the back-end
---local IsSpellOverlayed = function() end
-
 -- Doing it this way to make the transition to library later on easier
 LibSecureButton.embeds = LibSecureButton.embeds or {} 
 LibSecureButton.buttons = LibSecureButton.buttons or {} 
@@ -99,9 +104,6 @@ local AllButtons = LibSecureButton.allbuttons
 local Buttons = LibSecureButton.buttons
 local Callbacks = LibSecureButton.callbacks
 local UIHider = LibSecureButton.frame
-
--- Cache of reagent IDs by SpellIDs that require them.
-local ReagentBySpellID = {}
 
 -- Blizzard Textures
 local EDGE_LOC_TEXTURE = [[Interface\Cooldown\edge-LoC]]
@@ -329,7 +331,7 @@ local OnUpdate = function(self, elapsed)
 end 
 
 local UpdateActionButton = function(self, event, ...)
-	local arg1 = ...
+	local arg1, arg2 = ...
 
 	if (event == "PLAYER_ENTERING_WORLD") then 
 		self:Update()
@@ -381,11 +383,11 @@ local UpdateActionButton = function(self, event, ...)
 	elseif (event == "GP_SPELL_ACTIVATION_OVERLAY_GLOW_SHOW") then
 		local spellID = self:GetSpellID()
 		if (spellID and (spellID == arg1)) then
-			self:ShowOverlayGlow()
+			self:ShowOverlayGlow(arg2)
 		else
 			local actionType, id = GetActionInfo(self.buttonAction)
 			if (actionType == "flyout") and FlyoutHasSpell(id, arg1) then
-				self:ShowOverlayGlow()
+				self:ShowOverlayGlow(arg2)
 			end
 		end
 
@@ -780,7 +782,7 @@ ActionButton.UpdateCount = function(self)
 					end
 				end
 			end
-			local reagentID = ReagentBySpellID[actionID]
+			local reagentID = LibSecureButton:GetReagentBySpellID(actionID)
 			if reagentID then
 				count = GetItemCount(reagentID)
 			end
@@ -927,8 +929,19 @@ ActionButton.UpdateUsable = function(self)
 	end
 end
 
-ActionButton.ShowOverlayGlow = function(self)
+ActionButton.ShowOverlayGlow = function(self, overlayType)
 	if self.SpellHighlight then 
+		local r, g, b, a
+		if (overlayType == "CLEARCAST") then
+			r, g, b, a = 75/255, 225/255, 75/255, .75
+		elseif (overlayType == "REACTIVE") then
+			r, g, b, a = 255/255, 225/255, 125/255, .75
+		elseif (overlayType == "FINISHER") then
+			r, g, b, a = 255/255, 75/255, 75/255, .75
+		else
+			r, g, b, a = 255/255, 225/255, 125/255, .75
+		end
+		self.SpellHighlight.Texture:SetVertexColor(r, g, b, a)
 		self.SpellHighlight:Show()
 	end
 end
@@ -942,10 +955,13 @@ end
 ActionButton.UpdateSpellHighlight = function(self)
 	if self.SpellHighlight then 
 		local spellId = self:GetSpellID()
-		if (spellId and (IsSpellOverlayed and IsSpellOverlayed(spellId))) then
-			self:ShowOverlayGlow()
-		else
-			self:HideOverlayGlow()
+		if (spellId) then
+			local overlayType = LibSecureButton:GetSpellOverlayType(spellId)
+			if (overlayType) then
+				self:ShowOverlayGlow(overlayType)
+			else
+				self:HideOverlayGlow()
+			end
 		end
 	end 
 end
@@ -2087,7 +2103,7 @@ local embedMethods = {
 	GetActionButtonTooltip = true, 
 	GetAllActionButtonsOrdered = true,
 	GetAllActionButtonsByType = true,
-	UpdateActionButtonBindings = true,
+	UpdateActionButtonBindings = true
 }
 
 LibSecureButton.Embed = function(self, target)
@@ -2102,99 +2118,3 @@ end
 for target in pairs(LibSecureButton.embeds) do
 	LibSecureButton:Embed(target)
 end
-
---------------------------------------------------------------
--- List of ReagentID indexed by SpellID
--- *Kind thanks to Alexander Heubner for compiling this list!
---------------------------------------------------------------
-
--- General Spells
-ReagentBySpellID[  818] =  4470 -- Campfire
-
--- Druid
-ReagentBySpellID[21849] = 17021 -- Gift of the Wild (Rank 1)
-ReagentBySpellID[21850] = 17026 -- Gift of the Wild (Rank 2)
-ReagentBySpellID[20484] = 17034 -- Rebirth (Rank 1)
-ReagentBySpellID[20739] = 17035 -- Rebirth (Rank 2)
-ReagentBySpellID[20742] = 17036 -- Rebirth (Rank 3)
-ReagentBySpellID[20747] = 17037 -- Rebirth (Rank 4)
-ReagentBySpellID[20748] = 17038 -- Rebirth (Rank 5)
-
--- Mage
-ReagentBySpellID[23028] = 17020 -- Arcane Brilliance
-ReagentBySpellID[11419] = 17032 -- Portal (DN)
-ReagentBySpellID[11416] = 17032 -- Portal (IF)
-ReagentBySpellID[11417] = 17032 -- Portal (OG)
-ReagentBySpellID[10059] = 17032 -- Portal (SW)
-ReagentBySpellID[11420] = 17032 -- Portal (TB)
-ReagentBySpellID[11418] = 17032 -- Portal (UC)
-ReagentBySpellID[  130] = 17056 -- Slow fall
-ReagentBySpellID[ 3565] = 17031 -- Teleport (DN)
-ReagentBySpellID[ 3562] = 17031 -- Teleport (IF)
-ReagentBySpellID[ 3567] = 17031 -- Teleport (OG)
-ReagentBySpellID[ 3561] = 17031 -- Teleport (SW)
-ReagentBySpellID[ 3566] = 17031 -- Teleport (TB)
-ReagentBySpellID[ 3563] = 17031 -- Teleport (UC)
-
--- Paladin
-ReagentBySpellID[19752] = 17033 -- Divine Intervention
-ReagentBySpellID[25898] = 21177 -- Greater Blessing of Kings
-ReagentBySpellID[25890] = 21177 -- Greater Blessing of Light
-ReagentBySpellID[25782] = 21177 -- Greater Blessing of Might (Rank 1)
-ReagentBySpellID[25916] = 21177 -- Greater Blessing of Might (Rank 2)
-ReagentBySpellID[25895] = 21177 -- Greater Blessing of Salvation
-ReagentBySpellID[25899] = 21177 -- Greater Blessing of Sanctuary
-ReagentBySpellID[25894] = 21177 -- Greater Blessing of Wisdom (Rank 1)
-ReagentBySpellID[25918] = 21177 -- Greater Blessing of Wisdom (Rank 2)
-
--- Priest
-ReagentBySpellID[ 1706] = 17056 -- Levitate
-ReagentBySpellID[21562] = 17028 -- Prayer of Fortitude (Rank 1)
-ReagentBySpellID[21564] = 17029 -- Prayer of Fortitude (Rank 2)
-ReagentBySpellID[27683] = 17029 -- Prayer of Shadow Protection
-ReagentBySpellID[27681] = 17029 -- Prayer of Spirit
-
--- Rogue
-ReagentBySpellID[ 2094] =  5530 -- Blind
-ReagentBySpellID[ 1856] =  5140 -- Vanish (Rank 1)
-ReagentBySpellID[ 1857] =  5140 -- Vanish (Rank 2)
-
--- Shaman
-ReagentBySpellID[  131] = 17057 -- Water Breathing
-ReagentBySpellID[  546] = 17058 -- Water Walking
-
--- Warlock
-ReagentBySpellID[ 1098] =  6265 -- Enslave Demon (Rank 1)
-ReagentBySpellID[11725] =  6265 -- Enslave Demon (Rank 2)
-ReagentBySpellID[11726] =  6265 -- Enslave Demon (Rank 3)
-ReagentBySpellID[ 6366] =  6265 -- Firestone (Lesser)
-ReagentBySpellID[17951] =  6265 -- Firestone
-ReagentBySpellID[17952] =  6265 -- Firestone (Greater)
-ReagentBySpellID[17953] =  6265 -- Firestone (Major)
-ReagentBySpellID[ 1122] =  5565 -- Inferno
-ReagentBySpellID[18540] = 16583 -- Ritual of Doom
-ReagentBySpellID[  698] =  6265 -- Ritual of Summoning
-ReagentBySpellID[ 6201] =  6265 -- Healthstone (Minor)
-ReagentBySpellID[ 6202] =  6265 -- Healthstone (Lesser)
-ReagentBySpellID[ 5699] =  6265 -- Healthstone
-ReagentBySpellID[11729] =  6265 -- Healthstone (Greater)
-ReagentBySpellID[11730] =  6265 -- Healthstone (Major)
-ReagentBySpellID[17877] =  6265 -- Shadowburn (Rank 1)
-ReagentBySpellID[18867] =  6265 -- Shadowburn (Rank 2)
-ReagentBySpellID[18868] =  6265 -- Shadowburn (Rank 3)
-ReagentBySpellID[18869] =  6265 -- Shadowburn (Rank 4)
-ReagentBySpellID[18870] =  6265 -- Shadowburn (Rank 5)
-ReagentBySpellID[18871] =  6265 -- Shadowburn (Rank 6)
-ReagentBySpellID[ 6353] =  6265 -- Soul Fire (Rank 1)
-ReagentBySpellID[17924] =  6265 -- Soul Fire (Rank 2)
-ReagentBySpellID[  693] =  6265 -- Soulstone (Minor)
-ReagentBySpellID[20752] =  6265 -- Soulstone (Lesser)
-ReagentBySpellID[20755] =  6265 -- Soulstone
-ReagentBySpellID[20756] =  6265 -- Soulstone (Greater)
-ReagentBySpellID[20757] =  6265 -- Soulstone (Major)
-ReagentBySpellID[ 2362] =  6265 -- Spellstone
-ReagentBySpellID[17727] =  6265 -- Spellstone (Greater)
-ReagentBySpellID[17728] =  6265 -- Spellstone (Major)
-ReagentBySpellID[  691] =  6265 -- Summon Felhunter
-ReagentBySpellID[  712] =  6265 -- Summon Succubus
-ReagentBySpellID[  697] =  6265 -- Summon Voidwalker
