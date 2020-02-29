@@ -387,7 +387,7 @@ local Enable = function(self)
 		end
 
 		self:RegisterMessage("GP_UNIT_AURA", Proxy)
-		self:RegisterEvent("PLAYER_LEVEL_UP", UpdateClassFilter, true)
+		self:RegisterEvent("PLAYER_LEVEL_UP", Proxy, true)
 
 		return true
 	end
@@ -397,7 +397,7 @@ local Disable = function(self)
 	local element = self.GroupAura
 	if (element) then
 		self:UnregisterMessage("UNIT_AURA", Proxy)
-		self:UnregisterEvent("PLAYER_LEVEL_UP", UpdateClassFilter)
+		self:UnregisterEvent("PLAYER_LEVEL_UP", Proxy)
 		element:Hide()
 		element:SetScript("OnUpdate", nil)
 	end
@@ -405,5 +405,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("GroupAura", Enable, Disable, Proxy, 15)
+	Lib:RegisterElement("GroupAura", Enable, Disable, Proxy, 16)
 end 
