@@ -992,7 +992,7 @@ local StyleRaidFrame = function(self, unit, id, layout, ...)
 	-----------------------------------------------------------
 	local groupAura = overlay:CreateFrame("Button")
 	groupAura:SetIgnoreParentAlpha(true)
-	groupAura:SetFrameLevel(overlay:GetFrameLevel() - 4)
+	groupAura:SetFrameLevel(overlay:GetFrameLevel() + 1)
 	groupAura:SetPoint(unpack(layout.GroupAuraPlace))
 	groupAura:SetSize(unpack(layout.GroupAuraSize))
 	groupAura.disableMouse = layout.GroupAuraButtonDisableMouse
