@@ -1,6 +1,27 @@
 local ADDON, Private = ...
 local Changelog = {
 	{
+		tag = "1.0.101-RC",
+		date = "2020-02-29",
+		entries = {
+			{
+				header = "Changed",
+				items = {
+					[[Actionbutton spell highlight alerts have been moved to a new back-end of its own.]],
+					[[Actionbutton spell highlights have gotten new coloring. Clearcasts are now blue, reactive abilities bright yellow, finishing moves range.]],
+					[[Added Shadow Bolt highlighting when Warlock Shadow Trance is active.]]
+				}
+			},
+			{
+				header = "Fixed",
+				items = {
+					[[Fixed an issue in the mana orb plugin that would sometimes cause it to be forcefully reshown even though the element had been disabled.]],
+					[[Fixed an issue where a custom styling method would overwrite the minimap module's ring bar text display, and people hitting new experience- or reputation levels would still be seeing the "New" text.]]
+				}
+			}
+		}
+	},
+	{
 		tag = "1.0.99-RC",
 		date = "2020-02-28",
 		entries = {
