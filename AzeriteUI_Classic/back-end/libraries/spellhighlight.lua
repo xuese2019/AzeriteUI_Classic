@@ -20,28 +20,84 @@ LibAura:Embed(LibSpellHighlight)
 -- Lua API
 local _G = _G
 local assert = assert
+local bit_band = bit.band
 local debugstack = debugstack
 local error = error
+local select = select
 local string_join = string.join
 local string_match = string.match
 local type = type
 
 -- WoW API
+local CombatLogGetCurrentEventInfo = CombatLogGetCurrentEventInfo
+local GetSpellInfo = GetSpellInfo
+local IsPlayerSpell = IsPlayerSpell
+local IsUsableSpell = IsUsableSpell
 local UnitClass = UnitClass
+local UnitCreatureType = UnitCreatureType
+local UnitExists = UnitExists
+local UnitGUID = UnitGUID
+local UnitHealth = UnitHealth
+local UnitHealthMax = UnitHealthMax
+local UnitIsFriend = UnitIsFriend
 
 -- Doing it this way to make the transition to library later on easier
 LibSpellHighlight.embeds = LibSpellHighlight.embeds or {} 
+LibSpellHighlight.activeHighlights = LibSpellHighlight.activeHighlights or {}
 LibSpellHighlight.highlightSpellsByAuraID = LibSpellHighlight.highlightSpellsByAuraID or {} 
 LibSpellHighlight.highlightTypeByAuraID = LibSpellHighlight.highlightTypeByAuraID or {} 
-LibSpellHighlight.activeHighlights = LibSpellHighlight.activeHighlights or {}
+LibSpellHighlight.reactiveSpells = LibSpellHighlight.reactiveSpells or {}
 
 -- Shortcuts
+local ActiveHighlights = LibSpellHighlight.activeHighlights
 local HighlightSpellsByAuraID = LibSpellHighlight.highlightSpellsByAuraID
 local HighlightTypeByAuraID = LibSpellHighlight.highlightTypeByAuraID
-local ActiveHighlights = LibSpellHighlight.activeHighlights
+local ReactiveSpells = LibSpellHighlight.reactiveSpells
 
 -- Constants
+local gameLocale = GetLocale()
 local _,playerClass = UnitClass("player")
+local playerGUID = UnitGUID("player")
+
+local AFFILIATION_MINE = COMBATLOG_OBJECT_AFFILIATION_MINE
+
+-- Localized spell- and creature type names
+local L = {
+	Creature_Demon = ({
+		enUS = "Demon",
+		deDE = "Dämon",
+		esES = "Demonio",
+		esMX = "Demonio",
+		frFR = "Démon",
+		itIT = "Demone",
+		ptBR = "Demônio",
+		ruRU = "Демон",
+		koKR = "악마",
+		zhCN = "恶魔",
+		zhTW = "惡魔"
+	})[gameLocale],
+	Creature_Undead = ({
+		enUS = "Undead",
+		deDE = "Untoter",
+		esES = "No-muerto",
+		esMX = "No-muerto",
+		frFR = "Mort-vivant",
+		itIT = "Non Morto",
+		ptBR = "Renegado",
+		ruRU = "Нежить",
+		koKR = "언데드",
+		zhCN = "亡灵",
+		zhTW = "不死族"
+	})[gameLocale],
+	Spell_Counterattack = GetSpellInfo(19306),
+	Spell_Execute = GetSpellInfo(20662),
+	Spell_MongooseBite = GetSpellInfo(1495),
+	Spell_Overpower = GetSpellInfo(7384),
+	Spell_Revenge = GetSpellInfo(6572),
+	Spell_Riposte = GetSpellInfo(14251),
+	Spell_ShadowBolt = GetSpellInfo(686)
+}
+
 
 -- Utility Functions
 ----------------------------------------------------
@@ -131,12 +187,19 @@ do
 	end
 end
 
-LibSpellHighlight.OnEvent = function(self, event, ...)
+LibSpellHighlight.UpdateEvents = function(self)
+	if (playerClass == "PALADIN") then
+		if (self:GetHighestRankForReactiveSpell(L.Spell_Exorcism)) then
+
+		end
+	end
+end
+
+LibSpellHighlight.OnEvent = function(self, event, unit, ...)
 	if (event == "PLAYER_ENTERING_WORLD") then
 		self:UpdateHighlightsByAura()
 
 	elseif (event == "GP_UNIT_AURA") then
-		local unit = ...
 		if (unit == "player") then
 			self:UpdateHighlightsByAura()
 		end
@@ -145,6 +208,15 @@ end
 
 LibSpellHighlight:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
 LibSpellHighlight:RegisterMessage("GP_UNIT_AURA", "OnEvent")
+
+if (playerClass == "HUNTER")
+or (playerClass == "PALADIN")
+or (playerClass == "ROGUE")
+or (playerClass == "WARLOCK")
+or (playerClass == "WARRIOR") then
+	LibSpellHighlight:RegisterEvent("PLAYER_ENTERING_WORLD", "UpdateEvents")
+	LibSpellHighlight:RegisterEvent("SPELLS_CHANGED", "UpdateEvents")
+end
 
 -- Module embedding
 local embedMethods = {
@@ -197,4 +269,54 @@ if (playerClass == "DRUID") then
 		[9830] = true  -- Shred (Rank 5)
 	}
 
+end
+
+if (playerClass == "HUNTER") then
+	ReactiveSpells[L.Spell_Counterattack] = { 19306, 20909, 20910 }
+	ReactiveSpells[L.Spell_MongooseBite] = { 1495, 14269, 14270, 14271 }
+end 
+
+if (playerClass == "PALADIN") then
+	ReactiveSpells[L.Spell_Exorcism] = { 879, 5614, 5615, 10312, 10313, 10314 }
+	ReactiveSpells[L.Spell_HammerOfWrath] = { 24239, 24274, 24275 }
+end 
+
+if (playerClass == "ROGUE") then
+	ReactiveSpells[L.Spell_Riposte] = { 14251 }
+end 
+
+if (playerClass == "WARLOCK") then
+
+	HighlightTypeByAuraID[17941] = "REACTIVE"
+	HighlightSpellsByAuraID[17941] = { -- Shadow Trance
+		[  686] = true, -- Shadow Bolt (Rank 1)
+		[  695] = true, -- Shadow Bolt (Rank 2)
+		[  705] = true, -- Shadow Bolt (Rank 3)
+		[ 1088] = true, -- Shadow Bolt (Rank 4)
+		[ 1106] = true, -- Shadow Bolt (Rank 5)
+		[ 7641] = true, -- Shadow Bolt (Rank 6)
+		[11659] = true, -- Shadow Bolt (Rank 7)
+		[11660] = true, -- Shadow Bolt (Rank 8)
+		[11661] = true, -- Shadow Bolt (Rank 9)
+		[25307] = true, -- Shadow Bolt (Rank 10)
+	}
+
+end 
+
+if (playerClass == "WARRIOR") then
+	ReactiveSpells[L.Spell_Execute] = { 5308, 20658, 20660, 20661, 20662 }
+	ReactiveSpells[L.Spell_Overpower] = { 7384, 7887, 11584, 11585 }
+	ReactiveSpells[L.Spell_Revenge] = { 6572, 6574, 7379, 11600, 11601, 25288 }
+end
+
+LibSpellHighlight.GetHighestRankForReactiveSpell = function(spellName)
+	local reactiveSpells = ReactiveSpells[spellName]
+	if (reactiveSpells) then
+		for i = #reactiveSpells,1,-1 do
+			local spellID = reactiveSpells[i]
+			if (IsPlayerSpell(spellID)) then
+				return spellID 
+			end
+		end
+	end
 end
