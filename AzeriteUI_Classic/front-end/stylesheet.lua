@@ -54,6 +54,7 @@ local MenuButtonFontSize, MenuButtonW, MenuButtonH = 14, 300, 50
 
 -- Generic single colored texture
 local BLANK_TEXTURE = [[Interface\ChatFrame\ChatFrameBackground]]
+local NEW = "*"
 
 -- Use a metatable to dynamically create the colors
 local spellTypeColor = setmetatable({
