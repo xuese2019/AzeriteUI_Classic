@@ -91,6 +91,8 @@ local L = {
 	})[gameLocale],
 	Spell_Counterattack = GetSpellInfo(19306),
 	Spell_Execute = GetSpellInfo(20662),
+	Spell_Exorcism = GetSpellInfo(879),
+	Spell_HammerOfWrath = GetSpellInfo(24239),
 	Spell_MongooseBite = GetSpellInfo(1495),
 	Spell_Overpower = GetSpellInfo(7384),
 	Spell_Revenge = GetSpellInfo(6572),
