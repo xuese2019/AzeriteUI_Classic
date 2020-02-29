@@ -1,6 +1,20 @@
 local ADDON, Private = ...
 local Changelog = {
 	{
+		tag = "1.0.102-RC",
+		date = "2020-02-29",
+		entries = {
+			{
+				header = "Fixed",
+				items = {
+					[[Fixed an issue with the dispellable group frame debuff display that could cause an error when leveling up.]],
+					[[Fixed an issue that could cause exact mob health values to not be displayed. This was related to API changes in the classic client that since February 18th 2020 now reveals exact mob health to the player, where we previously used RealMobHealth interaction to show this.]],
+					[[Attempting to work around an issue that would cause a bug and require a `/reload` upon reaching level 60. A little hard to reproduce, though.]]
+				}
+			}
+		}
+	},
+	{
 		tag = "1.0.101-RC",
 		date = "2020-02-29",
 		entries = {
