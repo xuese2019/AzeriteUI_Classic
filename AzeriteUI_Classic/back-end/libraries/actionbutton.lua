@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 78)
+local LibSecureButton = Wheel:Set("LibSecureButton", 79)
 if (not LibSecureButton) then
 	return
 end
@@ -931,17 +931,17 @@ end
 
 ActionButton.ShowOverlayGlow = function(self, overlayType)
 	if self.SpellHighlight then 
-		local r, g, b, a
+		local r, g, b
 		if (overlayType == "CLEARCAST") then
-			r, g, b, a = 75/255, 225/255, 75/255, .75
+			r, g, b = 75/255, 125/255, 255/255
 		elseif (overlayType == "REACTIVE") then
-			r, g, b, a = 255/255, 225/255, 125/255, .75
+			r, g, b = 255/255, 225/255, 125/255
 		elseif (overlayType == "FINISHER") then
-			r, g, b, a = 255/255, 75/255, 75/255, .75
+			r, g, b = 255/255, 125/255, 75/255
 		else
-			r, g, b, a = 255/255, 225/255, 125/255, .75
+			r, g, b = 255/255, 225/255, 125/255
 		end
-		self.SpellHighlight.Texture:SetVertexColor(r, g, b, a)
+		self.SpellHighlight.Texture:SetVertexColor(r, g, b, .75)
 		self.SpellHighlight:Show()
 	end
 end
