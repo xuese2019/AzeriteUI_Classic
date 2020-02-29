@@ -1948,16 +1948,20 @@ UnitFramePlayer.OnInit = function(self)
 	end)
 
 	self.frame.EnableManaOrb = function()
-		self.frame.Power.ignoredResource = self.layout.PowerIgnoredResource
-		self.frame.Power:ForceUpdate()
-		self.frame:EnableElement("ExtraPower")
-		self.frame.ExtraPower:ForceUpdate()
+		if (self.frame.ExtraPower) then
+			self.frame.Power.ignoredResource = self.layout.PowerIgnoredResource
+			self.frame.Power:ForceUpdate()
+			self.frame:EnableElement("ExtraPower")
+			self.frame.ExtraPower:ForceUpdate()
+		end
 	end
 
 	self.frame.DisableManaOrb = function()
-		self.frame.Power.ignoredResource = nil
-		self.frame.Power:ForceUpdate()
-		self.frame:DisableElement("ExtraPower")
+		if (self.frame.ExtraPower) then
+			self.frame.Power.ignoredResource = nil
+			self.frame.Power:ForceUpdate()
+			self.frame:DisableElement("ExtraPower")
+		end
 	end
 
 	if (not self.db.enablePlayerManaOrb) then
