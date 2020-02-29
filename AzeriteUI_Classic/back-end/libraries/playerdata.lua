@@ -1,4 +1,4 @@
-local LibPlayerData = Wheel:Set("LibPlayerData", 14)
+local LibPlayerData = Wheel:Set("LibPlayerData", 15)
 if (not LibPlayerData) then	
 	return
 end
@@ -84,35 +84,6 @@ local check = function(value, num, ...)
 	local types = string_join(", ", ...)
 	local name = string_match(debugstack(2, 2, 0), ": in function [`<](.-)['>]")
 	error(("Bad argument #%.0f to '%s': %s expected, got %s"):format(num, name, types, type(value)), 3)
-end
-
--- Unit Health Cache
----------------------------------------------------------------------	
--- These functions are intended to return nil 
--- if no actual health data is available. 
--- We're currently using them as a proxy for RealMobHealth
--- when that is available, but modifies the return values to
--- accomodate our system of returning nil when only percentages exist.
-
--- TODO: Return healthMax too with this one,
--- and rewrite front end modules to match the new behavior.
--- This will be to effectively cut the number of function calls in half.
-LibPlayerData.UnitHealth = function(self, unit)
-	if (RealMobHealth and RealMobHealth.GetUnitHealth) then 
-		local healthCur, healthMax, curIsGuess, maxIsGuess = RealMobHealth.GetUnitHealth(unit)
-		if (curIsGuess ~= nil) then -- nil means just percentage fallbacks are available
-			return healthCur or 0
-		end
-	end
-end
-
-LibPlayerData.UnitHealthMax = function(self, unit)
-	if (RealMobHealth and RealMobHealth.GetUnitHealth) then 
-		local healthCur, healthMax, curIsGuess, maxIsGuess = RealMobHealth.GetUnitHealth(unit)
-		if (maxIsGuess ~= nil) then -- nil means just percentage fallbacks are available
-			return healthMax or 0
-		end
-	end
 end
 
 -- Level Functions 

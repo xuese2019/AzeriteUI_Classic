@@ -264,8 +264,9 @@ local Update = function(self, event, unit)
 	local preview = health.Preview
 
 	-- Retrieve values for our bars
-	local curHealth = UnitHealth(unit) -- The unit's current health
-	local maxHealth = UnitHealthMax(unit) -- The unit's maximum health
+	local curHealth = UnitHealth(unit) or 0 -- The unit's current health
+	local maxHealth = UnitHealthMax(unit) or 0 -- The unit's maximum health
+	local perc = (maxHealth > 0) and curHealth/maxHealth*100
 
 	health:SetMinMaxValues(0, maxHealth, forced)
 	health:SetValue(curHealth, forced)
@@ -276,11 +277,11 @@ local Update = function(self, event, unit)
 	preview:SetValue(curHealth, true)
 
 	local minPerc, maxPerc
-	if not(UnitIsUnit(unit, "player") or UnitIsUnit(unit, "pet") or UnitInParty(unit) or UnitInRaid(unit)) then 
+	if UnitIsPlayer(unit) and not(UnitIsUnit(unit, "player") or UnitIsUnit(unit, "pet") or UnitInParty(unit) or UnitInRaid(unit)) then 
 		minPerc = curHealth
 		maxPerc = maxHealth
-		curHealth = LibPlayerData:UnitHealth(unit) or 0
-		maxHealth = LibPlayerData:UnitHealthMax(unit) or 0
+		curHealth = 0
+		maxHealth = 0
 	end
 
 	health:UpdateValues(unit, curHealth, maxHealth, minPerc, maxPerc)
@@ -381,5 +382,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Health", Enable, Disable, Proxy, 40)
+	Lib:RegisterElement("Health", Enable, Disable, Proxy, 41)
 end 

@@ -185,18 +185,8 @@ local StatusBar_UpdateValue = function(bar, value, max)
 	local isRealValue
 	local unit = bar:GetParent().unit
 	if (unit) then 
-		isRealValue = UnitIsUnit(unit, "player") or UnitIsUnit(unit, "pet") or UnitInParty(unit) or UnitInRaid(unit)
-		if (not isRealValue) then 
-			local healthCur = Module:UnitHealth(unit)
-			local healthMax = Module:UnitHealthMax(unit)
-			if (healthCur and healthMax) then 
-				value, max = healthCur, healthMax
-				isRealValue = true
-			else
-				-- Don't do this, as it'll make the values hide
-				-- when not currently mousing over the unit.
-				--value, max = nil, nil
-			end 
+		if (not UnitIsPlayer(unit)) or (UnitIsUnit(unit, "player") or UnitIsUnit(unit, "pet") or UnitInParty(unit) or UnitInRaid(unit)) then
+			isRealValue = true
 		end
 	end
 
