@@ -49,7 +49,7 @@ local UNKNOWN = UNKNOWN
 
 -- Custom strings & constants
 local Spinner = {}
-local NEW = "*" -- [[|TInterface\OptionsFrame\UI-OptionsFrame-NewFeatureIcon:0:0:0:0|t]]
+local NEW = "*"
 local shortXPString = "%s%%"
 local longXPString = "%s / %s"
 local fullXPString = "%s / %s (%s)"
