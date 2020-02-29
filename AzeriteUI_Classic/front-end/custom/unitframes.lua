@@ -1960,14 +1960,15 @@ UnitFramePlayer.OnInit = function(self)
 		self.frame:DisableElement("ExtraPower")
 	end
 
+	if (not self.db.enablePlayerManaOrb) then
+		self.frame:DisableManaOrb()
+	end
+
 	-- Create a secure proxy updater for the menu system
 	local callbackFrame = CreateSecureCallbackFrame(self, self.frame, self.db, SECURE.Player_SecureCallback)
 end 
 
 UnitFramePlayer.OnEnable = function(self)
-	if (not self.db.enablePlayerManaOrb) then
-		self.frame:DisableManaOrb()
-	end
 	self:RegisterEvent("PLAYER_ALIVE", "OnEvent")
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
 	self:RegisterEvent("DISABLE_XP_GAIN", "OnEvent")
@@ -1977,7 +1978,13 @@ UnitFramePlayer.OnEnable = function(self)
 end
 
 UnitFramePlayer.OnEvent = function(self, event, ...)
-	if (event == "PLAYER_LEVEL_UP") then 
+	if (event == "PLAYER_ENTERING_WORLD") then
+		if (self.db.enablePlayerManaOrb) then
+			self.frame:EnableManaOrb()
+		else
+			self.frame:DisableManaOrb()
+		end
+	elseif (event == "PLAYER_LEVEL_UP") then 
 		local level = ...
 		if (level and (level ~= PlayerLevel)) then
 			PlayerLevel = level
