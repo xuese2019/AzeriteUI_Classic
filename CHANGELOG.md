@@ -4,10 +4,12 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [1.0.102-RC] 2020-02-29
+## [1.0.103-RC] 2020-03-01
 ### Fixed
 - Fixed an issue with the dispellable group frame debuff display that could cause an error when leveling up.
 - Fixed an issue that could cause exact mob health values to not be displayed. This was related to API changes in the classic client that since February 18th 2020 now reveals exact mob health to the player, where we previously used RealMobHealth interaction to show this.
+- Redid how it is decided whether a full health value is available or not.
+- Made the clearcast highlight color brighter, as it wasn't standing enough out from its surroundings.
 - Attempting to work around an issue that would cause a bug and require a `/reload` upon reaching level 60. A little hard to reproduce, though.
 
 ## [1.0.101-RC] 2020-02-29
