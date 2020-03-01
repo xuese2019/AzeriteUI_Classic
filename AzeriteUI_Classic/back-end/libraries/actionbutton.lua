@@ -933,7 +933,7 @@ ActionButton.ShowOverlayGlow = function(self, overlayType)
 	if self.SpellHighlight then 
 		local r, g, b
 		if (overlayType == "CLEARCAST") then
-			r, g, b = 75/255, 125/255, 255/255
+			r, g, b = 125/255, 225/255, 255/255
 		elseif (overlayType == "REACTIVE") then
 			r, g, b = 255/255, 225/255, 125/255
 		elseif (overlayType == "FINISHER") then
