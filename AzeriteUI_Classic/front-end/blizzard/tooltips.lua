@@ -182,19 +182,7 @@ end
 -- Will expand on this later to tailer all tooltips to our needs.  
 local StatusBar_UpdateValue = function(bar, value, max)
 
-	local isRealValue
-	local unit = bar:GetParent().unit
-	if (unit) then 
-		if (not UnitIsPlayer(unit)) or (UnitIsUnit(unit, "player") or UnitIsUnit(unit, "pet") or UnitInParty(unit) or UnitInRaid(unit)) then
-			isRealValue = true
-		end
-	end
-
-	-- This happens for pets of grouped units
-	if (not isRealValue) and (max ~= 100) then
-		isRealValue = true
-	end
-
+	local isRealValue = (max ~= 100)
 	if (value) then 
 		if (isRealValue) then 
 			if (value >= 1e8) then 			bar.value:SetFormattedText("%.0fm", value/1e6) 		-- 100m, 1000m, 2300m, etc

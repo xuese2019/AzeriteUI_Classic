@@ -2074,24 +2074,9 @@ Tooltip.UpdateBarValues = function(self, unit, noUpdate)
 				local updateNeeded = self:ClearStatusBar(i,true)
 				needUpdate = needUpdate or updateNeeded
 			else 
-				local min,max
-				isRealValue = UnitIsUnit(unit, "player") or UnitIsUnit(unit, "pet") or UnitInParty(unit) or UnitInRaid(unit)
-				if (not isRealValue) then 
-					min = LibPlayerData:UnitHealth(unit)
-					max = LibPlayerData:UnitHealthMax(unit)
-					if (min and max) then 
-						isRealValue = true
-					end
-				end 
-				if (not min) or (not max) then 
-					min = UnitHealth(unit) or 0
-					max = UnitHealthMax(unit) or 0
-				end
-
-				-- This happens for pets of grouped units
-				if (not isRealValue) and (max ~= 100) then
-					isRealValue = true
-				end
+				local min = UnitHealth(unit) or 0
+				local max = UnitHealthMax(unit) or 0
+				isRealValue = (max ~= 100)
 			
 				-- Only show units with health, hide the bar otherwise
 				if ((min > 0) and (max > 0)) then 

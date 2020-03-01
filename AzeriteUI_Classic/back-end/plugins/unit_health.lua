@@ -277,7 +277,7 @@ local Update = function(self, event, unit)
 	preview:SetValue(curHealth, true)
 
 	local minPerc, maxPerc
-	if UnitIsPlayer(unit) and not(UnitIsUnit(unit, "player") or UnitIsUnit(unit, "pet") or UnitInParty(unit) or UnitInRaid(unit)) then 
+	if (maxHealth == 100) then 
 		minPerc = curHealth
 		maxPerc = maxHealth
 		curHealth = 0
