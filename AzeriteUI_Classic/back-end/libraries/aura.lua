@@ -1,4 +1,4 @@
-local LibAura = Wheel:Set("LibAura", 26)
+local LibAura = Wheel:Set("LibAura", 27)
 if (not LibAura) then
 	return
 end
@@ -63,10 +63,6 @@ local UnitInParty = UnitInParty
 local UnitInRaid = UnitInRaid
 local UnitIsUnit = UnitIsUnit
 
--- WoW Constants
-local BUFF_MAX_DISPLAY = BUFF_MAX_DISPLAY
-local DEBUFF_MAX_DISPLAY = DEBUFF_MAX_DISPLAY 
-
 -- Library registries
 LibAura.embeds = LibAura.embeds or {}
 LibAura.auraCache = LibAura.auraCache or {} -- dynamic unit aura cache
@@ -81,7 +77,11 @@ local AuraCache = LibAura.auraCache -- dynamic unit aura cache
 local AuraCacheByGUID = LibAura.auraCacheByGUID -- dynamic aura info from the combat log
 local UnitHasAuraWatch = LibAura.auraWatches -- dynamic list of tracked units
 
--- WoW Constants
+-- Sourced from FrameXML/BuffFrame.lua
+local BUFF_MAX_DISPLAY = BUFF_MAX_DISPLAY
+local DEBUFF_MAX_DISPLAY = DEBUFF_MAX_DISPLAY 
+
+-- Sourced from FrameXML/Constants.lua
 local COMBATLOG_OBJECT_TYPE_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER
 local COMBATLOG_OBJECT_REACTION_FRIENDLY = COMBATLOG_OBJECT_REACTION_FRIENDLY
 
@@ -292,6 +292,9 @@ LibAura.CacheUnitAurasByFilter = function(self, unit, filter)
 
 	local unitGUID = UnitGUID(queryUnit or unit)
 	local auraCacheByGUID = AuraCacheByGUID[unitGUID]
+
+	local hasBuffs, hasDebuffs
+	local hasPoison, hasCurse, hasDisease, hasMagic
 
 	local counter, limit = 0, string_match(filter, "HARMFUL") and DEBUFF_MAX_DISPLAY or BUFF_MAX_DISPLAY
 	for i = 1,limit do 

@@ -1,4 +1,4 @@
-local LibFader = Wheel:Set("LibFader", 23)
+local LibFader = Wheel:Set("LibFader", 25)
 if (not LibFader) then	
 	return
 end
@@ -51,8 +51,10 @@ local UnitPowerMax = UnitPowerMax
 local UnitPowerType = UnitPowerType
 local UnregisterAttributeDriver = UnregisterAttributeDriver
 
--- WoW Constants
-local DEBUFF_MAX_DISPLAY = DEBUFF_MAX_DISPLAY or 16
+-- Sourced from FrameXML/BuffFrame.lua
+local DEBUFF_MAX_DISPLAY = DEBUFF_MAX_DISPLAY
+
+-- Sourced from BlizzardInterfaceResources/Resources/EnumerationTables.lua
 local POWER_TYPE_MANA = Enum.PowerType.Mana
 
 -- Player Constants
@@ -405,7 +407,10 @@ LibFader.OnEvent = function(self, event, ...)
 		self:CheckHealth()
 
 	elseif (event == "GP_UNIT_AURA") then 
-		self:CheckAuras()
+		local unit = ...
+		if (unit == "player") then
+			self:CheckAuras()
+		end
 
 	elseif (event == "ZONE_CHANGED_NEW_AREA") then 
 		self:CheckInstance()
