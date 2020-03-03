@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.104-RC] 2020-03-03
+### Added
+- Added Rogue and Druid finishing moves spell highlighting when combo points are maxed out.
+
 ## [1.0.103-RC] 2020-03-01
 ### Fixed
 - Fixed an issue with the dispellable group frame debuff display that could cause an error when leveling up.

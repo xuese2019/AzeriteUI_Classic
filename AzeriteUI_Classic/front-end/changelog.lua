@@ -1,6 +1,18 @@
 local ADDON, Private = ...
 local Changelog = {
 	{
+		tag = "1.0.104-RC",
+		date = "2020-03-03",
+		entries = {
+			{
+				header = "Added",
+				items = {
+					[[Added Rogue and Druid finishing moves spell highlighting when combo points are maxed out.]]
+				}
+			}
+		}
+	},
+	{
 		tag = "1.0.103-RC",
 		date = "2020-03-01",
 		entries = {
