@@ -30,6 +30,7 @@ local type = type
 
 -- WoW API
 local CombatLogGetCurrentEventInfo = CombatLogGetCurrentEventInfo
+local GetComboPoints = GetComboPoints
 local GetSpellInfo = GetSpellInfo
 local IsPlayerSpell = IsPlayerSpell
 local IsUsableSpell = IsUsableSpell
@@ -40,26 +41,48 @@ local UnitGUID = UnitGUID
 local UnitHealth = UnitHealth
 local UnitHealthMax = UnitHealthMax
 local UnitIsFriend = UnitIsFriend
+local UnitPower = UnitPower
+local UnitPowerMax = UnitPowerMax
+local UnitPowerType = UnitPowerType
 
 -- Doing it this way to make the transition to library later on easier
 LibSpellHighlight.embeds = LibSpellHighlight.embeds or {} 
-LibSpellHighlight.activeHighlights = LibSpellHighlight.activeHighlights or {}
-LibSpellHighlight.highlightSpellsByAuraID = LibSpellHighlight.highlightSpellsByAuraID or {} 
-LibSpellHighlight.highlightTypeByAuraID = LibSpellHighlight.highlightTypeByAuraID or {} 
-LibSpellHighlight.reactiveSpells = LibSpellHighlight.reactiveSpells or {}
+LibSpellHighlight.activeHighlights = LibSpellHighlight.activeHighlights or {} -- current active highlights spellIDs and their highlight type
+LibSpellHighlight.activeHighlightsByAuraID = LibSpellHighlight.activeHighlightsByAuraID or {}
+LibSpellHighlight.highlightSpellsByAuraID = LibSpellHighlight.highlightSpellsByAuraID or {} -- reactive auras and actionbar highlight spells
+LibSpellHighlight.highlightTypeByAuraID = LibSpellHighlight.highlightTypeByAuraID or {} -- character auraID to actionbar highlight type
+LibSpellHighlight.highlightTypeBySpellID = LibSpellHighlight.highlightTypeBySpellID or {}
+LibSpellHighlight.reactiveSpellsBySpellID = LibSpellHighlight.reactiveSpellsBySpellID or {}
+LibSpellHighlight.comboFinishersBySpellID = LibSpellHighlight.comboFinishersBySpellID or {}
+LibSpellHighlight.spellIDToAuraID = LibSpellHighlight.spellIDToAuraID or {} -- table to convert spellID to triggering auraID
 
 -- Shortcuts
 local ActiveHighlights = LibSpellHighlight.activeHighlights
+local ActiveHighlightsByAuraID = LibSpellHighlight.activeHighlightsByAuraID
 local HighlightSpellsByAuraID = LibSpellHighlight.highlightSpellsByAuraID
 local HighlightTypeByAuraID = LibSpellHighlight.highlightTypeByAuraID
-local ReactiveSpells = LibSpellHighlight.reactiveSpells
+local HighlightTypeBySpellID = LibSpellHighlight.highlightTypeBySpellID
+local ReactiveSpellsBySpellID = LibSpellHighlight.reactiveSpellsBySpellID
+local ComboFinishersBySpellID = LibSpellHighlight.comboFinishersBySpellID
+local SpellIDToAuraID = LibSpellHighlight.spellIDToAuraID
 
 -- Constants
 local gameLocale = GetLocale()
 local _,playerClass = UnitClass("player")
 local playerGUID = UnitGUID("player")
 
-local AFFILIATION_MINE = COMBATLOG_OBJECT_AFFILIATION_MINE
+-- Sourced from BlizzardInterfaceResources/Resources/EnumerationTables.lua
+local SPELL_POWER_COMBO_POINTS = Enum.PowerType.ComboPoints
+local SPELL_POWER_ENERGY = Enum.PowerType.Energy
+
+-- Sourced from FrameXML/TargetFrame.lua
+local MAX_COMBO_POINTS = MAX_COMBO_POINTS
+
+-- Sourced from FrameXML/BuffFrame.lua
+local BUFF_MAX_DISPLAY = BUFF_MAX_DISPLAY
+
+-- Sourced from FrameXML/Constants.lua
+local COMBATLOG_OBJECT_AFFILIATION_MINE = COMBATLOG_OBJECT_AFFILIATION_MINE
 
 -- Localized spell- and creature type names
 local L = {
@@ -100,7 +123,6 @@ local L = {
 	Spell_ShadowBolt = GetSpellInfo(686)
 }
 
-
 -- Utility Functions
 ----------------------------------------------------
 -- Syntax check 
@@ -118,19 +140,32 @@ end
 
 -- Public API
 ----------------------------------------------------
+-- Strict boolean return values
 LibSpellHighlight.IsSpellOverlayed = function(self, spellID)
-	for auraID in pairs(ActiveHighlights) do
-		local highlightsByAuraID = HighlightSpellsByAuraID[auraID]
-		if (highlightsByAuraID) and (highlightsByAuraID[spellID]) then
+	-- Check for active spellIDs
+	if (ActiveHighlights[spellID]) then
+		return true
+	else
+		-- Check if an aura connected to the spellID is active
+		local auraID = SpellIDToAuraID[spellID]
+		if (auraID) and (ActiveHighlightsByAuraID[auraID]) then
 			return true
 		end
 	end
+	return false
 end
 
+-- Can be used in the same manner as the above,
+-- but this one returns the overlay type or nil instead of strictly booleans.
 LibSpellHighlight.GetSpellOverlayType = function(self, spellID)
-	for auraID in pairs(ActiveHighlights) do
-		local highlightsByAuraID = HighlightSpellsByAuraID[auraID]
-		if (highlightsByAuraID) and (highlightsByAuraID[spellID]) then
+	-- Check for active spellIDs
+	local highlightType = ActiveHighlights[spellID]
+	if (highlightType) then
+		return highlightType
+	else
+		-- Check if an aura connected to the spellID is active
+		local auraID = SpellIDToAuraID[spellID]
+		if (auraID) and (ActiveHighlightsByAuraID[auraID]) then
 			return HighlightTypeByAuraID[auraID]
 		end
 	end
@@ -141,6 +176,9 @@ end
 do
 	local currentHighlights = {} -- only used as a cache for this method
 	LibSpellHighlight.UpdateHighlightsByAura = function(self)
+
+		-- This is a local temporary list of highlights,
+		-- which we need to reset on every iteration.
 		for auraID in pairs(currentHighlights) do
 			currentHighlights[auraID] = nil
 		end
@@ -159,66 +197,146 @@ do
 			local highlightsByAuraID = HighlightSpellsByAuraID[auraID]
 			if (highlightsByAuraID) then
 
-				-- Add it to current highlights.
+				-- Add it to this iteration's highlights.
 				currentHighlights[auraID] = true
 
-				-- Add to active and send an actication message if needed.
-				-- Only do this once per discovery.
-				for auraID,highlightsByAuraID in pairs(HighlightSpellsByAuraID) do
-					if (not ActiveHighlights[auraID]) then
-						ActiveHighlights[auraID] = true
-						for spellID in pairs(highlightsByAuraID) do
-							self:SendMessage("GP_SPELL_ACTIVATION_OVERLAY_GLOW_SHOW", spellID, HighlightTypeByAuraID[auraID])
-						end
+				if (not ActiveHighlightsByAuraID[auraID]) then
+					local highlightType = HighlightTypeByAuraID[auraID]
+
+					ActiveHighlightsByAuraID[auraID] = true
+
+					for spellID in pairs(highlightsByAuraID) do -- iterate spell list
+						-- Send out an activation message if this spellID currently has an active highlight.
+						self:SendMessage("GP_SPELL_ACTIVATION_OVERLAY_GLOW_SHOW", spellID, highlightType)
 					end
 				end
 			end
 			
 		end
 
-		-- Disable active highlights that no longer match the current ones.
-		for auraID in pairs(ActiveHighlights) do
-			if (not currentHighlights[auraID]) then
-				ActiveHighlights[auraID] = nil
-				for spellID in pairs(HighlightSpellsByAuraID[auraID]) do
-					self:SendMessage("GP_SPELL_ACTIVATION_OVERLAY_GLOW_HIDE", spellID, HighlightTypeByAuraID[auraID])
+		-- Disable active highlights that no longer match the current iteration.
+		for auraID in pairs(ActiveHighlightsByAuraID) do -- iterate the previous aura iteration
+			if (not currentHighlights[auraID]) then -- compare to the current iteration
+
+				-- Clear out this entry
+				ActiveHighlightsByAuraID[auraID] = nil
+
+				local highlightsByAuraID = HighlightSpellsByAuraID[auraID] -- get spell list
+				if (highlightsByAuraID) then
+					local highlightType = HighlightTypeByAuraID[auraID]
+					for spellID in pairs(highlightsByAuraID) do -- iterate spell list
+						-- Send out a disable message if this spellID no longer has an active highlight.
+						self:SendMessage("GP_SPELL_ACTIVATION_OVERLAY_GLOW_HIDE", spellID, highlightType)
+					end
 				end
 			end
 		end
-		
+
 	end
 end
 
-LibSpellHighlight.UpdateEvents = function(self)
-	if (playerClass == "PALADIN") then
+do
+	local comboPointsMaxed
+	LibSpellHighlight.UpdateComboPoints = function(self)
+		local min = UnitPower("player", SPELL_POWER_COMBO_POINTS)
+		local max = UnitPowerMax("player", SPELL_POWER_COMBO_POINTS)
+		if (min == max) then
+			if (not comboPointsMaxed) then
+				comboPointsMaxed = true
+				for spellID in pairs(ComboFinishersBySpellID) do
+					if (not ActiveHighlights[spellID]) then
+
+						ActiveHighlights[spellID] = true
+
+						-- Send out an activation message if this spellID currently has an active highlight.
+						local highlightType = HighlightTypeBySpellID[spellID]
+						self:SendMessage("GP_SPELL_ACTIVATION_OVERLAY_GLOW_SHOW", spellID, highlightType)
+					end
+				end
+			end
+		else
+			if (comboPointsMaxed) then
+				comboPointsMaxed = nil
+				for spellID in pairs(ComboFinishersBySpellID) do
+					if (ActiveHighlights[spellID]) then
+						ActiveHighlights[spellID] = nil
+
+						-- Send out a disable message if this spellID no longer has an active highlight.
+						local highlightType = HighlightTypeBySpellID[spellID]
+						self:SendMessage("GP_SPELL_ACTIVATION_OVERLAY_GLOW_HIDE", spellID, highlightType)
+					end
+				end
+			end
+		end
+	end
+end
+
+LibSpellHighlight.UpdateEvents = function(self, event, ...)
+
+	-- Allow it to run on the first occurence
+	-- of this event after any sort of UI reset.
+	if (event == "PLAYER_ENTERING_WORLD") then
+		local isLogin, isReload = ...
+		if not(isLogin or isReload) then
+			return
+		end
+	end
+
+	if (playerClass == "DRUID") then
+		self:RegisterUnitEvent("UNIT_MAXPOWER", "OnEvent", "player")
+		self:RegisterUnitEvent("UNIT_POWER_FREQUENT", "OnEvent", "player")
+		self:RegisterEvent("PLAYER_TARGET_CHANGED", "OnEvent")
+		self:RegisterMessage("GP_UNIT_AURA", "OnEvent")
+
+		-- Initial update
+		self:UpdateHighlightsByAura()
+	
+	elseif (playerClass == "ROGUE") then
+		self:RegisterUnitEvent("UNIT_MAXPOWER", "OnEvent", "player")
+		self:RegisterUnitEvent("UNIT_POWER_FREQUENT", "OnEvent", "player")
+		self:RegisterEvent("PLAYER_TARGET_CHANGED", "OnEvent")
+
+	
+	elseif (playerClass == "PALADIN") then
 		if (self:GetHighestRankForReactiveSpell(L.Spell_Exorcism)) then
 
 		end
+
+	elseif (playerClass == "WARLOCK") then
+		self:RegisterMessage("GP_UNIT_AURA", "OnEvent")
+
+		-- Initial update
+		self:UpdateHighlightsByAura()
 	end
 end
 
 LibSpellHighlight.OnEvent = function(self, event, unit, ...)
-	if (event == "PLAYER_ENTERING_WORLD") then
-		self:UpdateHighlightsByAura()
-
-	elseif (event == "GP_UNIT_AURA") then
+	if (event == "GP_UNIT_AURA") then
 		if (unit == "player") then
 			self:UpdateHighlightsByAura()
 		end
+
+	elseif (event == "UNIT_POWER_FREQUENT") or (event == "UNIT_DISPLAYPOWER") then
+		self:UpdateComboPoints()
 	end
 end
 
-LibSpellHighlight:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
-LibSpellHighlight:RegisterMessage("GP_UNIT_AURA", "OnEvent")
+if (playerClass == "DRUID") then
 
-if (playerClass == "HUNTER")
-or (playerClass == "PALADIN")
-or (playerClass == "ROGUE")
-or (playerClass == "WARLOCK")
-or (playerClass == "WARRIOR") then
-	LibSpellHighlight:RegisterEvent("PLAYER_ENTERING_WORLD", "UpdateEvents")
+	LibSpellHighlight:RegisterEvent("SPELLS_CHANGED", "UpdateEvents")
+	LibSpellHighlight:RegisterEvent("UNIT_DISPLAYPOWER", "UpdateEvents")
+
+elseif (playerClass == "HUNTER")
+	or (playerClass == "PALADIN")
+	or (playerClass == "ROGUE")
+	or (playerClass == "WARLOCK")
+	or (playerClass == "WARRIOR") then
+
 	LibSpellHighlight:RegisterEvent("SPELLS_CHANGED", "UpdateEvents")
 end
+
+-- Run this once for all
+LibSpellHighlight:RegisterEvent("PLAYER_ENTERING_WORLD", "UpdateEvents")
 
 -- Module embedding
 local embedMethods = {
@@ -271,20 +389,56 @@ if (playerClass == "DRUID") then
 		[9830] = true  -- Shred (Rank 5)
 	}
 
+	ComboFinishersBySpellID[22568] = true -- Ferocious Bite (Rank 1)
+	ComboFinishersBySpellID[22827] = true -- Ferocious Bite (Rank 2)
+	ComboFinishersBySpellID[22828] = true -- Ferocious Bite (Rank 3)
+	ComboFinishersBySpellID[22829] = true -- Ferocious Bite (Rank 4)
+	ComboFinishersBySpellID[31018] = true -- Ferocious Bite (Rank 5) (The Beast - Content Phase 6)
+	ComboFinishersBySpellID[ 1079] = true -- Rip (Rank 1)
+	ComboFinishersBySpellID[ 9492] = true -- Rip (Rank 2)
+	ComboFinishersBySpellID[ 9493] = true -- Rip (Rank 3)
+	ComboFinishersBySpellID[ 9752] = true -- Rip (Rank 4)
+	ComboFinishersBySpellID[ 9894] = true -- Rip (Rank 5)
+	ComboFinishersBySpellID[ 9896] = true -- Rip (Rank 6)
+
 end
 
 if (playerClass == "HUNTER") then
-	ReactiveSpells[L.Spell_Counterattack] = { 19306, 20909, 20910 }
-	ReactiveSpells[L.Spell_MongooseBite] = { 1495, 14269, 14270, 14271 }
+	ReactiveSpellsBySpellID[L.Spell_Counterattack] = { 19306, 20909, 20910 }
+	ReactiveSpellsBySpellID[L.Spell_MongooseBite] = { 1495, 14269, 14270, 14271 }
 end 
 
 if (playerClass == "PALADIN") then
-	ReactiveSpells[L.Spell_Exorcism] = { 879, 5614, 5615, 10312, 10313, 10314 }
-	ReactiveSpells[L.Spell_HammerOfWrath] = { 24239, 24274, 24275 }
+	ReactiveSpellsBySpellID[L.Spell_Exorcism] = { 879, 5614, 5615, 10312, 10313, 10314 }
+	ReactiveSpellsBySpellID[L.Spell_HammerOfWrath] = { 24239, 24274, 24275 }
 end 
 
 if (playerClass == "ROGUE") then
-	ReactiveSpells[L.Spell_Riposte] = { 14251 }
+	ReactiveSpellsBySpellID[L.Spell_Riposte] = { 14251 }
+
+	ComboFinishersBySpellID[ 8647] = true -- Expose Armor (Rank 1)
+	ComboFinishersBySpellID[ 8649] = true -- Expose Armor (Rank 2)
+	ComboFinishersBySpellID[ 8650] = true -- Expose Armor (Rank 3)
+	ComboFinishersBySpellID[11197] = true -- Expose Armor (Rank 4)
+	ComboFinishersBySpellID[11198] = true -- Expose Armor (Rank 5)
+	ComboFinishersBySpellID[ 2098] = true -- Eviscerate (Rank 1)
+	ComboFinishersBySpellID[ 6760] = true -- Eviscerate (Rank 2)
+	ComboFinishersBySpellID[ 6761] = true -- Eviscerate (Rank 3)
+	ComboFinishersBySpellID[ 6762] = true -- Eviscerate (Rank 4)
+	ComboFinishersBySpellID[ 8623] = true -- Eviscerate (Rank 5)
+	ComboFinishersBySpellID[ 8624] = true -- Eviscerate (Rank 6)
+	ComboFinishersBySpellID[11299] = true -- Eviscerate (Rank 7)
+	ComboFinishersBySpellID[11300] = true -- Eviscerate (Rank 8)
+	ComboFinishersBySpellID[31016] = true -- Eviscerate (Rank 9) (Blackhand Assasin - Content Phase 6)
+	ComboFinishersBySpellID[ 1943] = true -- Rupture (Rank 1)
+	ComboFinishersBySpellID[ 8639] = true -- Rupture (Rank 2)
+	ComboFinishersBySpellID[ 8640] = true -- Rupture (Rank 3)
+	ComboFinishersBySpellID[11273] = true -- Rupture (Rank 4)
+	ComboFinishersBySpellID[11274] = true -- Rupture (Rank 5)
+	ComboFinishersBySpellID[11275] = true -- Rupture (Rank 6)
+	ComboFinishersBySpellID[ 5171] = true -- Slice and Dive (Rank 1)
+	ComboFinishersBySpellID[ 6774] = true -- Slice and Dive (Rank 2)
+
 end 
 
 if (playerClass == "WARLOCK") then
@@ -306,16 +460,30 @@ if (playerClass == "WARLOCK") then
 end 
 
 if (playerClass == "WARRIOR") then
-	ReactiveSpells[L.Spell_Execute] = { 5308, 20658, 20660, 20661, 20662 }
-	ReactiveSpells[L.Spell_Overpower] = { 7384, 7887, 11584, 11585 }
-	ReactiveSpells[L.Spell_Revenge] = { 6572, 6574, 7379, 11600, 11601, 25288 }
+	ReactiveSpellsBySpellID[L.Spell_Execute] = { 5308, 20658, 20660, 20661, 20662 }
+	ReactiveSpellsBySpellID[L.Spell_Overpower] = { 7384, 7887, 11584, 11585 }
+	ReactiveSpellsBySpellID[L.Spell_Revenge] = { 6572, 6574, 7379, 11600, 11601, 25288 }
 end
 
+-- Cache all spellIDs that have a triggering auraID
+for auraID,spells in pairs(HighlightSpellsByAuraID) do
+	for spellID in pairs(spells) do
+		SpellIDToAuraID[spellID] = auraID
+		HighlightTypeBySpellID[spellID] = HighlightTypeByAuraID[auraID]
+	end
+end
+
+-- Register all finisher spells by overlay type
+for spellID in pairs(ComboFinishersBySpellID) do
+	HighlightTypeBySpellID[spellID] = "FINISHER"
+end
+
+
 LibSpellHighlight.GetHighestRankForReactiveSpell = function(spellName)
-	local reactiveSpells = ReactiveSpells[spellName]
-	if (reactiveSpells) then
-		for i = #reactiveSpells,1,-1 do
-			local spellID = reactiveSpells[i]
+	local reactiveSpellsBySpellID = ReactiveSpellsBySpellID[spellName]
+	if (reactiveSpellsBySpellID) then
+		for i = #reactiveSpellsBySpellID,1,-1 do
+			local spellID = reactiveSpellsBySpellID[i]
 			if (IsPlayerSpell(spellID)) then
 				return spellID 
 			end
