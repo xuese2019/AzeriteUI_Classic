@@ -402,5 +402,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("ClassPower", Enable, Disable, Proxy, 35)
+	Lib:RegisterElement("ClassPower", Enable, Disable, Proxy, 36)
 end 

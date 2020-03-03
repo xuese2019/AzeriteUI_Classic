@@ -25,6 +25,10 @@ local EDGE_LOC_TEXTURE = [[Interface\Cooldown\edge-LoC]]
 local EDGE_NORMAL_TEXTURE = [[Interface\Cooldown\edge]]
 local BLING_TEXTURE = [[Interface\Cooldown\star4]]
 
+-- Sourced from FrameXML/BuffFrame.lua
+local BUFF_MAX_DISPLAY = BUFF_MAX_DISPLAY
+local DEBUFF_MAX_DISPLAY = DEBUFF_MAX_DISPLAY
+
 -- Aura Cache
 local Cache = {}
 
