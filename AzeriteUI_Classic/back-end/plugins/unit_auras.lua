@@ -670,6 +670,8 @@ local Update = function(self, event, unit, ...)
 		Auras.visibleAuras = visible
 		Auras.visibleBuffs = visibleBuffs
 		Auras.visibleDebuffs = visibleDebuffs
+		Auras.hasBuffs = visibleBuffs > 0
+		Auras.hasDebuffs = visibleDebuffs > 0
 
 		EvaluateVisibilities(Auras, visible)
 
