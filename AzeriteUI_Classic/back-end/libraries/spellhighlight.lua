@@ -159,9 +159,11 @@ end
 -- but this one returns the overlay type or nil instead of strictly booleans.
 LibSpellHighlight.GetSpellOverlayType = function(self, spellID)
 	-- Check for active spellIDs
-	local highlightType = ActiveHighlights[spellID]
-	if (highlightType) then
-		return highlightType
+	if (ActiveHighlights[spellID]) then
+		local highlightType = HighlightTypeBySpellID[spellID]
+		if (highlightType) then
+			return highlightType
+		end
 	else
 		-- Check if an aura connected to the spellID is active
 		local auraID = SpellIDToAuraID[spellID]
@@ -275,6 +277,7 @@ LibSpellHighlight.UpdateEvents = function(self, event, ...)
 
 	-- Allow it to run on the first occurence
 	-- of this event after any sort of UI reset.
+	-- Not needed after teleports or instance zoning.
 	if (event == "PLAYER_ENTERING_WORLD") then
 		local isLogin, isReload = ...
 		if not(isLogin or isReload) then
@@ -288,24 +291,28 @@ LibSpellHighlight.UpdateEvents = function(self, event, ...)
 		self:RegisterEvent("PLAYER_TARGET_CHANGED", "OnEvent")
 		self:RegisterMessage("GP_UNIT_AURA", "OnEvent")
 
-		-- Initial update
+		-- Initial updates
 		self:UpdateHighlightsByAura()
+		self:UpdateComboPoints()
 	
 	elseif (playerClass == "ROGUE") then
 		self:RegisterUnitEvent("UNIT_MAXPOWER", "OnEvent", "player")
 		self:RegisterUnitEvent("UNIT_POWER_FREQUENT", "OnEvent", "player")
 		self:RegisterEvent("PLAYER_TARGET_CHANGED", "OnEvent")
 
+		-- Initial updates
+		self:UpdateComboPoints()
 	
 	elseif (playerClass == "PALADIN") then
-		if (self:GetHighestRankForReactiveSpell(L.Spell_Exorcism)) then
+		local highestRankSpellID = self:GetHighestRankForReactiveSpell(L.Spell_Exorcism)
+		if (highestRankSpellID) then
 
 		end
 
 	elseif (playerClass == "WARLOCK") then
 		self:RegisterMessage("GP_UNIT_AURA", "OnEvent")
 
-		-- Initial update
+		-- Initial updates
 		self:UpdateHighlightsByAura()
 	end
 end
@@ -313,10 +320,12 @@ end
 LibSpellHighlight.OnEvent = function(self, event, unit, ...)
 	if (event == "GP_UNIT_AURA") then
 		if (unit == "player") then
+			-- Update highlights responding to active auras
 			self:UpdateHighlightsByAura()
 		end
 
 	elseif (event == "UNIT_POWER_FREQUENT") or (event == "UNIT_DISPLAYPOWER") then
+		-- Update highlights of combo point finishers
 		self:UpdateComboPoints()
 	end
 end
@@ -335,7 +344,7 @@ elseif (playerClass == "HUNTER")
 	LibSpellHighlight:RegisterEvent("SPELLS_CHANGED", "UpdateEvents")
 end
 
--- Run this once for all
+-- Run this once for all classes
 LibSpellHighlight:RegisterEvent("PLAYER_ENTERING_WORLD", "UpdateEvents")
 
 -- Module embedding
