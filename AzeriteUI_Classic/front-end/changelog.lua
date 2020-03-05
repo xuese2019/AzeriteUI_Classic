@@ -1,6 +1,24 @@
 local ADDON, Private = ...
 local Changelog = {
 	{
+		tag = "1.0.105-RC",
+		date = "2020-03-05",
+		entries = {
+			{
+				header = "Changed",
+				items = {
+					[[Further adjusted the spell highlight coloring a bit. This is a work in progress, as I want the three highlight types to have easily identifiable coloring, stand out when active, and still fit the general coloring of the user interface.]]
+				}
+			},
+			{
+				header = "Fixed",
+				items = {
+					[[Finishing move spell highlights for rogues and druids should have consistent coloring now, and not suddenly switch to the reactive coloring.]]
+				}
+			}
+		}
+	},
+	{
 		tag = "1.0.104-RC",
 		date = "2020-03-03",
 		entries = {
