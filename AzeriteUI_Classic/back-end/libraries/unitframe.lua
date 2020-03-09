@@ -1,4 +1,4 @@
-local LibUnitFrame = Wheel:Set("LibUnitFrame", 70)
+local LibUnitFrame = Wheel:Set("LibUnitFrame", 71)
 if (not LibUnitFrame) then	
 	return
 end
@@ -490,25 +490,25 @@ LibUnitFrame.SpawnUnitFrame = function(self, unit, parent, styleFunc, ...)
 	frame:SetAttribute("unit", unit)
 
 	local unitDriver = LibUnitFrame:GetUnitFrameUnitDriver(unit)
-	if unitDriver then 
-		local vehicleSwitcher = CreateFrame("Frame", nil, nil, "SecureHandlerAttributeTemplate")
-		vehicleSwitcher:SetFrameRef("UnitFrame", frame)
-		vehicleSwitcher:SetAttribute("unit", unit)
-		vehicleSwitcher:SetAttribute("_onattributechanged", [=[
+	if (unitDriver) then 
+		local unitSwitcher = CreateFrame("Frame", nil, nil, "SecureHandlerAttributeTemplate")
+		unitSwitcher:SetFrameRef("UnitFrame", frame)
+		unitSwitcher:SetAttribute("unit", unit)
+		unitSwitcher:SetAttribute("_onattributechanged", [=[
 			local frame = self:GetFrameRef("UnitFrame"); 
 			frame:SetAttribute("unit", value); 
 		]=])
 		frame.realUnit = unit
 		frame:SetAttribute("unit", SecureCmdOptionParse(unitDriver))
-		RegisterAttributeDriver(vehicleSwitcher, "state-vehicleswitch", unitDriver)
+		RegisterAttributeDriver(unitSwitcher, "state-vehicleswitch", unitDriver)
 	else
 		frame:SetAttribute("unit", unit)
 	end 
 
 	local visDriver = LibUnitFrame:GetUnitFrameVisibilityDriver(unit)
-	if frame.visibilityOverrideDriver then 
+	if (frame.visibilityOverrideDriver) then 
 		visDriver = frame.visibilityOverrideDriver
-	elseif frame.visibilityPreDriver then
+	elseif (frame.visibilityPreDriver) then
 		visDriver = frame.visibilityPreDriver .. visDriver
 	end
 
@@ -520,9 +520,9 @@ LibUnitFrame.SpawnUnitFrame = function(self, unit, parent, styleFunc, ...)
 	_G.ClickCastFrames = ClickCastFrames or {}
 	ClickCastFrames[frame] = true
 
-	frames[frame] = true 
+	frames[frame] = true
 
-	if frame.PostCreate then 
+	if (frame.PostCreate) then
 		frame:PostCreate()
 	end 
 	
