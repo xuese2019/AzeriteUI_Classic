@@ -235,11 +235,20 @@ local Update = function(self, event, unit, ...)
 		end 
 	end
 	
+	-- Different GUID means a different player or NPC,
+	-- so we want updates to be instant, not smoothed. 
+	local guid = UnitGUID(unit)
+	local forced = event == "Forced"
+
 	local element = self.GroupAura
 	if element.PreUpdate then
 		element:PreUpdate(unit)
 	end
 
+	-- Store some basic values on the element
+	local forced = forced or guid ~= element.guid
+	element.guid = guid
+	
 	local canAttack = UnitCanAttack("player", unit)
 	local isCharmed = UnitIsCharmed(unit)
 
@@ -253,13 +262,18 @@ local Update = function(self, event, unit, ...)
 	-- Once for each filter type, as UnitAura can't list HELPFUL and HARMFUL at the same time. 
 	for filterType,allowedSchools in pairs(classFilter) do
 
+		-- Forcefully register cache the auras for the relevant filters
+		-- This is to ensure force updates actually have the right filters and fully updated caches
+		if forced then 
+			LibAura:CacheUnitBuffsByFilter(unit, filterType)
+			LibAura:CacheUnitDebuffsByFilter(unit, filterType)
+		end 
+
 		-- Iterate auras until no more exists, 
 		-- don't rely on values that will be different in Classic and Live. 
 		local auraID = 0
 		while true do
 			auraID = auraID + 1
-
-			--local name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = UnitAura(unit, auraID, filterType)
 
 			local name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = LibAura:GetUnitAura(unit, auraID, filterType)
 
@@ -396,7 +410,7 @@ end
 local Disable = function(self)
 	local element = self.GroupAura
 	if (element) then
-		self:UnregisterMessage("UNIT_AURA", Proxy)
+		self:UnregisterMessage("GP_UNIT_AURA", Proxy)
 		self:UnregisterEvent("PLAYER_LEVEL_UP", Proxy)
 		element:Hide()
 		element:SetScript("OnUpdate", nil)
@@ -405,5 +419,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("GroupAura", Enable, Disable, Proxy, 16)
+	Lib:RegisterElement("GroupAura", Enable, Disable, Proxy, 18)
 end 
