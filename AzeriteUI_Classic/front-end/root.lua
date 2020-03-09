@@ -454,6 +454,62 @@ Core.ApplyExperimentalFeatures = function(self)
 			g:SetAllPoints(f)
 		end
 	end
+
+	-- Auto turn-in Rugged Armor Kits
+	-- Not including this, nor do I plan to.
+	-- I simply needed this to hand in a lot of kits for my epic neck.
+	-- Leaving the code in here for future reference, though. And for friends.
+	do
+		if (false) then
+
+			-- Lua API
+			local string_split = string.split
+			local tonumber = tonumber
+
+			-- WoW API
+			local CompleteQuest = CompleteQuest
+			local IsQuestCompletable = IsQuestCompletable
+			local GetNumGossipAvailableQuests = GetNumGossipAvailableQuests
+			local GetQuestReward = GetQuestReward
+			local SelectGossipAvailableQuest = SelectGossipAvailableQuest
+			local UnitGUID = UnitGUID
+
+			local gossip = function(self, event, ...)
+				local target = UnitGUID("npc")
+				if (target) then
+					local _, _, _, _, _, id = string_split("-", target)
+					local mobId = tonumber(id)
+					if (mobId == 14833) then -- Chronos
+						local num = GetItemCount(15564) -- Rugged Armor Kit
+						if (num > 5) then
+							-- Armor Kits
+							if (GetNumGossipAvailableQuests() == 2) then
+								SelectGossipAvailableQuest(2)
+
+							-- Available quests reduced when hitting Friendly.
+							elseif (GetNumGossipAvailableQuests() == 1) then
+								SelectGossipAvailableQuest(1)
+							end
+						end
+					end
+				end
+			end
+
+			local progress = function(selv, event, ...)
+				if (IsQuestCompletable()) then
+					CompleteQuest()
+				end
+			end
+
+			local complete = function(selv, event, ...)
+				GetQuestReward(0)
+			end
+
+			self:RegisterEvent("GOSSIP_SHOW", gossip)
+			self:RegisterEvent("QUEST_PROGRESS", progress)
+			self:RegisterEvent("QUEST_COMPLETE", complete)
+		end
+	end
 	
 end
 
