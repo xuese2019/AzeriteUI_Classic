@@ -937,7 +937,7 @@ ActionButton.ShowOverlayGlow = function(self, overlayType)
 		elseif (overlayType == "REACTIVE") then
 			r, g, b, a = 255/255, 225/255, 125/255, .75
 		elseif (overlayType == "FINISHER") then
-			r, g, b, a = 255/255, 25/255, 25/255, .85
+			r, g, b, a = 255/255, 50/255, 75/255, .75
 		else
 			-- Not sure why finishers sometimes change into this yet.
 			r, g, b, a = 255/255, 225/255, 125/255, .75
