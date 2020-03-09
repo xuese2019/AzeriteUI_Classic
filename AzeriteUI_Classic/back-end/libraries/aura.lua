@@ -1,4 +1,4 @@
-local LibAura = Wheel:Set("LibAura", 27)
+local LibAura = Wheel:Set("LibAura", 28)
 if (not LibAura) then
 	return
 end
@@ -43,6 +43,7 @@ local string_join = string.join
 local string_match = string.match
 local string_sub = string.sub
 local table_concat = table.concat
+local table_remove = table.remove
 local tonumber = tonumber
 local type = type
 
@@ -170,7 +171,7 @@ local UnregisterAllEvents = Frame_MT.__index.UnregisterAllEvents
 Frame.OnEvent = function(self, event, unit, ...)
 	-- This fires before the aura events
 	if (event == "COMBAT_LOG_EVENT_UNFILTERED") then 
-		return LibAura:CombatLogHandler(CombatLogGetCurrentEventInfo()) 
+		--return LibAura:CombatLogHandler(CombatLogGetCurrentEventInfo()) 
 	
 	elseif (event == "UNIT_AURA") then 
 		-- don't bother caching up anything we haven't got a registered aurawatch or cache for
@@ -200,9 +201,9 @@ LibAura.CombatLogHandler = function(self, ...)
 	destGUID, destName, destFlags, destRaidFlags,
 	spellID, spellName, spellSchool, auraType = ...
 
-	local unitGUID = destGUID or sourceGUID
-	if (not unitGUID) or (not spellName) then 
-		return -- this ever happens?
+	-- This ever actually happens?
+	if (not destGUID) or (not sourceGUID) or (not spellName) then
+		return
 	end 
 
 	if (spellName == sunderArmorName) then
@@ -214,33 +215,56 @@ LibAura.CombatLogHandler = function(self, ...)
 
 	if (auraType == "BUFF") or (auraType == "DEBUFF") then
 		if (eventType == "SPELL_AURA_REFRESH" or eventType == "SPELL_AURA_APPLIED") then
-			if (not AuraCacheByGUID[unitGUID]) then 
-				AuraCacheByGUID[unitGUID] = {}
+			
+			-- Retrieve or create the cache by destination GUID
+			local destCache = AuraCacheByGUID[destGUID]
+			if (not destCache) then 
+				destCache = {}
+				AuraCacheByGUID[destGUID] = destCache
 			end
-			local unitCache = AuraCacheByGUID[unitGUID]
-			if (not unitCache[spellName]) then
-				unitCache[spellName] = {}
+
+			-- Check for matches
+			local spellCache
+			local numAuras = #destCache
+			for i = 1,numAuras do
+				spellCache = destCache[i]
+				if (spellCache.spellName == spellName) and (spellCache.sourceGUID == sourceGUID) then
+					break
+				end
+				spellCache = nil
 			end
-			local spellCache = unitCache[spellName]
-			if (not spellCache[sourceGUID]) then
-				spellCache[sourceGUID] = {}
+
+			-- Make a new entry if none matching was found
+			if (not spellCache) then
+				spellCache = {}
+				destCache[numAuras + 1] = spellCache
 			end
-			spellCache.timestamp = timestamp
-			spellCache.eventType = eventType
-			spellCache.sourceFlags = sourceFlags
-			spellCache.sourceRaidFlags = sourceRaidFlags
+
+			-- Cache up relevant'ish info
 			spellCache.destFlags = destFlags
+			spellCache.destGUID = destGUID
 			spellCache.destRaidFlags = destRaidFlags
+			spellCache.eventType = eventType
 			spellCache.isCastByPlayer = sourceGUID == playerGUID
+			spellCache.sourceFlags = sourceFlags
+			spellCache.sourceGUID = sourceGUID
+			spellCache.sourceRaidFlags = sourceRaidFlags
+			spellCache.spellName = spellName
+			spellCache.timestamp = timestamp
 			spellCache.unitCaster = sourceName
 	
 		elseif (eventType == "SPELL_AURA_REMOVED") then
-			local unitCache = AuraCacheByGUID[unitGUID]
-			if (unitCache) then
-				local spellCache = unitCache[spellName]
-				if (spellCache) then
-					for i in pairs(spellCache) do 
-						spellCache[i] = nil
+			local destCache = AuraCacheByGUID[destGUID]
+			if (destCache) then
+				local numAuras = #destCache
+				for i = numAuras,1,-1 do
+					local spellCache = destCache[i]
+					if (spellCache.spellName == spellName) and (spellCache.sourceGUID == sourceGUID) then
+						for i in pairs(spellCache) do 
+							spellCache[i] = nil
+						end
+						table_remove(destCache, i)
+						break
 					end
 				end
 			end
@@ -291,7 +315,7 @@ LibAura.CacheUnitAurasByFilter = function(self, unit, filter)
 	end
 
 	local unitGUID = UnitGUID(queryUnit or unit)
-	local auraCacheByGUID = AuraCacheByGUID[unitGUID]
+	local destCache = AuraCacheByGUID[unitGUID]
 
 	local hasBuffs, hasDebuffs
 	local hasPoison, hasCurse, hasDisease, hasMagic
@@ -316,15 +340,8 @@ LibAura.CacheUnitAurasByFilter = function(self, unit, filter)
 			end
 		end
 
-		-- Add combat log parsed info
-		local spellCache = auraCacheByGUID and auraCacheByGUID[name]
-		if (spellCache) then
-			unitCaster = spellCache.unitCaster
-			isCastByPlayer = spellCache.isCastByPlayer
-		else
-			unitCaster = unit
-			isCastByPlayer = unit == "player"
-		end
+		-- This just makes more sense, and it works.
+		isCastByPlayer = unitCaster == "player"
 
 		-- Cache up the values for the aura index.
 		-- *Only ever replace the whole table on its initial creation, 
@@ -432,7 +449,6 @@ LibAura.RegisterAuraWatch = function(self, unit, filter)
 
 	if (not LibAura.isTracking) then 
 		RegisterEvent(Frame, "UNIT_SPELLCAST_SUCCEEDED")
-		RegisterEvent(Frame, "COMBAT_LOG_EVENT_UNFILTERED")
 		LibAura.isTracking = true
 	end 
 end
@@ -454,11 +470,12 @@ LibAura.UnregisterAuraWatch = function(self, unit, filter)
 	if (LibAura.isTracking) then 
 		UnregisterEvent(Frame, "UNIT_AURA")
 		UnregisterEvent(Frame, "UNIT_SPELLCAST_SUCCEEDED")
-		UnregisterEvent(Frame, "COMBAT_LOG_EVENT_UNFILTERED")
+
 		if (playerClass == "ROGUE") or (playerClass == "DRUID") then
 			UnregisterEvent(Frame, "PLAYER_TARGET_CHANGED")
 			UnregisterEvent(Frame, "UNIT_POWER_UPDATE")
 		end
+
 		LibAura.isTracking = nil
 	end 
 end
