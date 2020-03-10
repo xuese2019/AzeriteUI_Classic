@@ -1,4 +1,4 @@
-local LibMessage = Wheel:Set("LibMessage", 11)
+local LibMessage = Wheel:Set("LibMessage", 12)
 if (not LibMessage) then	
 	return
 end
@@ -184,16 +184,17 @@ LibMessage.New = function(self, target, registerName, registerNameAlternate, unr
 				return
 			end
 
-			for i = #messages, 1, -1 do
-				table_remove(messages, i)
-				--messages[i] = nil
-			end
+			if (messages) and (messages > 0) then
+				for i = #messages, 1, -1 do
+					table_remove(messages, i)
+				end
 
-			-- Fire the Unregister callback if something was actually unregistered
-			-- This is intentionally the same callback as used in the single unregister method, 
-			-- as that too is only called when no more occurrences of the message are registered.
-			if (target.OnUnregister and (not next(events[message]))) then
-				target:OnUnregister(message, ...)
+				-- Fire the Unregister callback if something was actually unregistered
+				-- This is intentionally the same callback as used in the single unregister method, 
+				-- as that too is only called when no more occurrences of the message are registered.
+				if (target.OnUnregister and (not next(events[message]))) then
+					target:OnUnregister(message, ...)
+				end
 			end
 		end
 	end
@@ -328,20 +329,21 @@ LibMessage.UnregisterMessage = function(self, message, func)
 	end
 end
 
-LibMessage.UnregisterAllMessages = function(self, message, ...)
-	check(message, 1, "string")
+LibMessage.UnregisterAllMessages = function(self)
+	for message in pairs(events) do
+		local messages = events[message][self]
+		-- Silently fail if nothing is registered. 
+		-- We don't want errors on this one as I sometimes need to 
+		-- use this method as a precaution when upgrading libraries.
+		if (not messages) or (#messages == 0) then
+			return
+		end
 
-	local messages = events[message] and events[message][self]
-
-	-- Silently fail if nothing is registered. 
-	-- We don't want errors on this one as I sometimes need to 
-	-- use this method as a precaution when upgrading libraries.
-	if (not messages) or (#messages == 0) then
-		return
-	end
-
-	for i = #messages, 1, -1 do
-		table_remove(messages, i)
+		if (messages) and (messages > 0) then
+			for i = #messages, 1, -1 do
+				table_remove(messages, i)
+			end
+		end
 	end
 end
 
