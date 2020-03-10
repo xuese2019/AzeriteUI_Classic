@@ -68,25 +68,26 @@ local secureSnippets = {
 
 		local UICenter = self:GetFrameRef("UICenter"); 
 		local extraButtonsCount = tonumber(self:GetAttribute("extraButtonsCount")) or 0;
-		local useSmallerExtraButtons = self:GetAttribute("useAlternativeLayout") or false;
-	
-		local buttonSize, buttonSpacing, iconSize = 64, 8, 44; 
-		local row2mod = -2/5; -- horizontal offset for upper row 
+		local buttonSize, buttonSpacing, iconSize = 64, 8, 44;
+		local row2mod = -2/5; -- horizontal offset for upper row
 
 		for id,button in ipairs(Buttons) do 
 			local buttonID = button:GetID(); 
 			local barID = Pagers[id]:GetID(); 
 
-			button:ClearAllPoints(); 
-
+			-- Primary Bar
 			if (barID == 1) then 
+				button:ClearAllPoints(); 
+
 				if (buttonID > 10) then
 					button:SetPoint("BOTTOMLEFT", UICenter, "BOTTOMLEFT", 60 + ((buttonID-2-1 + row2mod) * (buttonSize + buttonSpacing)), 42 + buttonSize + buttonSpacing)
 				else
 					button:SetPoint("BOTTOMLEFT", UICenter, "BOTTOMLEFT", 60 + ((buttonID-1) * (buttonSize + buttonSpacing)), 42)
 				end 
 
+			-- Secondary Bar
 			elseif (barID == self:GetAttribute("BOTTOMLEFT_ACTIONBAR_PAGE")) then 
+				button:ClearAllPoints(); 
 
 				-- 3x2 complimentary buttons
 				if (extraButtonsCount <= 11) then 
@@ -104,12 +105,83 @@ local secureSnippets = {
 						button:SetPoint("BOTTOMLEFT", UICenter, "BOTTOMLEFT", 60 + (((buttonID-6+10)-1 +row2mod) * (buttonSize + buttonSpacing)), 42 + buttonSize + buttonSpacing)
 					end
 				end 
-			end 
+			end
 		end 
 
 		-- lua callback to update the hover frame anchors to the current layout
 		self:CallMethod("UpdateFadeAnchors"); 
 	
+	]=],
+
+	arrangeSideButtons = [=[
+		local UICenter = self:GetFrameRef("UICenter"); 
+		local sideBar1Enabled = self:GetAttribute("sideBar1Enabled");
+		local sideBar2Enabled = self:GetAttribute("sideBar2Enabled");
+		local sideBar3Enabled = self:GetAttribute("sideBar3Enabled");
+		local sideBarCount = (sideBar1Enabled and 1 or 0) + (sideBar2Enabled and 1 or 0) + (sideBar3Enabled and 1 or 0);
+		local buttonSize, buttonSpacing, iconSize = 64, 8, 44;
+
+		for id,button in ipairs(Buttons) do 
+			local buttonID = button:GetID(); 
+			local barID = Pagers[id]:GetID(); 
+
+			-- First Side Bar
+			if (barID == self:GetAttribute("RIGHT_ACTIONBAR_PAGE")) then
+
+				if (sideBar1Enabled) then
+					button:ClearAllPoints(); 
+
+					-- 12x1
+					if (sideBarCount > 1) then
+						-- This is always the first when it's enabled
+
+					-- 6x2
+					else
+
+					end
+				end
+
+			-- Second Side Bar
+			elseif (barID == self:GetAttribute("LEFT_ACTIONBAR_PAGE")) then
+
+				if (sideBar2Enabled) then
+					button:ClearAllPoints(); 
+
+					if (sideBarCount > 1) then
+
+						-- 12x1, 2nd
+						if (sideBar1Enabled) then
+
+						-- 12x1, 1st
+						else
+
+						end
+
+					-- 6x2, 1st
+					else
+
+					end
+				end
+
+			-- Third Side Bar
+			elseif (barID == self:GetAttribute("BOTTOMRIGHT_ACTIONBAR_PAGE")) then
+
+				if (sideBar3Enabled) then
+					button:ClearAllPoints(); 
+
+					-- 12x1, 3rd
+					if (sideBarCount > 2) then
+
+					-- 12x1, 2nd
+					elseif (sideBarCount > 1) then
+
+					-- 6x2, 1st
+					else
+
+					end
+				end
+			end 
+		end
 	]=],
 
 	arrangePetButtons = [=[
@@ -797,60 +869,6 @@ PetButton.PostLeave = ActionButton.PostLeave
 
 -- Bar Creation
 ----------------------------------------------------
-Module.SpawnExitButton = function(self)
-	local layout = self.layout
-
-	local button = self:CreateFrame("Button", nil, "UICenter", "SecureActionButtonTemplate")
-	button:SetFrameStrata("MEDIUM")
-	button:SetFrameLevel(100)
-	button:Place(unpack(layout.ExitButtonPlace))
-	button:SetSize(unpack(layout.ExitButtonSize))
-	button:SetAttribute("type", "macro")
-	button:SetAttribute("macrotext", "/dismount [mounted]")
-
-	-- Put our texture on the button
-	button.texture = button:CreateTexture()
-	button.texture:SetSize(unpack(layout.ExitButtonTextureSize))
-	button.texture:SetPoint(unpack(layout.ExitButtonTexturePlace))
-	button.texture:SetTexture(layout.ExitButtonTexturePath)
-
-	button:SetScript("OnEnter", function(button)
-		local tooltip = self:GetActionButtonTooltip()
-		tooltip:Hide()
-		tooltip:SetDefaultAnchor(button)
-
-		if UnitOnTaxi("player") then 
-			tooltip:AddLine(TAXI_CANCEL)
-			tooltip:AddLine(TAXI_CANCEL_DESCRIPTION, Colors.quest.green[1], Colors.quest.green[2], Colors.quest.green[3])
-		elseif IsMounted() then 
-			tooltip:AddLine(BINDING_NAME_DISMOUNT)
-			tooltip:AddLine(L["%s to dismount."]:format(L["<Left-Click>"]), Colors.quest.green[1], Colors.quest.green[2], Colors.quest.green[3])
-		else 
-			tooltip:AddLine(LEAVE_VEHICLE)
-			tooltip:AddLine(L["%s to leave the vehicle."]:format(L["<Left-Click>"]), Colors.quest.green[1], Colors.quest.green[2], Colors.quest.green[3])
-		end 
-
-		tooltip:Show()
-	end)
-
-	button:SetScript("OnLeave", function(button) 
-		local tooltip = self:GetActionButtonTooltip()
-		tooltip:Hide()
-	end)
-
-	-- Gotta do this the unsecure way, no macros exist for this yet. 
-	button:HookScript("OnClick", function(self, button) 
-		if (UnitOnTaxi("player") and (not InCombatLockdown())) then
-			TaxiRequestEarlyLanding()
-		end
-	end)
-
-	-- Register a visibility driver
-	RegisterAttributeDriver(button, "state-visibility", "[mounted]show;hide")
-
-	self.VehicleExitButton = button
-end
-
 Module.SpawnActionBars = function(self)
 	local db = self.db
 	local proxy = self:GetSecureUpdater()
@@ -862,19 +880,37 @@ Module.SpawnActionBars = function(self)
 	local numPrimary = 7 -- Number of primary buttons always visible
 	local firstHiddenID = db.extraButtonsCount + numPrimary -- first buttonID to be hidden
 	
-	-- Spawn Primary ActionBar
+	-- Primary Action Bar
 	for id = 1,NUM_ACTIONBAR_BUTTONS do 
 		buttonID = buttonID + 1
 		Buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButton, 1, id)
 		HoverButtons[Buttons[buttonID]] = buttonID > numPrimary
 	end 
 
-	-- Spawn Secondary ActionBar
+	-- Secondary Action Bar (Bottom Left)
 	for id = 1,NUM_ACTIONBAR_BUTTONS do 
 		buttonID = buttonID + 1
 		Buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButton, BOTTOMLEFT_ACTIONBAR_PAGE, id)
 		HoverButtons[Buttons[buttonID]] = true
 	end 
+
+	-- First Side Bar (Bottom Right)
+	for id = 1,NUM_ACTIONBAR_BUTTONS do 
+		buttonID = buttonID + 1
+		Buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButton, BOTTOMRIGHT_ACTIONBAR_PAGE, id)
+	end
+
+	-- Second Side bar (Right)
+	for id = 1,NUM_ACTIONBAR_BUTTONS do 
+		buttonID = buttonID + 1
+		Buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButton, RIGHT_ACTIONBAR_PAGE, id)
+	end
+
+	-- Third Side Bar (Left)
+	for id = 1,NUM_ACTIONBAR_BUTTONS do 
+		buttonID = buttonID + 1
+		Buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButton, LEFT_ACTIONBAR_PAGE, id)
+	end
 
 	-- Apply common settings to the action buttons.
 	for buttonID,button in ipairs(Buttons) do 
@@ -928,6 +964,63 @@ Module.SpawnPetBar = function(self)
 		]=]):format(id, id))
 		
 	end
+end
+
+Module.SpawnStanceBar = function(self)
+end
+
+Module.SpawnExitButton = function(self)
+	local layout = self.layout
+
+	local button = self:CreateFrame("Button", nil, "UICenter", "SecureActionButtonTemplate")
+	button:SetFrameStrata("MEDIUM")
+	button:SetFrameLevel(100)
+	button:Place(unpack(layout.ExitButtonPlace))
+	button:SetSize(unpack(layout.ExitButtonSize))
+	button:SetAttribute("type", "macro")
+	button:SetAttribute("macrotext", "/dismount [mounted]")
+
+	-- Put our texture on the button
+	button.texture = button:CreateTexture()
+	button.texture:SetSize(unpack(layout.ExitButtonTextureSize))
+	button.texture:SetPoint(unpack(layout.ExitButtonTexturePlace))
+	button.texture:SetTexture(layout.ExitButtonTexturePath)
+
+	button:SetScript("OnEnter", function(button)
+		local tooltip = self:GetActionButtonTooltip()
+		tooltip:Hide()
+		tooltip:SetDefaultAnchor(button)
+
+		if UnitOnTaxi("player") then 
+			tooltip:AddLine(TAXI_CANCEL)
+			tooltip:AddLine(TAXI_CANCEL_DESCRIPTION, Colors.quest.green[1], Colors.quest.green[2], Colors.quest.green[3])
+		elseif IsMounted() then 
+			tooltip:AddLine(BINDING_NAME_DISMOUNT)
+			tooltip:AddLine(L["%s to dismount."]:format(L["<Left-Click>"]), Colors.quest.green[1], Colors.quest.green[2], Colors.quest.green[3])
+		else 
+			tooltip:AddLine(LEAVE_VEHICLE)
+			tooltip:AddLine(L["%s to leave the vehicle."]:format(L["<Left-Click>"]), Colors.quest.green[1], Colors.quest.green[2], Colors.quest.green[3])
+		end 
+
+		tooltip:Show()
+	end)
+
+	button:SetScript("OnLeave", function(button) 
+		local tooltip = self:GetActionButtonTooltip()
+		tooltip:Hide()
+	end)
+
+	-- Gotta do this the unsecure way, no macros exist for this yet. 
+	button:HookScript("OnClick", function(self, button) 
+		if (UnitOnTaxi("player") and (not InCombatLockdown())) then
+			TaxiRequestEarlyLanding()
+		end
+	end)
+
+	-- Register a visibility driver
+	RegisterAttributeDriver(button, "state-visibility", "[mounted]show;hide")
+
+	self.VehicleExitButton = button
 end
 
 -- Getters
@@ -1108,7 +1201,10 @@ Module.GetSecureUpdater = function(self)
 	
 		-- Apply references and attributes used for updates.
 		proxy:SetFrameRef("UICenter", self:GetFrame("UICenter"))
-		proxy:SetAttribute("BOTTOMLEFT_ACTIONBAR_PAGE", BOTTOMLEFT_ACTIONBAR_PAGE);
+		proxy:SetAttribute("BOTTOMLEFT_ACTIONBAR_PAGE", BOTTOMLEFT_ACTIONBAR_PAGE)
+		proxy:SetAttribute("BOTTOMRIGHT_ACTIONBAR_PAGE", BOTTOMRIGHT_ACTIONBAR_PAGE)
+		proxy:SetAttribute("RIGHT_ACTIONBAR_PAGE", RIGHT_ACTIONBAR_PAGE)
+		proxy:SetAttribute("LEFT_ACTIONBAR_PAGE", LEFT_ACTIONBAR_PAGE)
 		proxy:SetAttribute("arrangeButtons", secureSnippets.arrangeButtons)
 		proxy:SetAttribute("arrangePetButtons", secureSnippets.arrangePetButtons)
 		proxy:SetAttribute("_onattributechanged", secureSnippets.attributeChanged)
@@ -1416,6 +1512,7 @@ Module.OnInit = function(self)
 	-- Spawn the bars
 	self:SpawnActionBars()
 	self:SpawnPetBar()
+	self:SpawnStanceBar()
 	self:SpawnExitButton()
 
 	-- Arrange buttons

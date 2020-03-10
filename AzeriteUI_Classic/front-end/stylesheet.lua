@@ -1823,10 +1823,19 @@ Defaults.ActionBarMain = {
 	-- unlock buttons
 	buttonLock = true,
 
-	-- Valid range is 0 to 17. anything outside will be limited to this range. 
+	-- Valid range is 0 to 17. anything outside will be limited to this range.
 	extraButtonsCount = 5, -- default this to a full standard bar, just to make it slightly easier for people
 	petBarEnabled = true,
 	stanceBarEnabled = true,
+
+	sideBar1Enabled = false,
+	sideBar1Page = RIGHT_ACTIONBAR_PAGE,
+
+	sideBar2Enabled = false,
+	sideBar2Page = LEFT_ACTIONBAR_PAGE,
+
+	sideBar3Enabled = false,
+	sideBar3Page = BOTTOMRIGHT_ACTIONBAR_PAGE,
 
 	-- Valid values are 'always','hover','combat'
 	extraButtonsVisibility = "combat", -- defaulting this to combat, so new users can access their full default bar

@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 80)
+local LibSecureButton = Wheel:Set("LibSecureButton", 82)
 if (not LibSecureButton) then
 	return
 end
@@ -116,36 +116,16 @@ local BUTTON_NAME_TEMPLATE_FULL = "%sActionButton%.0f"
 local PETBUTTON_NAME_TEMPLATE_SIMPLE = "%sPetActionButton"
 local PETBUTTON_NAME_TEMPLATE_FULL = "%sPetActionButton%.0f"
 
+-- Constants
+local NUM_ACTIONBAR_BUTTONS = NUM_ACTIONBAR_BUTTONS
+local NUM_PET_ACTION_SLOTS = NUM_PET_ACTION_SLOTS
+local NUM_STANCE_SLOTS = NUM_STANCE_SLOTS
+
 -- Time constants
 local DAY, HOUR, MINUTE = 86400, 3600, 60
 
 local SECURE = {
-	Page_OnAttributeChanged = [=[ 
-		if (name == "state-page") then 
-			local page; 
-
-			if (value == "11") then 
-				page = 12; 
-			end
-
-			if page then 
-				value = page; 
-			end 
-
-			self:SetAttribute("state", value);
-
-			local button = self:GetFrameRef("Button"); 
-			local buttonPage = button:GetAttribute("actionpage"); 
-			local id = button:GetID(); 
-			local actionpage = tonumber(value); 
-			local slot = actionpage and (actionpage > 1) and ((actionpage - 1)*12 + id) or id; 
-
-			button:SetAttribute("actionpage", actionpage or 0); 
-			button:SetAttribute("action", slot); 
-			button:CallMethod("UpdateAction"); 
-		end 
-	]=], 
-	Page_OnAttributeChanged_Debug = [=[ 
+	Page_OnAttributeChanged = string_format([=[ 
 		if (name == "state-page") then 
 			local page; 
 
@@ -165,7 +145,7 @@ local SECURE = {
 			local buttonPage = button:GetAttribute("actionpage"); 
 			local id = button:GetID(); 
 			local actionpage = tonumber(value); 
-			local slot = actionpage and (actionpage > 1) and ((actionpage - 1)*12 + id) or id; 
+			local slot = actionpage and (actionpage > 1) and ((actionpage - 1)*%d + id) or id; 
 
 			button:SetAttribute("actionpage", actionpage or 0); 
 			button:SetAttribute("action", slot); 
@@ -186,7 +166,7 @@ local SECURE = {
 				end
 			end
 		end 
-	]=]
+	]=])
 
 }
 
@@ -1643,27 +1623,11 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 		end
 	]=])
 
-	-- Need to figure these out on button creation, 
-	-- as we're not interested in the library owner's name, 
-	-- but rather the addon name of the module calling this method. 
-	local DEBUG_ENABLED
-	if self.GetAddon then 
-		local addon = self:GetAddon() 
-		if addon then 
-			if self:GetOwner():IsDebugModeEnabled() then 
-				DEBUG_ENABLED = true 
-			end
-		end
-	end
-
 	local button
 	if (buttonType == "pet") then 
 		-- Add a page driver layer, basically a fake bar for the current button
 		local page = visibility:CreateFrame("Frame", nil, "SecureHandlerAttributeTemplate")
-		--page.id = 0
-		page.AddDebugMessage = DEBUG_ENABLED and self.AddDebugMessageFormatted or nil
-		--page:SetID(0) 
-		--page:SetAttribute("_onattributechanged", DEBUG_ENABLED and SECURE.Page_OnAttributeChanged_Debug or SECURE.Page_OnAttributeChanged)
+		page.AddDebugMessage = self.AddDebugMessageFormatted
 
 		button = setmetatable(LibSecureButton:PrepareButton(page:CreateFrame("CheckButton", name, "PetActionButtonTemplate")), PetButton_MT)
 		button:SetFrameStrata("LOW")
@@ -1759,13 +1723,19 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 		button = setmetatable(visibility:CreateFrame("CheckButton", name, "StanceButtonTemplate"), StanceButton_MT)
 		button:SetFrameStrata("LOW")
 
+
+		button:SetScript("OnEnter", StanceButton.OnEnter)
+		button:SetScript("OnLeave", StanceButton.OnLeave)
+		button:SetScript("OnDragStart", StanceButton.OnDragStart)
+		button:SetScript("OnReceiveDrag", StanceButton.OnReceiveDrag)
+
 	else 
 		-- Add a page driver layer, basically a fake bar for the current button
 		local page = visibility:CreateFrame("Frame", nil, "SecureHandlerAttributeTemplate")
 		page.id = barID
-		page.AddDebugMessage = DEBUG_ENABLED and self.AddDebugMessageFormatted or nil
+		page.AddDebugMessage = self.AddDebugMessageFormatted
 		page:SetID(barID) 
-		page:SetAttribute("_onattributechanged", DEBUG_ENABLED and SECURE.Page_OnAttributeChanged_Debug or SECURE.Page_OnAttributeChanged)
+		page:SetAttribute("_onattributechanged", SECURE.Page_OnAttributeChanged)
 
 		button = setmetatable(page:CreateFrame("CheckButton", name, "SecureActionButtonTemplate"), ActionButton_MT)
 		button:SetFrameStrata("LOW")
