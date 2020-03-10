@@ -136,12 +136,17 @@ LibMessage.New = function(self, target, registerName, registerNameAlternate, unr
 		check(message, 1, "string")
 		check(func, 2, "string", "function", "nil")
 
+		local silent = ...
 		local messages = events[message] and events[message][self]
 		if (not messages) then
-			if (not events[message]) then
-				return error(("The message '%s' isn't currently registered to any object."):format(message))
+			if (silent == true) then
+				return
 			else
-				return error(("The message '%s' isn't currently registered to the object '%s'."):format(message, tostring(self)))
+				if (not events[message]) then
+					return error(("The message '%s' isn't currently registered to any object."):format(message))
+				else
+					return error(("The message '%s' isn't currently registered to the object '%s'."):format(message, tostring(self)))
+				end
 			end
 		end
 
