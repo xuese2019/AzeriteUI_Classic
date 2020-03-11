@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.107-RC] 2020-03-11
+### Changed
+- Updated minimap blips to work with patch 1.13.4.
+
 ## [1.0.106-RC] 2020-03-11
 - Updated for WoW Classic Client Patch 1.13.4.
 
