@@ -1,6 +1,30 @@
 local ADDON, Private = ...
 local Changelog = {
 	{
+		tag = "1.0.106-RC",
+		date = "2020-03-11",
+		items = {
+			[[Updated for WoW Classic Client Patch 1.13.4.]]
+		},
+		entries = {
+			{
+				header = "Added",
+				items = {
+					[[Added spell activation highlights for Hunter Counterattack and Mongoose Bite.]],
+					[[Added spell activation highlight for Paladin Hammer of Wrath.]],
+					[[Added spell activation highlight for Rogue Riposte.]],
+					[[Added spell activation highlights for Warrior Execute, Overpower and Revenge.]]
+				}
+			},
+			{
+				header = "Fixed",
+				items = {
+					[[Fixed a problem where the group debuff display wouldn't properly update on unit GUID changes. Fixed it in the plugin, but plan to write this into the aura back-end to make sure all modules and plugins using it automatically gets updated.]]
+				}
+			}
+		}
+	},
+	{
 		tag = "1.0.105-RC",
 		date = "2020-03-05",
 		entries = {

@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.106-RC] 2020-03-11
+- Updated for WoW Classic Client Patch 1.13.4.
+
+### Added
+- Added spell activation highlights for Hunter Counterattack and Mongoose Bite.
+- Added spell activation highlight for Paladin Hammer of Wrath.
+- Added spell activation highlight for Rogue Riposte.
+- Added spell activation highlights for Warrior Execute, Overpower and Revenge.
+
+### Fixed
+- Fixed a problem where the group debuff display wouldn't properly update on unit GUID changes. Fixed it in the plugin, but plan to write this into the aura back-end to make sure all modules and plugins using it automatically gets updated.
+
 ## [1.0.105-RC] 2020-03-05
 ### Changed
 - Further adjusted the spell highlight coloring a bit. This is a work in progress, as I want the three highlight types to have easily identifiable coloring, stand out when active, and still fit the general coloring of the user interface.
