@@ -2365,7 +2365,8 @@ Layouts.Minimap = {
 	BlipTextures = {
 		["1.13.2"] = GetMedia("Blip-Nandini-New-113_2"),
 		["1.13.3"] = GetMedia("Blip-Nandini-New-113_2"),
-		["1.13.4"] = [[Interface\Minimap\ObjectIconsAtlas.blp]] -- Blizzard Fallback
+		["1.13.4"] = GetMedia("Blip-Nandini-New-113_2"),
+		["1.13.5"] = [[Interface\Minimap\ObjectIconsAtlas.blp]] -- Blizzard Fallback
 	},
 	Clock_OverrideValue = Minimap_Clock_OverrideValue,
 	ClockColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] }, 
