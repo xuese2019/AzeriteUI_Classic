@@ -16,9 +16,10 @@ Looking for AzeriteUI for WoW: Battle For Azeroth? Get it [here](https://www.cur
 * Twitter: [@GoldpawsStuff](https://twitter.com/goldpawsstuff)  
 
 ## **Recommended addons:**  
-* Real Mob Health for WoW Classic: [www.curseforge.com/wow/addons/real-mob-health](https://www.curseforge.com/wow/addons/real-mob-health) 
+These are some addons we feel go very well together with our user interface. They are not required, but we recommend them as they further enhance the look and functionality in a non-intrusive manner.
 * Enhanced World Map for WoW Classic: [www.curseforge.com/wow/addons/enhanced-world-map-for-wow-classic](https://www.curseforge.com/wow/addons/enhanced-world-map-for-wow-classic)
 * Immersion for WoW Classic: [www.curseforge.com/wow/addons/immersion](https://www.curseforge.com/wow/addons/immersion/files/all?filter-game-version=1738749986%3a67408)
+* H.H.T.D for WoW Classic: [https://www.curseforge.com/wow/addons/h-h-t-d](https://www.curseforge.com/wow/addons/h-h-t-d/files/all?filter-game-version=1738749986%3a67408)
 
 ## **Frequently Asked Questions:**  
 ### **It's so big, how can I scale it down?**  
