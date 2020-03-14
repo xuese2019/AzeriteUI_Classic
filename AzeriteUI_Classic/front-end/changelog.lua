@@ -1,8 +1,8 @@
 local ADDON, Private = ...
 local Changelog = {
 	{
-		tag = "1.0.108-beta",
-		date = "2020-03-14",
+		tag = "1.0.110-beta",
+		date = "2020-03-15",
 		entries = {
 			{
 				header = "Added",
@@ -15,6 +15,12 @@ local Changelog = {
 				header = "Changed",
 				items = {
 					[[Optimized the spell activation highlight code a bit. Changed how timers are disabled. Working on the weird behavior for overpower/revenge and other reactive abilities.]]
+				}
+			},
+			{
+				header = "Fixed",
+				items = {
+					[[Fixed an issue that would cause a bug on logon and reloads when only the main 7 actionbuttons was enabled.]]
 				}
 			}
 		}
