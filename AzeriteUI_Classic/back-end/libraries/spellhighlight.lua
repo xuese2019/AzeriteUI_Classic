@@ -247,8 +247,8 @@ LibSpellHighlight.UpdatePlayerSpellCache = function(self)
 	end
 	-- Cache the new.
 	for spellName,spellList in pairs(ReactiveSpellsBySpellID) do
-		for i = #reactiveSpellsBySpellID,1,-1 do
-			local spellID = reactiveSpellsBySpellID[i]
+		for i = #ReactiveSpellsBySpellID,1,-1 do
+			local spellID = ReactiveSpellsBySpellID[i]
 			if (IsPlayerSpell(spellID)) then
 				PlayerSpellCache[spellName] = spellID
 			end
