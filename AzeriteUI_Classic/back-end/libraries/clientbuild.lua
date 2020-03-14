@@ -1,4 +1,4 @@
-local LibClientBuild = Wheel:Set("LibClientBuild", 32)
+local LibClientBuild = Wheel:Set("LibClientBuild", 34)
 if (not LibClientBuild) then
 	return
 end
@@ -13,17 +13,19 @@ local tostring = tostring
 
 LibClientBuild.embeds = LibClientBuild.embeds or {}
 
-local currentClientPatch, currentClientBuild = _G.GetBuildInfo() 
+local currentClientPatch, currentClientBuild = GetBuildInfo() 
 currentClientBuild = tonumber(currentClientBuild)
 
 local builds = {
-	["Classic"] = 31446,
-		-- 31407 August 8th 2019 pre-launch
-		-- 31446 August 12th 2019 name reservation
-		["1.13.2"] = 31446
+	["Classic"] = 33526,
+		["1.13.2"] = 31446,
+		["1.13.3"] = 33526,
+		["1.13.4"] = 33598
 }
 local clientPatchRequirements = {
-	["1.13.2"] = "1.13.2" 
+	["1.13.2"] = "1.13.2",
+	["1.13.3"] = "1.13.3",
+	["1.13.4"] = "1.13.4"
 }
 local clientIsAtLeast = {}
 for version, build in pairs(builds) do
