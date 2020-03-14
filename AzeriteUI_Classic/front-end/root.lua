@@ -511,6 +511,113 @@ Core.ApplyExperimentalFeatures = function(self)
 		end
 	end
 	
+	-- Temporary Weapon Enchants!
+	do
+		-- Not using this, can't filter it to only show weapon buffs.
+		--[[
+		local header = self:CreateFrame("Frame", nil, "UICenter", "SecureAuraHeaderTemplate")
+		header:SetFrameStrata("MEDIUM")
+		header:SetFrameLevel(500)
+		header:SetSize(30*3+10*2,30)
+		header:Place("BOTTOMLEFT", "UICenter", "BOTTOMLEFT", 72, 270)
+		header:SetAttribute("filter", "HARMFUL HELPFUL")
+		header:SetAttribute("includeWeapons", 1)
+		header:SetAttribute("minWidth", 30*3+10*2)
+		header:SetAttribute("minHeight", 30)
+		header:SetAttribute("point", "BOTTOMLEFT")
+		header:SetAttribute("xOffset", 40)
+		header:SetAttribute("yOffset", 0)
+		header:SetAttribute("sortMethod", "INDEX") -- , NAME
+		header:SetAttribute("template", "AzeriteUIAuraButtonTemplate")
+		header:SetAttribute("weaponTemplate", "AzeriteUIAuraButtonTemplate")
+		header:SetAttribute("unit", "player")
+		header:Show()
+		]]--
+
+
+		local tempEnchantButtons = {
+			self:CreateFrame("Button", nil, "UICenter", "SecureActionButtonTemplate"),
+			self:CreateFrame("Button", nil, "UICenter", "SecureActionButtonTemplate"),
+			self:CreateFrame("Button", nil, "UICenter", "SecureActionButtonTemplate")
+		}
+
+		-- Style them
+		for i,button in ipairs(tempEnchantButtons) do
+			
+			button:SetSize(30,30)
+			button:Place("BOTTOMLEFT", "UICenter", "BOTTOMLEFT", 20, 115 + (40*(i-1)))
+			button:SetAttribute("type", "cancelaura")
+			button:SetAttribute("target-slot", i+15)
+			button:RegisterForClicks("RightButtonUp")
+
+			local border = button:CreateFrame("Frame")
+			border:SetSize(30+10, 30+10)
+			border:SetPoint("CENTER", 0, 0)
+			border:SetBackdrop({ edgeFile = GetMedia("aura_border"), edgeSize = 12 })
+			border:SetBackdropColor(0,0,0,0)
+			border:SetBackdropBorderColor(Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3)
+			button.Border = border
+
+			local icon = button:CreateTexture()
+			icon:SetDrawLayer("BACKGROUND")
+			icon:ClearAllPoints()
+			icon:SetPoint("CENTER",0,0)
+			icon:SetSize(30-6, 30-6)
+			icon:SetTexCoord(5/64, 59/64, 5/64, 59/64)
+			button.Icon = icon
+
+			local count = border:CreateFontString()
+			count:ClearAllPoints()
+			count:SetPoint("BOTTOMRIGHT", 9, -6)
+			count:SetFontObject(GetFont(12, true))
+			count:SetTextColor(Colors.normal[1], Colors.normal[2], Colors.normal[3], .85)
+			button.Count = count
+
+			local time = border:CreateFontString()
+			time:ClearAllPoints()
+			time:SetPoint("TOPLEFT", -6, 6)
+			time:SetFontObject(GetFont(11, true))
+			time:SetTextColor(Colors.normal[1], Colors.normal[2], Colors.normal[3], .85)
+			button.Time = time
+
+			-- MainHand, OffHand, Ranged = 16,17,18
+			button:SetID(i+15)
+		end
+
+		-- UNIT_INVENTORY_CHANGED
+		local update = function()
+			local hasMainHandEnchant, mainHandExpiration, mainHandCharges, mainHandEnchantID, hasOffHandEnchant, offHandExpiration, offHandCharges, offHandEnchantId, hasRangedEnchant, rangedEnchantExpiration, rangedCharges, rangedEnchantID = GetWeaponEnchantInfo()
+
+			if (hasMainHandEnchant) then
+				local button = tempEnchantButtons[1]
+				button.Icon:SetTexture(GetInventoryItemTexture("player", button:GetID()))
+				button:SetAlpha(1)
+			else
+				tempEnchantButtons[1]:SetAlpha(0)
+			end
+
+			if (hasOffHandEnchant) then
+				local button = tempEnchantButtons[2]
+				button.Icon:SetTexture(GetInventoryItemTexture("player", button:GetID()))
+				button:SetAlpha(1)
+			else
+				tempEnchantButtons[2]:SetAlpha(0)
+			end
+
+			if (hasRangedEnchant) then
+				local button = tempEnchantButtons[3]
+				button.Icon:SetTexture(GetInventoryItemTexture("player", button:GetID()))
+				button:SetAlpha(1)
+			else
+				tempEnchantButtons[3]:SetAlpha(0)
+			end
+		end
+
+		self:RegisterEvent("PLAYER_ENTERING_WORLD", update)
+		self:RegisterEvent("UNIT_INVENTORY_CHANGED", update)
+
+	end
+
 end
 
 -- We could add this into the back-end, leaving it here for now, though. 
