@@ -56,6 +56,7 @@ LibSpellHighlight.highlightTypeBySpellID = LibSpellHighlight.highlightTypeBySpel
 LibSpellHighlight.reactiveSpellsBySpellID = LibSpellHighlight.reactiveSpellsBySpellID or {}
 LibSpellHighlight.comboFinishersBySpellID = LibSpellHighlight.comboFinishersBySpellID or {}
 LibSpellHighlight.spellIDToAuraID = LibSpellHighlight.spellIDToAuraID or {} -- table to convert spellID to triggering auraID
+LibSpellHighlight.playerSpellCache = LibSpellHighlight.playerSpellCache or {} -- dynamically updated cache of current available spellIDs
 LibSpellHighlight.runningTimers = LibSpellHighlight.runningTimers or {} -- currently running timers
 
 -- Frame tracking timers
@@ -72,6 +73,7 @@ local HighlightTypeBySpellID = LibSpellHighlight.highlightTypeBySpellID
 local ReactiveSpellsBySpellID = LibSpellHighlight.reactiveSpellsBySpellID
 local ComboFinishersBySpellID = LibSpellHighlight.comboFinishersBySpellID
 local SpellIDToAuraID = LibSpellHighlight.spellIDToAuraID
+local PlayerSpellCache = LibSpellHighlight.playerSpellCache
 
 -- Reset caches in case of library upgrade
 table_wipe(ComboFinishersBySpellID)
@@ -205,17 +207,16 @@ Frame:SetScript("OnUpdate", nil)
 Frame.timers = Timers
 
 local OnUpdate = function(self, elapsed)
-	local numTimers = 0
+	local hasTimers
 	for spellID, timeLeft in pairs(self.timers) do
 		if (timeLeft - elapsed > 0) then
 			self.timers[spellID] = timeLeft - elapsed
-			numTimers = numTimers + 1
+			hasTimers = true
 		else
-			self.timers[spellID] = nil
 			LibSpellHighlight:DeactivateHighlight(spellID)
 		end
 	end
-	if (numTimers == 0) then
+	if (not hasTimers) then
 		TimerRunning = nil
 		self:SetScript("OnUpdate", nil)
 	end
@@ -226,7 +227,7 @@ LibSpellHighlight.ActivateHighlight = function(self, spellID, duration)
 
 	self:SendMessage("GP_SPELL_ACTIVATION_OVERLAY_GLOW_SHOW", spellID, HighlightTypeBySpellID[spellID])
 
-	if (not TimerRunning) then
+	if (duration) and (not TimerRunning) then
 		TimerRunning = true
 		Frame:SetScript("OnUpdate", OnUpdate)
 	end
@@ -237,14 +238,19 @@ LibSpellHighlight.DeactivateHighlight = function(self, spellID)
 	self:SendMessage("GP_SPELL_ACTIVATION_OVERLAY_GLOW_HIDE", spellID, HighlightTypeBySpellID[spellID])
 end
 
--- Retrieve the spellID of the highest available rank of a spell.
-LibSpellHighlight.GetHighestRankForReactiveSpell = function(self, spellName)
-	local reactiveSpellsBySpellID = ReactiveSpellsBySpellID[spellName]
-	if (reactiveSpellsBySpellID) then
+-- TODO: Create a faster cache on entering world / changing spells!
+-- TODO: proxy the events, call class methods from it
+LibSpellHighlight.UpdatePlayerSpellCache = function(self)
+	-- Clear the old. Faster than wipe.
+	for spellName in pairs(PlayerSpellCache) do
+		PlayerSpellCache[spellName] = nil
+	end
+	-- Cache the new.
+	for spellName,spellList in pairs(ReactiveSpellsBySpellID) do
 		for i = #reactiveSpellsBySpellID,1,-1 do
 			local spellID = reactiveSpellsBySpellID[i]
 			if (IsPlayerSpell(spellID)) then
-				return spellID 
+				PlayerSpellCache[spellName] = spellID
 			end
 		end
 	end
@@ -348,7 +354,7 @@ LibSpellHighlight.UpdateCounterAttack = function(self, event, ...)
 	swingMissType, spellName, _, spellMissType, swingBlocked = CombatLogGetCurrentEventInfo()
 
 	local isSrcPlayer = bit_band(sourceFlags, COMBATLOG_OBJECT_AFFILIATION_MINE) == COMBATLOG_OBJECT_AFFILIATION_MINE
-	local isDstPlayer = destGUID == UnitGUID("player")
+	local isDstPlayer = destGUID == playerGUID
 
 	if (isDstPlayer) then
 		if (eventType == "SWING_MISSED") or (eventType == "SPELL_MISSED") then
@@ -359,43 +365,37 @@ LibSpellHighlight.UpdateCounterAttack = function(self, event, ...)
 				missedType = spellMissType
 			end
 			if (missedType == "PARRY") then
-				local spellID = self:GetHighestRankForReactiveSpell(L.Spell_Counterattack)
-				if (spellID) then
-					ActiveHighlights[spellID] = true
-					self:ActivateHighlight(spellID, 5)
-				end
+				local spellID = PlayerSpellCache[L.Spell_Counterattack]
+				ActiveHighlights[spellID] = true
+				self:ActivateHighlight(spellID, 5)
 			end
 		end
 	end
 	
 	if (isSrcPlayer) and (eventType == "SPELL_CAST_SUCCESS") and (spellName == L.Spell_Counterattack) then
-		local spellID = self:GetHighestRankForReactiveSpell(L.Spell_Counterattack)
-		if (spellID) then
-			ActiveHighlights[spellID] = nil
-			self:DeactivateHighlight(spellID)
-		end
+		local spellID = PlayerSpellCache[L.Spell_Counterattack]
+		ActiveHighlights[spellID] = nil
+		self:DeactivateHighlight(spellID)
 	end
 end
 
 -- Warrior
 LibSpellHighlight.UpdateExecute = function(self, event, ...)
-	local spellID = self:GetHighestRankForReactiveSpell(L.Spell_Execute)
-	if (spellID) then
-		local enable
-		if (UnitExists("target")) and (not UnitIsFriend("player", "target")) then
-			local min = UnitHealth("target")
-			local max = UnitHealthMax("target")
-			if (min > 0) and (max > 0) and ((min/max < .2) or IsUsableSpell(spellID)) then
-				enable = true
-			end
+	local enable
+	if (UnitExists("target")) and (not UnitIsFriend("player", "target")) then
+		local min = UnitHealth("target")
+		local max = UnitHealthMax("target")
+		if (min > 0) and (max > 0) and ((min/max < .2) or IsUsableSpell(spellID)) then
+			enable = true
 		end
-		if (enable) then
-			ActiveHighlights[spellID] = true
-			self:ActivateHighlight(spellID, 10)
-		else
-			ActiveHighlights[spellID] = nil
-			self:DeactivateHighlight(spellID)
-		end
+	end
+	local spellID = PlayerSpellCache[L.Spell_Execute]
+	if (enable) then
+		ActiveHighlights[spellID] = true
+		self:ActivateHighlight(spellID, 10)
+	else
+		ActiveHighlights[spellID] = nil
+		self:DeactivateHighlight(spellID)
 	end
 end
 
@@ -406,23 +406,21 @@ end
 
 -- Paladin
 LibSpellHighlight.UpdateHammerOfWrath = function(self, event, ...)
-	local spellID = self:GetHighestRankForReactiveSpell(L.Spell_HammerOfWrath)
-	if (spellID) then
-		local enable
-		if (UnitExists("target")) and (not UnitIsFriend("player", "target")) then
-			local min = UnitHealth("target")
-			local max = UnitHealthMax("target")
-			if (min > 0) and (max > 0) and (min/max < .2) then
-				enable = true
-			end
+	local spellID = PlayerSpellCache[L.Spell_HammerOfWrath]
+	local enable
+	if (UnitExists("target")) and (not UnitIsFriend("player", "target")) then
+		local min = UnitHealth("target")
+		local max = UnitHealthMax("target")
+		if (min > 0) and (max > 0) and (min/max < .2) then
+			enable = true
 		end
-		if (enable) then
-			ActiveHighlights[spellID] = true
-			self:ActivateHighlight(spellID, 10)
-		else
-			ActiveHighlights[spellID] = nil
-			self:DeactivateHighlight(spellID)
-		end
+	end
+	if (enable) then
+		ActiveHighlights[spellID] = true
+		self:ActivateHighlight(spellID, 10)
+	else
+		ActiveHighlights[spellID] = nil
+		self:DeactivateHighlight(spellID)
 	end
 end
 
@@ -434,7 +432,7 @@ LibSpellHighlight.UpdateMongooseBite = function(self, event, ...)
 	swingMissType, spellName, _, spellMissType, swingBlocked = CombatLogGetCurrentEventInfo()
 
 	local isSrcPlayer = bit_band(sourceFlags, COMBATLOG_OBJECT_AFFILIATION_MINE) == COMBATLOG_OBJECT_AFFILIATION_MINE
-	local isDstPlayer = destGUID == UnitGUID("player")
+	local isDstPlayer = destGUID == playerGUID
 
 	if (isDstPlayer) then
 		if (eventType == "SWING_MISSED") or (eventType == "SPELL_MISSED") then
@@ -445,21 +443,17 @@ LibSpellHighlight.UpdateMongooseBite = function(self, event, ...)
 				missedType = spellMissType
 			end
 			if (missedType == "DODGE") then
-				local spellID = self:GetHighestRankForReactiveSpell(L.Spell_MongooseBite)
-				if (spellID) then
-					ActiveHighlights[spellID] = true
-					self:ActivateHighlight(spellID, 5)
-				end
+				local spellID = PlayerSpellCache[L.Spell_MongooseBite]
+				ActiveHighlights[spellID] = true
+				self:ActivateHighlight(spellID, 5)
 			end
 		end
 	end
 	
 	if (isSrcPlayer) and (eventType == "SPELL_CAST_SUCCESS") and (spellName == L.Spell_MongooseBite) then
-		local spellID = self:GetHighestRankForReactiveSpell(L.Spell_MongooseBite)
-		if (spellID) then
-			ActiveHighlights[spellID] = nil
-			self:DeactivateHighlight(spellID)
-		end
+		local spellID = PlayerSpellCache[L.Spell_MongooseBite]
+		ActiveHighlights[spellID] = nil
+		self:DeactivateHighlight(spellID)
 	end
 end
 
@@ -481,19 +475,15 @@ LibSpellHighlight.UpdateOverpower = function(self, event, ...)
 				missedType = spellMissType
 			end
 			if (missedType == "DODGE") then
-				local spellID = self:GetHighestRankForReactiveSpell(L.Spell_Overpower)
-				if (spellID) then
-					ActiveHighlights[spellID] = true
-					self:ActivateHighlight(spellID, 5)
-				end
+				local spellID = PlayerSpellCache[L.Spell_Overpower]
+				ActiveHighlights[spellID] = true
+				self:ActivateHighlight(spellID, 5)
 			end
 		elseif (eventType == "SPELL_CAST_SUCCESS") then
 			if (spellName == L.Spell_Overpower) then
-				local spellID = self:GetHighestRankForReactiveSpell(L.Spell_Overpower)
-				if (spellID) then
-					ActiveHighlights[spellID] = nil
-					self:DeactivateHighlight(spellID)
-				end
+				local spellID = PlayerSpellCache[L.Spell_Overpower]
+				ActiveHighlights[spellID] = nil
+				self:DeactivateHighlight(spellID)
 			end
 		end
 	end
@@ -507,7 +497,7 @@ LibSpellHighlight.UpdateRevenge = function(self, event, ...)
 	swingMissType, spellName, _, spellMissType, swingBlocked = CombatLogGetCurrentEventInfo()
 
 	local isSrcPlayer = bit_band(sourceFlags, COMBATLOG_OBJECT_AFFILIATION_MINE) == COMBATLOG_OBJECT_AFFILIATION_MINE
-	local isDstPlayer = destGUID == UnitGUID("player")
+	local isDstPlayer = destGUID == playerGUID
 
 	if (isDstPlayer) then
 		if (eventType == "SWING_MISSED") or (eventType == "SPELL_MISSED") then
@@ -518,27 +508,21 @@ LibSpellHighlight.UpdateRevenge = function(self, event, ...)
 				missedType = spellMissType
 			end
 			if (missedType == "BLOCK") or (missedType == "DODGE") or (missedType == "PARRY") then
-				local spellID = self:GetHighestRankForReactiveSpell(L.Spell_Revenge)
-				if (spellID) then
-					ActiveHighlights[spellID] = true
-					self:ActivateHighlight(spellID, 5)
-				end
-			end
-		elseif (eventType == "SWING_DAMAGE") and (swingBlocked) then
-			local spellID = self:GetHighestRankForReactiveSpell(L.Spell_Revenge)
-			if (spellID) then
+				local spellID = PlayerSpellCache[L.Spell_Revenge]
 				ActiveHighlights[spellID] = true
 				self:ActivateHighlight(spellID, 5)
 			end
+		elseif (eventType == "SWING_DAMAGE") and (swingBlocked) then
+			local spellID = PlayerSpellCache[L.Spell_Revenge]
+			ActiveHighlights[spellID] = true
+			self:ActivateHighlight(spellID, 5)
 		end
 	end
 
 	if (isSrcPlayer) and (eventType == "SPELL_CAST_SUCCESS") and (spellName == L.Spell_Revenge) then
-		local spellID = self:GetHighestRankForReactiveSpell(L.Spell_Revenge)
-		if (spellID) then
-			ActiveHighlights[spellID] = nil
-			self:DeactivateHighlight(spellID)
-		end
+		local spellID = PlayerSpellCache[L.Spell_Revenge]
+		ActiveHighlights[spellID] = nil
+		self:DeactivateHighlight(spellID)
 	end
 end
 
@@ -550,7 +534,7 @@ LibSpellHighlight.UpdateRiposte = function(self, event, ...)
 	swingMissType, spellName, _, spellMissType, swingBlocked = CombatLogGetCurrentEventInfo()
 
 	local isSrcPlayer = bit_band(sourceFlags, COMBATLOG_OBJECT_AFFILIATION_MINE) == COMBATLOG_OBJECT_AFFILIATION_MINE
-	local isDstPlayer = destGUID == UnitGUID("player")
+	local isDstPlayer = destGUID == playerGUID
 
 	if (isDstPlayer) and ((eventType == "SWING_MISSED") or (eventType == "SPELL_MISSED")) then
 		local missedType
@@ -560,33 +544,33 @@ LibSpellHighlight.UpdateRiposte = function(self, event, ...)
 			missedType = spellMissType
 		end
 		if (missedType == "PARRY") then
-			local spellID = self:GetHighestRankForReactiveSpell(L.Spell_Riposte)
-			if (spellID) then
-				ActiveHighlights[spellID] = true
-				self:ActivateHighlight(spellID, 5)
-			end
+			local spellID = PlayerSpellCache[L.Spell_Riposte]
+			ActiveHighlights[spellID] = true
+			self:ActivateHighlight(spellID, 5)
 		end
 	end
 
 	if (isSrcPlayer) and (eventType == "SPELL_CAST_SUCCESS") and (spellName == L.Spell_Riposte) then
-		local spellID = self:GetHighestRankForReactiveSpell(L.Spell_Riposte)
-		if (spellID) then
-			ActiveHighlights[spellID] = nil
-			self:DeactivateHighlight(spellID)
-		end
+		local spellID = PlayerSpellCache[L.Spell_Riposte]
+		ActiveHighlights[spellID] = nil
+		self:DeactivateHighlight(spellID)
 	end
 end
 
--- An extra step mainly for convenience here.
-LibSpellHighlight.RegisterCombatLogEvent = function(self, spellName, methodName)
-	if (self:GetHighestRankForReactiveSpell(spellName)) then
-		self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", methodName)
-	end
+LibSpellHighlight.UpdateOverpowerAndRevenge = function(self, event, ...)
+	self:UpdateOverpower(event, ...)
+	self:UpdateRevenge(event, ...)
+end
+
+LibSpellHighlight.UpdateCounterAttackAndMongooseBite = function(self, event, ...)
+	self:UpdateCounterAttack(event, ...)
+	self:UpdateMongooseBite(event, ...)
 end
 
 LibSpellHighlight.UpdateEvents = function(self, event, ...)
 	self:UnregisterAllEvents()
 	self:UnregisterAllMessages()
+	self:UpdatePlayerSpellCache()
 
 	-- Allow it to run on the first occurence
 	-- of this event after any sort of UI reset.
@@ -613,8 +597,15 @@ LibSpellHighlight.UpdateEvents = function(self, event, ...)
 	
 	elseif (playerClass == "HUNTER") then
 		-- Register combat log parsing if abilities exist.
-		self:RegisterCombatLogEvent(L.Spell_Counterattack, "UpdateCounterAttack")
-		self:RegisterCombatLogEvent(L.Spell_MongooseBite, "UpdateMongooseBite")
+		if (PlayerSpellCache[L.Spell_Counterattack]) and (PlayerSpellCache[L.Spell_MongooseBite]) then
+			self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "UpdateCounterAttackAndMongooseBite")
+
+		elseif ((PlayerSpellCache[L.Spell_Counterattack])) then
+			self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "UpdateCounterAttack")
+
+		elseif ((PlayerSpellCache[L.Spell_MongooseBite])) then
+			self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "UpdateMongooseBite")
+		end
 	
 	elseif (playerClass == "ROGUE") then
 		-- Track combo points for finisher highlight.
@@ -623,13 +614,15 @@ LibSpellHighlight.UpdateEvents = function(self, event, ...)
 		self:RegisterUnitEvent("UNIT_POWER_FREQUENT", "UpdateComboPoints", "player")
 
 		-- Register combat log parsing if abilities exist.
-		self:RegisterCombatLogEvent(L.Spell_Riposte, "UpdateRiposte")
+		if (PlayerSpellCache[L.Spell_Riposte]) then
+			self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "UpdateRiposte")
+		end
 
 		-- Initial update of highlights.
 		self:UpdateComboPoints()
 
 	elseif (playerClass == "PALADIN") then
-		if (self:GetHighestRankForReactiveSpell(L.Spell_HammerOfWrath)) then
+		if (PlayerSpellCache[L.Spell_HammerOfWrath]) then
 			-- Track target health for activations.
 			self:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", "UpdateHammerOfWrath", "target")
 			self:RegisterEvent("PLAYER_TARGET_CHANGED", "UpdateHammerOfWrath")
@@ -639,10 +632,12 @@ LibSpellHighlight.UpdateEvents = function(self, event, ...)
 		end
 
 		-- Register combat log parsing if abilities exist.
-		self:RegisterCombatLogEvent(L.Spell_Exorcism, "UpdateExorcism")
+		if (PlayerSpellCache[L.Spell_Exorcism]) then
+			self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "UpdateExorcism")
+		end
 
 	elseif (playerClass == "WARLOCK") then
-		if (self:GetHighestRankForReactiveSpell(L.Spell_Nightfall)) then
+		if (PlayerSpellCache[L.Spell_Nightfall]) then
 			-- Track Shadow Trance for Shadow Bolt highlighting.
 			self:RegisterMessage("GP_UNIT_AURA", "UpdateAuras")
 
@@ -651,7 +646,7 @@ LibSpellHighlight.UpdateEvents = function(self, event, ...)
 		end
 
 	elseif (playerClass == "WARRIOR") then
-		if (self:GetHighestRankForReactiveSpell(L.Spell_Execute)) then
+		if (PlayerSpellCache[L.Spell_Execute]) then
 			-- Track target health for activations.
 			self:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", "UpdateExecute", "target")
 			self:RegisterEvent("PLAYER_TARGET_CHANGED", "UpdateExecute")
@@ -661,8 +656,16 @@ LibSpellHighlight.UpdateEvents = function(self, event, ...)
 		end
 
 		-- Register combat log parsing if abilities exist.
-		self:RegisterCombatLogEvent(L.Spell_Overpower, "UpdateOverpower")
-		self:RegisterCombatLogEvent(L.Spell_Revenge, "UpdateRevenge")
+		if (PlayerSpellCache[L.Spell_Overpower]) and (PlayerSpellCache[L.Spell_Revenge]) then
+			self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "UpdateOverpowerAndRevenge")
+
+		elseif ((PlayerSpellCache[L.Spell_Overpower])) then
+			self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "UpdateOverpower")
+
+		elseif ((PlayerSpellCache[L.Spell_Revenge])) then
+			self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "UpdateRevenge")
+		end
+
 	end
 end
 
