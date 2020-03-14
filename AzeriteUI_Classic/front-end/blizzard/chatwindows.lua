@@ -293,12 +293,37 @@ Module.PostCreateChatWindow = function(self, frame)
 	-- just lock all frames away from our important objects
 	frame:SetClampRectInsets(unpack(layout.DefaultClampRectInsets))
 
-	-- Set the frame's alpha and color
+	-- Set the frame's backdrop alpha and color
 	FCF_SetWindowColor(frame, 0, 0, 0, 0)
 	FCF_SetWindowAlpha(frame, 0, 1)
 
 	-- Update the scale of this window
 	self:UpdateChatWindowScale(frame)
+
+	-- Font
+	------------------------------
+	local locked
+	local updateFont = function(frame)
+		if (locked) then
+			return
+		end
+		locked = true
+		local fontObject = frame:GetFontObject()
+		local font, size, style = fontObject:GetFont()
+		fontObject:SetFont(font, size, "OUTLINE")
+		--fontObject:SetShadowColor(0,0,0,0)
+		--fontObject:SetShadowOffset(0,0)
+		fontObject:SetShadowColor(0,0,0,.5)
+		fontObject:SetShadowOffset(-.75, -.75)
+		locked = false
+	end
+
+	hooksecurefunc(frame, "SetFontObject", updateFont)
+	hooksecurefunc(frame, "SetFont", updateFont)
+
+	-- Trigger an initial update
+	frame:SetFontObject(frame:GetFontObject())
+
 
 	-- Tabs
 	------------------------------
