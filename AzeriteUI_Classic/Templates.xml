@@ -1,0 +1,38 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+
+	<Button name="AzeriteUIAuraButtonTemplate" inherits="SecureActionButtonTemplate" virtual="true">
+		<Size x="30" y="30"/>
+
+		<Attributes>
+			<Attribute name="type" value="cancelaura"/>
+		</Attributes>
+
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture parentKey="Icon">
+					<Anchors>
+						<Anchor point="CENTER" x="0" y="0"/>
+					</Anchors>
+					<TexCoords left="0.078125" right="0.921875" top="0.078125" bottom="0.921875"/>
+				</Texture>
+			</Layer>
+		</Layers>
+
+		<Frames>
+			<Frame parentKey="Border">
+				<Size x="40" y="40"/>
+				<Anchors>
+					<Anchor point="CENTER" x="0" y="0"/>
+				</Anchors>
+			</Frame>
+		</Frames>
+
+		<Scripts>
+			<OnLoad>
+				self:RegisterForClicks("RightButtonUp")
+			</OnLoad>
+		</Scripts>
+	</Button>
+
+</Ui>

@@ -11,8 +11,9 @@
 ## X-Discord: https://discord.gg/MUSfWXd
 ## X-License: Custom
 
-# Unique global addon font objects
+# Global templates
 FontStyles.xml
+Templates.xml
 
 # External libraries, not made by us.
 # Loaded first, so our own can assume they exist.
