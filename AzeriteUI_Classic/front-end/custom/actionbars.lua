@@ -1218,14 +1218,8 @@ end
 -- Setters
 ----------------------------------------------------
 Module.SetForcedVisibility = function(self, force)
-	if (not ActionBarHoverFrame) then 
-		return 
-	end 
-	if (force) then 
-		ActionBarHoverFrame.FORCED = true
-	else 
-		ActionBarHoverFrame.FORCED = nil
-	end 
+	local actionBarHoverFrame = self:GetFadeFrame()
+	actionBarHoverFrame.FORCED = force and true
 end
 
 -- Updates
@@ -1234,12 +1228,14 @@ Module.UpdateFading = function(self)
 	local db = self.db
 
 	-- Set action bar hover settings
-	ActionBarHoverFrame.incombat = db.extraButtonsVisibility == "combat"
-	ActionBarHoverFrame.always = db.extraButtonsVisibility == "always"
+	local actionBarHoverFrame = self:GetFadeFrame()
+	actionBarHoverFrame.incombat = db.extraButtonsVisibility == "combat"
+	actionBarHoverFrame.always = db.extraButtonsVisibility == "always"
 
 	-- We're hardcoding these until options can be added
-	PetBarHoverFrame.incombat = db.petBarVisibility == "combat"
-	PetBarHoverFrame.always = db.petBarVisibility == "always"
+	local petBarHoverFrame = self:GetFadeFramePet()
+	petBarHoverFrame.incombat = db.petBarVisibility == "combat"
+	petBarHoverFrame.always = db.petBarVisibility == "always"
 end 
 
 Module.UpdateExplorerModeAnchors = function(self)
@@ -1304,22 +1300,22 @@ Module.UpdateFadeAnchors = function(self)
 
 	-- If we have hoverbuttons, setup the anchors
 	if (left and right and top and bottom) then 
-		local hover = self:GetFadeFrame()
-		hover:ClearAllPoints()
-		hover:SetPoint("TOP", Buttons[top], "TOP", 0, 0)
-		hover:SetPoint("BOTTOM", Buttons[bottom], "BOTTOM", 0, 0)
-		hover:SetPoint("LEFT", Buttons[left], "LEFT", 0, 0)
-		hover:SetPoint("RIGHT", Buttons[right], "RIGHT", 0, 0)
+		local actionBarHoverFrame = self:GetFadeFrame()
+		actionBarHoverFrame:ClearAllPoints()
+		actionBarHoverFrame:SetPoint("TOP", Buttons[top], "TOP", 0, 0)
+		actionBarHoverFrame:SetPoint("BOTTOM", Buttons[bottom], "BOTTOM", 0, 0)
+		actionBarHoverFrame:SetPoint("LEFT", Buttons[left], "LEFT", 0, 0)
+		actionBarHoverFrame:SetPoint("RIGHT", Buttons[right], "RIGHT", 0, 0)
 	end
 
-	local hover = self:GetFadeFramePet()
+	local petBarHoverFrame = self:GetFadeFramePet()
 	if (self.db.petBarEnabled) then
-		hover:ClearAllPoints()
-		hover:SetPoint("TOPLEFT", PetButtons[1], "TOPLEFT")
-		hover:SetPoint("BOTTOMRIGHT", PetButtons[10], "BOTTOMRIGHT")
+		petBarHoverFrame:ClearAllPoints()
+		petBarHoverFrame:SetPoint("TOPLEFT", PetButtons[1], "TOPLEFT")
+		petBarHoverFrame:SetPoint("BOTTOMRIGHT", PetButtons[10], "BOTTOMRIGHT")
 	else
-		hover:ClearAllPoints()
-		hover:SetAllPoints(self:GetFrame())
+		petBarHoverFrame:ClearAllPoints()
+		petBarHoverFrame:SetAllPoints(self:GetFrame())
 	end
 
 	self:UpdateButtonGrids()
