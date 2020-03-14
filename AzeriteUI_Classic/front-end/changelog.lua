@@ -1,6 +1,37 @@
 local ADDON, Private = ...
 local Changelog = {
 	{
+		tag = "1.0.108-beta",
+		date = "2020-03-14",
+		entries = {
+			{
+				header = "Added",
+				items = {
+					[[Added highly experimental temporary enchants (weapon buffs). Placement and design should only be considered placeholders. Shaman weapon buffs should be possible to remove in combat.]],
+					[[Added chat outlines. No options added for it, will come before this version leaves beta.]]
+				}
+			},
+			{
+				header = "Changed",
+				items = {
+					[[Optimized the spell activation highlight code a bit. Changed how timers are disabled. Working on the weird behavior for overpower/revenge and other reactive abilities.]]
+				}
+			}
+		}
+	},
+	{
+		tag = "1.0.107-RC",
+		date = "2020-03-11",
+		entries = {
+			{
+				header = "Changed",
+				items = {
+					[[Updated minimap blips to work with patch 1.13.4.]]
+				}
+			}
+		}
+	},
+	{
 		tag = "1.0.106-RC",
 		date = "2020-03-11",
 		items = {

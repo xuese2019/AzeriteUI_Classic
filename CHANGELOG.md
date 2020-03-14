@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.108-beta] 2020-03-14
+### Added
+- Added highly experimental temporary enchants (weapon buffs). Placement and design should only be considered placeholders. Shaman weapon buffs should be possible to remove in combat.
+- Added chat outlines. No options added for it, will come before this version leaves beta.
+
+### Changed
+- Optimized the spell activation highlight code a bit. Changed how timers are disabled. Working on the weird behavior for overpower/revenge and other reactive abilities.
+
 ## [1.0.107-RC] 2020-03-11
 ### Changed
 - Updated minimap blips to work with patch 1.13.4.
