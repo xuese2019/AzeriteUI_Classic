@@ -1,7 +1,7 @@
 local ADDON, Private = ...
 local Changelog = {
 	{
-		tag = "1.0.110-beta",
+		tag = "1.0.111-beta",
 		date = "2020-03-15",
 		entries = {
 			{

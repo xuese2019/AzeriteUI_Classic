@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [1.0.110-beta] 2020-03-15
+## [1.0.111-beta] 2020-03-15
 ### Added
 - Added highly experimental temporary enchants (weapon buffs). Placement and design should only be considered placeholders. Shaman weapon buffs should be possible to remove in combat.
 - Added chat outlines. No options added for it, will come before this version leaves beta.
