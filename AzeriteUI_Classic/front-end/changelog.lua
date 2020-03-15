@@ -7,20 +7,21 @@ local Changelog = {
 			{
 				header = "Added",
 				items = {
-					[[Added highly experimental temporary enchants (weapon buffs). Placement and design should only be considered placeholders. Shaman weapon buffs should be possible to remove in combat.]],
-					[[Added chat outlines. No options added for it, will come before this version leaves beta.]]
+					[[Added chat outlines. This is enabled by default, but can be toggled through the menu.]],
+					[[Added highly experimental temporary enchants. Placement and design should only be considered placeholders. Shaman weapon buffs should be possible to remove in combat by right-clicking, but this is currently untested.]]
 				}
 			},
 			{
 				header = "Changed",
 				items = {
-					[[Optimized the spell activation highlight code a bit. Changed how timers are disabled. Working on the weird behavior for overpower/revenge and other reactive abilities.]]
+					[[Optimized the spell activation highlight code a bit. Changed how timers are disabled.]]
 				}
 			},
 			{
 				header = "Fixed",
 				items = {
-					[[Fixed an issue that would cause a bug on logon and reloads when only the main 7 actionbuttons was enabled.]]
+					[[Fixed an issue that would cause a bug on logon and reloads when only the main 7 actionbuttons was enabled.]],
+					[[Fixed issues related to reactive spell highlighting, where spells sometimes wouldn't trigger properly, or not go away once triggered.]]
 				}
 			}
 		}
