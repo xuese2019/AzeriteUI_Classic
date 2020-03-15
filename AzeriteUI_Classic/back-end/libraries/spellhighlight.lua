@@ -12,6 +12,13 @@ assert(LibMessage, "LibSpellHighlight requires LibMessage to be loaded.")
 local LibAura = Wheel("LibAura")
 assert(LibAura, "LibSpellHighlight requires LibAura to be loaded.")
 
+local LibModule = Wheel("LibModule")
+assert(LibModule, "LibSpellHighlight requires LibModule to be loaded.")
+
+local Debug = function(...)
+	LibModule:AddDebugMessageFormatted(...)
+end
+
 -- Embed functionality into this
 LibEvent:Embed(LibSpellHighlight)
 LibMessage:Embed(LibSpellHighlight)
@@ -24,6 +31,7 @@ local bit_band = bit.band
 local debugstack = debugstack
 local error = error
 local select = select
+local string_format = string.format
 local string_join = string.join
 local string_match = string.match
 local table_wipe = table.wipe
@@ -41,6 +49,7 @@ local UnitExists = UnitExists
 local UnitGUID = UnitGUID
 local UnitHealth = UnitHealth
 local UnitHealthMax = UnitHealthMax
+local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 local UnitIsFriend = UnitIsFriend
 local UnitPower = UnitPower
 local UnitPowerMax = UnitPowerMax
@@ -213,10 +222,12 @@ local OnUpdate = function(self, elapsed)
 			self.timers[spellID] = timeLeft - elapsed
 			hasTimers = true
 		else
+			Debug(string_format("Disabling SpellHighlight timer for %d",spellID))
 			LibSpellHighlight:DeactivateHighlight(spellID)
 		end
 	end
 	if (not hasTimers) then
+		Debug(string_format("Disabling SpellHighlight OnUpdate"))
 		TimerRunning = nil
 		self:SetScript("OnUpdate", nil)
 	end
@@ -224,10 +235,18 @@ end
 
 LibSpellHighlight.ActivateHighlight = function(self, spellID, duration)
 	Timers[spellID] = duration
+	ActiveHighlights[spellID] = true
+
+	if (duration) then
+		Debug(string_format("Enabling SpellHighlight for %d (%d seconds)",spellID,duration))
+	else
+		Debug(string_format("Enabling SpellHighlight for %d",spellID))
+	end
 
 	self:SendMessage("GP_SPELL_ACTIVATION_OVERLAY_GLOW_SHOW", spellID, HighlightTypeBySpellID[spellID])
 
 	if (duration) and (not TimerRunning) then
+		Debug(string_format("Enabling SpellHighlight OnUpdate"))
 		TimerRunning = true
 		Frame:SetScript("OnUpdate", OnUpdate)
 	end
@@ -235,6 +254,8 @@ end
 
 LibSpellHighlight.DeactivateHighlight = function(self, spellID)
 	Timers[spellID] = nil
+	ActiveHighlights[spellID] = nil
+	Debug(string_format("Disabling SpellHighlight for %d",spellID))
 	self:SendMessage("GP_SPELL_ACTIVATION_OVERLAY_GLOW_HIDE", spellID, HighlightTypeBySpellID[spellID])
 end
 
@@ -247,8 +268,8 @@ LibSpellHighlight.UpdatePlayerSpellCache = function(self)
 	end
 	-- Cache the new.
 	for spellName,spellList in pairs(ReactiveSpellsBySpellID) do
-		for i = #ReactiveSpellsBySpellID,1,-1 do
-			local spellID = ReactiveSpellsBySpellID[i]
+		for i = #spellList,1,-1 do
+			local spellID = spellList[i]
 			if (IsPlayerSpell(spellID)) then
 				PlayerSpellCache[spellName] = spellID
 				break -- need to break to avoid overwriting it with a lower rank
@@ -328,20 +349,14 @@ LibSpellHighlight.UpdateComboPoints = function(self, event, ...)
 		if (not comboPointsAreMaxed) then
 			comboPointsAreMaxed = true
 			for spellID in pairs(ComboFinishersBySpellID) do
-				if (not ActiveHighlights[spellID]) then
-					ActiveHighlights[spellID] = true
-					self:ActivateHighlight(spellID)
-				end
+				self:ActivateHighlight(spellID)
 			end
 		end
 	else
 		if (comboPointsAreMaxed) then
 			comboPointsAreMaxed = nil
 			for spellID in pairs(ComboFinishersBySpellID) do
-				if (ActiveHighlights[spellID]) then
-					ActiveHighlights[spellID] = nil
-					self:DeactivateHighlight(spellID)
-				end
+				self:DeactivateHighlight(spellID)
 			end
 		end
 	end
@@ -367,7 +382,6 @@ LibSpellHighlight.UpdateCounterAttack = function(self, event, ...)
 			end
 			if (missedType == "PARRY") then
 				local spellID = PlayerSpellCache[L.Spell_Counterattack]
-				ActiveHighlights[spellID] = true
 				self:ActivateHighlight(spellID, 5)
 			end
 		end
@@ -375,7 +389,6 @@ LibSpellHighlight.UpdateCounterAttack = function(self, event, ...)
 	
 	if (isSrcPlayer) and (eventType == "SPELL_CAST_SUCCESS") and (spellName == L.Spell_Counterattack) then
 		local spellID = PlayerSpellCache[L.Spell_Counterattack]
-		ActiveHighlights[spellID] = nil
 		self:DeactivateHighlight(spellID)
 	end
 end
@@ -392,10 +405,8 @@ LibSpellHighlight.UpdateExecute = function(self, event, ...)
 	end
 	local spellID = PlayerSpellCache[L.Spell_Execute]
 	if (enable) then
-		ActiveHighlights[spellID] = true
 		self:ActivateHighlight(spellID, 10)
 	else
-		ActiveHighlights[spellID] = nil
 		self:DeactivateHighlight(spellID)
 	end
 end
@@ -417,10 +428,8 @@ LibSpellHighlight.UpdateHammerOfWrath = function(self, event, ...)
 		end
 	end
 	if (enable) then
-		ActiveHighlights[spellID] = true
 		self:ActivateHighlight(spellID, 10)
 	else
-		ActiveHighlights[spellID] = nil
 		self:DeactivateHighlight(spellID)
 	end
 end
@@ -445,7 +454,6 @@ LibSpellHighlight.UpdateMongooseBite = function(self, event, ...)
 			end
 			if (missedType == "DODGE") then
 				local spellID = PlayerSpellCache[L.Spell_MongooseBite]
-				ActiveHighlights[spellID] = true
 				self:ActivateHighlight(spellID, 5)
 			end
 		end
@@ -453,7 +461,6 @@ LibSpellHighlight.UpdateMongooseBite = function(self, event, ...)
 	
 	if (isSrcPlayer) and (eventType == "SPELL_CAST_SUCCESS") and (spellName == L.Spell_MongooseBite) then
 		local spellID = PlayerSpellCache[L.Spell_MongooseBite]
-		ActiveHighlights[spellID] = nil
 		self:DeactivateHighlight(spellID)
 	end
 end
@@ -477,13 +484,11 @@ LibSpellHighlight.UpdateOverpower = function(self, event, ...)
 			end
 			if (missedType == "DODGE") then
 				local spellID = PlayerSpellCache[L.Spell_Overpower]
-				ActiveHighlights[spellID] = true
 				self:ActivateHighlight(spellID, 5)
 			end
 		elseif (eventType == "SPELL_CAST_SUCCESS") then
 			if (spellName == L.Spell_Overpower) then
 				local spellID = PlayerSpellCache[L.Spell_Overpower]
-				ActiveHighlights[spellID] = nil
 				self:DeactivateHighlight(spellID)
 			end
 		end
@@ -510,19 +515,16 @@ LibSpellHighlight.UpdateRevenge = function(self, event, ...)
 			end
 			if (missedType == "BLOCK") or (missedType == "DODGE") or (missedType == "PARRY") then
 				local spellID = PlayerSpellCache[L.Spell_Revenge]
-				ActiveHighlights[spellID] = true
 				self:ActivateHighlight(spellID, 5)
 			end
 		elseif (eventType == "SWING_DAMAGE") and (swingBlocked) then
 			local spellID = PlayerSpellCache[L.Spell_Revenge]
-			ActiveHighlights[spellID] = true
 			self:ActivateHighlight(spellID, 5)
 		end
 	end
 
 	if (isSrcPlayer) and (eventType == "SPELL_CAST_SUCCESS") and (spellName == L.Spell_Revenge) then
 		local spellID = PlayerSpellCache[L.Spell_Revenge]
-		ActiveHighlights[spellID] = nil
 		self:DeactivateHighlight(spellID)
 	end
 end
@@ -546,14 +548,12 @@ LibSpellHighlight.UpdateRiposte = function(self, event, ...)
 		end
 		if (missedType == "PARRY") then
 			local spellID = PlayerSpellCache[L.Spell_Riposte]
-			ActiveHighlights[spellID] = true
 			self:ActivateHighlight(spellID, 5)
 		end
 	end
 
 	if (isSrcPlayer) and (eventType == "SPELL_CAST_SUCCESS") and (spellName == L.Spell_Riposte) then
 		local spellID = PlayerSpellCache[L.Spell_Riposte]
-		ActiveHighlights[spellID] = nil
 		self:DeactivateHighlight(spellID)
 	end
 end
@@ -566,6 +566,23 @@ end
 LibSpellHighlight.UpdateCounterAttackAndMongooseBite = function(self, event, ...)
 	self:UpdateCounterAttack(event, ...)
 	self:UpdateMongooseBite(event, ...)
+end
+
+LibSpellHighlight.ClearAllHighlights = function(self)
+	for spellID in pairs(ActivateHighlights) do
+		self:DeactivateHighlight(spellID)
+	end
+	for auraID,spellList in pairs(HighlightSpellsByAuraID) do
+		for spellID in pairs(spellList) do
+			self:DeactivateHighlight(spellID)
+		end
+	end
+end
+
+LibSpellHighlight.UpdateDead = function(self, event, ...)
+	if (UnitIsDeadOrGhost("player")) then
+		self:ClearAllHighlights()
+	end
 end
 
 LibSpellHighlight.UpdateEvents = function(self, event, ...)
@@ -582,6 +599,8 @@ LibSpellHighlight.UpdateEvents = function(self, event, ...)
 			return
 		end
 	end
+
+	self:RegisterMessage("UNIT_HEALTH_FREQUENT", "UpdateDead")
 
 	if (playerClass == "DRUID") then
 		-- Track clear casting aura for expensive spell highlight.
@@ -675,6 +694,7 @@ for target in pairs(LibSpellHighlight.embeds) do
 	LibSpellHighlight:Embed(target)
 end
 
+-- TODO: Nature's Swiftness
 if (playerClass == "DRUID") then
 
 	-- Omen of Clarity (Proc)
@@ -759,6 +779,10 @@ if (playerClass == "ROGUE") then
 
 end 
 
+-- TODO: Nature's Swiftness
+if (playerClass == "SHAMAN") then
+end
+
 if (playerClass == "WARLOCK") then
 
 	HighlightTypeByAuraID[17941] = "REACTIVE"
@@ -780,7 +804,6 @@ end
 if (playerClass == "WARRIOR") then
 	ReactiveSpellsBySpellID[L.Spell_Execute] = { 5308, 20658, 20660, 20661, 20662 }
 	ReactiveSpellsBySpellID[L.Spell_Overpower] = { 7384, 7887, 11584, 11585 }
-	--ReactiveSpellsBySpellID[L.Spell_Overpower] = { 284 } -- Heroic Strike (Rank 2)
 	ReactiveSpellsBySpellID[L.Spell_Revenge] = { 6572, 6574, 7379, 11600, 11601, 25288 }
 end
 
