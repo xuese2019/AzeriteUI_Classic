@@ -251,6 +251,7 @@ LibSpellHighlight.UpdatePlayerSpellCache = function(self)
 			local spellID = ReactiveSpellsBySpellID[i]
 			if (IsPlayerSpell(spellID)) then
 				PlayerSpellCache[spellName] = spellID
+				break -- need to break to avoid overwriting it with a lower rank
 			end
 		end
 	end
