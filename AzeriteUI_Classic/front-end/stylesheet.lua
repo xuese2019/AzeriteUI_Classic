@@ -1815,6 +1815,10 @@ Defaults[ADDON] = {
 	blockCounter = {}
 }
 
+Defaults.BlizzardChatFrames = {
+	enableChatOutline = true
+}
+
 Defaults.BlizzardFloaterHUD = {
 }
 

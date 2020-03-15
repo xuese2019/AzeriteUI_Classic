@@ -867,6 +867,23 @@ Module.CreateMenuTable = function(self)
 		table_insert(MenuTable, ActionBarMenu)
 	end
 
+	-- ChatFrames
+	local BlizzardChatFrames = Core:GetModule("BlizzardChatFrames", true)
+	if BlizzardChatFrames and not (BlizzardChatFrames:IsIncompatible() or BlizzardChatFrames:DependencyFailed()) then 
+		table_insert(MenuTable, {
+			title = L["Chat Windows"], type = nil, hasWindow = true, 
+			buttons = {
+				{
+					enabledTitle = L_ENABLED:format(L["Chat Outline"]),
+					disabledTitle = L_DISABLED:format(L["Chat Outline"]),
+					type = "TOGGLE_VALUE", 
+					configDB = "BlizzardChatFrames", configKey = "enableChatOutline", 
+					proxyModule = "BlizzardChatFrames"
+				}
+			}
+		})
+	end
+
 	-- Nameplates
 	local NamePlates = Core:GetModule("NamePlates", true)
 	if NamePlates and not (NamePlates:IsIncompatible() or NamePlates:DependencyFailed()) then 

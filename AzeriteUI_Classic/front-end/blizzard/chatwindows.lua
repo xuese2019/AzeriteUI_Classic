@@ -33,6 +33,7 @@ local GetConfig = Private.GetConfig
 local GetLayout = Private.GetLayout
 
 local alphaLocks = {}
+local frameCache = {}
 
 -- OnUpdate Handler
 -------------------------------------------------------
@@ -271,6 +272,12 @@ end
 Module.UpdateChatWindowPositions = function(self)
 end 
 
+Module.UpdateChatOutlines = function(self)
+	for frame in pairs(frameCache) do
+		frame:SetFontObject(frame:GetFontObject())
+	end
+end
+
 Module.PostCreateTemporaryChatWindow = function(self, frame, ...)
 	local chatType, chatTarget, sourceChatFrame, selectWindow = ...
 
@@ -283,6 +290,8 @@ end
 
 Module.PostCreateChatWindow = function(self, frame)
 	local layout = self.layout
+
+	frameCache[frame] = true
 
 	-- Window
 	------------------------------
@@ -310,10 +319,13 @@ Module.PostCreateChatWindow = function(self, frame)
 		locked = true
 		local fontObject = frame:GetFontObject()
 		local font, size, style = fontObject:GetFont()
-		fontObject:SetFont(font, size, "OUTLINE")
-		--fontObject:SetShadowColor(0,0,0,0)
-		--fontObject:SetShadowOffset(0,0)
-		fontObject:SetShadowColor(0,0,0,.5)
+		if (self.db.enableChatOutline) then
+			fontObject:SetFont(font, size, "OUTLINE")
+			fontObject:SetShadowColor(0,0,0,.5)
+		else
+			fontObject:SetFont(font, size, "")
+			fontObject:SetShadowColor(0,0,0,.75)
+		end
 		fontObject:SetShadowOffset(-.75, -.75)
 		locked = false
 	end
@@ -323,7 +335,6 @@ Module.PostCreateChatWindow = function(self, frame)
 
 	-- Trigger an initial update
 	frame:SetFontObject(frame:GetFontObject())
-
 
 	-- Tabs
 	------------------------------
@@ -800,7 +811,34 @@ Module.OnEvent = function(self, event, ...)
 end 
 
 Module.OnInit = function(self)
+	self.db = GetConfig(self:GetName())
 	self.layout = GetLayout(self:GetName())
+
+	-- Create a secure proxy frame for the menu system
+	local callbackFrame = self:CreateFrame("Frame", nil, "UICenter", "SecureHandlerAttributeTemplate")
+	callbackFrame.UpdateChatOutlines = function() self:UpdateChatOutlines() end
+
+	-- Register module db with the secure proxy
+	for key,value in pairs(self.db) do 
+		callbackFrame:SetAttribute(key,value)
+	end 
+
+	-- Now that attributes have been defined, attach the onattribute script
+	callbackFrame:SetAttribute("_onattributechanged", [=[
+		if name then 
+			name = string.lower(name); 
+		end 
+		if (name == "change-enablechatoutline") then 
+			self:SetAttribute("enableChatOutline", value); 
+			self:CallMethod("UpdateChatOutlines"); 
+		end 
+	]=])
+
+	-- Attach a getter method for the menu to the module
+	self.GetSecureUpdater = function(self) 
+		return callbackFrame 
+	end
+	
 	self:SetUpAlphaScripts()
 	self:SetUpScrollScripts()
 	self:SetUpMainFrames()
@@ -808,6 +846,7 @@ Module.OnInit = function(self)
 	self:SetUPBNToastFrame()
 	self:UpdateChatWindowScales()
 	self:UpdateChatDockPosition()
+	self:UpdateChatOutlines()
 end 
 
 Module.OnEnable = function(self)
