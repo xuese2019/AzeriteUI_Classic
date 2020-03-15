@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 82)
+local LibSecureButton = Wheel:Set("LibSecureButton", 84)
 if (not LibSecureButton) then
 	return
 end
@@ -363,11 +363,17 @@ local UpdateActionButton = function(self, event, ...)
 	elseif (event == "GP_SPELL_ACTIVATION_OVERLAY_GLOW_SHOW") then
 		local spellID = self:GetSpellID()
 		if (spellID and (spellID == arg1)) then
-			self:ShowOverlayGlow(arg2)
+			local overlayType = LibSecureButton:GetSpellOverlayType(spellID)
+			if (overlayType) then
+				self:ShowOverlayGlow(overlayType)
+			end
 		else
 			local actionType, id = GetActionInfo(self.buttonAction)
 			if (actionType == "flyout") and FlyoutHasSpell(id, arg1) then
-				self:ShowOverlayGlow(arg2)
+				local overlayType = LibSecureButton:GetSpellOverlayType(spellID)
+				if (overlayType) then
+					self:ShowOverlayGlow(overlayType)
+				end
 			end
 		end
 
