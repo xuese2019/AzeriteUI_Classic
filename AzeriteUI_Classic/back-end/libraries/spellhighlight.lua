@@ -1,4 +1,4 @@
-local LibSpellHighlight = Wheel:Set("LibSpellHighlight", -1)
+local LibSpellHighlight = Wheel:Set("LibSpellHighlight", 1)
 if (not LibSpellHighlight) then
 	return
 end
