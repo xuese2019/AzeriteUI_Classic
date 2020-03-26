@@ -1828,7 +1828,7 @@ Defaults.ActionBarMain = {
 	buttonLock = true,
 
 	-- Valid range is 0 to 17. anything outside will be limited to this range.
-	extraButtonsCount = 5, -- default this to a full standard bar, just to make it slightly easier for people
+	extraButtonsCount = 0, -- default this to 7. going full azerite style.
 	petBarEnabled = true,
 	stanceBarEnabled = true,
 
