@@ -874,6 +874,13 @@ Module.CreateMenuTable = function(self)
 			title = L["Chat Windows"], type = nil, hasWindow = true, 
 			buttons = {
 				{
+					enabledTitle = L_ENABLED:format(L["Battleground Filter"]),
+					disabledTitle = L_DISABLED:format(L["Battleground Filter"]),
+					type = "TOGGLE_VALUE", 
+					configDB = "BlizzardChatFrames", configKey = "enableBGSpamFilter", 
+					proxyModule = "BlizzardChatFrames"
+				},
+				{
 					enabledTitle = L_ENABLED:format(L["Chat Outline"]),
 					disabledTitle = L_DISABLED:format(L["Chat Outline"]),
 					type = "TOGGLE_VALUE", 

@@ -1816,7 +1816,8 @@ Defaults[ADDON] = {
 }
 
 Defaults.BlizzardChatFrames = {
-	enableChatOutline = true
+	enableChatOutline = true, -- enable outlined chat for readability
+	enableBGSpamFilter = true -- enable a battleground filter to clean up the chat
 }
 
 Defaults.BlizzardFloaterHUD = {

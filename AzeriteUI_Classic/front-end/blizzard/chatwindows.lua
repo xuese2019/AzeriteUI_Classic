@@ -9,10 +9,14 @@ Module:SetIncompatible("Prat-3.0")
 
 -- Lua API
 local _G = _G
+local ipairs = ipairs
 local math_floor = math.floor
 local string_format = string.format
+local string_gsub = string.gsub
+local string_match = string.match
 local string_len = string.len
-local string_sub = string.sub 
+local string_sub = string.sub
+local table_insert = table.insert
 
 -- WoW API
 local FCF_GetButtonSide = FCF_GetButtonSide
@@ -21,6 +25,7 @@ local FCF_SetWindowColor = FCF_SetWindowColor
 local FCF_Tab_OnClick = FCF_Tab_OnClick
 local FCF_UpdateButtonSide = FCF_UpdateButtonSide
 local GetGuildRosterMOTD = GetGuildRosterMOTD
+local IsInInstance = IsInInstance
 local IsShiftKeyDown = IsShiftKeyDown
 local UIFrameFadeRemoveFrame = UIFrameFadeRemoveFrame
 local UIFrameIsFading = UIFrameIsFading
@@ -35,7 +40,49 @@ local GetLayout = Private.GetLayout
 local alphaLocks = {}
 local frameCache = {}
 
--- OnUpdate Handler
+-- Pure methods
+local Blizz_ChatFrame = CreateFrame("ScrollingMessageFrame")
+local Blizz_ChatFrame_MT = { __index = Blizz_ChatFrame }
+local Blizz_AddMessage = Blizz_ChatFrame_MT.__index.AddMessage
+
+-- Localized search patterns created from global strings.
+local FilteredGlobals = {}
+for i,global in ipairs({
+
+	"CREATED_ITEM", -- "%s creates: %s."
+	"CREATED_ITEM_MULTIPLE", -- "%s creates: %sx%d."
+	"ERR_BG_PLAYER_JOINED_SS", -- "|Hplayer:%s|h[%s]|h has joined the battle"
+	"ERR_BG_PLAYER_LEFT_S", -- "%s has left the battle"
+	"ERR_INSTANCE_GROUP_ADDED_S", -- "%s has joined the instance group."
+	"ERR_INSTANCE_GROUP_REMOVED_S", -- "%s has left the instance group."
+	"ERR_NOT_IN_RAID", -- "You are not in a raid group"
+	"ERR_RAID_MEMBER_ADDED_S", -- "%s has joined the raid group"
+	"ERR_RAID_MEMBER_REMOVED_S", -- "%s has left the raid group"
+	"ERR_PLAYER_DIED_S", -- "%s has died."
+	"ERR_PLAYER_JOINED_BATTLE_D", -- "%s has joined the battle."
+	"ERR_PLAYER_LEFT_BATTLE_D", -- "%s has left the battle."
+	"LOOT_ITEM", -- "%s receives loot: %s."
+	"LOOT_ITEM_MULTIPLE", -- "%s receives loot: %sx%d."
+
+	-- Only added by Blizzard's filter, which we disable.
+	-- These would have to be intercepted by AddMessage if removed otherwise.
+	--"ERR_PLAYERLIST_JOINED_BATTLE", -- "%d players have joined the battle: %s"
+	--"ERR_PLAYERLIST_LEFT_BATTLE", -- "%d players have left the battle: %s"
+	--"ERR_PLAYERS_JOINED_BATTLE_D", -- "%d players have joined the battle."
+	--"ERR_PLAYERS_LEFT_BATTLE_D", -- "%d players have left the battle."
+
+}) do
+	local msg = _G[global]
+	if (msg) then
+		-- Convert a global string into a useable search pattern
+		msg = string_gsub(msg, "%[", "%%[");
+		msg = string_gsub(msg, "%]", "%%]");
+		msg = string_gsub(msg, "%%s", "(.-)")
+		table_insert(FilteredGlobals, msg)
+	end
+end
+
+-- Script Handlers
 -------------------------------------------------------
 local HZ = 1/60
 local OnUpdate = function(frame, elapsed)
@@ -115,6 +162,19 @@ local OnUpdate = function(frame, elapsed)
 		self:UpdateChatWindowAlpha(ChatFrame1)
 	end
 	frame.elapsed = 0
+end
+
+local OnChatMessage = function(self, event, message, author, ...)
+	-- Filter out various battleground spam
+	if (event == "CHAT_MSG_SYSTEM") then
+		for i,pattern in ipairs(FilteredGlobals) do
+			if (string_match(message,pattern)) then
+				return true
+			end
+		end
+	end
+	-- Pass everything else through
+	return false, message, author, ...
 end
 
 -- API
@@ -275,6 +335,36 @@ end
 Module.UpdateChatOutlines = function(self)
 	for frame in pairs(frameCache) do
 		frame:SetFontObject(frame:GetFontObject())
+	end
+end
+
+Module.StartBlizzardFilter = function(self)
+	BattlegroundChatFilters:OnLoad()
+	BattlegroundChatFilters:SetScript("OnEvent", BattlegroundChatFilters.OnEvent)
+	if (not BattlegroundChatFilters:GetScript("OnUpdate")) then
+		local _, instanceType = IsInInstance()
+		if (instanceType == "pvp") then
+			BattlegroundChatFilters:StartBGChatFilter()
+		end
+	end
+end
+
+Module.StopBlizzardFilter = function(self)
+	-- This kills off blizzard's interfering bg spam filter,
+	-- and prevents it from adding their additional leave/join messages.
+	BattlegroundChatFilters:StopBGChatFilter()
+	BattlegroundChatFilters:UnregisterAllEvents()
+	BattlegroundChatFilters:SetScript("OnUpdate", nil)
+	BattlegroundChatFilters:SetScript("OnEvent", nil)
+end
+
+Module.UpdateChatFilters = function(self)
+	if (self.db.enableBGSpamFilter) then
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_SYSTEM", OnChatMessage)
+		self:StopBlizzardFilter()
+	else
+		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_SYSTEM", OnChatMessage)
+		self:StartBlizzardFilter()
 	end
 end
 
@@ -817,6 +907,7 @@ Module.OnInit = function(self)
 	-- Create a secure proxy frame for the menu system
 	local callbackFrame = self:CreateFrame("Frame", nil, "UICenter", "SecureHandlerAttributeTemplate")
 	callbackFrame.UpdateChatOutlines = function() self:UpdateChatOutlines() end
+	callbackFrame.UpdateChatFilters = function() self:UpdateChatFilters() end
 
 	-- Register module db with the secure proxy
 	for key,value in pairs(self.db) do 
@@ -828,7 +919,10 @@ Module.OnInit = function(self)
 		if name then 
 			name = string.lower(name); 
 		end 
-		if (name == "change-enablechatoutline") then 
+		if (name == "change-enablebgspamfilter") then
+			self:SetAttribute("enableBGSpamFilter", value); 
+			self:CallMethod("UpdateChatFilters"); 
+		elseif (name == "change-enablechatoutline") then 
 			self:SetAttribute("enableChatOutline", value); 
 			self:CallMethod("UpdateChatOutlines"); 
 		end 
@@ -847,6 +941,7 @@ Module.OnInit = function(self)
 	self:UpdateChatWindowScales()
 	self:UpdateChatDockPosition()
 	self:UpdateChatOutlines()
+	self:UpdateChatFilters()
 end 
 
 Module.OnEnable = function(self)

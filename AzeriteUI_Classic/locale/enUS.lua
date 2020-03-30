@@ -119,6 +119,7 @@ L["Pet Bar"] = true
 L["Pet Bar Visibility"] = true
 L["Chat Windows"] = true
 L["Chat Outline"] = true
+L["Battleground Filter"] = true
 L["UnitFrames"] = true
 L["Party Frames"] = true
 L["Raid Frames"] = true
