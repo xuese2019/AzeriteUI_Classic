@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.115-RC] 2020-04-01
+### Fixed
+- Solved an issue where pet bar actions that required a right-click weren't usable through their keybinds, only through the aforementioned right-click.
+
 ## [1.0.114-RC] 2020-03-30
 ### Added
 - Added a battleground chat filter that removes all messages about players joining or leaving, in an effort to make the chat more readable.

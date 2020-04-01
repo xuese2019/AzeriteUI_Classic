@@ -1,7 +1,37 @@
 local ADDON, Private = ...
 local Changelog = {
 	{
-		tag = "1.0.111-beta",
+		tag = "1.0.115-RC",
+		date = "2020-04-01",
+		entries = {
+			{
+				header = "Fixed",
+				items = {
+					[[Solved an issue where pet bar actions that required a right-click weren't usable through their keybinds, only through the aforementioned right-click.]]
+				}
+			}
+		}
+	},
+	{
+		tag = "1.0.114-RC",
+		date = "2020-03-30",
+		entries = {
+			{
+				header = "Added",
+				entries = {
+					[[Added a battleground chat filter that removes all messages about players joining or leaving, in an effort to make the chat more readable.]]
+				}
+			},
+			{
+				header = "Changed",
+				entries = {
+					[[Changed the default number of actionbuttons to 7, as the user interface was intended to have in the first place. Options to add more will always remain.]]
+				}
+			}
+		}
+	},
+	{
+		tag = "1.0.113-RC",
 		date = "2020-03-15",
 		entries = {
 			{
