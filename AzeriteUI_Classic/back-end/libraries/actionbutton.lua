@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 84)
+local LibSecureButton = Wheel:Set("LibSecureButton", 85)
 if (not LibSecureButton) then
 	return
 end
@@ -2039,10 +2039,10 @@ LibSecureButton.UpdateActionButtonBindings = function(self)
 
 	for button in self:GetAllActionButtonsByType("pet") do
 
-		local visibility = button._owner
+		local pager = button:GetPager()
 
 		-- clear current overridebindings
-		ClearOverrideBindings(visibility) 
+		ClearOverrideBindings(pager) 
 
 		-- retrieve button id
 		local buttonID = button:GetID()
@@ -2057,10 +2057,10 @@ LibSecureButton.UpdateActionButtonBindings = function(self)
 		for keyNumber = 1, select("#", GetBindingKey(bindingAction)) do 
 
 			-- get a key for the action
-			local key = select(keyNumber, GetBindingKey(bindingAction)) 
+			local key = select(keyNumber, GetBindingKey(bindingAction))
 			if (key and (key ~= "")) then
-				-- this is why we need named buttons
-				SetOverrideBindingClick(visibility, false, key, button:GetName(), "CLICK: LeftButton") -- assign the key to our own button
+				-- We need both right- and left click functionality on pet buttons
+				SetOverrideBindingClick(pager, false, key, button:GetName()) -- assign the key to our own button
 			end	
 		end
 		
