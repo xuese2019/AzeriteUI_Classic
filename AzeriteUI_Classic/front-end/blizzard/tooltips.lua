@@ -61,9 +61,9 @@ local formatMoney = function(money)
 	local silver = math_floor((money - (gold * COPPER_PER_SILVER * SILVER_PER_GOLD)) / COPPER_PER_SILVER)
 	local copper = math_mod(money, COPPER_PER_SILVER)
 	
-	local goldIcon = string_format([[|T%s:16:16:0:0:64:64:%d:%d:%d:%d|t]], GetMedia("coins"), 0,32,0,32)
-	local silverIcon = string_format([[|T%s:16:16:0:0:64:64:%d:%d:%d:%d|t]], GetMedia("coins"), 32,64,0,32)
-	local copperIcon = string_format([[|T%s:16:16:0:0:64:64:%d:%d:%d:%d|t]], GetMedia("coins"), 0,32,32,64)
+	local goldIcon = string_format([[|T%s:16:16:-2:0:64:64:%d:%d:%d:%d|t]], GetMedia("coins"), 0,32,0,32)
+	local silverIcon = string_format([[|T%s:16:16:-2:0:64:64:%d:%d:%d:%d|t]], GetMedia("coins"), 32,64,0,32)
+	local copperIcon = string_format([[|T%s:16:16:-2:0:64:64:%d:%d:%d:%d|t]], GetMedia("coins"), 0,32,32,64)
 
 	local moneyString
 	if (gold > 0) then 
