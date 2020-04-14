@@ -129,6 +129,7 @@ L["HUD"] = true
 L["CastBar"] = true
 L["ClassPower"] = true
 L["Alerts"] = true
+L["Raid Warnings"] = true
 L["TalkingHead"] = true
 L["NamePlates"] = true
 L["Auras"] = true
