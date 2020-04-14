@@ -1821,6 +1821,7 @@ Defaults.BlizzardChatFrames = {
 }
 
 Defaults.BlizzardFloaterHUD = {
+	enableRaidWarnings = true
 }
 
 Defaults.ActionBarMain = {
