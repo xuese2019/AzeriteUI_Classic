@@ -998,6 +998,7 @@ Module.CreateMenuTable = function(self)
 				proxyModule = "UnitFramePlayerHUD"
 			})
 		end
+
 		table_insert(MenuTable, HUDMenu)
 	end
 
