@@ -176,7 +176,29 @@ end
 
 Module.OnInit = function(self)
 	self.db = GetConfig(self:GetName())
+	self.db.enableBGSanityFilter = nil
 	self.layout = GetLayout(self:GetName())
+
+	-- Create a secure proxy frame for the menu system
+	local callbackFrame = self:CreateFrame("Frame", nil, "UICenter", "SecureHandlerAttributeTemplate")
+
+	-- Register module db with the secure proxy
+	for key,value in pairs(self.db) do 
+		callbackFrame:SetAttribute(key,value)
+	end 
+
+	-- Now that attributes have been defined, attach the onattribute script
+	callbackFrame:SetAttribute("_onattributechanged", [=[
+		if name then 
+			name = string.lower(name); 
+		end 
+	]=])
+
+	-- Attach a getter method for the menu to the module
+	self.GetSecureUpdater = function(self) 
+		return callbackFrame 
+	end
+	
 end 
 
 Module.OnEnable = function(self)
