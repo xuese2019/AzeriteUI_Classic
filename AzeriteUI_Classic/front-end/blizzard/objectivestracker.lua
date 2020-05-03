@@ -5,7 +5,7 @@ if (not Core) then
 end
 
 local L = Wheel("LibLocale"):GetLocale(ADDON)
-local Module = Core:NewModule("BlizzardObjectivesTracker", "LibEvent", "LibFrame")
+local Module = Core:NewModule("BlizzardObjectivesTracker", "LibEvent", "LibFrame", "LibClientBuild")
 Module:SetIncompatible("!KalielsTracker")
 
 -- Lua API
@@ -34,6 +34,13 @@ local IsUnitOnQuest = IsUnitOnQuest
 local Colors = Private.Colors
 local GetFont = Private.GetFont
 local GetLayout = Private.GetLayout
+
+-- Tracking Flags
+local IN_COMBAT, IN_BOSS_FIGHT, IN_ARENA
+
+-- Constants for client version
+local IsClassic = Module:IsClassic()
+local IsRetail = Module:IsRetail()
 
 -----------------------------------------------------------------
 -- Utility
@@ -184,7 +191,7 @@ end
 -----------------------------------------------------------------
 -- Styling
 -----------------------------------------------------------------
-Module.StyleLog = function(self)
+Module.StyleClassicLog = function(self)
 	-- Just hook the global functions as far as possible
 	hooksecurefunc("QuestLog_Update", QuestLog_Update)
 	hooksecurefunc("QuestLogTitleButton_OnEnter", QuestLogTitleButton_OnEnter)
@@ -196,7 +203,7 @@ Module.StyleLog = function(self)
 	end
 end
 
-Module.StyleTracker = function(self)
+Module.StyleClassicTracker = function(self)
 	local layout = self.layout
 
 	local scaffold = self:CreateFrame("Frame", nil, "UICenter")
@@ -393,6 +400,84 @@ Module.StyleTracker = function(self)
 	end)
 end
 
+Module.StyleRetailTracker = function(self)
+	hooksecurefunc("ObjectiveTracker_Update", function()
+		local frame = ObjectiveTrackerFrame.MODULES
+		if (frame) then
+			for i = 1, #frame do
+				local modules = frame[i]
+				if (modules) then
+					local header = modules.Header
+					local background = modules.Header.Background
+					background:SetAtlas(nil)
+
+					local text = modules.Header.Text
+					text:SetParent(header)
+				end
+			end
+		end
+	end)
+end 
+
+Module.PositionRetailTracker = function(self)
+	if (not ObjectiveTrackerFrame) then 
+		return self:RegisterEvent("ADDON_LOADED", "OnEvent")
+	end
+	local layout = self.layout
+
+	local ObjectiveFrameHolder = self:CreateFrame("Frame", nil, "UICenter")
+	ObjectiveFrameHolder:SetWidth(layout.Width)
+	ObjectiveFrameHolder:SetHeight(22)
+	ObjectiveFrameHolder:Place(unpack(layout.Place))
+	
+	ObjectiveTrackerFrame:SetParent(self.frame) -- taint or ok?
+	ObjectiveTrackerFrame:ClearAllPoints()
+	ObjectiveTrackerFrame:SetPoint("TOP", ObjectiveFrameHolder, "TOP")
+
+	-- Create a dummy frame to cover the tracker  
+	-- to block mouse input when it's faded out. 
+	local ObjectiveFrameCover = self:CreateFrame("Frame", nil, "UICenter")
+	ObjectiveFrameCover:SetParent(ObjectiveFrameHolder)
+	ObjectiveFrameCover:SetFrameLevel(ObjectiveTrackerFrame:GetFrameLevel() + 5)
+	ObjectiveFrameCover:SetAllPoints()
+	ObjectiveFrameCover:EnableMouse(true)
+	ObjectiveFrameCover:Hide()
+
+	-- Minihack to fix mouseover fading
+	self.frame:ClearAllPoints()
+	self.frame:SetAllPoints(ObjectiveTrackerFrame)
+	self.frame.holder = ObjectiveFrameHolder
+	self.frame.cover = ObjectiveFrameCover
+
+	local top = ObjectiveTrackerFrame:GetTop() or 0
+	local screenHeight = GetScreenHeight()
+	local maxHeight = screenHeight - (layout.SpaceBottom + layout.SpaceTop)
+	local objectiveFrameHeight = math_min(maxHeight, layout.MaxHeight)
+
+	if (layout.Scale) then 
+		ObjectiveTrackerFrame:SetScale(layout.Scale)
+		ObjectiveTrackerFrame:SetWidth(layout.Width / layout.Scale)
+		ObjectiveTrackerFrame:SetHeight(objectiveFrameHeight / layout.Scale)
+	else
+		ObjectiveTrackerFrame:SetScale(1)
+		ObjectiveTrackerFrame:SetWidth(layout.Width)
+		ObjectiveTrackerFrame:SetHeight(objectiveFrameHeight)
+	end	
+
+	ObjectiveTrackerFrame:SetClampedToScreen(false)
+	ObjectiveTrackerFrame:SetAlpha(.9)
+
+	local ObjectiveTrackerFrame_SetPosition = function(_,_, parent)
+		if parent ~= ObjectiveFrameHolder then
+			ObjectiveTrackerFrame:ClearAllPoints()
+			ObjectiveTrackerFrame:SetPoint("TOP", ObjectiveFrameHolder, "TOP")
+		end
+	end
+	hooksecurefunc(ObjectiveTrackerFrame,"SetPoint", ObjectiveTrackerFrame_SetPosition)
+
+	self:StyleRetailTracker()
+end
+
 -----------------------------------------------------------------
 -- Startup
 -----------------------------------------------------------------
@@ -401,18 +486,27 @@ Module.CreateDriver = function(self)
 
 	if (layout.HideInCombat or layout.HideInBossFights) then 
 		local driverFrame = self:CreateFrame("Frame", nil, _G.UIParent, "SecureHandlerAttributeTemplate")
-		driverFrame:HookScript("OnShow", function() 
-			if _G.QuestWatchFrame then 
-				_G.QuestWatchFrame:SetAlpha(.9)
-				self.frame.cover:Hide()
+
+		driverFrame:HookScript("OnShow", function()
+			if (ObjectiveTrackerFrame) then
+				ObjectiveTrackerFrame:SetAlpha(.9)
 			end
+			if (QuestWatchFrame) then
+				QuestWatchFrame:SetAlpha(.9)
+			end
+			self.frame.cover:Hide()
 		end)
+
 		driverFrame:HookScript("OnHide", function() 
-			if _G.QuestWatchFrame then 
-				_G.QuestWatchFrame:SetAlpha(0)
-				self.frame.cover:Show()
+			if (ObjectiveTrackerFrame) then
+				ObjectiveTrackerFrame:SetAlpha(0)
 			end
+			if (QuestWatchFrame) then
+				QuestWatchFrame:SetAlpha(0)
+			end
+			self.frame.cover:Show()
 		end)
+
 		driverFrame:SetAttribute("_onattributechanged", [=[
 			if (name == "state-vis") then
 				if (value == "show") then 
@@ -426,22 +520,43 @@ Module.CreateDriver = function(self)
 				end 
 			end
 		]=])
+
 		local driver = "hide;show"
-		if layout.HideInBossFights then 
+		if (IsRetail) and (layout.HideInArena) then 
+			driver = "[@arena1,exists][@arena2,exists][@arena3,exists][@arena4,exists][@arena5,exists]" .. driver
+		end
+		if (layout.HideInBossFights) then
 			driver = "[@boss1,exists][@boss2,exists][@boss3,exists][@boss4,exists]" .. driver
 		end 
-		if layout.HideInCombat then 
+		if (layout.HideInCombat) then
 			driver = "[combat]" .. driver
 		end 
 		RegisterAttributeDriver(driverFrame, "state-vis", driver)
+	end
+end
+
+Module.OnEvent = function(self, event, ...)
+	if (event == "ADDON_LOADED") then 
+		local addon = ...
+		if (addon == "Blizzard_ObjectiveTracker") then 
+			self:UnregisterEvent("ADDON_LOADED", "OnEvent")
+			self:PositionRetailTracker()
+		end 
 	end 
-end 
+end
 
 Module.OnInit = function(self)
 	self.layout = GetLayout(self:GetName())
 	self.frame = self:CreateFrame("Frame", nil, "UICenter")
-	self:StyleLog()
-	self:StyleTracker()
+
+	if (IsClassic) then
+		self:StyleClassicLog()
+		self:StyleClassicTracker()
+	end
+
+	if (IsRetail) then
+		self:PositionRetailTracker()
+	end
 end 
 
 Module.OnEnable = function(self)

@@ -685,9 +685,9 @@ LibMinimap.SetMinimapBlips = function(self, path, patchMin, patchMax)
 	check(patchMin, 2, "string")
 	check(patchMax, 3, "string", "nil")
 
-	local build = LibMinimap:GetBuild()
-	local buildMin = LibMinimap:GetBuildForPatch(patchMin)
-	local buildMax = LibMinimap:GetBuildForPatch(patchMax or patchMin)
+	local build = LibMinimap:GetCurrentClientBuild()
+	local buildMin = LibMinimap:GetClientBuildByPatch(patchMin)
+	local buildMax = LibMinimap:GetClientBuildByPatch(patchMax or patchMin)
 
 	-- Only apply the blips if the match the given client interval
 	if (buildMin and buildMax) and (build >= buildMin) and (build <= buildMax) then

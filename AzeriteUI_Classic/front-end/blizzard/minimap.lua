@@ -5,7 +5,7 @@ if (not Core) then
 end
 
 local L = Wheel("LibLocale"):GetLocale(ADDON)
-local Module = Core:NewModule("Minimap", "LibEvent", "LibDB", "LibMinimap", "LibTooltip", "LibTime", "LibSound", "LibPlayerData")
+local Module = Core:NewModule("Minimap", "LibEvent", "LibDB", "LibMinimap", "LibTooltip", "LibTime", "LibSound", "LibPlayerData", "LibClientBuild")
 
 -- Don't grab buttons if these are active
 local MBB = Module:IsAddOnEnabled("MBB") 
@@ -58,6 +58,10 @@ local shortLevelString = "%s %.0f"
 
 -- Constant to track player level
 local LEVEL = UnitLevel("player")
+
+-- Constants for client version
+local IsClassic = Module:IsClassic()
+local IsRetail = Module:IsRetail()
 
 ----------------------------------------------------
 -- Utility Functions
@@ -967,126 +971,131 @@ Module.SetUpMinimap = function(self)
 	Spinner[1] = ring1
 	Spinner[2] = ring2
 
-	-- Tracking button
-	local tracking = Handler:CreateOverlayFrame("Button")
-	tracking:SetFrameLevel(tracking:GetFrameLevel() + 10) -- need this above the ring frame and the rings
-	tracking:SetPoint(unpack(layout.TrackingButtonPlace))
-	tracking:SetSize(unpack(layout.TrackingButtonSize))
-	tracking:EnableMouse(true)
-	tracking:RegisterForClicks("AnyUp")
-	tracking._owner = Handler
+	-- Classic Tracking button
+	if (IsClassic) then
+		local tracking = Handler:CreateOverlayFrame("Button")
+		tracking:SetFrameLevel(tracking:GetFrameLevel() + 10) -- need this above the ring frame and the rings
+		tracking:SetPoint(unpack(layout.TrackingButtonPlace))
+		tracking:SetSize(unpack(layout.TrackingButtonSize))
+		tracking:EnableMouse(true)
+		tracking:RegisterForClicks("AnyUp")
+		tracking._owner = Handler
 
-	local trackingBackdrop = tracking:CreateTexture()
-	trackingBackdrop:SetDrawLayer("BACKGROUND")
-	trackingBackdrop:SetSize(unpack(layout.TrackingButtonBackdropSize))
-	trackingBackdrop:SetPoint("CENTER", 0, 0)
-	trackingBackdrop:SetTexture(layout.TrackingButtonBackdropTexture)
-	trackingBackdrop:SetVertexColor(unpack(layout.TrackingButtonBackdropColor))
+		local trackingBackdrop = tracking:CreateTexture()
+		trackingBackdrop:SetDrawLayer("BACKGROUND")
+		trackingBackdrop:SetSize(unpack(layout.TrackingButtonBackdropSize))
+		trackingBackdrop:SetPoint("CENTER", 0, 0)
+		trackingBackdrop:SetTexture(layout.TrackingButtonBackdropTexture)
+		trackingBackdrop:SetVertexColor(unpack(layout.TrackingButtonBackdropColor))
 
-	local trackingTextureBg = tracking:CreateTexture()
-	trackingTextureBg:SetDrawLayer("ARTWORK", 0)
-	trackingTextureBg:SetPoint("CENTER")
-	trackingTextureBg:SetSize(unpack(layout.TrackingButtonIconBgSize))
-	trackingTextureBg:SetTexture(layout.TrackingButtonIconBgTexture)
-	trackingTextureBg:SetVertexColor(0,0,0,1)
+		local trackingTextureBg = tracking:CreateTexture()
+		trackingTextureBg:SetDrawLayer("ARTWORK", 0)
+		trackingTextureBg:SetPoint("CENTER")
+		trackingTextureBg:SetSize(unpack(layout.TrackingButtonIconBgSize))
+		trackingTextureBg:SetTexture(layout.TrackingButtonIconBgTexture)
+		trackingTextureBg:SetVertexColor(0,0,0,1)
 
-	local trackingTexture = tracking:CreateTexture()
-	trackingTexture:SetDrawLayer("ARTWORK", 1)
-	trackingTexture:SetPoint("CENTER")
-	trackingTexture:SetSize(unpack(layout.TrackingButtonIconSize))
-	trackingTexture:SetMask(layout.TrackingButtonIconMask)
-	trackingTexture:SetTexture(GetTrackingTexture())
-	tracking.Texture = trackingTexture
+		local trackingTexture = tracking:CreateTexture()
+		trackingTexture:SetDrawLayer("ARTWORK", 1)
+		trackingTexture:SetPoint("CENTER")
+		trackingTexture:SetSize(unpack(layout.TrackingButtonIconSize))
+		trackingTexture:SetMask(layout.TrackingButtonIconMask)
+		trackingTexture:SetTexture(GetTrackingTexture())
+		tracking.Texture = trackingTexture
 
-	local trackingMenuFrame = CreateFrame("Frame", ADDON.."MinimapTrackingButtonMenu", tracking, "UIDropDownMenuTemplate")
+		local trackingMenuFrame = CreateFrame("Frame", ADDON.."MinimapTrackingButtonMenu", tracking, "UIDropDownMenuTemplate")
 
-	tracking.ShowMenu = function(self)
-		local hasTracking
-		local trackingMenu = { { text = "Select Tracking", isTitle = true } }
-		for _,spellID in ipairs({
-			 1494, --Track Beasts
-			19883, --Track Humanoids
-			19884, --Track Undead
-			19885, --Track Hidden
-			19880, --Track Elementals
-			19878, --Track Demons
-			19882, --Track Giants
-			19879, --Track Dragonkin
-				5225, --Track Humanoids: Druid
-				5500, --Sense Demons
-				5502, --Sense Undead
-				2383, --Find Herbs
-				2580, --Find Minerals
-				2481  --Find Treasure
-		}) do
-			if (IsPlayerSpell(spellID)) then
-				hasTracking = true
-				local spellName = GetSpellInfo(spellID)
-				local spellTexture = GetSpellTexture(spellID)
-				table_insert(trackingMenu, {
-					text = spellName,
-					icon = spellTexture,
-					func = function() CastSpellByID(spellID) end
-				})
+		tracking.ShowMenu = function(self)
+			local hasTracking
+			local trackingMenu = { { text = "Select Tracking", isTitle = true } }
+			for _,spellID in ipairs({
+				1494, --Track Beasts
+				19883, --Track Humanoids
+				19884, --Track Undead
+				19885, --Track Hidden
+				19880, --Track Elementals
+				19878, --Track Demons
+				19882, --Track Giants
+				19879, --Track Dragonkin
+					5225, --Track Humanoids: Druid
+					5500, --Sense Demons
+					5502, --Sense Undead
+					2383, --Find Herbs
+					2580, --Find Minerals
+					2481  --Find Treasure
+			}) do
+				if (IsPlayerSpell(spellID)) then
+					hasTracking = true
+					local spellName = GetSpellInfo(spellID)
+					local spellTexture = GetSpellTexture(spellID)
+					table_insert(trackingMenu, {
+						text = spellName,
+						icon = spellTexture,
+						func = function() CastSpellByID(spellID) end
+					})
+				end
 			end
+			if hasTracking then 
+				EasyMenu(trackingMenu, trackingMenuFrame, "cursor", 0 , 0, "MENU")
+			end 
 		end
-		if hasTracking then 
-			EasyMenu(trackingMenu, trackingMenuFrame, "cursor", 0 , 0, "MENU")
-		end 
+
+		tracking:SetScript("OnClick", Tracking_OnClick)
+		tracking:SetScript("OnEnter", Tracking_OnEnter)
+		tracking:SetScript("OnLeave", Tracking_OnLeave)
+
+		Minimap:SetScript("OnMouseUp", function(_, button)
+			if (button == "RightButton") then
+				tracking:ShowMenu()
+			else
+				Minimap_OnClick(Minimap)
+			end
+		end)
+
+		self:RegisterEvent("UNIT_AURA", "OnEvent")
+
+		Handler.Tracking = tracking
 	end
 
-	tracking:SetScript("OnClick", Tracking_OnClick)
-	tracking:SetScript("OnEnter", Tracking_OnEnter)
-	tracking:SetScript("OnLeave", Tracking_OnLeave)
+	-- Classic battleground eye
+	if (IsClassic) then
+		local BGFrame = MiniMapBattlefieldFrame
+		local BGFrameBorder = MiniMapBattlefieldBorder
+		local BGIcon = MiniMapBattlefieldIcon
 
-	Minimap:SetScript("OnMouseUp", function(_, button)
-		if (button == "RightButton") then
-			tracking:ShowMenu()
-		else
-			Minimap_OnClick(Minimap)
+		if BGFrame then
+			local button = Handler:CreateOverlayFrame()
+			button:SetFrameLevel(button:GetFrameLevel() + 10) 
+			button:Place(unpack(layout.BattleGroundEyePlace))
+			button:SetSize(unpack(layout.BattleGroundEyeSize))
+
+			local point, x, y = unpack(layout.BattleGroundEyePlace)
+
+			-- For some reason any other points 
+			BGFrame:ClearAllPoints()
+			BGFrame:SetPoint("TOPRIGHT", Minimap, -4, -2)
+			BGFrame:SetHitRectInsets(-8, -8, -8, -8)
+			BGFrameBorder:Hide()
+			BGIcon:SetAlpha(0)
+		
+			local eye = button:CreateTexture()
+			eye:SetDrawLayer("OVERLAY", 1)
+			eye:SetPoint("CENTER", 0, 0)
+			eye:SetSize(unpack(layout.BattleGroundEyeSize))
+			eye:SetTexture(layout.BattleGroundEyeTexture)
+			eye:SetVertexColor(unpack(layout.BattleGroundEyeColor))
+			eye:SetShown(BGFrame:IsShown())
+
+			tracking:Place(unpack(BGFrame:IsShown() and layout.TrackingButtonPlaceAlternate or layout.TrackingButtonPlace))
+			BGFrame:HookScript("OnShow", function() 
+				eye:Show()
+				tracking:Place(unpack(layout.TrackingButtonPlaceAlternate))
+			end)
+			BGFrame:HookScript("OnHide", function() 
+				eye:Hide()
+				tracking:Place(unpack(layout.TrackingButtonPlace))
+			end)
 		end
-	end)
-
-	self:RegisterEvent("UNIT_AURA", "OnEvent")
-
-	Handler.Tracking = tracking
-
-	local BGFrame = MiniMapBattlefieldFrame
-	local BGFrameBorder = MiniMapBattlefieldBorder
-	local BGIcon = MiniMapBattlefieldIcon
-
-	if BGFrame then
-		local button = Handler:CreateOverlayFrame()
-		button:SetFrameLevel(button:GetFrameLevel() + 10) 
-		button:Place(unpack(layout.BattleGroundEyePlace))
-		button:SetSize(unpack(layout.BattleGroundEyeSize))
-
-		local point, x, y = unpack(layout.BattleGroundEyePlace)
-
-		-- For some reason any other points 
-		BGFrame:ClearAllPoints()
-		BGFrame:SetPoint("TOPRIGHT", Minimap, -4, -2)
-		BGFrame:SetHitRectInsets(-8, -8, -8, -8)
-		BGFrameBorder:Hide()
-		BGIcon:SetAlpha(0)
-	
-		local eye = button:CreateTexture()
-		eye:SetDrawLayer("OVERLAY", 1)
-		eye:SetPoint("CENTER", 0, 0)
-		eye:SetSize(unpack(layout.BattleGroundEyeSize))
-		eye:SetTexture(layout.BattleGroundEyeTexture)
-		eye:SetVertexColor(unpack(layout.BattleGroundEyeColor))
-		eye:SetShown(BGFrame:IsShown())
-
-		tracking:Place(unpack(BGFrame:IsShown() and layout.TrackingButtonPlaceAlternate or layout.TrackingButtonPlace))
-		BGFrame:HookScript("OnShow", function() 
-			eye:Show()
-			tracking:Place(unpack(layout.TrackingButtonPlaceAlternate))
-		end)
-		BGFrame:HookScript("OnHide", function() 
-			eye:Hide()
-			tracking:Place(unpack(layout.TrackingButtonPlace))
-		end)
 	end
 
 end 
@@ -1349,13 +1358,15 @@ Module.UpdateBars = function(self, event, ...)
 end
 
 Module.UpdateTracking = function(self)
-	local Handler = self:GetMinimapHandler()
-	local icon = GetTrackingTexture()
-	if (icon) then
-		Handler.Tracking.Texture:SetTexture(icon)
-		Handler.Tracking:Show()
-	else
-		Handler.Tracking:Hide()
+	if (IsClassic) then
+		local Handler = self:GetMinimapHandler()
+		local icon = GetTrackingTexture()
+		if (icon) then
+			Handler.Tracking.Texture:SetTexture(icon)
+			Handler.Tracking:Show()
+		else
+			Handler.Tracking:Hide()
+		end
 	end
 end
 

@@ -77,7 +77,7 @@ for i,global in ipairs({
 		-- Convert a global string into a useable search pattern
 		msg = string_gsub(msg, "%[", "%%[");
 		msg = string_gsub(msg, "%]", "%%]");
-		msg = string_gsub(msg, "%%s", "(.-)")
+		msg = string_gsub(msg, "%%[d/s]", "(.-)")
 		table_insert(FilteredGlobals, msg)
 	end
 end
@@ -166,11 +166,9 @@ end
 
 local OnChatMessage = function(self, event, message, author, ...)
 	-- Filter out various battleground spam
-	if (event == "CHAT_MSG_SYSTEM") then
-		for i,pattern in ipairs(FilteredGlobals) do
-			if (string_match(message,pattern)) then
-				return true
-			end
+	for i,pattern in ipairs(FilteredGlobals) do
+		if (string_match(message,pattern)) then
+			return true
 		end
 	end
 	-- Pass everything else through
@@ -359,7 +357,12 @@ Module.StopBlizzardFilter = function(self)
 end
 
 Module.UpdateChatFilters = function(self)
+	local enable
 	if (self.db.enableBGSpamFilter) then
+		local _, instanceType = IsInInstance()
+		enable = (instanceType == "pvp")
+	end
+	if (enable) then
 		ChatFrame_AddMessageEventFilter("CHAT_MSG_SYSTEM", OnChatMessage)
 		self:StopBlizzardFilter()
 	else

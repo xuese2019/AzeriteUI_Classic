@@ -1,10 +1,12 @@
-local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 47)
+local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 48)
 if (not LibTooltipScanner) then	
 	return
 end
 
+local LibClientBuild = Wheel("LibClientBuild")
+assert(LibClientBuild, "LibTooltipScanner requires LibClientBuild to be loaded.")
+
 -- Lua API
-local _G = _G
 local assert = assert
 local debugstack = debugstack
 local error = error
@@ -21,42 +23,46 @@ local tonumber = tonumber
 local type = type
 
 -- WoW API
-local CreateFrame = _G.CreateFrame
-local GetAchievementInfo = _G.GetAchievementInfo
-local GetActionCharges = _G.GetActionCharges
-local GetActionCooldown = _G.GetActionCooldown
-local GetActionCount = _G.GetActionCount
-local GetActionLossOfControlCooldown = _G.GetActionLossOfControlCooldown
-local GetActionText = _G.GetActionText
-local GetActionTexture = _G.GetActionTexture
-local GetDetailedItemLevelInfo = _G.GetDetailedItemLevelInfo 
-local GetGuildBankItemInfo = _G.GetSpecializationRole
-local GetGuildInfo = _G.GetGuildInfo
-local GetItemInfo = _G.GetItemInfo
-local GetItemQualityColor = _G.GetItemQualityColor
-local GetItemStats = _G.GetItemStats
-local GetSpecialization = _G.GetSpecialization
-local GetSpecializationInfo = _G.GetSpecializationInfo
-local GetSpecializationRole = _G.GetSpecializationRole
-local GetSpellInfo = _G.GetSpellInfo
-local GetTrackingTexture = _G.GetTrackingTexture
-local HasAction = _G.HasAction
-local IsActionInRange = _G.IsActionInRange
-local UnitClass = _G.UnitClass 
-local UnitClassification = _G.UnitClassification
-local UnitCreatureFamily = _G.UnitCreatureFamily
-local UnitCreatureType = _G.UnitCreatureType
-local UnitExists = _G.UnitExists
-local UnitEffectiveLevel = _G.UnitEffectiveLevel
-local UnitFactionGroup = _G.UnitFactionGroup
-local UnitIsDead = _G.UnitIsDead
-local UnitIsGhost = _G.UnitIsGhost
-local UnitIsPlayer = _G.UnitIsPlayer
-local UnitLevel = _G.UnitLevel
-local UnitName = _G.UnitName
-local UnitRace = _G.UnitRace
-local UnitReaction = _G.UnitReaction
-local DoesSpellExist = _G.C_Spell.DoesSpellExist 
+local CreateFrame = CreateFrame
+local GetAchievementInfo = GetAchievementInfo
+local GetActionCharges = GetActionCharges
+local GetActionCooldown = GetActionCooldown
+local GetActionCount = GetActionCount
+local GetActionLossOfControlCooldown = GetActionLossOfControlCooldown
+local GetActionText = GetActionText
+local GetActionTexture = GetActionTexture
+local GetDetailedItemLevelInfo = GetDetailedItemLevelInfo 
+local GetGuildBankItemInfo = GetSpecializationRole
+local GetGuildInfo = GetGuildInfo
+local GetItemInfo = GetItemInfo
+local GetItemQualityColor = GetItemQualityColor
+local GetItemStats = GetItemStats
+local GetSpecialization = GetSpecialization
+local GetSpecializationInfo = GetSpecializationInfo
+local GetSpecializationRole = GetSpecializationRole
+local GetSpellInfo = GetSpellInfo
+local GetTrackingTexture = GetTrackingTexture
+local HasAction = HasAction
+local IsActionInRange = IsActionInRange
+local UnitClass = UnitClass 
+local UnitClassification = UnitClassification
+local UnitCreatureFamily = UnitCreatureFamily
+local UnitCreatureType = UnitCreatureType
+local UnitExists = UnitExists
+local UnitEffectiveLevel = UnitEffectiveLevel
+local UnitFactionGroup = UnitFactionGroup
+local UnitIsDead = UnitIsDead
+local UnitIsGhost = UnitIsGhost
+local UnitIsPlayer = UnitIsPlayer
+local UnitLevel = UnitLevel
+local UnitName = UnitName
+local UnitRace = UnitRace
+local UnitReaction = UnitReaction
+local DoesSpellExist = C_Spell.DoesSpellExist 
+
+-- Constants for client version
+local IsClassic = LibClientBuild:IsClassic()
+local IsRetail = LibClientBuild:IsRetail()
 
 LibTooltipScanner.embeds = LibTooltipScanner.embeds or {}
 
@@ -93,55 +99,55 @@ local pvpRanks = {
 ---------------------------------------------------------
 -- Localized Constants
 local Constants = {
-	CastChanneled = _G.SPELL_CAST_CHANNELED, 
-	CastInstant = _G.SPELL_RECAST_TIME_CHARGEUP_INSTANT,
-	CastNextMelee = _G.SPELL_ON_NEXT_SWING, 
-	CastNextRanged = _G.SPELL_ON_NEXT_RANGED, 
-	CastTimeMin = _G.SPELL_CAST_TIME_MIN,
-	CastTimeSec = _G.SPELL_CAST_TIME_SEC, 
-	ContainerSlots = _G.CONTAINER_SLOTS, 
+	CastChanneled = SPELL_CAST_CHANNELED, 
+	CastInstant = SPELL_RECAST_TIME_CHARGEUP_INSTANT,
+	CastNextMelee = SPELL_ON_NEXT_SWING, 
+	CastNextRanged = SPELL_ON_NEXT_RANGED, 
+	CastTimeMin = SPELL_CAST_TIME_MIN,
+	CastTimeSec = SPELL_CAST_TIME_SEC, 
+	ContainerSlots = CONTAINER_SLOTS, 
 
-	CooldownRemaining = _G.COOLDOWN_REMAINING,
-	CooldownTimeRemaining1 = _G.ITEM_COOLDOWN_TIME,
-	CooldownTimeRemaining2 = _G.ITEM_COOLDOWN_TIME_MIN,
-	CooldownTimeRemaining3 = _G.ITEM_COOLDOWN_TIME_SEC,
+	CooldownRemaining = COOLDOWN_REMAINING,
+	CooldownTimeRemaining1 = ITEM_COOLDOWN_TIME,
+	CooldownTimeRemaining2 = ITEM_COOLDOWN_TIME_MIN,
+	CooldownTimeRemaining3 = ITEM_COOLDOWN_TIME_SEC,
 
-	RechargeTimeRemaining1 = _G.SPELL_RECHARGE_TIME,
-	RechargeTimeRemaining2 = _G.SPELL_RECHARGE_TIME_MIN,
-	RechargeTimeRemaining3 = _G.SPELL_RECHARGE_TIME_SEC,
+	RechargeTimeRemaining1 = SPELL_RECHARGE_TIME,
+	RechargeTimeRemaining2 = SPELL_RECHARGE_TIME_MIN,
+	RechargeTimeRemaining3 = SPELL_RECHARGE_TIME_SEC,
 
-	ItemBoundAccount = _G.ITEM_ACCOUNTBOUND,
-	ItemBoundBnet = _G.ITEM_BNETACCOUNTBOUND,
-	ItemBoundSoul = _G.ITEM_SOULBOUND,
-	ItemBlock = _G.SHIELD_BLOCK_TEMPLATE,
-	ItemDamage = _G.DAMAGE_TEMPLATE,
-	ItemDurability = _G.DURABILITY_TEMPLATE,
-	ItemLevel = _G.ITEM_LEVEL,
-	ItemReqLevel = _G.ITEM_MIN_LEVEL, 
-	ItemSellPrice = _G.SELL_PRICE, 
-	ItemUnique = _G.ITEM_UNIQUE, -- "Unique"
-	ItemUniqueEquip = _G.ITEM_UNIQUE_EQUIPPABLE, -- "Unique-Equipped"
-	ItemUniqueMultiple = _G.ITEM_UNIQUE_MULTIPLE, -- "Unique (%d)"
-	ItemEquipEffect = _G.ITEM_SPELL_TRIGGER_ONEQUIP, -- "Equip:"
-	ItemUseEffect = _G.ITEM_SPELL_TRIGGER_ONUSE, -- "Use:"
-	Level = _G.LEVEL,
+	ItemBoundAccount = ITEM_ACCOUNTBOUND,
+	ItemBoundBnet = ITEM_BNETACCOUNTBOUND,
+	ItemBoundSoul = ITEM_SOULBOUND,
+	ItemBlock = SHIELD_BLOCK_TEMPLATE,
+	ItemDamage = DAMAGE_TEMPLATE,
+	ItemDurability = DURABILITY_TEMPLATE,
+	ItemLevel = ITEM_LEVEL,
+	ItemReqLevel = ITEM_MIN_LEVEL, 
+	ItemSellPrice = SELL_PRICE, 
+	ItemUnique = ITEM_UNIQUE, -- "Unique"
+	ItemUniqueEquip = ITEM_UNIQUE_EQUIPPABLE, -- "Unique-Equipped"
+	ItemUniqueMultiple = ITEM_UNIQUE_MULTIPLE, -- "Unique (%d)"
+	ItemEquipEffect = ITEM_SPELL_TRIGGER_ONEQUIP, -- "Equip:"
+	ItemUseEffect = ITEM_SPELL_TRIGGER_ONUSE, -- "Use:"
+	Level = LEVEL,
 
-	PowerType1 = _G.POWER_TYPE_ENERGY,
-	PowerType2 = _G.POWER_TYPE_FOCUS,
-	PowerType3 = _G.POWER_TYPE_MANA,
-	PowerType4 = _G.POWER_TYPE_RED_POWER,
+	PowerType1 = POWER_TYPE_ENERGY,
+	PowerType2 = POWER_TYPE_FOCUS,
+	PowerType3 = POWER_TYPE_MANA,
+	PowerType4 = POWER_TYPE_RED_POWER,
 
-	RangeCaster = _G.SPELL_RANGE_AREA,
-	RangeMelee = _G.MELEE_RANGE,
-	RangeSpell = _G.SPELL_RANGE, -- SPELL_RANGE_DUAL = "%1$s: %2$s yd range"
-	RangeUnlimited = _G.SPELL_RANGE_UNLIMITED, 
+	RangeCaster = SPELL_RANGE_AREA,
+	RangeMelee = MELEE_RANGE,
+	RangeSpell = SPELL_RANGE, -- SPELL_RANGE_DUAL = "%1$s: %2$s yd range"
+	RangeUnlimited = SPELL_RANGE_UNLIMITED, 
 
-	SpellRequiresForm = _G.SPELL_REQUIRED_FORM, 
+	SpellRequiresForm = SPELL_REQUIRED_FORM, 
 
-	UnitSkinnable1 = _G.UNIT_SKINNABLE_LEATHER, -- "Skinnable"
-	UnitSkinnable2 = _G.UNIT_SKINNABLE_BOLTS, -- "Requires Engineering"
-	UnitSkinnable3 = _G.UNIT_SKINNABLE_HERB, -- "Requires Herbalism"
-	UnitSkinnable4 = _G.UNIT_SKINNABLE_ROCK, -- "Requires Mining"
+	UnitSkinnable1 = UNIT_SKINNABLE_LEATHER, -- "Skinnable"
+	UnitSkinnable2 = UNIT_SKINNABLE_BOLTS, -- "Requires Engineering"
+	UnitSkinnable3 = UNIT_SKINNABLE_HERB, -- "Requires Herbalism"
+	UnitSkinnable4 = UNIT_SKINNABLE_ROCK, -- "Requires Mining"
 }
 
 local singlePattern = function(msg, plain)
@@ -183,14 +189,14 @@ local Patterns = {
 	Level = 						   Constants.Level,
 
 	-- For aura scanning
-	AuraTimeRemaining1 =  			   singlePattern(_G.SPELL_TIME_REMAINING_DAYS),
-	AuraTimeRemaining2 = 			   singlePattern(_G.SPELL_TIME_REMAINING_HOURS),
-	AuraTimeRemaining3 = 			   singlePattern(_G.SPELL_TIME_REMAINING_MIN),
-	AuraTimeRemaining4 = 			   singlePattern(_G.SPELL_TIME_REMAINING_SEC),
-	AuraTimeRemaining5 = 			   pluralPattern(_G.SPELL_TIME_REMAINING_DAYS),
-	AuraTimeRemaining6 = 			   pluralPattern(_G.SPELL_TIME_REMAINING_HOURS),
-	AuraTimeRemaining7 = 			   pluralPattern(_G.SPELL_TIME_REMAINING_MIN),
-	AuraTimeRemaining8 = 			   pluralPattern(_G.SPELL_TIME_REMAINING_SEC),
+	AuraTimeRemaining1 =  			   singlePattern(SPELL_TIME_REMAINING_DAYS),
+	AuraTimeRemaining2 = 			   singlePattern(SPELL_TIME_REMAINING_HOURS),
+	AuraTimeRemaining3 = 			   singlePattern(SPELL_TIME_REMAINING_MIN),
+	AuraTimeRemaining4 = 			   singlePattern(SPELL_TIME_REMAINING_SEC),
+	AuraTimeRemaining5 = 			   pluralPattern(SPELL_TIME_REMAINING_DAYS),
+	AuraTimeRemaining6 = 			   pluralPattern(SPELL_TIME_REMAINING_HOURS),
+	AuraTimeRemaining7 = 			   pluralPattern(SPELL_TIME_REMAINING_MIN),
+	AuraTimeRemaining8 = 			   pluralPattern(SPELL_TIME_REMAINING_SEC),
 
 	-- Total Cast Time
 	CastTime1 = 				"^" .. Constants.CastInstant, 
@@ -1563,7 +1569,11 @@ LibTooltipScanner.GetTooltipDataForUnit = function(self, unit, tbl)
 			local isPVP = UnitIsPVP(unit)
 			local isFFA = UnitIsPVPFreeForAll(unit)
 			local pvpName = UnitPVPName(unit)
-			local pvpRankName, pvpRankNumber = GetPVPRankInfo(UnitPVPRank(unit))
+			local pvpRankName, pvpRankNumber
+
+			if (GetPVPRankInfo) and (UnitPVPRank) then
+				pvpRankName, pvpRankNumber = GetPVPRankInfo(UnitPVPRank(unit))
+			end
 
 			-- Correct the rank names according to faction,
 			-- as the above function only returns the names

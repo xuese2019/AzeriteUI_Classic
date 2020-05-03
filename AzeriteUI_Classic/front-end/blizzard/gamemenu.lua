@@ -194,10 +194,15 @@ Module.StyleWindow = function(self, frame)
 	end
 
 	-- 8.2.0 weirdness
-	if self.frame.Border then 
+	if (self.frame.Border) then 
 		self.frame.Border:SetParent(self.UIHider)
 	end
 
+	-- 8.3.0 weirdness
+	if (self.frame.Header) then 
+		self.frame.Header:SetParent(self.UIHider)
+	end
+	
 end
 
 Module.OnInit = function(self)

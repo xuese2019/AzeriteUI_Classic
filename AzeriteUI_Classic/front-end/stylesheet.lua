@@ -1486,6 +1486,7 @@ local UnitFrame_Aura_PostUpdateButton = function(element, button)
 	local isFriend = UnitIsFriend("player", button.unit)
 	local isYou = UnitIsUnit("player", button.unit)
 
+	-- Border
 	if (isFriend) then
 		if button.isBuff then 
 			local color = layout.AuraBorderBackdropBorderColor
@@ -1504,8 +1505,8 @@ local UnitFrame_Aura_PostUpdateButton = function(element, button)
 			if color then 
 				button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
 			end 
-		elseif button.isBuff then 
-			local color = colors.quest.green or layout.AuraBorderBackdropBorderColor
+		elseif (button.isBuff) then 
+			local color = layout.AuraBorderBackdropBorderColor -- colors.quest.green
 			if color then 
 				button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
 			end 
@@ -1516,7 +1517,8 @@ local UnitFrame_Aura_PostUpdateButton = function(element, button)
 				button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
 			end 
 		end
-	end 
+	end
+
 	-- Icon
 	if (isYou) then
 		button.Icon:SetDesaturated(false)
@@ -1909,20 +1911,30 @@ local Layouts = {}
 -- Addon Core
 Layouts[ADDON] = {
 	DisableUIWidgets = {
-		ActionBars = true, 
+		ActionBars = true,
 		Auras = true,
+		BuffTimer = true, -- Retail
 		CaptureBar = true,
 		CastBars = true,
+		Chat = true,
 		Durability = true,
+		LevelUpDisplay = true, -- Retail
 		Minimap = true,
-		--QuestWatchFrame = true, 
+		OrderHall = true,
+		ObjectiveTracker = true, -- Retail
+		PlayerPowerBarAlt = true, -- Retail
+		--QuestWatchFrame = true, -- Classic
+		TotemFrame = true, -- Retail
+		Tutorials = true,
 		UnitFramePlayer = true,
 		UnitFramePet = true,
 		UnitFrameTarget = true,
 		UnitFrameToT = true,
+		UnitFrameFocus = true, -- Retail
 		UnitFrameParty = true,
 		--UnitFrameRaid = true,
-		UnitFrameBoss = true,
+		UnitFrameBoss = true, -- Retail
+		UnitFrameArena = true, -- Classic TBC, Retail
 		--Warnings = true,
 		ZoneText = true
 	},
@@ -2066,8 +2078,9 @@ Layouts.BlizzardTimers = {
 Layouts.BlizzardObjectivesTracker = {
 	FontObject = GetFont(13, true),
 	FontObjectTitle = GetFont(15, true),
+	HideInArena = true, -- Retail/TBC
 	HideInBossFights = true,
-	HideInCombat = false, 
+	HideInCombat = false,
 	MaxHeight = 1080 - (260 + 380),
 	Place = { "BOTTOMRIGHT", -60, 380 },
 	Scale = 1.0, 

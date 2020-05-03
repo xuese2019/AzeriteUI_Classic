@@ -1,5 +1,11 @@
-local LibSpellData = Wheel:Set("LibSpellData", -1)
-if (not LibSpellData) then	
+-- This library is for Classic only!
+local LibClientBuild = Wheel("LibClientBuild")
+if (not LibClientBuild) or (not LibClientBuild:IsClassic()) then
+	return
+end
+
+local LibSpellData = Wheel:Set("LibSpellData", 1)
+if (not LibSpellData) then
 	return
 end
 

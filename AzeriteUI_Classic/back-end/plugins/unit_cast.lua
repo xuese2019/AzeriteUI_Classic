@@ -1,8 +1,10 @@
 local LibCast = Wheel("LibCast")
 assert(LibCast, "UnitCast requires LibCast to be loaded.")
 
+local LibClientBuild = Wheel("LibClientBuild")
+assert(LibCast, "UnitCast requires LibClientBuild to be loaded.")
+
 -- Lua API
-local _G = _G
 local math_floor = math.floor
 local string_find = string.find
 local string_match = string.match
@@ -10,23 +12,27 @@ local tonumber = tonumber
 local tostring = tostring
 
 -- WoW API
-local GetCVar = _G.GetCVar
-local GetNetStats = _G.GetNetStats
-local GetTime = _G.GetTime
-local UnitClass = _G.UnitClass
-local UnitExists = _G.UnitExists
-local UnitGUID = _G.UnitGUID
-local UnitIsPlayer = _G.UnitIsPlayer
-local UnitIsUnit = _G.UnitIsUnit
-local UnitReaction = _G.UnitReaction
+local GetCVar = GetCVar
+local GetNetStats = GetNetStats
+local GetTime = GetTime
+local UnitClass = UnitClass
+local UnitExists = UnitExists
+local UnitGUID = UnitGUID
+local UnitIsPlayer = UnitIsPlayer
+local UnitIsUnit = UnitIsUnit
+local UnitReaction = UnitReaction
 
 -- Localization
-local L_FAILED = _G.FAILED
-local L_INTERRUPTED = _G.INTERRUPTED
-local L_MILLISECONDS_ABBR = _G.MILLISECONDS_ABBR
+local L_FAILED = FAILED
+local L_INTERRUPTED = INTERRUPTED
+local L_MILLISECONDS_ABBR = MILLISECONDS_ABBR
 
 -- Constants
 local DAY, HOUR, MINUTE = 86400, 3600, 60
+
+-- Constants for client version
+local IsClassic = LibClientBuild:IsClassic()
+local IsRetail = LibClientBuild:IsRetail()
 
 -- Define it here so it can call itself later on
 local Update
@@ -303,6 +309,12 @@ local OnUpdate = function(element, elapsed)
 	end
 end 
 
+if (IsClassic) then
+end
+
+if (IsRetail) then
+end
+
 Update = function(self, event, unit, ...)
 	-- This just messes with our system here.
 	if (event == "FrequentUpdate") then 
@@ -571,30 +583,19 @@ local Enable = function(self)
 		element.ForceUpdate = ForceUpdate
 		element:Hide()
 
-		local unit = self.unit
-		if (unit == "player") then 
-			self:RegisterEvent("UNIT_SPELLCAST_START", Proxy)
-			self:RegisterEvent("UNIT_SPELLCAST_FAILED", Proxy)
-			self:RegisterEvent("UNIT_SPELLCAST_STOP", Proxy)
-			self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED", Proxy)
-			self:RegisterEvent("UNIT_SPELLCAST_DELAYED", Proxy)
-			self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START", Proxy)
-			self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE", Proxy)
-			self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP", Proxy)
-		else
-			if (unit == "target") or (unit == "targettarget") then
-				self:RegisterEvent("PLAYER_TARGET_CHANGED", Proxy, true)
-			end
-			self:RegisterMessage("GP_SPELL_CAST_START", Proxy)
-			self:RegisterMessage("GP_SPELL_CAST_STOP", Proxy)
-			self:RegisterMessage("GP_SPELL_CAST_FAILED", Proxy)
-			self:RegisterMessage("GP_SPELL_CAST_SUCCESS", Proxy)
-			self:RegisterMessage("GP_SPELL_CAST_INTERRUPTED", Proxy)
-			self:RegisterMessage("GP_SPELL_CAST_DELAYED", Proxy)
-			self:RegisterMessage("GP_SPELL_CAST_CHANNEL_START", Proxy)
-			self:RegisterMessage("GP_SPELL_CAST_CHANNEL_UPDATE", Proxy)
-			self:RegisterMessage("GP_SPELL_CAST_CHANNEL_STOP", Proxy)
+		if (self.unit == "target") or (self.unit == "targettarget") then
+			self:RegisterEvent("PLAYER_TARGET_CHANGED", Proxy, true)
 		end
+
+		self:RegisterMessage("GP_SPELL_CAST_START", Proxy)
+		self:RegisterMessage("GP_SPELL_CAST_STOP", Proxy)
+		self:RegisterMessage("GP_SPELL_CAST_FAILED", Proxy)
+		self:RegisterMessage("GP_SPELL_CAST_SUCCESS", Proxy)
+		self:RegisterMessage("GP_SPELL_CAST_INTERRUPTED", Proxy)
+		self:RegisterMessage("GP_SPELL_CAST_DELAYED", Proxy)
+		self:RegisterMessage("GP_SPELL_CAST_CHANNEL_START", Proxy)
+		self:RegisterMessage("GP_SPELL_CAST_CHANNEL_UPDATE", Proxy)
+		self:RegisterMessage("GP_SPELL_CAST_CHANNEL_STOP", Proxy)
 
 		element.UpdateColor = UpdateColor
 
@@ -634,5 +635,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 39)
+	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 41)
 end 

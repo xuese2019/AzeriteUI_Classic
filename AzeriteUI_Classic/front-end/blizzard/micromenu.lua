@@ -3,7 +3,7 @@ local Core = Wheel("LibModule"):GetModule(ADDON)
 if (not Core) then 
 	return 
 end
-local Module = Core:NewModule("BlizzardMicroMenu", "LibEvent", "LibDB", "LibTooltip", "LibFrame")
+local Module = Core:NewModule("BlizzardMicroMenu", "LibEvent", "LibDB", "LibTooltip", "LibFrame", "LibClientBuild")
 
 -- Lua API
 local _G = _G
@@ -11,24 +11,29 @@ local ipairs = ipairs
 local math_floor = math.floor
 local pairs = pairs
 local string_format = string.format
+local table_insert = table.insert
 
 -- WoW API
-local GetAvailableBandwidth = _G.GetAvailableBandwidth
-local GetBindingKey = _G.GetBindingKey
-local GetBindingText = _G.GetBindingText
-local GetCVarBool = _G.GetCVarBool
-local GetDownloadedPercentage = _G.GetDownloadedPercentage
-local GetFramerate = _G.GetFramerate
-local GetMovieDownloadProgress = _G.GetMovieDownloadProgress
-local GetNetStats = _G.GetNetStats
+local GetAvailableBandwidth = GetAvailableBandwidth
+local GetBindingKey = GetBindingKey
+local GetBindingText = GetBindingText
+local GetCVarBool = GetCVarBool
+local GetDownloadedPercentage = GetDownloadedPercentage
+local GetFramerate = GetFramerate
+local GetMovieDownloadProgress = GetMovieDownloadProgress
+local GetNetStats = GetNetStats
 
 -- Private API
 local Colors = Private.Colors
 local GetLayout = Private.GetLayout
 
+-- Constants for client version
+local IsClassic = Module:IsClassic()
+local IsRetail = Module:IsRetail()
+
+-- All this shit needs to go!!
 local BLANK_TEXTURE = [[Interface\ChatFrame\ChatFrameBackground]]
 local buttonWidth, buttonHeight, buttonSpacing, sizeMod = 300,50,10, .75
-
 local L = Wheel("LibLocale"):GetLocale(ADDON)
 local Layout = GetLayout(Module:GetName())
 
@@ -64,31 +69,59 @@ local getMicroButtonTooltipText = function(text, action)
 	return formatBindingKeyIntoText(text, action, "%s %s", NORMAL_FONT_COLOR_CODE.."(%s)"..FONT_COLOR_CODE_CLOSE)
 end
 
-local microButtons = {
-	"CharacterMicroButton",
-	"SpellbookMicroButton",
-	"TalentMicroButton",
-	"QuestLogMicroButton",
-	"SocialsMicroButton",
-	"WorldMapMicroButton",
-	"MainMenuMicroButton",
-	"HelpMicroButton"
-}
+local microButtons = {}
+if (IsClassic) then
+	table_insert(microButtons, "CharacterMicroButton")
+	table_insert(microButtons, "SpellbookMicroButton")
+	table_insert(microButtons, "TalentMicroButton")
+	table_insert(microButtons, "QuestLogMicroButton")
+	table_insert(microButtons, "SocialsMicroButton")
+	table_insert(microButtons, "WorldMapMicroButton")
+	table_insert(microButtons, "MainMenuMicroButton")
+	table_insert(microButtons, "HelpMicroButton")
+end
+if (IsRetail) then
+	table_insert(microButtons, "CharacterMicroButton")
+	table_insert(microButtons, "SpellbookMicroButton")
+	table_insert(microButtons, "TalentMicroButton")
+	table_insert(microButtons, "AchievementMicroButton")
+	table_insert(microButtons, "QuestLogMicroButton")
+	table_insert(microButtons, "GuildMicroButton")
+	table_insert(microButtons, "LFDMicroButton")
+	table_insert(microButtons, "CollectionsMicroButton")
+	table_insert(microButtons, "EJMicroButton")
+	table_insert(microButtons, "StoreMicroButton")
+	table_insert(microButtons, "MainMenuMicroButton")
+end
 
-local microButtonTexts = {
-	CharacterMicroButton = CHARACTER_BUTTON,
-	SpellbookMicroButton = SPELLBOOK_ABILITIES_BUTTON,
-	TalentMicroButton = TALENTS_BUTTON, -- check order
-	QuestLogMicroButton = QUESTLOG_BUTTON,
-	SocialsMicroButton = SOCIALS,
-	WorldMapMicroButton = WORLD_MAP, 
-	MainMenuMicroButton = MAINMENU_BUTTON, 
-	HelpMicroButton = HELP_BUTTON
-}
+local microButtonTexts = {}
+if (IsClassic) then
+	microButtonTexts.CharacterMicroButton = CHARACTER_BUTTON
+	microButtonTexts.SpellbookMicroButton = SPELLBOOK_ABILITIES_BUTTON
+	microButtonTexts.TalentMicroButton = TALENTS_BUTTON
+	microButtonTexts.QuestLogMicroButton = QUESTLOG_BUTTON
+	microButtonTexts.SocialsMicroButton = SOCIALS
+	microButtonTexts.WorldMapMicroButton = WORLD_MAP
+	microButtonTexts.MainMenuMicroButton = MAINMENU_BUTTON
+	microButtonTexts.HelpMicroButton = HELP_BUTTON
+end
+if (IsRetail) then
+	microButtonTexts.CharacterMicroButton = CHARACTER_BUTTON
+	microButtonTexts.SpellbookMicroButton = SPELLBOOK_ABILITIES_BUTTON
+	microButtonTexts.TalentMicroButton = TALENTS_BUTTON
+	microButtonTexts.AchievementMicroButton = ACHIEVEMENT_BUTTON
+	microButtonTexts.QuestLogMicroButton = QUESTLOG_BUTTON
+	microButtonTexts.GuildMicroButton = LOOKINGFORGUILD
+	microButtonTexts.LFDMicroButton = DUNGEONS_BUTTON
+	microButtonTexts.CollectionsMicroButton = COLLECTIONS
+	microButtonTexts.EJMicroButton = ADVENTURE_JOURNAL or ENCOUNTER_JOURNAL
+	microButtonTexts.StoreMicroButton = BLIZZARD_STORE
+	microButtonTexts.MainMenuMicroButton = MAINMENU_BUTTON
+end
 
-local microButtonScripts = {
-
-	CharacterMicroButton_OnEnter = function(self)
+local microButtonScripts = {}
+if (IsClassic) then
+	microButtonScripts.CharacterMicroButton_OnEnter = function(self)
 		self.tooltipText = getMicroButtonTooltipText(CHARACTER_BUTTON, "TOGGLECHARACTER0")
 		local titleColor, normalColor = Layout.MenuButtonTitleColor, Layout.MenuButtonNormalColor
 		local tooltip = Module:GetOptionsMenuTooltip()
@@ -97,9 +130,8 @@ local microButtonScripts = {
 		tooltip:AddLine(self.tooltipText, titleColor[1], titleColor[2], titleColor[3], true)
 		tooltip:AddLine(self.newbieText or NEWBIE_TOOLTIP_CHARACTER, normalColor[1], normalColor[2], normalColor[3], true)
 		tooltip:Show()
-	end,
-	
-	SpellbookMicroButton_OnEnter = function(self)
+	end
+	microButtonScripts.SpellbookMicroButton_OnEnter = function(self)
 		self.tooltipText = getMicroButtonTooltipText(SPELLBOOK_ABILITIES_BUTTON, "TOGGLESPELLBOOK")
 		local titleColor, normalColor = Layout.MenuButtonTitleColor, Layout.MenuButtonNormalColor
 		local tooltip = Module:GetOptionsMenuTooltip()
@@ -108,9 +140,8 @@ local microButtonScripts = {
 		tooltip:AddLine(self.tooltipText, titleColor[1], titleColor[2], titleColor[3], true)
 		tooltip:AddLine(self.newbieText or NEWBIE_TOOLTIP_SPELLBOOK, normalColor[1], normalColor[2], normalColor[3], true)
 		tooltip:Show()
-	end,
-	
-	MainMenuMicroButton_OnEnter = function(self)
+	end
+	microButtonScripts.MainMenuMicroButton_OnEnter = function(self)
 		local titleColor, normalColor = Layout.MenuButtonTitleColor, Layout.MenuButtonNormalColor
 		local tooltip = Module:GetOptionsMenuTooltip()
 		tooltip:Hide()
@@ -118,9 +149,8 @@ local microButtonScripts = {
 		tooltip:AddLine(self.tooltipText, titleColor[1], titleColor[2], titleColor[3], true)
 		tooltip:AddLine(self.newbieText, normalColor[1], normalColor[2], normalColor[3], true)
 		tooltip:Show()
-	end,
-
-	MicroButton_OnEnter = function(self)
+	end
+	microButtonScripts.MicroButton_OnEnter = function(self)
 		if (self:IsEnabled() or self.minLevel or self.disabledTooltip or self.factionGroup) then
 	
 			local titleColor, normalColor = Layout.MenuButtonTitleColor, Layout.MenuButtonNormalColor
@@ -149,13 +179,87 @@ local microButtonScripts = {
 
 			tooltip:Show()
 		end
-	end, 
-
-	MicroButton_OnLeave = function(button)
+	end
+	microButtonScripts.MicroButton_OnLeave = function(button)
 		local tooltip = Module:GetOptionsMenuTooltip()
 		tooltip:Hide() 
 	end
-}
+end
+if (IsRetail) then
+	microButtonScripts.CharacterMicroButton_OnEnter = function(self)
+		self.tooltipText = getMicroButtonTooltipText(CHARACTER_BUTTON, "TOGGLECHARACTER0")
+		local titleColor, normalColor = Layout.MenuButtonTitleColor, Layout.MenuButtonNormalColor
+		local tooltip = Module:GetOptionsMenuTooltip()
+		tooltip:Hide()
+		tooltip:SetDefaultAnchor(self)
+		tooltip:AddLine(self.tooltipText, titleColor[1], titleColor[2], titleColor[3], true)
+		tooltip:AddLine(self.newbieText or NEWBIE_TOOLTIP_CHARACTER, normalColor[1], normalColor[2], normalColor[3], true)
+		tooltip:Show()
+	end
+	microButtonScripts.SpellbookMicroButton_OnEnter = function(self)
+		self.tooltipText = getMicroButtonTooltipText(SPELLBOOK_ABILITIES_BUTTON, "TOGGLESPELLBOOK")
+		local titleColor, normalColor = Layout.MenuButtonTitleColor, Layout.MenuButtonNormalColor
+		local tooltip = Module:GetOptionsMenuTooltip()
+		tooltip:Hide()
+		tooltip:SetDefaultAnchor(self)
+		tooltip:AddLine(self.tooltipText, titleColor[1], titleColor[2], titleColor[3], true)
+		tooltip:AddLine(self.newbieText or NEWBIE_TOOLTIP_SPELLBOOK, normalColor[1], normalColor[2], normalColor[3], true)
+		tooltip:Show()
+	end
+	microButtonScripts.CollectionsMicroButton_OnEnter = function(self)
+		self.tooltipText = getMicroButtonTooltipText(COLLECTIONS, "TOGGLECOLLECTIONS")
+		local titleColor, normalColor = Layout.MenuButtonTitleColor, Layout.MenuButtonNormalColor
+		local tooltip = Module:GetOptionsMenuTooltip()
+		tooltip:Hide()
+		tooltip:SetDefaultAnchor(self)
+		tooltip:AddLine(self.tooltipText, titleColor[1], titleColor[2], titleColor[3], true)
+		tooltip:AddLine(self.newbieText or NEWBIE_TOOLTIP_MOUNTS_AND_PETS, normalColor[1], normalColor[2], normalColor[3], true)
+		tooltip:Show()
+	end
+	microButtonScripts.MainMenuMicroButton_OnEnter = function(self)
+		local titleColor, normalColor = Layout.MenuButtonTitleColor, Layout.MenuButtonNormalColor
+		local tooltip = Module:GetOptionsMenuTooltip()
+		tooltip:Hide()
+		tooltip:SetDefaultAnchor(self)
+		tooltip:AddLine(self.tooltipText, titleColor[1], titleColor[2], titleColor[3], true)
+		tooltip:AddLine(self.newbieText, normalColor[1], normalColor[2], normalColor[3], true)
+		tooltip:Show()
+	end
+	microButtonScripts.MicroButton_OnEnter = function(self)
+		if (self:IsEnabled() or self.minLevel or self.disabledTooltip or self.factionGroup) then
+	
+			local titleColor, normalColor = Layout.MenuButtonTitleColor, Layout.MenuButtonNormalColor
+			local tooltip = Module:GetOptionsMenuTooltip()
+			tooltip:Hide()
+			tooltip:SetDefaultAnchor(self)
+
+			if self.tooltipText then
+				tooltip:AddLine(self.tooltipText, titleColor[1], titleColor[2], titleColor[3], true)
+				tooltip:AddLine(self.newbieText, normalColor[1], normalColor[2], normalColor[3], true)
+			else
+				tooltip:AddLine(self.newbieText, titleColor[1], titleColor[2], titleColor[3], true)
+			end
+	
+			if (not self:IsEnabled()) then
+				if (self.factionGroup == "Neutral") then
+					tooltip:AddLine(FEATURE_NOT_AVAILBLE_PANDAREN, Layout.Colors.quest.red[1], Layout.Colors.quest.red[2], Layout.Colors.quest.red[3], true)
+	
+				elseif ( self.minLevel ) then
+					tooltip:AddLine(string_format(FEATURE_BECOMES_AVAILABLE_AT_LEVEL, self.minLevel), Layout.Colors.quest.red[1], Layout.Colors.quest.red[2], Layout.Colors.quest.red[3], true)
+	
+				elseif ( self.disabledTooltip ) then
+					tooltip:AddLine(self.disabledTooltip, Layout.Colors.quest.red[1], Layout.Colors.quest.red[2], Layout.Colors.quest.red[3], true)
+				end
+			end
+
+			tooltip:Show()
+		end
+	end
+	microButtonScripts.MicroButton_OnLeave = function(button)
+		local tooltip = Module:GetOptionsMenuTooltip()
+		tooltip:Hide()
+	end
+end
 
 local ConfigWindow_OnShow = function(self) 
 	local tooltip = Module:GetOptionsMenuTooltip()

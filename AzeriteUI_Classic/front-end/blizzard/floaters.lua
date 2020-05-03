@@ -4,15 +4,21 @@ if (not Core) then
 	return 
 end
 
-local Module = Core:NewModule("BlizzardFloaterHUD", "LibEvent", "LibFrame", "LibTooltip", "LibDB", "LibBlizzard")
+local Module = Core:NewModule("BlizzardFloaterHUD", "LibEvent", "LibFrame", "LibTooltip", "LibDB", "LibBlizzard", "LibClientBuild")
 
 -- Private API
 local GetConfig = Private.GetConfig
 local GetFont = Private.GetFont
 local GetLayout = Private.GetLayout
 
+-- Constants for client version
+local IsClassic = Module:IsClassic()
+local IsRetail = Module:IsRetail()
+
+-- Local caches
 local HolderCache, StyleCache = {}, {}
 
+-- Pure meta methods
 local mt = getmetatable(CreateFrame("Frame")).__index
 local Frame_ClearAllPoints = mt.ClearAllPoints
 local Frame_IsShown = mt.IsShown
@@ -124,25 +130,27 @@ Module.StyleRaidWarningFrame = function(self)
 	-- as the SetTextHeight method scales the text after it already
 	-- has been turned into a bitmap and turned into a texture.
 	-- So I'm just going to turn it off. Completely.
-	local frame = RaidWarningFrame
-	frame:SetAlpha(.85)
-	frame:SetHeight(85) -- 512,70
-	frame.timings.RAID_NOTICE_MIN_HEIGHT = fontSize
-	frame.timings.RAID_NOTICE_MAX_HEIGHT = fontSize
-	frame.timings.RAID_NOTICE_SCALE_UP_TIME = 0
-	frame.timings.RAID_NOTICE_SCALE_DOWN_TIME = 0
+	for _,frameName in ipairs({"RaidWarningFrame", "RaidBossEmoteFrame"}) do
+		local frame = _G[frameName]
+		frame:SetAlpha(.85)
+		frame:SetHeight(85) -- 512,70
+		frame.timings.RAID_NOTICE_MIN_HEIGHT = fontSize
+		frame.timings.RAID_NOTICE_MAX_HEIGHT = fontSize
+		frame.timings.RAID_NOTICE_SCALE_UP_TIME = 0
+		frame.timings.RAID_NOTICE_SCALE_DOWN_TIME = 0
 
-	local slot1 = RaidWarningFrameSlot1
-	slot1:SetFontObject(GetFont(fontSize,true,true))
-	slot1:SetShadowColor(0,0,0,.5)
-	slot1:SetWidth(frameWidth) -- 800
-	slot1.SetTextHeight = function() end
+		local slot1 = _G[frameName.."Slot1"]
+		slot1:SetFontObject(GetFont(fontSize,true,true))
+		slot1:SetShadowColor(0,0,0,.5)
+		slot1:SetWidth(frameWidth) -- 800
+		slot1.SetTextHeight = function() end
 
-	local slot2 = RaidWarningFrameSlot2
-	slot2:SetFontObject(GetFont(fontSize,true,true))
-	slot2:SetShadowColor(0,0,0,.5)
-	slot2:SetWidth(frameWidth) -- 800
-	slot2.SetTextHeight = function() end
+		local slot2 = _G[frameName.."Slot2"]
+		slot2:SetFontObject(GetFont(fontSize,true,true))
+		slot2:SetShadowColor(0,0,0,.5)
+		slot2:SetWidth(frameWidth) -- 800
+		slot2.SetTextHeight = function() end
+	end
 
 	-- Just a little in-game test for dev purposes!
 	-- /run RaidNotice_AddMessage(RaidWarningFrame, "Testing how texts will be displayed with my changes! Testing how texts will be displayed with my changes!", ChatTypeInfo["RAID_WARNING"])
@@ -204,5 +212,8 @@ end
 Module.OnEnable = function(self)
 	self:StyleErrorFrame()
 	self:StyleRaidWarningFrame()
-	self:StyleQuestTimerFrame()
+
+	if (IsClassic) then
+		self:StyleQuestTimerFrame()
+	end
 end

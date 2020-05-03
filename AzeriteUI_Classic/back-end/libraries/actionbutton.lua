@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 85)
+local LibSecureButton = Wheel:Set("LibSecureButton", 87)
 if (not LibSecureButton) then
 	return
 end
@@ -9,6 +9,9 @@ assert(LibEvent, "LibSecureButton requires LibEvent to be loaded.")
 local LibMessage = Wheel("LibMessage")
 assert(LibMessage, "LibSecureButton requires LibMessage to be loaded.")
 
+local LibClientBuild = Wheel("LibClientBuild")
+assert(LibClientBuild, "LibSecureButton requires LibClientBuild to be loaded.")
+
 local LibFrame = Wheel("LibFrame")
 assert(LibFrame, "LibSecureButton requires LibFrame to be loaded.")
 
@@ -18,8 +21,10 @@ assert(LibSound, "LibSecureButton requires LibSound to be loaded.")
 local LibTooltip = Wheel("LibTooltip")
 assert(LibTooltip, "LibSecureButton requires LibTooltip to be loaded.")
 
-local LibSpellData = Wheel("LibSpellData")
-assert(LibSpellData, "LibSecureButton requires LibSpellData to be loaded.")
+local LibSpellData = Wheel("LibSpellData", true)
+if (LibClientBuild:IsClassic()) then
+	assert(LibSpellData, "LibSecureButton requires LibSpellData to be loaded.")
+end
 
 local LibSpellHighlight = Wheel("LibSpellHighlight")
 assert(LibSpellHighlight, "LibSecureButton requires LibSpellHighlight to be loaded.")
@@ -30,8 +35,11 @@ LibMessage:Embed(LibSecureButton)
 LibFrame:Embed(LibSecureButton)
 LibSound:Embed(LibSecureButton)
 LibTooltip:Embed(LibSecureButton)
-LibSpellData:Embed(LibSecureButton)
 LibSpellHighlight:Embed(LibSecureButton)
+
+if (LibClientBuild:IsClassic()) then
+	LibSpellData:Embed(LibSecureButton)
+end
 
 -- Lua API
 local _G = _G
@@ -78,6 +86,10 @@ local IsStackableAction = IsStackableAction
 local IsUsableAction = IsUsableAction
 local SetClampedTextureRotation = SetClampedTextureRotation
 local UnitClass = UnitClass
+
+-- Constants for client version
+local IsClassic = LibClientBuild:IsClassic()
+local IsRetail = LibClientBuild:IsRetail()
 
 -- Doing it this way to make the transition to library later on easier
 LibSecureButton.embeds = LibSecureButton.embeds or {} 
@@ -768,9 +780,11 @@ ActionButton.UpdateCount = function(self)
 					end
 				end
 			end
-			local reagentID = LibSecureButton:GetReagentBySpellID(actionID)
-			if reagentID then
-				count = GetItemCount(reagentID)
+			if (IsClassic) then
+				local reagentID = LibSecureButton:GetReagentBySpellID(actionID)
+				if reagentID then
+					count = GetItemCount(reagentID)
+				end
 			end
 		else
 			if (IsItemAction(action) and (IsConsumableAction(action) or IsStackableAction(action))) then
