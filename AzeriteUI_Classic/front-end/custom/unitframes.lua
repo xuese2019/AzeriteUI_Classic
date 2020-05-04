@@ -2247,8 +2247,8 @@ UnitFrameRaid.OnInit = function(self)
 	))
 	self.frame:SetAttribute("_onattributechanged", SECURE.Raid_OnAttribute)
 
-	if (not self.db.allowBlizzard) then 
-		self:DisableUIWidget("UnitFrameRaid") 
+	if (not self.db.allowBlizzard) then
+		self:DisableUIWidget("UnitFrameRaid")
 	end
 
 	-- Only show it in raids, not parties.
