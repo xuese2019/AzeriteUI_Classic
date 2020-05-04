@@ -1,4 +1,4 @@
-local LibSpellHighlight = Wheel:Set("LibSpellHighlight", 1)
+local LibSpellHighlight = Wheel:Set("LibSpellHighlight", 2)
 if (not LibSpellHighlight) then
 	return
 end
@@ -8,6 +8,9 @@ assert(LibEvent, "LibSpellHighlight requires LibEvent to be loaded.")
 
 local LibMessage = Wheel("LibMessage")
 assert(LibMessage, "LibSpellHighlight requires LibMessage to be loaded.")
+
+local LibClientBuild = Wheel("LibClientBuild")
+assert(LibClientBuild, "LibCast requires LibClientBuild to be loaded.")
 
 local LibAura = Wheel("LibAura")
 assert(LibAura, "LibSpellHighlight requires LibAura to be loaded.")
@@ -98,6 +101,10 @@ LibSpellHighlight:UnregisterAllMessages()
 -- Player Constants
 local _,playerClass = UnitClass("player")
 local playerGUID = UnitGUID("player")
+
+-- Constants for client version
+local IsClassic = LibClientBuild:IsClassic()
+local IsRetail = LibClientBuild:IsRetail()
 
 -- Sourced from BlizzardInterfaceResources/Resources/EnumerationTables.lua
 local SPELL_POWER_COMBO_POINTS = Enum.PowerType.ComboPoints
@@ -689,143 +696,148 @@ LibSpellHighlight.UpdateEvents = function(self, event, ...)
 	end
 end
 
+local PopulateClassicDatabase = function(self)
+	if (not IsClassic) then
+		return
+	end
+
+	if (playerClass == "DRUID") then
+
+		-- Omen of Clarity (Proc)
+		HighlightTypeByAuraID[16870] = "CLEARCAST"
+		HighlightSpellsByAuraID[16870] = {
+			[6807] = true, -- Maul (Rank 1)
+			[6808] = true, -- Maul (Rank 2)
+			[6809] = true, -- Maul (Rank 3)
+			[8972] = true, -- Maul (Rank 4)
+			[9745] = true, -- Maul (Rank 5)
+			[9880] = true, -- Maul (Rank 6)
+			[9881] = true, -- Maul (Rank 7)
+			[6785] = true, -- Ravage (Rank 1)
+			[6787] = true, -- Ravage (Rank 2)
+			[9866] = true, -- Ravage (Rank 3)
+			[9867] = true, -- Ravage (Rank 4)
+			[8936] = true, -- Regrowth (Rank 1)
+			[8938] = true, -- Regrowth (Rank 2)
+			[8939] = true, -- Regrowth (Rank 3)
+			[8940] = true, -- Regrowth (Rank 4)
+			[8941] = true, -- Regrowth (Rank 5)
+			[9750] = true, -- Regrowth (Rank 6)
+			[9856] = true, -- Regrowth (Rank 7)
+			[9857] = true, -- Regrowth (Rank 8)
+			[9858] = true, -- Regrowth (Rank 9)
+			[5221] = true, -- Shred (Rank 1)
+			[6800] = true, -- Shred (Rank 2)
+			[8992] = true, -- Shred (Rank 3)
+			[9829] = true, -- Shred (Rank 4)
+			[9830] = true  -- Shred (Rank 5)
+		}
+	
+		ComboFinishersBySpellID[22568] = true -- Ferocious Bite (Rank 1)
+		ComboFinishersBySpellID[22827] = true -- Ferocious Bite (Rank 2)
+		ComboFinishersBySpellID[22828] = true -- Ferocious Bite (Rank 3)
+		ComboFinishersBySpellID[22829] = true -- Ferocious Bite (Rank 4)
+		ComboFinishersBySpellID[31018] = true -- Ferocious Bite (Rank 5) (The Beast - Content Phase 6)
+		ComboFinishersBySpellID[ 1079] = true -- Rip (Rank 1)
+		ComboFinishersBySpellID[ 9492] = true -- Rip (Rank 2)
+		ComboFinishersBySpellID[ 9493] = true -- Rip (Rank 3)
+		ComboFinishersBySpellID[ 9752] = true -- Rip (Rank 4)
+		ComboFinishersBySpellID[ 9894] = true -- Rip (Rank 5)
+		ComboFinishersBySpellID[ 9896] = true -- Rip (Rank 6)
+	
+	end
+	
+	if (playerClass == "HUNTER") then
+		ReactiveSpellsBySpellID[L.Spell_Counterattack] = { 19306, 20909, 20910 }
+		ReactiveSpellsBySpellID[L.Spell_MongooseBite] = { 1495, 14269, 14270, 14271 }
+	end 
+	
+	if (playerClass == "PALADIN") then
+		ReactiveSpellsBySpellID[L.Spell_Exorcism] = { 879, 5614, 5615, 10312, 10313, 10314 }
+		ReactiveSpellsBySpellID[L.Spell_HammerOfWrath] = { 24239, 24274, 24275 }
+	end 
+	
+	if (playerClass == "ROGUE") then
+		ReactiveSpellsBySpellID[L.Spell_Riposte] = { 14251 }
+	
+		ComboFinishersBySpellID[ 8647] = true -- Expose Armor (Rank 1)
+		ComboFinishersBySpellID[ 8649] = true -- Expose Armor (Rank 2)
+		ComboFinishersBySpellID[ 8650] = true -- Expose Armor (Rank 3)
+		ComboFinishersBySpellID[11197] = true -- Expose Armor (Rank 4)
+		ComboFinishersBySpellID[11198] = true -- Expose Armor (Rank 5)
+		ComboFinishersBySpellID[ 2098] = true -- Eviscerate (Rank 1)
+		ComboFinishersBySpellID[ 6760] = true -- Eviscerate (Rank 2)
+		ComboFinishersBySpellID[ 6761] = true -- Eviscerate (Rank 3)
+		ComboFinishersBySpellID[ 6762] = true -- Eviscerate (Rank 4)
+		ComboFinishersBySpellID[ 8623] = true -- Eviscerate (Rank 5)
+		ComboFinishersBySpellID[ 8624] = true -- Eviscerate (Rank 6)
+		ComboFinishersBySpellID[11299] = true -- Eviscerate (Rank 7)
+		ComboFinishersBySpellID[11300] = true -- Eviscerate (Rank 8)
+		ComboFinishersBySpellID[31016] = true -- Eviscerate (Rank 9) (Blackhand Assasin - Content Phase 6)
+		ComboFinishersBySpellID[ 1943] = true -- Rupture (Rank 1)
+		ComboFinishersBySpellID[ 8639] = true -- Rupture (Rank 2)
+		ComboFinishersBySpellID[ 8640] = true -- Rupture (Rank 3)
+		ComboFinishersBySpellID[11273] = true -- Rupture (Rank 4)
+		ComboFinishersBySpellID[11274] = true -- Rupture (Rank 5)
+		ComboFinishersBySpellID[11275] = true -- Rupture (Rank 6)
+		ComboFinishersBySpellID[ 5171] = true -- Slice and Dive (Rank 1)
+		ComboFinishersBySpellID[ 6774] = true -- Slice and Dive (Rank 2)
+	
+	end 
+	
+	if (playerClass == "SHAMAN") then
+	end
+	
+	if (playerClass == "WARLOCK") then
+	
+		HighlightTypeByAuraID[17941] = "REACTIVE"
+		HighlightSpellsByAuraID[17941] = { -- Shadow Trance
+			[  686] = true, -- Shadow Bolt (Rank 1)
+			[  695] = true, -- Shadow Bolt (Rank 2)
+			[  705] = true, -- Shadow Bolt (Rank 3)
+			[ 1088] = true, -- Shadow Bolt (Rank 4)
+			[ 1106] = true, -- Shadow Bolt (Rank 5)
+			[ 7641] = true, -- Shadow Bolt (Rank 6)
+			[11659] = true, -- Shadow Bolt (Rank 7)
+			[11660] = true, -- Shadow Bolt (Rank 8)
+			[11661] = true, -- Shadow Bolt (Rank 9)
+			[25307] = true, -- Shadow Bolt (Rank 10)
+		}
+		ReactiveSpellsBySpellID[L.Spell_Nightfall] = { 18094, 18095 }
+	end 
+	
+	if (playerClass == "WARRIOR") then
+		ReactiveSpellsBySpellID[L.Spell_Execute] = { 5308, 20658, 20660, 20661, 20662 }
+		ReactiveSpellsBySpellID[L.Spell_Overpower] = { 7384, 7887, 11584, 11585 }
+		ReactiveSpellsBySpellID[L.Spell_Revenge] = { 6572, 6574, 7379, 11600, 11601, 25288 }
+	end
+	
+	-- Cache all spellIDs that have a triggering auraID,
+	-- and store their overlay types.
+	for auraID,spells in pairs(HighlightSpellsByAuraID) do
+		for spellID in pairs(spells) do
+			SpellIDToAuraID[spellID] = auraID
+			HighlightTypeBySpellID[spellID] = HighlightTypeByAuraID[auraID]
+		end
+	end
+	
+	-- Store overlay type of reative spells
+	for spellName, spells in pairs(ReactiveSpellsBySpellID) do
+		for _,spellID in ipairs(spells) do
+			HighlightTypeBySpellID[spellID] = "REACTIVE"
+		end
+	end
+
+	-- Store overlay type of combo point finishers
+	for spellID in pairs(ComboFinishersBySpellID) do
+		HighlightTypeBySpellID[spellID] = "FINISHER"
+	end
+
+end
+
 -- Upgrade existing embeds, if any
 for target in pairs(LibSpellHighlight.embeds) do
 	LibSpellHighlight:Embed(target)
-end
-
--- TODO: Nature's Swiftness
-if (playerClass == "DRUID") then
-
-	-- Omen of Clarity (Proc)
-	HighlightTypeByAuraID[16870] = "CLEARCAST"
-	HighlightSpellsByAuraID[16870] = {
-		[6807] = true, -- Maul (Rank 1)
-		[6808] = true, -- Maul (Rank 2)
-		[6809] = true, -- Maul (Rank 3)
-		[8972] = true, -- Maul (Rank 4)
-		[9745] = true, -- Maul (Rank 5)
-		[9880] = true, -- Maul (Rank 6)
-		[9881] = true, -- Maul (Rank 7)
-		[6785] = true, -- Ravage (Rank 1)
-		[6787] = true, -- Ravage (Rank 2)
-		[9866] = true, -- Ravage (Rank 3)
-		[9867] = true, -- Ravage (Rank 4)
-		[8936] = true, -- Regrowth (Rank 1)
-		[8938] = true, -- Regrowth (Rank 2)
-		[8939] = true, -- Regrowth (Rank 3)
-		[8940] = true, -- Regrowth (Rank 4)
-		[8941] = true, -- Regrowth (Rank 5)
-		[9750] = true, -- Regrowth (Rank 6)
-		[9856] = true, -- Regrowth (Rank 7)
-		[9857] = true, -- Regrowth (Rank 8)
-		[9858] = true, -- Regrowth (Rank 9)
-		[5221] = true, -- Shred (Rank 1)
-		[6800] = true, -- Shred (Rank 2)
-		[8992] = true, -- Shred (Rank 3)
-		[9829] = true, -- Shred (Rank 4)
-		[9830] = true  -- Shred (Rank 5)
-	}
-
-	ComboFinishersBySpellID[22568] = true -- Ferocious Bite (Rank 1)
-	ComboFinishersBySpellID[22827] = true -- Ferocious Bite (Rank 2)
-	ComboFinishersBySpellID[22828] = true -- Ferocious Bite (Rank 3)
-	ComboFinishersBySpellID[22829] = true -- Ferocious Bite (Rank 4)
-	ComboFinishersBySpellID[31018] = true -- Ferocious Bite (Rank 5) (The Beast - Content Phase 6)
-	ComboFinishersBySpellID[ 1079] = true -- Rip (Rank 1)
-	ComboFinishersBySpellID[ 9492] = true -- Rip (Rank 2)
-	ComboFinishersBySpellID[ 9493] = true -- Rip (Rank 3)
-	ComboFinishersBySpellID[ 9752] = true -- Rip (Rank 4)
-	ComboFinishersBySpellID[ 9894] = true -- Rip (Rank 5)
-	ComboFinishersBySpellID[ 9896] = true -- Rip (Rank 6)
-
-end
-
-if (playerClass == "HUNTER") then
-	ReactiveSpellsBySpellID[L.Spell_Counterattack] = { 19306, 20909, 20910 }
-	ReactiveSpellsBySpellID[L.Spell_MongooseBite] = { 1495, 14269, 14270, 14271 }
-end 
-
-if (playerClass == "PALADIN") then
-	ReactiveSpellsBySpellID[L.Spell_Exorcism] = { 879, 5614, 5615, 10312, 10313, 10314 }
-	ReactiveSpellsBySpellID[L.Spell_HammerOfWrath] = { 24239, 24274, 24275 }
-end 
-
-if (playerClass == "ROGUE") then
-	ReactiveSpellsBySpellID[L.Spell_Riposte] = { 14251 }
-
-	ComboFinishersBySpellID[ 8647] = true -- Expose Armor (Rank 1)
-	ComboFinishersBySpellID[ 8649] = true -- Expose Armor (Rank 2)
-	ComboFinishersBySpellID[ 8650] = true -- Expose Armor (Rank 3)
-	ComboFinishersBySpellID[11197] = true -- Expose Armor (Rank 4)
-	ComboFinishersBySpellID[11198] = true -- Expose Armor (Rank 5)
-	ComboFinishersBySpellID[ 2098] = true -- Eviscerate (Rank 1)
-	ComboFinishersBySpellID[ 6760] = true -- Eviscerate (Rank 2)
-	ComboFinishersBySpellID[ 6761] = true -- Eviscerate (Rank 3)
-	ComboFinishersBySpellID[ 6762] = true -- Eviscerate (Rank 4)
-	ComboFinishersBySpellID[ 8623] = true -- Eviscerate (Rank 5)
-	ComboFinishersBySpellID[ 8624] = true -- Eviscerate (Rank 6)
-	ComboFinishersBySpellID[11299] = true -- Eviscerate (Rank 7)
-	ComboFinishersBySpellID[11300] = true -- Eviscerate (Rank 8)
-	ComboFinishersBySpellID[31016] = true -- Eviscerate (Rank 9) (Blackhand Assasin - Content Phase 6)
-	ComboFinishersBySpellID[ 1943] = true -- Rupture (Rank 1)
-	ComboFinishersBySpellID[ 8639] = true -- Rupture (Rank 2)
-	ComboFinishersBySpellID[ 8640] = true -- Rupture (Rank 3)
-	ComboFinishersBySpellID[11273] = true -- Rupture (Rank 4)
-	ComboFinishersBySpellID[11274] = true -- Rupture (Rank 5)
-	ComboFinishersBySpellID[11275] = true -- Rupture (Rank 6)
-	ComboFinishersBySpellID[ 5171] = true -- Slice and Dive (Rank 1)
-	ComboFinishersBySpellID[ 6774] = true -- Slice and Dive (Rank 2)
-
-end 
-
--- TODO: Nature's Swiftness
-if (playerClass == "SHAMAN") then
-end
-
-if (playerClass == "WARLOCK") then
-
-	HighlightTypeByAuraID[17941] = "REACTIVE"
-	HighlightSpellsByAuraID[17941] = { -- Shadow Trance
-		[  686] = true, -- Shadow Bolt (Rank 1)
-		[  695] = true, -- Shadow Bolt (Rank 2)
-		[  705] = true, -- Shadow Bolt (Rank 3)
-		[ 1088] = true, -- Shadow Bolt (Rank 4)
-		[ 1106] = true, -- Shadow Bolt (Rank 5)
-		[ 7641] = true, -- Shadow Bolt (Rank 6)
-		[11659] = true, -- Shadow Bolt (Rank 7)
-		[11660] = true, -- Shadow Bolt (Rank 8)
-		[11661] = true, -- Shadow Bolt (Rank 9)
-		[25307] = true, -- Shadow Bolt (Rank 10)
-	}
-	ReactiveSpellsBySpellID[L.Spell_Nightfall] = { 18094, 18095 }
-end 
-
-if (playerClass == "WARRIOR") then
-	ReactiveSpellsBySpellID[L.Spell_Execute] = { 5308, 20658, 20660, 20661, 20662 }
-	ReactiveSpellsBySpellID[L.Spell_Overpower] = { 7384, 7887, 11584, 11585 }
-	ReactiveSpellsBySpellID[L.Spell_Revenge] = { 6572, 6574, 7379, 11600, 11601, 25288 }
-end
-
--- Cache all spellIDs that have a triggering auraID,
--- and store their overlay types.
-for auraID,spells in pairs(HighlightSpellsByAuraID) do
-	for spellID in pairs(spells) do
-		SpellIDToAuraID[spellID] = auraID
-		HighlightTypeBySpellID[spellID] = HighlightTypeByAuraID[auraID]
-	end
-end
-
--- Store overlay type of reative spells
-for spellName, spells in pairs(ReactiveSpellsBySpellID) do
-	for _,spellID in ipairs(spells) do
-		HighlightTypeBySpellID[spellID] = "REACTIVE"
-	end
-end
-
--- Store overlay type of combo point finishers
-for spellID in pairs(ComboFinishersBySpellID) do
-	HighlightTypeBySpellID[spellID] = "FINISHER"
 end
 
 -- Module embedding
@@ -858,3 +870,5 @@ elseif (playerClass == "HUNTER")
 	LibSpellHighlight:RegisterEvent("SPELLS_CHANGED", "UpdateEvents")
 	LibSpellHighlight:RegisterEvent("PLAYER_ENTERING_WORLD", "UpdateEvents")
 end
+
+PopulateClassicDatabase()
