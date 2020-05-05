@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 87)
+local LibSecureButton = Wheel:Set("LibSecureButton", 88)
 if (not LibSecureButton) then
 	return
 end
@@ -73,10 +73,13 @@ local GetActionTexture = GetActionTexture
 local GetBindingKey = GetBindingKey 
 local GetCursorInfo = GetCursorInfo
 local GetMacroSpell = GetMacroSpell
+local GetOverrideBarIndex = GetOverrideBarIndex
 local GetPetActionInfo = GetPetActionInfo
 local GetSpellInfo = GetSpellInfo
 local GetSpellSubtext = GetSpellSubtext
+local GetTempShapeshiftBarIndex = GetTempShapeshiftBarIndex
 local GetTime = GetTime
+local GetVehicleBarIndex = GetVehicleBarIndex
 local HasAction = HasAction
 local IsActionInRange = IsActionInRange
 local IsAutoCastPetAction = C_ActionBar.IsAutoCastPetAction
@@ -336,7 +339,7 @@ local UpdateActionButton = function(self, event, ...)
 			self.queuedForMacroUpdate = nil
 		end 
 
-	elseif (event == "UPDATE_SHAPESHIFT_FORM") then 
+	elseif (event == "UPDATE_SHAPESHIFT_FORM") or (event == "UPDATE_VEHICLE_ACTIONBAR") then
 		self:Update()
 
 	elseif (event == "PLAYER_ENTER_COMBAT") or (event == "PLAYER_LEAVE_COMBAT") then
@@ -355,7 +358,10 @@ local UpdateActionButton = function(self, event, ...)
 	elseif (event == "ACTIONBAR_UPDATE_USABLE") then
 		self:UpdateUsable()
 
-	elseif (event == "ACTIONBAR_UPDATE_STATE") then
+	elseif (event == "ACTIONBAR_UPDATE_STATE") or
+		   ((event == "UNIT_ENTERED_VEHICLE" or event == "UNIT_EXITED_VEHICLE") and (arg1 == "player")) or
+		   ((event == "COMPANION_UPDATE") and (arg1 == "MOUNT")) then
+
 		self:UpdateFlash()
 		--self:UpdateCheckedState()
 
@@ -395,7 +401,7 @@ local UpdateActionButton = function(self, event, ...)
 			self:HideOverlayGlow()
 		else
 			local actionType, id = GetActionInfo(self.buttonAction)
-			if actionType == "flyout" and FlyoutHasSpell(id, arg1) then
+			if (actionType == "flyout") and (FlyoutHasSpell(id, arg1)) then
 				self:HideOverlayGlow()
 			end
 		end
@@ -409,13 +415,23 @@ local UpdateActionButton = function(self, event, ...)
 	elseif (event == "SPELL_UPDATE_ICON") then
 		self:Update() -- really? how often is this called?
 
-	elseif (event == "TRADE_SKILL_SHOW") or (event == "TRADE_SKILL_CLOSE") then
+	elseif (event == "TRADE_SKILL_SHOW") or (event == "TRADE_SKILL_CLOSE") or (event == "ARCHAEOLOGY_CLOSED") then
 		self:UpdateFlash()
 		--self:UpdateCheckedState()
 
 	elseif (event == "UPDATE_BINDINGS") then
 		self:UpdateBinding()
-	end 
+
+	elseif (event == "UPDATE_SUMMONPETS_ACTION") then 
+		local actionType, id = GetActionInfo(self.buttonAction)
+		if (actionType == "summonpet") then
+			local texture = GetActionTexture(self.buttonAction)
+			if (texture) then
+				self.Icon:SetTexture(texture)
+			end
+		end
+
+	end
 end
 
 local UpdatePetButton = function(self, event, ...)
@@ -1080,6 +1096,17 @@ ActionButton.OnEnable = function(self)
 	self:RegisterEvent("UPDATE_MACROS", UpdateActionButton)
 	self:RegisterEvent("UPDATE_SHAPESHIFT_FORM", UpdateActionButton)
 
+	if (IsRetail) then
+		self:RegisterEvent("ARCHAEOLOGY_CLOSED", Update)
+		self:RegisterEvent("COMPANION_UPDATE", Update)
+		--self:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_HIDE", Update)
+		--self:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_SHOW", Update)
+		self:RegisterEvent("UNIT_ENTERED_VEHICLE", Update)
+		self:RegisterEvent("UNIT_EXITED_VEHICLE", Update)
+		self:RegisterEvent("UPDATE_SUMMONPETS_ACTION", Update)
+		self:RegisterEvent("UPDATE_VEHICLE_ACTIONBAR", Update)
+	end
+
 	self:RegisterMessage("GP_SPELL_ACTIVATION_OVERLAY_GLOW_SHOW", UpdateActionButton)
 	self:RegisterMessage("GP_SPELL_ACTIVATION_OVERLAY_GLOW_HIDE", UpdateActionButton)
 end
@@ -1730,7 +1757,7 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 		]])
 
 		local visibilityDriver = "[@pet,exists]show;hide"
-		
+
 		-- enable the visibility driver
 		RegisterAttributeDriver(visibility, "state-vis", visibilityDriver)
 
@@ -1875,35 +1902,63 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 			return "message", "update"
 		]])
 
-		local driver 
-		if (barID == 1) then 
-			driver = "[form,noform] 0; [bar:2]2; [bar:3]3; [bar:4]4; [bar:5]5; [bar:6]6"
+		local driver, visibilityDriver
+		if (IsClassic) then
+			if (barID == 1) then 
+				driver = "[form,noform] 0; [bar:2]2; [bar:3]3; [bar:4]4; [bar:5]5; [bar:6]6"
 
-			local _, playerClass = UnitClass("player")
-			if (playerClass == "DRUID") then
-				driver = driver .. "; [bonusbar:1,nostealth] 7; [bonusbar:1,stealth] 7; [bonusbar:2] 8; [bonusbar:3] 9; [bonusbar:4] 10"
+				local _, playerClass = UnitClass("player")
+				if (playerClass == "DRUID") then
+					driver = driver .. "; [bonusbar:1,nostealth] 7; [bonusbar:1,stealth] 7; [bonusbar:2] 8; [bonusbar:3] 9; [bonusbar:4] 10"
 
-			elseif (playerClass == "PRIEST") then
-				driver = driver .. "; [bonusbar:1] 7"
+				elseif (playerClass == "PRIEST") then
+					driver = driver .. "; [bonusbar:1] 7"
 
-			elseif (playerClass == "ROGUE") then
-				driver = driver .. "; [bonusbar:1] 7"
+				elseif (playerClass == "ROGUE") then
+					driver = driver .. "; [bonusbar:1] 7"
 
-			elseif (playerClass == "WARRIOR") then
-				driver = driver .. "; [bonusbar:1] 7; [bonusbar:2] 8" 
-			end
-			driver = driver .. "; 1"
-		else 
-			driver = tostring(barID)
-		end 
+				elseif (playerClass == "WARRIOR") then
+					driver = driver .. "; [bonusbar:1] 7; [bonusbar:2] 8" 
+				end
+				driver = driver .. "; 1"
+				visibilityDriver = "[@player,exists]show;hide"
+			else 
+				driver = tostring(barID)
+				visibilityDriver = "[@player,noexists]hide;show"
+			end 
 
-		local visibilityDriver
-		if (barID == 1) then 
-			visibilityDriver = "[@player,exists]show;hide"
-		else 
-			visibilityDriver = "[@player,noexists]hide;show"
-		end 
+		elseif (IsRetail) then
+			if (barID == 1) then 
+				-- Moving vehicles farther back in the queue, as some overridebars like the ones 
+				-- found in the new 8.1.5 world quest "Cycle of Life" returns positive for both vehicleui and overridebar. 
+				driver = ("[overridebar]%.0f; [possessbar]%.0f; [shapeshift]%.0f; [vehicleui]%.0f; [form,noform] 0; [bar:2]2; [bar:3]3; [bar:4]4; [bar:5]5; [bar:6]6"):format(GetOverrideBarIndex(), GetVehicleBarIndex(), GetTempShapeshiftBarIndex(), GetVehicleBarIndex())
 		
+				local _, playerClass = UnitClass("player")
+				if (playerClass == "DRUID") then
+					driver = driver .. "; [bonusbar:1,nostealth] 7; [bonusbar:1,stealth] 7; [bonusbar:2] 8; [bonusbar:3] 9; [bonusbar:4] 10"
+		
+				elseif (playerClass == "MONK") then
+					driver = driver .. "; [bonusbar:1] 7; [bonusbar:2] 8; [bonusbar:3] 9"
+		
+				elseif (playerClass == "PRIEST") then
+					driver = driver .. "; [bonusbar:1] 7"
+		
+				elseif (playerClass == "ROGUE") then
+					driver = driver .. "; [bonusbar:1] 7"
+		
+				elseif (playerClass == "WARRIOR") then
+					driver = driver .. "; [bonusbar:1] 7; [bonusbar:2] 8" 
+				end
+				--driver = driver .. "; [form] 1; 1"
+				driver = driver .. "; 1"
+
+				visibilityDriver = "[@player,exists][overridebar][possessbar][shapeshift][vehicleui]show;hide"
+			else 
+				driver = tostring(barID)
+				visibilityDriver = "[overridebar][possessbar][shapeshift][vehicleui][@player,noexists]hide;show"
+			end 
+		end
+
 		-- enable the visibility driver
 		RegisterAttributeDriver(visibility, "state-vis", visibilityDriver)
 		
