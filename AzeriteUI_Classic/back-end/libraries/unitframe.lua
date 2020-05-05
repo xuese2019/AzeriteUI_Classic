@@ -1,4 +1,4 @@
-local LibUnitFrame = Wheel:Set("LibUnitFrame", 71)
+local LibUnitFrame = Wheel:Set("LibUnitFrame", 73)
 if (not LibUnitFrame) then	
 	return
 end
@@ -8,6 +8,9 @@ assert(LibEvent, "LibUnitFrame requires LibEvent to be loaded.")
 
 local LibFrame = Wheel("LibFrame")
 assert(LibFrame, "LibUnitFrame requires LibFrame to be loaded.")
+
+local LibClientBuild = Wheel("LibClientBuild")
+assert(LibClientBuild, "LibSecureButton requires LibClientBuild to be loaded.")
 
 local LibWidgetContainer = Wheel("LibWidgetContainer")
 assert(LibWidgetContainer, "LibUnitFrame requires LibWidgetContainer to be loaded.")
@@ -43,6 +46,10 @@ local ShowBossFrameWhenUninteractable = ShowBossFrameWhenUninteractable
 local ToggleDropDownMenu = ToggleDropDownMenu
 local UnitExists = UnitExists
 local UnitGUID = UnitGUID
+
+-- Constants for client version
+local IsClassic = LibClientBuild:IsClassic()
+local IsRetail = LibClientBuild:IsRetail()
 
 -- Library Registries
 LibUnitFrame.embeds = LibUnitFrame.embeds or {} -- who embeds this?
@@ -170,65 +177,7 @@ end
 -- Secure Snippets
 --------------------------------------------------------------------------
 local secureSnippets = {
-	initialConfigFunction = [=[
-		local header = self:GetParent()
-		local frames = table.new()
-		table.insert(frames, self)
-		self:GetChildList(frames)
-		for i = 1, #frames do
-			local frame = frames[i]
-			local unit
-			-- There's no need to do anything on frames with onlyProcessChildren
-			if (not frame:GetAttribute("oUF-onlyProcessChildren")) then
-				RegisterUnitWatch(frame)
 
-				-- Attempt to guess what the header is set to spawn.
-				local groupFilter = header:GetAttribute("groupFilter")
-
-				if(type(groupFilter) == "string" and groupFilter:match("MAIN[AT]")) then
-					local role = groupFilter:match("MAIN([AT])")
-					if(role == "T") then
-						unit = "maintank"
-					else
-						unit = "mainassist"
-					end
-				elseif(header:GetAttribute("showRaid")) then
-					unit = "raid"
-				elseif(header:GetAttribute("showParty")) then
-					unit = "party"
-				end
-
-				local headerType = header:GetAttribute("oUF-headerType")
-				local suffix = frame:GetAttribute("unitsuffix")
-				if(unit and suffix) then
-					if(headerType == "pet" and suffix == "target") then
-						unit = unit .. headerType .. suffix
-					else
-						unit = unit .. suffix
-					end
-				elseif(unit and headerType == "pet") then
-					unit = unit .. headerType
-				end
-
-				frame:SetAttribute("*type1", "target")
-				frame:SetAttribute("*type2", "togglemenu")
-				frame:SetAttribute("oUF-guessUnit", unit)
-			end
-
-			local body = header:GetAttribute("oUF-initialConfigFunction")
-			if(body) then
-				frame:Run(body, unit)
-			end
-		end
-
-		header:CallMethod("styleFunction", self:GetName())
-
-		local Clique = header:GetFrameRef("clickcast_header")
-		if Clique then
-			Clique:SetAttribute("clickcast_button", self)
-			Clique:RunAttribute("clickcast_register")
-		end
-	]=]
 }
 
 -- Utility Functions
@@ -384,11 +333,17 @@ end
 
 LibUnitFrame.GetUnitFrameVisibilityDriver = function(self, unit)
 	local visDriver
-	if (unit == "player") then 
-		visDriver = "[@player,exists][mounted]show;hide"
+	if (unit == "player") then
+		if (IsClassic) then
+			visDriver = "[@player,exists][mounted]show;hide"
+		elseif (IsRetail) then
+			-- Might seem stupid, but I want the player frame to disappear along with the actionbars 
+			-- when we've blown the flight master's whistle and are getting picked up.
+			visDriver = "[@player,exists][vehicleui][possessbar][overridebar][mounted]show;hide"
+		end
 	else
-		local partyID = unit:match("^party(%d+)")
-		if (partyID) then 
+		local partyID = string_match(unit, "^party(%d+)")
+		if (partyID) then
 			visDriver = string_format("[nogroup:raid,@%s,exists]show;hide", unit)
 		else 
 			visDriver = string_format("[@%s,exists]show;hide", unit)
@@ -399,18 +354,19 @@ end
 
 LibUnitFrame.GetUnitFrameUnitDriver = function(self, unit)
 	local unitDriver
-	-- The below is just for retail. Leaving it for reference.
-	--[[
-	if (unit == "player") then 
-		unitDriver = "[nooverridebar,vehicleui]pet;[overridebar,@vehicle,exists]vehicle;player"
-	elseif (unit == "pet") then 
-		unitDriver = "[nooverridebar,vehicleui]player;pet"
-	elseif (unit:match("^party(%d+)")) then 
-		unitDriver = string_format("[unithasvehicleui,@%s]%s;%s", unit, unit.."pet", unit)
-	elseif (unit:match("^raid(%d+)")) then 
-		unitDriver = string_format("[unithasvehicleui,@%s]%s;%s", unit, unit.."pet", unit)
+	if (IsRetail) then
+		if (unit == "player") then 
+			-- Should work in all cases where the unitframe is replaced. It should always be the "pet" unit.
+			--vehicleDriver = "[vehicleui]pet;player"
+			vehicleDriver = "[nooverridebar,vehicleui]pet;[overridebar,@vehicle,exists]vehicle;player"
+		elseif (unit == "pet") then 
+			vehicleDriver = "[nooverridebar,vehicleui]player;pet"
+		elseif (string_match(unit, "^party(%d+)")) then 
+			vehicleDriver = string_format("[unithasvehicleui,@%s]%s;%s", unit, unit.."pet", unit)
+		elseif (string_match(unit, "^raid(%d+)")) then 
+			vehicleDriver = string_format("[unithasvehicleui,@%s]%s;%s", unit, unit.."pet", unit)
+		end
 	end
-	--]]
 	return unitDriver
 end 
 
@@ -463,18 +419,18 @@ LibUnitFrame.SpawnUnitFrame = function(self, unit, parent, styleFunc, ...)
 	elseif (unit == "mouseover") then
 		frame:RegisterEvent("UPDATE_MOUSEOVER_UNIT", UnitFrame.OverrideAllElements, true)
 
-	elseif (unit:match("^boss(%d+)")) then
+	elseif (string_match(unit, "^boss(%d+)")) then
 		frame.unitGroup = "boss"
 		frame:SetFrameStrata("MEDIUM")
 		frame:SetFrameLevel(1000)
 		frame:RegisterEvent("INSTANCE_ENCOUNTER_ENGAGE_UNIT", UnitFrame.OverrideAllElements, true)
 		frame:RegisterEvent("UNIT_TARGETABLE_CHANGED", UnitFrame.OverrideAllElements, true)
 
-	elseif (unit:match("^party(%d+)")) then 
+	elseif (string_match(unit, "^party(%d+)")) then 
 		frame.unitGroup = "party"
 		frame:RegisterEvent("GROUP_ROSTER_UPDATE", UnitFrame.OverrideAllElements, true)
 
-	elseif (unit:match("^raid(%d+)")) then 
+	elseif (string_match(unit, "^raid(%d+)")) then 
 		frame.unitGroup = "raid"
 		frame:RegisterEvent("GROUP_ROSTER_UPDATE", UnitFrame.OverrideAllElementsOnChangedGUID, true)
 
@@ -483,7 +439,7 @@ LibUnitFrame.SpawnUnitFrame = function(self, unit, parent, styleFunc, ...)
 		frame:RegisterEvent("PLAYER_TARGET_CHANGED", UnitFrame.OverrideAllElements, true)
 		frame:EnableFrameFrequent(.5, "unit")
 
-	elseif (unit:match("%w+target")) then
+	elseif (string_match(unit, "%w+target")) then
 		frame:EnableFrameFrequent(.5, "unit")
 	end
 
@@ -527,35 +483,6 @@ LibUnitFrame.SpawnUnitFrame = function(self, unit, parent, styleFunc, ...)
 	end 
 	
 	return frame
-end
-
--- spawn and style a new group header
-LibUnitFrame.SpawnHeader = function(self, unit, parent, styleFunc, ...)
-	
-	local headerTemplate, unitTemplate
-	if _G.Clique then 
-		headerTemplate = "SecureGroupHeaderTemplate"
-		unitTemplate = "SecureUnitButtonTemplate, SecureHandlerStateTemplate, SecureHandlerEnterLeaveTemplate"
-	else 
-		headerTemplate = "SecureGroupHeaderTemplate"
-		unitTemplate = "SecureUnitButtonTemplate"
-	end 
-
-	local header = self:CreateFrame("Frame", nil, "UICenter", headerTemplate)
-	header:SetAttribute("template", unitTemplate)
-	header:SetAttribute("initialConfigFunction", secureSnippets.initialConfigFunction)
-	for i = 1, select("#", ...), 2 do
-		local attribute, value = select(i, ...)
-		if (not attribute) then 
-			break 
-		end
-		header:SetAttribute(attribute, value)
-	end
-	if _G.Clique then
-		header:SetFrameRef("clickcast_header", _G.Clique.header)
-	end
-
-	return header
 end
 
 -- Make this a proxy for development purposes
