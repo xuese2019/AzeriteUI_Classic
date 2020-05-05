@@ -1,4 +1,4 @@
-local LibUnitFrame = Wheel:Set("LibUnitFrame", 73)
+local LibUnitFrame = Wheel:Set("LibUnitFrame", 74)
 if (not LibUnitFrame) then	
 	return
 end
@@ -46,6 +46,7 @@ local ShowBossFrameWhenUninteractable = ShowBossFrameWhenUninteractable
 local ToggleDropDownMenu = ToggleDropDownMenu
 local UnitExists = UnitExists
 local UnitGUID = UnitGUID
+local UnitHasVehicleUI = UnitHasVehicleUI
 
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
@@ -304,6 +305,20 @@ UnitFrame.OverrideAllElementsOnChangedGUID = function(self, event, ...)
 	end
 end
 
+local UpdatePet = function(self, event, unit)
+	local petUnit
+	if (unit == "target") then
+		return
+	elseif (unit == "player") then
+		petUnit = "pet"
+	else
+		petUnit = unit.."pet"
+	end
+	if (not self:OnAttributeChanged("unit", UnitHasVehicleUI(unit) and petUnit or unit)) then
+		return self:UpdateAllElements(event, "Forced", self.unit)
+	end
+end
+
 -- Library API
 --------------------------------------------------------------------------
 -- Return or create the library default tooltip
@@ -416,8 +431,17 @@ LibUnitFrame.SpawnUnitFrame = function(self, unit, parent, styleFunc, ...)
 	if (unit == "target") then
 		frame:RegisterEvent("PLAYER_TARGET_CHANGED", UnitFrame.OverrideAllElements, true)
 
+	elseif (unit == "focus") then
+		frame:RegisterEvent("PLAYER_FOCUS_CHANGED", UnitFrame.OverrideAllElements, true)
+
 	elseif (unit == "mouseover") then
 		frame:RegisterEvent("UPDATE_MOUSEOVER_UNIT", UnitFrame.OverrideAllElements, true)
+
+	elseif (unit:match("^arena(%d+)")) then
+		frame.unitGroup = "arena"
+		frame:SetFrameStrata("MEDIUM")
+		frame:SetFrameLevel(1000)
+		frame:RegisterEvent("ARENA_OPPONENT_UPDATE", UnitFrame.OverrideAllElements, true)
 
 	elseif (string_match(unit, "^boss(%d+)")) then
 		frame.unitGroup = "boss"
@@ -429,10 +453,16 @@ LibUnitFrame.SpawnUnitFrame = function(self, unit, parent, styleFunc, ...)
 	elseif (string_match(unit, "^party(%d+)")) then 
 		frame.unitGroup = "party"
 		frame:RegisterEvent("GROUP_ROSTER_UPDATE", UnitFrame.OverrideAllElements, true)
+		if (IsRetail) then
+			frame:RegisterEvent("UNIT_PET", UpdatePet)
+		end
 
 	elseif (string_match(unit, "^raid(%d+)")) then 
 		frame.unitGroup = "raid"
 		frame:RegisterEvent("GROUP_ROSTER_UPDATE", UnitFrame.OverrideAllElementsOnChangedGUID, true)
+		if (IsRetail) then
+			frame:RegisterEvent("UNIT_PET", UpdatePet)
+		end
 
 	elseif (unit == "targettarget") then
 		-- Need an extra override event here so the ToT frame won't appear to lag behind on target changes.
