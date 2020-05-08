@@ -1,4 +1,4 @@
-local LibSpellHighlight = Wheel:Set("LibSpellHighlight", 2)
+local LibSpellHighlight = Wheel:Set("LibSpellHighlight", 5)
 if (not LibSpellHighlight) then
 	return
 end
@@ -592,7 +592,7 @@ LibSpellHighlight.UpdateDead = function(self, event, ...)
 	end
 end
 
-LibSpellHighlight.UpdateEvents = function(self, event, ...)
+LibSpellHighlight.UpdateClassicEvents = function(self, event, ...)
 	self:UnregisterAllEvents()
 	self:UnregisterAllMessages()
 	self:UpdatePlayerSpellCache()
@@ -854,21 +854,21 @@ LibSpellHighlight.Embed = function(self, target)
 	return target
 end
 
--- Register initialization events
-if (playerClass == "DRUID") then
-
-	LibSpellHighlight:RegisterEvent("SPELLS_CHANGED", "UpdateEvents")
-	LibSpellHighlight:RegisterEvent("UNIT_DISPLAYPOWER", "UpdateEvents")
-	LibSpellHighlight:RegisterEvent("PLAYER_ENTERING_WORLD", "UpdateEvents")
-
-elseif (playerClass == "HUNTER")
-	or (playerClass == "PALADIN")
-	or (playerClass == "ROGUE")
-	or (playerClass == "WARLOCK")
-	or (playerClass == "WARRIOR") then
-
-	LibSpellHighlight:RegisterEvent("SPELLS_CHANGED", "UpdateEvents")
-	LibSpellHighlight:RegisterEvent("PLAYER_ENTERING_WORLD", "UpdateEvents")
+if (IsClassic) then
+	-- Register initialization events
+	if (playerClass == "DRUID") then
+		LibSpellHighlight:RegisterEvent("SPELLS_CHANGED", "UpdateClassicEvents")
+		LibSpellHighlight:RegisterEvent("UNIT_DISPLAYPOWER", "UpdateClassicEvents")
+		LibSpellHighlight:RegisterEvent("PLAYER_ENTERING_WORLD", "UpdateClassicEvents")
+	elseif (playerClass == "HUNTER")
+		or (playerClass == "PALADIN")
+		or (playerClass == "ROGUE")
+		or (playerClass == "WARLOCK")
+		or (playerClass == "WARRIOR")
+	then
+		LibSpellHighlight:RegisterEvent("SPELLS_CHANGED", "UpdateClassicEvents")
+		LibSpellHighlight:RegisterEvent("PLAYER_ENTERING_WORLD", "UpdateClassicEvents")
+	end
+	-- Add the classic highlight database
+	PopulateClassicDatabase()
 end
-
-PopulateClassicDatabase()
