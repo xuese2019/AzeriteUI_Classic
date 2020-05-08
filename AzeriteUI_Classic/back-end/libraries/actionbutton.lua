@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 88)
+local LibSecureButton = Wheel:Set("LibSecureButton", 90)
 if (not LibSecureButton) then
 	return
 end
@@ -61,6 +61,7 @@ local tostring = tostring
 local type = type
 
 -- WoW API
+local ClearOverrideBindings = ClearOverrideBindings
 local CursorHasItem = CursorHasItem
 local CursorHasSpell = CursorHasSpell
 local FlyoutHasSpell = FlyoutHasSpell
@@ -70,7 +71,7 @@ local GetActionInfo = GetActionInfo
 local GetActionLossOfControlCooldown = GetActionLossOfControlCooldown
 local GetActionCount = GetActionCount
 local GetActionTexture = GetActionTexture
-local GetBindingKey = GetBindingKey 
+local GetBindingKey = GetBindingKey
 local GetCursorInfo = GetCursorInfo
 local GetMacroSpell = GetMacroSpell
 local GetOverrideBarIndex = GetOverrideBarIndex
@@ -85,9 +86,12 @@ local IsActionInRange = IsActionInRange
 local IsAutoCastPetAction = C_ActionBar.IsAutoCastPetAction
 local IsConsumableAction = IsConsumableAction
 local IsEnabledAutoCastPetAction = C_ActionBar.IsEnabledAutoCastPetAction
+local IsSpellOverlayed = IsSpellOverlayed
 local IsStackableAction = IsStackableAction
 local IsUsableAction = IsUsableAction
+local RegisterAttributeDriver = RegisterAttributeDriver
 local SetClampedTextureRotation = SetClampedTextureRotation
+local SetOverrideBindingClick = SetOverrideBindingClick
 local UnitClass = UnitClass
 
 -- Constants for client version
@@ -99,6 +103,7 @@ LibSecureButton.embeds = LibSecureButton.embeds or {}
 LibSecureButton.buttons = LibSecureButton.buttons or {} 
 LibSecureButton.allbuttons = LibSecureButton.allbuttons or {} 
 LibSecureButton.callbacks = LibSecureButton.callbacks or {} 
+LibSecureButton.controllers = LibSecureButton.controllers or {} -- controllers to return bindings to pet battles, vehicles, etc 
 LibSecureButton.numButtons = LibSecureButton.numButtons or 0 -- total number of spawned buttons 
 
 -- Frame to securely hide items
@@ -118,6 +123,7 @@ end
 local AllButtons = LibSecureButton.allbuttons
 local Buttons = LibSecureButton.buttons
 local Callbacks = LibSecureButton.callbacks
+local Controllers = LibSecureButton.controllers
 local UIHider = LibSecureButton.frame
 
 -- Blizzard Textures
@@ -127,48 +133,101 @@ local BLING_TEXTURE = [[Interface\Cooldown\star4]]
 
 -- Generic format strings for our button names
 local BUTTON_NAME_TEMPLATE_SIMPLE = "%sActionButton"
-local BUTTON_NAME_TEMPLATE_FULL = "%sActionButton%.0f"
+local BUTTON_NAME_TEMPLATE_FULL = "%sActionButton%d"
 local PETBUTTON_NAME_TEMPLATE_SIMPLE = "%sPetActionButton"
-local PETBUTTON_NAME_TEMPLATE_FULL = "%sPetActionButton%.0f"
+local PETBUTTON_NAME_TEMPLATE_FULL = "%sPetActionButton%d"
 
 -- Constants
 local NUM_ACTIONBAR_BUTTONS = NUM_ACTIONBAR_BUTTONS
 local NUM_PET_ACTION_SLOTS = NUM_PET_ACTION_SLOTS
 local NUM_STANCE_SLOTS = NUM_STANCE_SLOTS
+local BOTTOMLEFT_ACTIONBAR_PAGE = BOTTOMLEFT_ACTIONBAR_PAGE
+local BOTTOMRIGHT_ACTIONBAR_PAGE = BOTTOMRIGHT_ACTIONBAR_PAGE
+local LEFT_ACTIONBAR_PAGE = LEFT_ACTIONBAR_PAGE
+local RIGHT_ACTIONBAR_PAGE = RIGHT_ACTIONBAR_PAGE
 
 -- Time constants
 local DAY, HOUR, MINUTE = 86400, 3600, 60
 
-local SECURE = {
-	Page_OnAttributeChanged = string_format([=[ 
+local SECURE = {}
+if (IsClassic) then
+	SECURE.Page_OnAttributeChanged = string_format([=[ 
 		if (name == "state-page") then 
 			local page; 
-
+	
 			if (value == "11") then 
 				page = 12; 
 			end
-
+	
 			local driverResult; 
 			if page then 
 				driverResult = value;
 				value = page; 
 			end 
-
+	
 			self:SetAttribute("state", value);
-
+	
 			local button = self:GetFrameRef("Button"); 
 			local buttonPage = button:GetAttribute("actionpage"); 
 			local id = button:GetID(); 
 			local actionpage = tonumber(value); 
 			local slot = actionpage and (actionpage > 1) and ((actionpage - 1)*%d + id) or id; 
-
+	
 			button:SetAttribute("actionpage", actionpage or 0); 
 			button:SetAttribute("action", slot); 
 			button:CallMethod("UpdateAction"); 
-
+	
 			-- Debugging the weird results
 			-- *only showing bar 1, button 1
-			if self:GetID() == 1 and id == 1 then
+			if (self:GetID() == 1) and (id == 1) then
+				if driverResult then 
+					local page = tonumber(driverResult); 
+					if page then 
+						self:CallMethod("AddDebugMessage", "ActionButton driver attempted to change page to: " ..driverResult.. " - Page changed by environment to: " .. value); 
+					else 
+						self:CallMethod("AddDebugMessage", "ActionButton driver reported the state: " ..driverResult.. " - Page changed by environment to: " .. value); 
+					end
+				elseif value then 
+					self:CallMethod("AddDebugMessage", "ActionButton driver changed page to: " ..value); 
+				end
+			end
+		end 
+	]=])
+end
+if (IsRetail) then
+	SECURE.Page_OnAttributeChanged = string_format([=[ 
+		if (name == "state-page") then 
+			local page; 
+	
+			if (value == "11") then 
+				if (HasBonusActionBar()) and (GetActionBarPage() == 1) then  
+					page = GetBonusBarIndex(); 
+				else 
+					page = 12; 
+				end 
+			end
+	
+			local driverResult; 
+			if page then 
+				driverResult = value;
+				value = page; 
+			end 
+	
+			self:SetAttribute("state", value);
+	
+			local button = self:GetFrameRef("Button"); 
+			local buttonPage = button:GetAttribute("actionpage"); 
+			local id = button:GetID(); 
+			local actionpage = tonumber(value); 
+			local slot = actionpage and (actionpage > 1) and ((actionpage - 1)*%d + id) or id; 
+	
+			button:SetAttribute("actionpage", actionpage or 0); 
+			button:SetAttribute("action", slot); 
+			button:CallMethod("UpdateAction"); 
+	
+			-- Debugging the weird results
+			-- *only showing bar 1, button 1
+			if (self:GetID() == 1) and (id == 1) then
 				if driverResult then 
 					local page = tonumber(driverResult); 
 					if page then 
@@ -183,13 +242,13 @@ local SECURE = {
 		end 
 	]=])
 
-}
+end
 
 -- Utility Functions
 ----------------------------------------------------
 -- Syntax check 
 local check = function(value, num, ...)
-	assert(type(num) == "number", ("Bad argument #%.0f to '%s': %s expected, got %s"):format(2, "Check", "number", type(num)))
+	assert(type(num) == "number", ("Bad argument #%d to '%s': %s expected, got %s"):format(2, "Check", "number", type(num)))
 	for i = 1,select("#", ...) do
 		if type(value) == select(i, ...) then 
 			return 
@@ -197,7 +256,7 @@ local check = function(value, num, ...)
 	end
 	local types = string_join(", ", ...)
 	local name = string_match(debugstack(2, 2, 0), ": in function [`<](.-)['>]")
-	error(("Bad argument #%.0f to '%s': %s expected, got %s"):format(num, name, types, type(value)), 3)
+	error(("Bad argument #%d to '%s': %s expected, got %s"):format(num, name, types, type(value)), 3)
 end
 
 local nameHelper = function(self, id, buttonType)
@@ -234,19 +293,19 @@ end
 local formatCooldownTime = function(time)
 	if time > DAY then -- more than a day
 		time = time + DAY/2
-		return "%.0f%s", time/DAY - time/DAY%1, "d"
+		return "%d%s", time/DAY - time/DAY%1, "d"
 	elseif time > HOUR then -- more than an hour
 		time = time + HOUR/2
-		return "%.0f%s", time/HOUR - time/HOUR%1, "h"
+		return "%d%s", time/HOUR - time/HOUR%1, "h"
 	elseif time > MINUTE then -- more than a minute
 		time = time + MINUTE/2
-		return "%.0f%s", time/MINUTE - time/MINUTE%1, "m"
+		return "%d%s", time/MINUTE - time/MINUTE%1, "m"
 	elseif time > 10 then -- more than 10 seconds
-		return "%.0f", time - time%1
+		return "%d", time - time%1
 	elseif time >= 1 then -- more than 5 seconds
-		return "|cffff8800%.0f|r", time - time%1
+		return "|cffff8800%d|r", time - time%1
 	elseif time > 0 then
-		return "|cffff0000%.0f|r", time*10 - time*10%1
+		return "|cffff0000%d|r", time*10 - time*10%1
 	else
 		return ""
 	end	
@@ -402,6 +461,28 @@ local UpdateActionButton = function(self, event, ...)
 		else
 			local actionType, id = GetActionInfo(self.buttonAction)
 			if (actionType == "flyout") and (FlyoutHasSpell(id, arg1)) then
+				self:HideOverlayGlow()
+			end
+		end
+
+	elseif (event == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW") then
+		local spellID = self:GetSpellID()
+		if (spellID and (spellID == arg1)) then
+			self:ShowOverlayGlow()
+		else
+			local actionType, id = GetActionInfo(self.buttonAction)
+			if (actionType == "flyout") and FlyoutHasSpell(id, arg1) then
+				self:ShowOverlayGlow()
+			end
+		end
+
+	elseif (event == "SPELL_ACTIVATION_OVERLAY_GLOW_HIDE") then
+		local spellID = self:GetSpellID()
+		if (spellID and (spellID == arg1)) then
+			self:HideOverlayGlow()
+		else
+			local actionType, id = GetActionInfo(self.buttonAction)
+			if actionType == "flyout" and FlyoutHasSpell(id, arg1) then
 				self:HideOverlayGlow()
 			end
 		end
@@ -945,8 +1026,11 @@ ActionButton.UpdateUsable = function(self)
 	end
 end
 
-ActionButton.ShowOverlayGlow = function(self, overlayType)
-	if self.SpellHighlight then 
+if (IsClassic) then
+	ActionButton.ShowOverlayGlow = function(self, overlayType)
+		if (not self.SpellHighlight) then
+			return
+		end
 		local r, g, b, a
 		if (overlayType == "CLEARCAST") then
 			r, g, b, a = 125/255, 225/255, 255/255, .75
@@ -961,16 +1045,18 @@ ActionButton.ShowOverlayGlow = function(self, overlayType)
 		self.SpellHighlight.Texture:SetVertexColor(r, g, b, .75)
 		self.SpellHighlight:Show()
 	end
-end
 
-ActionButton.HideOverlayGlow = function(self)
-	if self.SpellHighlight then 
+	ActionButton.HideOverlayGlow = function(self)
+		if (not self.SpellHighlight) then
+			return
+		end
 		self.SpellHighlight:Hide()
 	end
-end
 
-ActionButton.UpdateSpellHighlight = function(self)
-	if self.SpellHighlight then 
+	ActionButton.UpdateSpellHighlight = function(self)
+		if (not self.SpellHighlight) then
+			return
+		end
 		local spellId = self:GetSpellID()
 		if (spellId) then
 			local overlayType = LibSecureButton:GetSpellOverlayType(spellId)
@@ -980,7 +1066,44 @@ ActionButton.UpdateSpellHighlight = function(self)
 				self:HideOverlayGlow()
 			end
 		end
-	end 
+	end
+end
+
+if (IsRetail) then
+	ActionButton.ShowOverlayGlow = function(self)
+		if (not self.SpellHighlight) then
+			return
+		end
+		local model = self.SpellHighlight.Model
+		local w,h = self:GetSize()
+		if (w and h) then 
+			model:SetSize(w*2,h*2)
+			model:Show()
+		else 
+			model:Hide()
+		end 
+		self.SpellHighlight:Show()
+	end
+
+	ActionButton.HideOverlayGlow = function(self)
+		if (not self.SpellHighlight) then
+			return
+		end
+		self.SpellHighlight:Hide()
+		self.SpellHighlight.Model:Hide()
+	end
+
+	ActionButton.UpdateSpellHighlight = function(self)
+		if (not self.SpellHighlight) then
+			return
+		end
+		local spellId = self:GetSpellID()
+		if (spellId and IsSpellOverlayed(spellId)) then
+			self:ShowOverlayGlow()
+		else
+			self:HideOverlayGlow()
+		end
+	end
 end
 
 -- Getters
@@ -1096,19 +1219,21 @@ ActionButton.OnEnable = function(self)
 	self:RegisterEvent("UPDATE_MACROS", UpdateActionButton)
 	self:RegisterEvent("UPDATE_SHAPESHIFT_FORM", UpdateActionButton)
 
-	if (IsRetail) then
-		self:RegisterEvent("ARCHAEOLOGY_CLOSED", Update)
-		self:RegisterEvent("COMPANION_UPDATE", Update)
-		--self:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_HIDE", Update)
-		--self:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_SHOW", Update)
-		self:RegisterEvent("UNIT_ENTERED_VEHICLE", Update)
-		self:RegisterEvent("UNIT_EXITED_VEHICLE", Update)
-		self:RegisterEvent("UPDATE_SUMMONPETS_ACTION", Update)
-		self:RegisterEvent("UPDATE_VEHICLE_ACTIONBAR", Update)
+	if (IsClassic) then
+		self:RegisterMessage("GP_SPELL_ACTIVATION_OVERLAY_GLOW_SHOW", UpdateActionButton)
+		self:RegisterMessage("GP_SPELL_ACTIVATION_OVERLAY_GLOW_HIDE", UpdateActionButton)
 	end
-
-	self:RegisterMessage("GP_SPELL_ACTIVATION_OVERLAY_GLOW_SHOW", UpdateActionButton)
-	self:RegisterMessage("GP_SPELL_ACTIVATION_OVERLAY_GLOW_HIDE", UpdateActionButton)
+	
+	if (IsRetail) then
+		self:RegisterEvent("ARCHAEOLOGY_CLOSED", UpdateActionButton)
+		self:RegisterEvent("COMPANION_UPDATE", UpdateActionButton)
+		self:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_HIDE", UpdateActionButton)
+		self:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_SHOW", UpdateActionButton)
+		self:RegisterEvent("UNIT_ENTERED_VEHICLE", UpdateActionButton)
+		self:RegisterEvent("UNIT_EXITED_VEHICLE", UpdateActionButton)
+		self:RegisterEvent("UPDATE_SUMMONPETS_ACTION", UpdateActionButton)
+		self:RegisterEvent("UPDATE_VEHICLE_ACTIONBAR", UpdateActionButton)
+	end
 end
 
 ActionButton.OnDisable = function(self)
@@ -1595,6 +1720,20 @@ LibSecureButton.CreateButtonSpellHighlight = function(self, button)
 	texture:SetAllPoints()
 	texture:SetVertexColor(255/255, 225/255, 125/255, 1)
 	button.SpellHighlight.Texture = texture
+
+	if (IsRetail) then
+		local model = spellHighlight:CreateFrame("PlayerModel")
+		model:Hide()
+		model:SetFrameLevel(button:GetFrameLevel()-1)
+		model:SetPoint("CENTER", 0, 0)
+		model:EnableMouse(false)
+		model:ClearModel()
+		model:SetDisplayInfo(26501) 
+		model:SetCamDistanceScale(3)
+		model:SetPortraitZoom(0)
+		model:SetPosition(0, 0, 0)
+		button.SpellHighlight.Model = model
+	end
 end
 
 -- Prepare a Blizzard Pet Button for our usage
@@ -1828,6 +1967,7 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 		button:SetScript("OnUpdate", OnUpdate)
 
 		-- A little magic to allow us to toggle autocasting of pet abilities
+		-- when placed on one of the regular action bars.
 		page:WrapScript(button, "PreClick", [[
 			if (button ~= "RightButton") then 
 				if (self:GetAttribute("type2")) then 
@@ -1929,9 +2069,10 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 
 		elseif (IsRetail) then
 			if (barID == 1) then 
-				-- Moving vehicles farther back in the queue, as some overridebars like the ones 
-				-- found in the new 8.1.5 world quest "Cycle of Life" returns positive for both vehicleui and overridebar. 
-				driver = ("[overridebar]%.0f; [possessbar]%.0f; [shapeshift]%.0f; [vehicleui]%.0f; [form,noform] 0; [bar:2]2; [bar:3]3; [bar:4]4; [bar:5]5; [bar:6]6"):format(GetOverrideBarIndex(), GetVehicleBarIndex(), GetTempShapeshiftBarIndex(), GetVehicleBarIndex())
+				-- Moving vehicles farther back in the queue, as some overridebars like the ones
+				-- found in the new 8.1.5 world quest "Cycle of Life" returns positive for both vehicleui and overridebar.
+				-- In other words; do NOT change the order of these, as it really matters!
+				driver = ("[overridebar]%d; [possessbar]%d; [shapeshift]%d; [vehicleui]%d; [form,noform] 0; [bar:2]2; [bar:3]3; [bar:4]4; [bar:5]5; [bar:6]6"):format(GetOverrideBarIndex(), GetVehicleBarIndex(), GetTempShapeshiftBarIndex(), GetVehicleBarIndex())
 		
 				local _, playerClass = UnitClass("player")
 				if (playerClass == "DRUID") then
@@ -2060,9 +2201,68 @@ LibSecureButton.GetActionButtonTooltip = function(self)
 	return LibSecureButton:GetTooltip("GP_ActionButtonTooltip") or LibSecureButton:CreateTooltip("GP_ActionButtonTooltip")
 end
 
+LibSecureButton.GetActionBarControllerPetBattle = function(self)
+	if ((not Controllers[self]) or (not Controllers[self].petBattle)) then 
+
+		-- Get the generic button name without the ID added
+		local name = nameHelper(self)
+
+		-- The blizzard petbattle UI gets its keybinds from the primary action bar, 
+		-- so in order for the petbattle UI keybinds to function properly, 
+		-- we need to temporarily give the primary action bar backs its keybinds.
+		local petbattle = self:CreateFrame("Frame", nil, UIParent, "SecureHandlerAttributeTemplate")
+		petbattle:SetAttribute("_onattributechanged", [[
+			if (name == "state-petbattle") then
+				if (value == "petbattle") then
+					for i = 1,6 do
+						local our_button, blizz_button = ("CLICK ]]..name..[[%d:LeftButton"):format(i), ("ACTIONBUTTON%d"):format(i)
+
+						-- Grab the keybinds from our own primary action bar,
+						-- and assign them to the default blizzard bar. 
+						-- The pet battle system will in turn get its bindings 
+						-- from the default blizzard bar, and the magic works! :)
+						
+						for k=1,select("#", GetBindingKey(our_button)) do
+							local key = select(k, GetBindingKey(our_button)) -- retrieve the binding key from our own primary bar
+							self:SetBinding(true, key, blizz_button) -- assign that key to the default bar
+						end
+						
+						-- do the same for the default UIs bindings
+						for k=1,select("#", GetBindingKey(blizz_button)) do
+							local key = select(k, GetBindingKey(blizz_button))
+							self:SetBinding(true, key, blizz_button)
+						end	
+					end
+				else
+					-- Return the key bindings to whatever buttons they were
+					-- assigned to before we so rudely grabbed them! :o
+					self:ClearBindings()
+				end
+			end
+		]])
+
+		-- Do we ever need to update his?
+		RegisterAttributeDriver(petbattle, "state-petbattle", "[petbattle]petbattle;nopetbattle")
+
+		if (not Controllers[self]) then 
+			Controllers[self] = {}
+		end
+		Controllers[self].petBattle = petbattle
+	end
+	return Controllers[self].petBattle
+end
+
+LibSecureButton.GetActionBarControllerVehicle = function(self)
+end
+
 -- Modules should call this at UPDATE_BINDINGS and the first PLAYER_ENTERING_WORLD
 LibSecureButton.UpdateActionButtonBindings = function(self)
-	-- "SHAPESHIFTBUTTON%.0f" -- stance bar
+
+	-- "SHAPESHIFTBUTTON%d" -- stance bar
+
+	local mainBarUsed
+	local petBattleUsed, vehicleUsed
+
 	for button in self:GetAllActionButtonsByType("action") do 
 
 		local pager = button:GetPager()
@@ -2076,19 +2276,23 @@ LibSecureButton.UpdateActionButtonBindings = function(self)
 
 		-- figure out the binding action
 		local bindingAction
-		if (barID == 1) then 
-			bindingAction = ("ACTIONBUTTON%.0f"):format(buttonID)
+		if (barID == 1) then
+			bindingAction = ("ACTIONBUTTON%d"):format(buttonID)
+
+			-- We've used the main bar, and need to update the controllers
+			mainBarUsed = true
+
 		elseif (barID == BOTTOMLEFT_ACTIONBAR_PAGE) then 
-			bindingAction = ("MULTIACTIONBAR1BUTTON%.0f"):format(buttonID)
+			bindingAction = ("MULTIACTIONBAR1BUTTON%d"):format(buttonID)
 
 		elseif (barID == BOTTOMRIGHT_ACTIONBAR_PAGE) then 
-			bindingAction = ("MULTIACTIONBAR2BUTTON%.0f"):format(buttonID)
+			bindingAction = ("MULTIACTIONBAR2BUTTON%d"):format(buttonID)
 
 		elseif (barID == RIGHT_ACTIONBAR_PAGE) then 
-			bindingAction = ("MULTIACTIONBAR3BUTTON%.0f"):format(buttonID)
+			bindingAction = ("MULTIACTIONBAR3BUTTON%d"):format(buttonID)
 
 		elseif (barID == LEFT_ACTIONBAR_PAGE) then 
-			bindingAction = ("MULTIACTIONBAR4BUTTON%.0f"):format(buttonID)
+			bindingAction = ("MULTIACTIONBAR4BUTTON%d"):format(buttonID)
 		end 
 
 		-- store the binding action name on the button
@@ -2101,8 +2305,9 @@ LibSecureButton.UpdateActionButtonBindings = function(self)
 			local key = select(keyNumber, GetBindingKey(bindingAction)) 
 			if (key and (key ~= "")) then
 				-- this is why we need named buttons
-				SetOverrideBindingClick(pager, false, key, button:GetName(), "CLICK: LeftButton") -- assign the key to our own button
-			end	
+				--SetOverrideBindingClick(pager, false, key, button:GetName(), "CLICK: LeftButton") -- assign the key to our own button
+				SetOverrideBindingClick(pager, false, key, button:GetName()) -- assign the key to our own button
+			end
 		end
 	end
 
@@ -2117,7 +2322,7 @@ LibSecureButton.UpdateActionButtonBindings = function(self)
 		local buttonID = button:GetID()
 
 		-- figure out the binding action
-		local bindingAction = ("BONUSACTIONBUTTON%.0f"):format(buttonID)
+		local bindingAction = ("BONUSACTIONBUTTON%d"):format(buttonID)
 
 		-- store the binding action name on the button
 		button.bindingAction = bindingAction
@@ -2134,7 +2339,16 @@ LibSecureButton.UpdateActionButtonBindings = function(self)
 		end
 		
 	end
-end 
+
+	if (mainBarUsed and not petBattleUsed) then 
+		self:GetActionBarControllerPetBattle()
+	end 
+
+	if (mainBarUsed and not vehicleUsed) then 
+		self:GetActionBarControllerVehicle()
+	end
+
+end
 
 -- This will cause multiple updates when library is updated. Hmm....
 hooksecurefunc("ActionButton_UpdateFlyout", function(self, ...)
@@ -2146,9 +2360,11 @@ end)
 -- Module embedding
 local embedMethods = {
 	SpawnActionButton = true,
-	GetActionButtonTooltip = true, 
+	GetActionButtonTooltip = true,
 	GetAllActionButtonsOrdered = true,
 	GetAllActionButtonsByType = true,
+	GetActionBarControllerPetBattle = true,
+	GetActionBarControllerVehicle = true,
 	UpdateActionButtonBindings = true
 }
 
