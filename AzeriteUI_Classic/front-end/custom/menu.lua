@@ -999,6 +999,24 @@ Module.CreateMenuTable = function(self)
 			})
 		end
 
+		-- Talking Head
+		table_insert(HUDMenu.buttons, {
+			enabledTitle = L_ENABLED:format(L["TalkingHead"]),
+			disabledTitle = L_DISABLED:format(L["TalkingHead"]),
+			type = "TOGGLE_VALUE", 
+			configDB = "BlizzardFloaterHUD", configKey = "enableTalkingHead", 
+			proxyModule = "BlizzardFloaterHUD"
+		})
+
+		-- Alerts
+		table_insert(HUDMenu.buttons, {
+			enabledTitle = L_ENABLED:format(L["Alerts"]),
+			disabledTitle = L_DISABLED:format(L["Alerts"]),
+			type = "TOGGLE_VALUE", 
+			configDB = "BlizzardFloaterHUD", configKey = "enableAlerts", 
+			proxyModule = "BlizzardFloaterHUD"
+		})
+
 		table_insert(MenuTable, HUDMenu)
 	end
 

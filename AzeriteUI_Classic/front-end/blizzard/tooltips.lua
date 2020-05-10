@@ -4,8 +4,7 @@ if (not Core) then
 	return 
 end
 
-local Module = Core:NewModule("BlizzardTooltips", "LibEvent", "LibDB", "LibFrame", "LibTooltip", "LibTooltipScanner", "LibPlayerData")
-
+local Module = Core:NewModule("BlizzardTooltips", "LibEvent", "LibDB", "LibFrame", "LibTooltip", "LibTooltipScanner", "LibPlayerData", "LibClientBuild")
 Module:SetIncompatible("TipTac")
 Module:SetIncompatible("TinyTip")
 Module:SetIncompatible("TinyTooltip")
@@ -42,15 +41,18 @@ local FACTION_ALLIANCE_TEXTURE = "|TInterface\\TargetingFrame\\UI-PVP-Alliance:1
 local FACTION_NEUTRAL_TEXTURE = "|TInterface\\TargetingFrame\\UI-PVP-Neutral:14:10:-2:1:64:64:6:34:0:40|t" -- 4:3
 local FACTION_HORDE_TEXTURE = "|TInterface\\TargetingFrame\\UI-PVP-Horde:14:14:-4:0:64:64:0:40:0:40|t" -- 1:1
 
--- Flag set to true if any other known 
--- addon with vendor sell prices is enabled 
-local DISABLE_VENDOR_PRICES = (function(...) 
-	for i = 1,select("#", ...) do
-		if Module:IsAddOnEnabled((select(i, ...))) then 
-			return true
+-- Flag set to true if any other known
+-- addon with vendor sell prices is enabled.
+local DISABLE_VENDOR_PRICES = Module:IsRetail()
+if (not DISABLE_VENDOR_PRICES) then
+	DISABLE_VENDOR_PRICES = (function(...)
+		for i = 1,select("#", ...) do
+			if Module:IsAddOnEnabled((select(i, ...))) then 
+				return true
+			end
 		end
-	end
-end)("Auctionator", "TradeSkillMaster")
+	end)("Auctionator", "TradeSkillMaster")
+end
 
 -- Lockdowns
 local LOCKDOWNS = {} 

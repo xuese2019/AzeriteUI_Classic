@@ -1,4 +1,4 @@
-local LibNamePlate = Wheel:Set("LibNamePlate", 42)
+local LibNamePlate = Wheel:Set("LibNamePlate", 43)
 if (not LibNamePlate) then	
 	return
 end
@@ -8,6 +8,9 @@ assert(LibMessage, "LibNamePlate requires LibMessage to be loaded.")
 
 local LibEvent = Wheel("LibEvent")
 assert(LibEvent, "LibNamePlate requires LibEvent to be loaded.")
+
+local LibClientBuild = Wheel("LibClientBuild")
+assert(LibClientBuild, "LibCast requires LibClientBuild to be loaded.")
 
 local LibFrame = Wheel("LibFrame")
 assert(LibFrame, "LibNamePlate requires LibFrame to be loaded.")
@@ -63,6 +66,10 @@ local UnitReaction = UnitReaction
 
 -- WoW Frames & Objects
 local WorldFrame = WorldFrame
+
+-- Constants for client version
+local IsClassic = LibClientBuild:IsClassic()
+local IsRetail = LibClientBuild:IsRetail()
 
 -- Plate Registries
 LibNamePlate.allPlates = LibNamePlate.allPlates or {}
@@ -263,6 +270,13 @@ local Colors = {
 		civilian 		= prepare(  64/255, 131/255,  38/255 )  -- used for friendly player nameplates
 	}
 }
+
+-- Add in retail class colors
+if (IsRetail) then
+	Colors.class.DEATHKNIGHT = prepare( 176/255,  31/255,  79/255 ) -- slightly more blue, less red, to stand out from angry mobs better
+	Colors.class.DEMONHUNTER = prepare( 163/255,  48/255, 201/255 )
+	Colors.class.MONK = prepare(   0/255, 255/255, 150/255 )
+end
 
 -- Utility Functions
 ----------------------------------------------------------
@@ -1208,14 +1222,28 @@ LibNamePlate.Enable = function(self)
 end 
 
 LibNamePlate.KillClassClutter = function(self)
-	if NamePlateDriverFrame then
-		local BlizzPlateManaBar = NamePlateDriverFrame.classNamePlatePowerBar
-		if BlizzPlateManaBar then
-			BlizzPlateManaBar:Hide()
-			BlizzPlateManaBar:UnregisterAllEvents()
+	if (NamePlateDriverFrame) then
+		if (IsClassic) then
+			local BlizzPlateManaBar = NamePlateDriverFrame.classNamePlatePowerBar
+			if BlizzPlateManaBar then
+				BlizzPlateManaBar:Hide()
+				BlizzPlateManaBar:UnregisterAllEvents()
+			end
+		end
+		if (IsRetail) then
+			DeathKnightResourceOverlayFrame:UnregisterAllEvents()
+			ClassNameplateBarMageFrame:UnregisterAllEvents()
+			ClassNameplateBarWindwalkerMonkFrame:UnregisterAllEvents()
+			ClassNameplateBarPaladinFrame:UnregisterAllEvents()
+			ClassNameplateBarRogueDruidFrame:UnregisterAllEvents()
+			ClassNameplateBarWarlockFrame:UnregisterAllEvents()
+			ClassNameplateManaBarFrame:UnregisterAllEvents()
+			ClassNameplateBrewmasterBarFrame:UnregisterAllEvents()
+			NamePlateDriverFrame:SetClassNameplateManaBar(nil)
+			NamePlateDriverFrame:SetClassNameplateBar(nil)
 		end
 	end
-end 
+end
 
 LibNamePlate.StartNamePlateEngine = function(self)
 	if LibNamePlate.enabled then 

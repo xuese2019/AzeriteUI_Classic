@@ -8,6 +8,7 @@ with static layout data used during the setup phase.
 local ADDON, Private = ...
 local L = Wheel("LibLocale"):GetLocale(ADDON)
 local LibDB = Wheel("LibDB")
+local LibClientBuild = Wheel("LibClientBuild")
 
 ------------------------------------------------
 -- Addon Environment
@@ -48,6 +49,10 @@ local GetAuraFilterFunc = Private.GetAuraFilterFunc
 local GetFont = Private.GetFont
 local GetMedia = Private.GetMedia
 local Colors = Private.Colors
+
+-- Constants for client version
+local IsClassic = LibClientBuild:IsClassic()
+local IsRetail = LibClientBuild:IsRetail()
 
 -- Just because we repeat them so many times
 local MenuButtonFontSize, MenuButtonW, MenuButtonH = 14, 300, 50
@@ -1826,6 +1831,11 @@ Defaults.BlizzardFloaterHUD = {
 	enableRaidWarnings = true
 }
 
+if (IsRetail) then
+	Defaults.BlizzardFloaterHUD.enableTalkingHead = true
+	Defaults.BlizzardFloaterHUD.enableAlerts = true
+end
+
 Defaults.ActionBarMain = {
 
 	-- unlock buttons
@@ -1921,7 +1931,7 @@ Layouts[ADDON] = {
 		LevelUpDisplay = true, -- Retail
 		Minimap = true,
 		OrderHall = true,
-		ObjectiveTracker = true, -- Retail
+		--ObjectiveTracker = true, -- Retail
 		PlayerPowerBarAlt = true, -- Retail
 		--QuestWatchFrame = true, -- Classic
 		TotemFrame = true, -- Retail
@@ -1991,8 +2001,69 @@ Layouts.BlizzardChatFrames = {
 
 -- Blizzard Floaters
 Layouts.BlizzardFloaterHUD = {
-	StyleErrorFrame = true, ErrorFrameStrata = "LOW",
-	StyleQuestTimerFrame = true, QuestTimerFramePlace = { "CENTER", UIParent, "CENTER", 0, 220 }
+	AlertFramesAnchor = "BOTTOM",
+	AlertFramesOffset = -10,
+	AlertFramesPlace = { "TOP", "UICenter", "TOP", 0, -40 },
+	AlertFramesPlaceTalkingHead = { "TOP", "UICenter", "TOP", 0, -240 },
+	AlertFramesPosition = "TOP",
+	AlertFramesSize = { 180, 20 },
+	ErrorFrameStrata = "LOW",
+	ExtraActionButtonBorderColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3], 1 },
+	ExtraActionButtonBorderDrawLayer = { "BORDER", 1 },
+	ExtraActionButtonBorderPlace = { "CENTER", 0, 0 },
+	ExtraActionButtonBorderSize = { 64/(122/256), 64/(122/256) },
+	ExtraActionButtonBorderTexture = GetMedia("actionbutton-border"),
+	ExtraActionButtonCooldownBlingColor = { 0, 0, 0 , 0 },
+	ExtraActionButtonCooldownBlingTexture = GetMedia("blank"),
+	ExtraActionButtonCooldownPlace = { "CENTER", 0, 0 },
+	ExtraActionButtonCooldownSize = { 44, 44 },
+	ExtraActionButtonCooldownSwipeColor = { 0, 0, 0, .5 },
+	ExtraActionButtonCooldownSwipeTexture = GetMedia("actionbutton_circular_mask"),
+	ExtraActionButtonCount = GetFont(18, true),
+	ExtraActionButtonCountJustifyH = "CENTER",
+	ExtraActionButtonCountJustifyV = "BOTTOM",
+	ExtraActionButtonCountPlace = { "BOTTOMRIGHT", -3, 3 },
+	ExtraActionButtonFramePlace = { "CENTER", "UICenter", "CENTER", 210 + 27, -60 },
+	ExtraActionButtonIconSize = { 44, 44 },
+	ExtraActionButtonIconMaskTexture = GetMedia("actionbutton_circular_mask"),  
+	ExtraActionButtonIconPlace = { "CENTER", 0, 0 },
+	ExtraActionButtonKeybindColor = { Colors.quest.gray[1], Colors.quest.gray[2], Colors.quest.gray[3], .75 },
+	ExtraActionButtonKeybindFont = GetFont(15, true),
+	ExtraActionButtonKeybindPlace = { "TOPLEFT", 5, -5 },
+	ExtraActionButtonKeybindJustifyH = "CENTER",
+	ExtraActionButtonKeybindJustifyV = "BOTTOM",
+	ExtraActionButtonKeybindShadowColor = { 0, 0, 0, 1 },
+	ExtraActionButtonKeybindShadowOffset = { 0, 0 },
+	ExtraActionButtonPlace = { "CENTER", 0, 0 },
+	ExtraActionButtonShowCooldownBling = true,
+	ExtraActionButtonShowCooldownSwipe = true,
+	ExtraActionButtonSize = { 64, 64 },
+	QuestTimerFramePlace = { "CENTER", UIParent, "CENTER", 0, 220 },
+	TalkingHeadFramePlace = { "TOP", "UICenter", "TOP", 0, -(60 + 40) },
+	VehicleSeatIndicatorPlace = { "CENTER", "UICenter", "CENTER", 424, 0 },
+	ZoneAbilityButtonBorderColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3], 1 },
+	ZoneAbilityButtonBorderDrawLayer = { "BORDER", 1 },
+	ZoneAbilityButtonBorderPlace = { "CENTER", 0, 0 },
+	ZoneAbilityButtonBorderSize = { 64/(122/256), 64/(122/256) },
+	ZoneAbilityButtonBorderTexture = GetMedia("actionbutton-border"),
+	ZoneAbilityButtonCooldownBlingColor = { 0, 0, 0 , 0 },
+	ZoneAbilityButtonCooldownBlingTexture = GetMedia("blank"),
+	ZoneAbilityButtonCooldownPlace = { "CENTER", 0, 0 },
+	ZoneAbilityButtonCooldownSize = { 44, 44 },
+	ZoneAbilityButtonCooldownSwipeColor = { 0, 0, 0, .5 },
+	ZoneAbilityButtonCooldownSwipeTexture = GetMedia("actionbutton_circular_mask"),
+	ZoneAbilityButtonCount = GetFont(18, true),
+	ZoneAbilityButtonCountPlace = { "BOTTOMRIGHT", -3, 3 },
+	ZoneAbilityButtonCountJustifyH = "CENTER",
+	ZoneAbilityButtonCountJustifyV = "BOTTOM",
+	ZoneAbilityButtonFramePlace = { "CENTER", "UICenter", "CENTER", 210 + 27, -60 },
+	ZoneAbilityButtonIconMaskTexture = GetMedia("actionbutton_circular_mask"),
+	ZoneAbilityButtonIconPlace = { "CENTER", 0, 0 },
+	ZoneAbilityButtonIconSize = { 44, 44 },
+	ZoneAbilityButtonPlace = { "CENTER", 0, 0 },
+	ZoneAbilityButtonShowCooldownSwipe = true,
+	ZoneAbilityButtonShowCooldownBling = true,
+	ZoneAbilityButtonSize = { 64, 64 }
 }
 
 -- Blizzard font replacements
@@ -2075,19 +2146,34 @@ Layouts.BlizzardTimers = {
 }
 
 -- Blizzard Objectives Tracker
-Layouts.BlizzardObjectivesTracker = {
-	FontObject = GetFont(13, true),
-	FontObjectTitle = GetFont(15, true),
-	HideInArena = true, -- Retail/TBC
-	HideInBossFights = true,
-	HideInCombat = false,
-	MaxHeight = 1080 - (260 + 380),
-	Place = { "BOTTOMRIGHT", -60, 380 },
-	Scale = 1.0, 
-	SpaceBottom = 380, 
-	SpaceTop = 260, 
-	Width = 255 -- 280 is classic default
-}
+if (IsClassic) then
+	Layouts.BlizzardObjectivesTracker = {
+		FontObject = GetFont(13, true),
+		FontObjectTitle = GetFont(15, true),
+		--HideInArena = true, -- Retail/TBC
+		HideInBossFights = true,
+		HideInCombat = false,
+		MaxHeight = 1080 - (260 + 380),
+		Place = { "BOTTOMRIGHT", -60, 380 },
+		Scale = 1.0, 
+		SpaceBottom = 380, 
+		SpaceTop = 260, 
+		Width = 255 -- 280 is classic default
+	}
+end
+if (IsRetail) then
+	Layouts.BlizzardObjectivesTracker = {
+		Place = { "TOPRIGHT", -60, -260 },
+		Width = 235, -- 235 default
+		Scale = 1.1, 
+		SpaceTop = 260, 
+		SpaceBottom = 330, 
+		MaxHeight = 480,
+		HideInCombat = false, 
+		HideInBossFights = true, 
+		HideInArena = true
+	}
+end
 
 -- Blizzard Popup Styling
 Layouts.BlizzardPopupStyling = {
@@ -2387,8 +2473,9 @@ Layouts.Minimap = {
 		["1.13.4"] = GetMedia("Blip-Nandini-New-113_2"),
 		["1.13.5"] = [[Interface\Minimap\ObjectIconsAtlas.blp]] -- Blizzard Fallback
 	},
+	BlobAlpha = { 0, 96, 0, 0 }, -- blobInside, blobOutside, ringOutside, ringInside
 	Clock_OverrideValue = Minimap_Clock_OverrideValue,
-	ClockColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] }, 
+	ClockColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] },
 	ClockFont = GetFont(15, true),
 	ClockPlace = { "BOTTOMRIGHT", -(13 + 213), -8 },
 	CompassColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .75 }, 

@@ -672,6 +672,12 @@ Module.SetUpMinimap = function(self)
 	-- Reposition minimap tooltip 
 	local tooltip = self:GetMinimapTooltip()
 
+	-- Blob & Ring Textures
+	-- Set the alpha values of the various map blob and ring textures. Values range from 0-255.
+	-- Using tested versions from DiabolicUI, which makes the map IMO much more readable.
+	self:SetMinimapBlobAlpha(unpack(layout.BlobAlpha))
+
+	-- Blip textures
 	for patch,path in pairs(layout.BlipTextures) do 
 		self:SetMinimapBlips(path, patch)
 	end
