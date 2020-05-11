@@ -1,7 +1,10 @@
-local LibAuraData = Wheel:Set("LibAuraData", -1)
+local LibAuraData = Wheel:Set("LibAuraData", 1)
 if (not LibAuraData) then
 	return
 end
+
+local LibClientBuild = Wheel("LibClientBuild")
+assert(LibClientBuild, "LibAuraData requires LibClientBuild to be loaded.")
 
 -- Lua API
 local _G = _G
@@ -36,6 +39,9 @@ local UserFlags = LibAuraData.userFlags
 
 -- Local constants & tables
 ---------------------------------------------------------------------
+-- Constants for client version
+local IsClassic = LibClientBuild:IsClassic()
+local IsRetail = LibClientBuild:IsRetail()
 
 -- Utility Functions
 ---------------------------------------------------------------------
@@ -193,37 +199,43 @@ local PlayerSpell 		= 2^0
 local RacialSpell 		= 2^1
 
 -- 2nd return value from UnitClass(unit)
-local DRUID 			= 2^2
-local HUNTER 			= 2^3
-local MAGE 				= 2^4
-local PALADIN 			= 2^5
-local PRIEST 			= 2^6
-local ROGUE 			= 2^7
-local SHAMAN 			= 2^8
-local WARLOCK 			= 2^9
-local WARRIOR 			= 2^10
+local DEATHKNIGHT 		= 2^2
+local DEMONHUNTER 		= 2^3
+local DRUID 			= 2^4
+local HUNTER 			= 2^5
+local MAGE 				= 2^6
+local MONK 				= 2^7
+local PALADIN 			= 2^8
+local PRIEST 			= 2^9
+local ROGUE 			= 2^10
+local SHAMAN 			= 2^11
+local WARLOCK 			= 2^12
+local WARRIOR 			= 2^13
 
-local CrowdControl 		= 2^11
-local Incapacitate 		= 2^12
-local Root 				= 2^13
-local Snare 			= 2^14
-local Silence 			= 2^15
-local Stun 				= 2^16
-local Taunt 			= 2^17
-local Immune			= 2^18
-local ImmuneSpell 		= 2^19
-local ImmunePhysical 	= 2^20
-local Disarm 			= 2^21
+local CrowdControl 		= 2^14
+local Incapacitate 		= 2^15
+local Root 				= 2^16
+local Snare 			= 2^17
+local Silence 			= 2^18
+local Stun 				= 2^19
+local Taunt 			= 2^20
+local Immune			= 2^21
+local ImmuneSpell 		= 2^22
+local ImmunePhysical 	= 2^23
+local Disarm 			= 2^24
 
-local Food 				= 2^22
-local Flask 			= 2^23
+local Food 				= 2^25
+local Flask 			= 2^26
 
 InfoFlags.IsPlayerSpell = PlayerSpell
 InfoFlags.IsRacialSpell = RacialSpell
 
+InfoFlags.DEATHKNIGHT = DEATHKNIGHT
+InfoFlags.DEMONHUNTER = DEMONHUNTER
 InfoFlags.DRUID = DRUID
 InfoFlags.HUNTER = HUNTER
 InfoFlags.MAGE = MAGE
+InfoFlags.MONK = MONK
 InfoFlags.PALADIN = PALADIN
 InfoFlags.PRIEST = PRIEST
 InfoFlags.ROGUE = ROGUE
@@ -245,9 +257,12 @@ InfoFlags.IsFood = Food
 InfoFlags.IsFlask = Flask
 
 -- For convenience farther down the list here
+local IsDeathKnight = PlayerSpell + DEATHKNIGHT
+local IsDemonHunter = PlayerSpell + DEMONHUNTER
 local IsDruid = PlayerSpell + DRUID
 local IsHunter = PlayerSpell + HUNTER
 local IsMage = PlayerSpell + MAGE
+local IsMonk = PlayerSpell + MONK
 local IsPaladin = PlayerSpell + PALADIN
 local IsPriest = PlayerSpell + PRIEST
 local IsRogue = PlayerSpell + ROGUE
@@ -272,87 +287,106 @@ local AddFlags = function(spellID, flags)
 	AuraFlags[spellID] = bit_bor(AuraFlags[spellID], flags)
 end
 
--- Druid (Balance)
-------------------------------------------------------------------------
-AddFlags(22812, IsDruid) 					-- Barkskin
-AddFlags(  339, IsDruid + IsRoot) 			-- Entangling Roots (Rank 1)
-AddFlags( 1062, IsDruid + IsRoot) 			-- Entangling Roots (Rank 2)
-AddFlags( 5195, IsDruid + IsRoot) 			-- Entangling Roots (Rank 3)
-AddFlags( 5196, IsDruid + IsRoot) 			-- Entangling Roots (Rank 4)
-AddFlags( 9852, IsDruid + IsRoot) 			-- Entangling Roots (Rank 5)
-AddFlags( 9853, IsDruid + IsRoot) 			-- Entangling Roots (Rank 6)
-AddFlags(  770, IsDruid) 					-- Faerie Fire (Rank 1)
-AddFlags( 2637, IsDruid + IsStun) 			-- Hibernate (Rank 1)
-AddFlags(18657, IsDruid + IsStun) 			-- Hibernate (Rank 2)
-AddFlags(18658, IsDruid + IsStun) 			-- Hibernate (Rank 3)
-AddFlags(16689, IsDruid + IsRoot) 			-- Nature's Grasp (Rank 1)
-AddFlags(16689, IsDruid + IsRoot) 			-- Nature's Grasp (Rank 2)
-AddFlags(16689, IsDruid + IsRoot) 			-- Nature's Grasp (Rank 3)
-AddFlags(16689, IsDruid + IsRoot) 			-- Nature's Grasp (Rank 4)
-AddFlags(16689, IsDruid + IsRoot) 			-- Nature's Grasp (Rank 5)
-AddFlags(16689, IsDruid + IsRoot) 			-- Nature's Grasp (Rank 6)
-AddFlags(16870, IsDruid) 					-- Omen of Clarity (Proc)
+-- The idea here is to have a tagged database of class abilities,
+-- organized by class and spec for use with various search filters.
+local PopulateClassicDatabase = function()
 
--- Druid (Feral)
--- https://classic.wowhead.com/druid-abilities/feral-combat
-------------------------------------------------------------------------
-AddFlags( 1066, IsDruid) 					-- Aquatic Form
-AddFlags( 8983, IsDruid + IsStun) 			-- Bash
-AddFlags( 5487, IsDruid) 					-- Bear Form
-AddFlags(  768, IsDruid) 					-- Cat Form
-AddFlags( 5209, IsDruid + IsTaunt) 			-- Challenging Roar (Taunt)
-AddFlags( 9821, IsDruid) 					-- Dash
-AddFlags( 9634, IsDruid) 					-- Dire Bear Form
-AddFlags( 5229, IsDruid) 					-- Enrage
-AddFlags(16857, IsDruid) 					-- Faerie Fire (Feral)
-AddFlags(22896, IsDruid) 					-- Frenzied Regeneration
-AddFlags( 6795, IsDruid + IsTaunt) 			-- Growl (Taunt)
-AddFlags(24932, IsDruid) 					-- Leader of the Pack
-AddFlags( 9007, IsDruid + IsStun) 			-- Pounce Bleed (Rank 1)
-AddFlags( 9824, IsDruid + IsStun) 			-- Pounce Bleed (Rank 2)
-AddFlags( 9826, IsDruid + IsStun) 			-- Pounce Bleed (Rank 3)
-AddFlags( 5215, IsDruid) 					-- Prowl (Rank 1)
-AddFlags( 6783, IsDruid) 					-- Prowl (Rank 2)
-AddFlags( 9913, IsDruid) 					-- Prowl (Rank 3)
-AddFlags( 9904, IsDruid) 					-- Rake
-AddFlags( 9894, IsDruid) 					-- Rip
-AddFlags( 9845, IsDruid) 					-- Tiger's Fury
-AddFlags(  783, IsDruid) 					-- Travel Form
+		-- Druid (Balance)
+	------------------------------------------------------------------------
+	AddFlags(22812, IsDruid) 					-- Barkskin
+	AddFlags(  339, IsDruid + IsRoot) 			-- Entangling Roots (Rank 1)
+	AddFlags( 1062, IsDruid + IsRoot) 			-- Entangling Roots (Rank 2)
+	AddFlags( 5195, IsDruid + IsRoot) 			-- Entangling Roots (Rank 3)
+	AddFlags( 5196, IsDruid + IsRoot) 			-- Entangling Roots (Rank 4)
+	AddFlags( 9852, IsDruid + IsRoot) 			-- Entangling Roots (Rank 5)
+	AddFlags( 9853, IsDruid + IsRoot) 			-- Entangling Roots (Rank 6)
+	AddFlags(  770, IsDruid) 					-- Faerie Fire (Rank 1)
+	AddFlags( 2637, IsDruid + IsStun) 			-- Hibernate (Rank 1)
+	AddFlags(18657, IsDruid + IsStun) 			-- Hibernate (Rank 2)
+	AddFlags(18658, IsDruid + IsStun) 			-- Hibernate (Rank 3)
+	AddFlags(16689, IsDruid + IsRoot) 			-- Nature's Grasp (Rank 1)
+	AddFlags(16689, IsDruid + IsRoot) 			-- Nature's Grasp (Rank 2)
+	AddFlags(16689, IsDruid + IsRoot) 			-- Nature's Grasp (Rank 3)
+	AddFlags(16689, IsDruid + IsRoot) 			-- Nature's Grasp (Rank 4)
+	AddFlags(16689, IsDruid + IsRoot) 			-- Nature's Grasp (Rank 5)
+	AddFlags(16689, IsDruid + IsRoot) 			-- Nature's Grasp (Rank 6)
+	AddFlags(16870, IsDruid) 					-- Omen of Clarity (Proc)
 
--- Druid (Restoration)
-------------------------------------------------------------------------
-AddFlags( 2893, IsDruid) 					-- Abolish Poison
-AddFlags(29166, IsDruid) 					-- Innervate
-AddFlags( 8936, IsDruid) 					-- Regrowth (Rank 1)
-AddFlags( 8938, IsDruid) 					-- Regrowth (Rank 2)
-AddFlags( 8939, IsDruid) 					-- Regrowth (Rank 3)
-AddFlags( 8940, IsDruid) 					-- Regrowth (Rank 4)
-AddFlags( 8941, IsDruid) 					-- Regrowth (Rank 5)
-AddFlags( 9750, IsDruid) 					-- Regrowth (Rank 6)
-AddFlags( 9856, IsDruid) 					-- Regrowth (Rank 7)
-AddFlags( 9857, IsDruid) 					-- Regrowth (Rank 8)
-AddFlags( 9858, IsDruid) 					-- Regrowth (Rank 9)
-AddFlags(  774, IsDruid) 					-- Rejuvenation (Rank 1)
-AddFlags( 1058, IsDruid) 					-- Rejuvenation (Rank 2)
-AddFlags( 1430, IsDruid) 					-- Rejuvenation (Rank 3)
-AddFlags( 2090, IsDruid) 					-- Rejuvenation (Rank 4)
-AddFlags( 2091, IsDruid) 					-- Rejuvenation (Rank 5)
-AddFlags( 3627, IsDruid) 					-- Rejuvenation (Rank 6)
-AddFlags( 8910, IsDruid) 					-- Rejuvenation (Rank 7)
-AddFlags( 9839, IsDruid) 					-- Rejuvenation (Rank 8)
-AddFlags( 9840, IsDruid) 					-- Rejuvenation (Rank 9)
-AddFlags( 9841, IsDruid) 					-- Rejuvenation (Rank 10)
-AddFlags(  740, IsDruid) 					-- Tranquility (Rank 1)
-AddFlags( 8918, IsDruid) 					-- Tranquility (Rank 2)
-AddFlags( 9862, IsDruid) 					-- Tranquility (Rank 3)
-AddFlags( 9863, IsDruid) 					-- Tranquility (Rank 4)
+	-- Druid (Feral)
+	-- https://classic.wowhead.com/druid-abilities/feral-combat
+	------------------------------------------------------------------------
+	AddFlags( 1066, IsDruid) 					-- Aquatic Form
+	AddFlags( 8983, IsDruid + IsStun) 			-- Bash
+	AddFlags( 5487, IsDruid) 					-- Bear Form
+	AddFlags(  768, IsDruid) 					-- Cat Form
+	AddFlags( 5209, IsDruid + IsTaunt) 			-- Challenging Roar (Taunt)
+	AddFlags( 9821, IsDruid) 					-- Dash
+	AddFlags( 9634, IsDruid) 					-- Dire Bear Form
+	AddFlags( 5229, IsDruid) 					-- Enrage
+	AddFlags(16857, IsDruid) 					-- Faerie Fire (Feral)
+	AddFlags(22896, IsDruid) 					-- Frenzied Regeneration
+	AddFlags( 6795, IsDruid + IsTaunt) 			-- Growl (Taunt)
+	AddFlags(24932, IsDruid) 					-- Leader of the Pack
+	AddFlags( 9007, IsDruid + IsStun) 			-- Pounce Bleed (Rank 1)
+	AddFlags( 9824, IsDruid + IsStun) 			-- Pounce Bleed (Rank 2)
+	AddFlags( 9826, IsDruid + IsStun) 			-- Pounce Bleed (Rank 3)
+	AddFlags( 5215, IsDruid) 					-- Prowl (Rank 1)
+	AddFlags( 6783, IsDruid) 					-- Prowl (Rank 2)
+	AddFlags( 9913, IsDruid) 					-- Prowl (Rank 3)
+	AddFlags( 9904, IsDruid) 					-- Rake
+	AddFlags( 9894, IsDruid) 					-- Rip
+	AddFlags( 9845, IsDruid) 					-- Tiger's Fury
+	AddFlags(  783, IsDruid) 					-- Travel Form
 
--- Warrior (Arms)
-------------------------------------------------------------------------
-AddFlags( 7922, IsWarrior + IsStun) 		-- Charge Stun (Rank 1)
-AddFlags(  772, IsWarrior) 					-- Rend (Rank 1)
-AddFlags( 6343, IsWarrior) 					-- Thunder Clap (Rank 1)
+	-- Druid (Restoration)
+	------------------------------------------------------------------------
+	AddFlags( 2893, IsDruid) 					-- Abolish Poison
+	AddFlags(29166, IsDruid) 					-- Innervate
+	AddFlags( 8936, IsDruid) 					-- Regrowth (Rank 1)
+	AddFlags( 8938, IsDruid) 					-- Regrowth (Rank 2)
+	AddFlags( 8939, IsDruid) 					-- Regrowth (Rank 3)
+	AddFlags( 8940, IsDruid) 					-- Regrowth (Rank 4)
+	AddFlags( 8941, IsDruid) 					-- Regrowth (Rank 5)
+	AddFlags( 9750, IsDruid) 					-- Regrowth (Rank 6)
+	AddFlags( 9856, IsDruid) 					-- Regrowth (Rank 7)
+	AddFlags( 9857, IsDruid) 					-- Regrowth (Rank 8)
+	AddFlags( 9858, IsDruid) 					-- Regrowth (Rank 9)
+	AddFlags(  774, IsDruid) 					-- Rejuvenation (Rank 1)
+	AddFlags( 1058, IsDruid) 					-- Rejuvenation (Rank 2)
+	AddFlags( 1430, IsDruid) 					-- Rejuvenation (Rank 3)
+	AddFlags( 2090, IsDruid) 					-- Rejuvenation (Rank 4)
+	AddFlags( 2091, IsDruid) 					-- Rejuvenation (Rank 5)
+	AddFlags( 3627, IsDruid) 					-- Rejuvenation (Rank 6)
+	AddFlags( 8910, IsDruid) 					-- Rejuvenation (Rank 7)
+	AddFlags( 9839, IsDruid) 					-- Rejuvenation (Rank 8)
+	AddFlags( 9840, IsDruid) 					-- Rejuvenation (Rank 9)
+	AddFlags( 9841, IsDruid) 					-- Rejuvenation (Rank 10)
+	AddFlags(  740, IsDruid) 					-- Tranquility (Rank 1)
+	AddFlags( 8918, IsDruid) 					-- Tranquility (Rank 2)
+	AddFlags( 9862, IsDruid) 					-- Tranquility (Rank 3)
+	AddFlags( 9863, IsDruid) 					-- Tranquility (Rank 4)
 
--- Warrior (Fury)
-------------------------------------------------------------------------
-AddFlags( 6673, IsWarrior) 					-- Battle Shout (Rank 1)
+	-- Warrior (Arms)
+	------------------------------------------------------------------------
+	AddFlags( 7922, IsWarrior + IsStun) 		-- Charge Stun (Rank 1)
+	AddFlags(  772, IsWarrior) 					-- Rend (Rank 1)
+	AddFlags( 6343, IsWarrior) 					-- Thunder Clap (Rank 1)
+
+	-- Warrior (Fury)
+	------------------------------------------------------------------------
+	AddFlags( 6673, IsWarrior) 					-- Battle Shout (Rank 1)
+
+end
+
+-- Same as above, but for the current version of retail.
+-- We will copy this into a specific version for the current expansion
+-- before upgrading to the pre-patch for the next one.
+local PopulateRetailDatabase = function()
+end
+
+-- Only load the database matching the game client.
+if (IsClassic) then
+	PopulateClassicDatabase()
+elseif (IsRetail) then
+	PopulateRetailDatabase()
+end

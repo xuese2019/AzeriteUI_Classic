@@ -4,7 +4,7 @@ if (not Core) then
 	return 
 end
 
-local Module = Core:NewModule("OptionsMenu", "HIGH", "LibMessage", "LibEvent", "LibDB", "LibFrame", "LibSound", "LibTooltip")
+local Module = Core:NewModule("OptionsMenu", "HIGH", "LibMessage", "LibEvent", "LibDB", "LibFrame", "LibSound", "LibTooltip", "LibClientBuild")
 local MenuTable
 
 -- Registries
@@ -31,9 +31,15 @@ local Colors = Private.Colors
 local GetConfig = Private.GetConfig
 local GetLayout = Private.GetLayout
 
+-- Constants for client version
+local IsClassic = Module:IsClassic()
+local IsRetail = Module:IsRetail()
+
+-- Da fuck am I still doing this for??
 local Layout = GetLayout(ADDON)
 local L = Wheel("LibLocale"):GetLocale(ADDON)
 
+-- Player Constants
 local _,PlayerClass = UnitClass("player")
 
 -- Secure script snippets
@@ -999,23 +1005,25 @@ Module.CreateMenuTable = function(self)
 			})
 		end
 
-		-- Talking Head
-		table_insert(HUDMenu.buttons, {
-			enabledTitle = L_ENABLED:format(L["TalkingHead"]),
-			disabledTitle = L_DISABLED:format(L["TalkingHead"]),
-			type = "TOGGLE_VALUE", 
-			configDB = "BlizzardFloaterHUD", configKey = "enableTalkingHead", 
-			proxyModule = "BlizzardFloaterHUD"
-		})
+		if (IsRetail) then
+			-- Talking Head
+			table_insert(HUDMenu.buttons, {
+				enabledTitle = L_ENABLED:format(L["TalkingHead"]),
+				disabledTitle = L_DISABLED:format(L["TalkingHead"]),
+				type = "TOGGLE_VALUE", 
+				configDB = "BlizzardFloaterHUD", configKey = "enableTalkingHead", 
+				proxyModule = "BlizzardFloaterHUD"
+			})
 
-		-- Alerts
-		table_insert(HUDMenu.buttons, {
-			enabledTitle = L_ENABLED:format(L["Alerts"]),
-			disabledTitle = L_DISABLED:format(L["Alerts"]),
-			type = "TOGGLE_VALUE", 
-			configDB = "BlizzardFloaterHUD", configKey = "enableAlerts", 
-			proxyModule = "BlizzardFloaterHUD"
-		})
+			-- Alerts
+			table_insert(HUDMenu.buttons, {
+				enabledTitle = L_ENABLED:format(L["Alerts"]),
+				disabledTitle = L_DISABLED:format(L["Alerts"]),
+				type = "TOGGLE_VALUE", 
+				configDB = "BlizzardFloaterHUD", configKey = "enableAlerts", 
+				proxyModule = "BlizzardFloaterHUD"
+			})
+		end
 
 		table_insert(MenuTable, HUDMenu)
 	end

@@ -1,7 +1,7 @@
 local ADDON, Private = ...
 
 -- Wooh! 
-local Core = Wheel("LibModule"):NewModule(ADDON, "LibDB", "LibMessage", "LibEvent", "LibBlizzard", "LibFrame", "LibSlash", "LibSwitcher", "LibAuraData", "LibAura")
+local Core = Wheel("LibModule"):NewModule(ADDON, "LibDB", "LibMessage", "LibEvent", "LibBlizzard", "LibFrame", "LibSlash", "LibSwitcher", "LibAuraData", "LibAura", "LibClientBuild")
 
 -- Tell the back-end what addon to look for before 
 -- initializing this module and all its submodules. 
@@ -42,6 +42,10 @@ local GetFont = Private.GetFont
 local GetLayout = Private.GetLayout
 local GetMedia = Private.GetMedia
 local Colors = Private.Colors
+
+-- Constants for client version
+local IsClassic = Core:IsClassic()
+local IsRetail = Core:IsRetail()
 
 -- Addon localization
 local L = Wheel("LibLocale"):GetLocale(ADDON)
@@ -315,7 +319,7 @@ Core.ApplyExperimentalFeatures = function(self)
 	end
 
 	-- Add back retail like stop watch commands
-	do
+	if (IsClassic) then
 		local commands = {
 			SLASH_STOPWATCH_PARAM_PLAY1 = "play",
 			SLASH_STOPWATCH_PARAM_PLAY2 = "play",
@@ -395,6 +399,7 @@ Core.ApplyExperimentalFeatures = function(self)
 	-- Going with Tukz way of completely hiding the broken popup,
 	-- instead of just modifying the button away as I initially did.
 	-- No point adding more sources of taint to the tainted element.
+	-- CHECK: Is this a retail problem too?
 	do
 		local battleground = self:CreateFrame("Frame", nil, "UICenter")
 		battleground:SetSize(574, 40)
@@ -457,28 +462,6 @@ Core.ApplyExperimentalFeatures = function(self)
 	
 	-- Temporary Weapon Enchants!
 	do
-		-- Not using this, can't filter it to only show weapon buffs.
-		--[[
-		local header = self:CreateFrame("Frame", nil, "UICenter", "SecureAuraHeaderTemplate")
-		header:SetFrameStrata("MEDIUM")
-		header:SetFrameLevel(500)
-		header:SetSize(30*3+10*2,30)
-		header:Place("BOTTOMLEFT", "UICenter", "BOTTOMLEFT", 72, 270)
-		header:SetAttribute("filter", "HARMFUL HELPFUL")
-		header:SetAttribute("includeWeapons", 1)
-		header:SetAttribute("minWidth", 30*3+10*2)
-		header:SetAttribute("minHeight", 30)
-		header:SetAttribute("point", "BOTTOMLEFT")
-		header:SetAttribute("xOffset", 40)
-		header:SetAttribute("yOffset", 0)
-		header:SetAttribute("sortMethod", "INDEX") -- , NAME
-		header:SetAttribute("template", "AzeriteUIAuraButtonTemplate")
-		header:SetAttribute("weaponTemplate", "AzeriteUIAuraButtonTemplate")
-		header:SetAttribute("unit", "player")
-		header:Show()
-		]]--
-
-
 		local tempEnchantButtons = {
 			self:CreateFrame("Button", nil, "UICenter", "SecureActionButtonTemplate"),
 			self:CreateFrame("Button", nil, "UICenter", "SecureActionButtonTemplate"),
@@ -559,7 +542,6 @@ Core.ApplyExperimentalFeatures = function(self)
 
 		self:RegisterEvent("PLAYER_ENTERING_WORLD", update)
 		self:RegisterEvent("UNIT_INVENTORY_CHANGED", update)
-
 	end
 
 end

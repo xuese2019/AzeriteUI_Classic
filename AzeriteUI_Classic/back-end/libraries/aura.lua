@@ -1,13 +1,6 @@
-local LibAura = Wheel:Set("LibAura", 28)
+local LibAura = Wheel:Set("LibAura", 29)
 if (not LibAura) then
 	return
-end
-
--- Add in support for LibClassicDurations.
-local LCD = LibStub and LibStub("LibClassicDurations", true)
-if (LCD) then
-	local ADDON, Private = ...
-	LCD:RegisterFrame(Private)
 end
 
 local LibMessage = Wheel("LibMessage")
@@ -15,6 +8,9 @@ assert(LibMessage, "LibAura requires LibMessage to be loaded.")
 
 local LibEvent = Wheel("LibEvent")
 assert(LibEvent, "LibAura requires LibEvent to be loaded.")
+
+local LibClientBuild = Wheel("LibClientBuild")
+assert(LibClientBuild, "LibCast requires LibClientBuild to be loaded.")
 
 local LibFrame = Wheel("LibFrame")
 assert(LibFrame, "LibAura requires LibFrame to be loaded.")
@@ -63,6 +59,20 @@ local UnitIsFeignDeath = UnitIsFeignDeath
 local UnitInParty = UnitInParty
 local UnitInRaid = UnitInRaid
 local UnitIsUnit = UnitIsUnit
+
+-- Constants for client version
+local IsClassic = LibClientBuild:IsClassic()
+local IsRetail = LibClientBuild:IsRetail()
+
+-- Add in support for LibClassicDurations.
+local LCD
+if (IsClassic) then
+	LCD = LibStub and LibStub("LibClassicDurations", true)
+	if (LCD) then
+		local ADDON, Private = ...
+		LCD:RegisterFrame(Private)
+	end
+end
 
 -- Library registries
 LibAura.embeds = LibAura.embeds or {}
@@ -332,7 +342,7 @@ LibAura.CacheUnitAurasByFilter = function(self, unit, filter)
 		end
 
 		-- Add aura duration info
-		if (LCD) then 
+		if (IsClassic) and (LCD) then 
 			local durationNew, expirationTimeNew = LCD:GetAuraDurationByUnit(unit, spellId, caster)
 			if ((not duration) or (duration == 0)) and (durationNew) then
 				duration = durationNew

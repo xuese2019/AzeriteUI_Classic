@@ -1552,6 +1552,47 @@ UnitStyles.StylePlayerHUDFrame = function(self, unit, id, layout, ...)
 	self.ClassPower = classPower
 	self.ClassPower.PostUpdate = layout.ClassPowerPostUpdate
 	self.ClassPower:PostUpdate()
+
+	-- PlayerAltPower Bar
+	if (IsRetail) then
+		local cast = backdrop:CreateStatusBar()
+		cast:Place(unpack(layout.PlayerAltPowerBarPlace))
+		cast:SetSize(unpack(layout.PlayerAltPowerBarSize))
+		cast:SetStatusBarTexture(layout.PlayerAltPowerBarTexture)
+		cast:SetStatusBarColor(unpack(layout.PlayerAltPowerBarColor)) 
+		cast:SetOrientation(layout.PlayerAltPowerBarOrientation) -- set the bar to grow towards the top.
+		--cast:DisableSmoothing(true) -- don't smoothe castbars, it'll make it inaccurate
+		cast:EnableMouse(true)
+		self.AltPower = cast
+		self.AltPower.OverrideValue = layout.PlayerAltPowerBarValueOverride
+				
+		local castBg = cast:CreateTexture()
+		castBg:SetPoint(unpack(layout.PlayerAltPowerBarBackgroundPlace))
+		castBg:SetSize(unpack(layout.PlayerAltPowerBarBackgroundSize))
+		castBg:SetTexture(layout.PlayerAltPowerBarBackgroundTexture)
+		castBg:SetDrawLayer(unpack(layout.PlayerAltPowerBarBackgroundDrawLayer))
+		castBg:SetVertexColor(unpack(layout.PlayerAltPowerBarBackgroundColor))
+		self.AltPower.Bg = castBg
+		
+		local castValue = cast:CreateFontString()
+		castValue:SetPoint(unpack(layout.PlayerAltPowerBarValuePlace))
+		castValue:SetFontObject(layout.PlayerAltPowerBarValueFont)
+		castValue:SetDrawLayer(unpack(layout.PlayerAltPowerBarValueDrawLayer))
+		castValue:SetJustifyH(layout.PlayerAltPowerBarValueJustifyH)
+		castValue:SetJustifyV(layout.PlayerAltPowerBarValueJustifyV)
+		castValue:SetTextColor(unpack(layout.PlayerAltPowerBarValueColor))
+		self.AltPower.Value = castValue
+		
+		local castName = cast:CreateFontString()
+		castName:SetPoint(unpack(layout.PlayerAltPowerBarNamePlace))
+		castName:SetFontObject(layout.PlayerAltPowerBarNameFont)
+		castName:SetDrawLayer(unpack(layout.PlayerAltPowerBarNameDrawLayer))
+		castName:SetJustifyH(layout.PlayerAltPowerBarNameJustifyH)
+		castName:SetJustifyV(layout.PlayerAltPowerBarNameJustifyV)
+		castName:SetTextColor(unpack(layout.PlayerAltPowerBarNameColor))
+		self.AltPower.Name = castName
+	end
+	
 end
 
 UnitStyles.StyleTargetFrame = function(self, unit, id, layout, ...)

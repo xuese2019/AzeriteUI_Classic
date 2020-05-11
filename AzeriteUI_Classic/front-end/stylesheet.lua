@@ -1827,13 +1827,17 @@ Defaults.BlizzardChatFrames = {
 	enableBGSpamFilter = true -- enable a battleground filter to clean up the chat
 }
 
-Defaults.BlizzardFloaterHUD = {
-	enableRaidWarnings = true
-}
-
+if (IsClassic) then
+	Defaults.BlizzardFloaterHUD = {
+		enableRaidWarnings = true -- not yet implemented!
+	}
+end
 if (IsRetail) then
-	Defaults.BlizzardFloaterHUD.enableTalkingHead = true
-	Defaults.BlizzardFloaterHUD.enableAlerts = true
+	Defaults.BlizzardFloaterHUD = {
+		enableAlerts = false,
+		enableRaidWarnings = true, -- not yet implemented!
+		enableTalkingHead = false
+	}
 end
 
 Defaults.ActionBarMain = {
@@ -3086,9 +3090,9 @@ Layouts.UnitFramePlayer = {
 
 -- PlayerHUD (combo points and castbar)
 Layouts.UnitFramePlayerHUD = {
-	CastBarColor = { 70/255, 255/255, 131/255, .69 }, 
+	CastBarColor = { 70/255, 255/255, 131/255, .69 },
 	CastBarOrientation = "RIGHT",
-	CastTimeToHoldFailed = .5, 
+	CastTimeToHoldFailed = .5,
 	CastBarBackgroundColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
 	CastBarBackgroundDrawLayer = { "BACKGROUND", 1 },
 	CastBarBackgroundPlace = { "CENTER", 1, -1 }, 
@@ -3156,11 +3160,47 @@ Layouts.UnitFramePlayerHUD = {
 	ClassPowerPlace = { "CENTER", "UICenter", "CENTER", 0, 0 }, 
 	ClassPowerPostCreatePoint = PlayerHUD_ClassPowerPostCreatePoint,
 	ClassPowerPostUpdate = PlayerHUD_ClassPowerPostUpdate,
-	ClassPowerReverseSides = false, 
+	ClassPowerReverseSides = false,
 	ClassPowerRuneSortOrder = "ASC",
-	ClassPowerSize = { 2,2 }, 
-	IgnoreMouseOver = true, 
+	ClassPowerSize = { 2,2 },
+	IgnoreMouseOver = true,
 	Place = { "BOTTOMLEFT", 75, 127 },
+	PlayerAltPowerBarBackgroundColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
+	PlayerAltPowerBarBackgroundDrawLayer = { "BACKGROUND", 1 },
+	PlayerAltPowerBarBackgroundPlace = { "CENTER", 1, -2 },
+	PlayerAltPowerBarBackgroundSize = { 193,93 },
+	PlayerAltPowerBarBackgroundTexture = GetMedia("cast_back"),
+	PlayerAltPowerBarColor = { Colors.power.ALTERNATE[1], Colors.power.ALTERNATE[2], Colors.power.ALTERNATE[3], .69 },
+	PlayerAltPowerBarNameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+	PlayerAltPowerBarNameDrawLayer = { "OVERLAY", 1 },
+	PlayerAltPowerBarNameFont = GetFont(15, true),
+	PlayerAltPowerBarNameJustifyH = "CENTER",
+	PlayerAltPowerBarNameJustifyV = "MIDDLE",
+	PlayerAltPowerBarNamePlace = { "TOP", 0, -(12 + 14) },
+	PlayerAltPowerBarOrientation = "RIGHT",
+	PlayerAltPowerBarPlace = { "CENTER", "UICenter", "CENTER", 0, -(133 + 56)  }, 
+	PlayerAltPowerBarSize = Constant.SmallBar,
+	PlayerAltPowerBarSparkMap = {
+		top = {
+			{ keyPercent =   0/128, offset = -16/32 },
+			{ keyPercent =  10/128, offset =   0/32 },
+			{ keyPercent = 119/128, offset =   0/32 },
+			{ keyPercent = 128/128, offset = -16/32 }
+		},
+		bottom = {
+			{ keyPercent =   0/128, offset = -16/32 },
+			{ keyPercent =  10/128, offset =   0/32 },
+			{ keyPercent = 119/128, offset =   0/32 },
+			{ keyPercent = 128/128, offset = -16/32 }
+		}
+	},
+	PlayerAltPowerBarTexture = Constant.SmallBarTexture,
+	PlayerAltPowerBarValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+	PlayerAltPowerBarValueDrawLayer = { "OVERLAY", 1 },
+	PlayerAltPowerBarValueFont = GetFont(14, true),
+	PlayerAltPowerBarValueJustifyH = "CENTER",
+	PlayerAltPowerBarValueJustifyV = "MIDDLE",
+	PlayerAltPowerBarValuePlace = { "CENTER", 0, 0 },
 	Size = { 103, 103 }
 }
 

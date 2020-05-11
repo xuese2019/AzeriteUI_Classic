@@ -13,6 +13,7 @@
 <Script file='plugins\generic_zone.lua'/>
 
 <!-- Unit dependant library plugins -->
+<Script file='plugins\unit_altpower.lua'/>
 <Script file='plugins\unit_auras.lua'/>
 <Script file='plugins\unit_cast.lua'/>
 <Script file='plugins\unit_classification.lua'/>
