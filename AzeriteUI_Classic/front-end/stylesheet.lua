@@ -598,7 +598,37 @@ local Minimap_Performance_FrameRate_PlaceFunc = function(Handler)
 	return "BOTTOM", Handler.Clock, "TOP", 0, 6 
 end 
 
-local Minimap_Rep_OverrideValue = function(element, current, min, max, factionName, standingID, standingLabel)
+local Minimap_AP_OverrideValue = function(element, min, max, level)
+	local value = element.Value or element:IsObjectType("FontString") and element 
+	if value.showDeficit then 
+		value:SetFormattedText(short(max - min))
+	else 
+		value:SetFormattedText(short(min))
+	end
+	local percent = value.Percent
+	if percent then 
+		if (max > 0) then 
+			local percValue = math_floor(min/max*100)
+			if (percValue > 0) then 
+				-- removing the percentage sign
+				percent:SetFormattedText("%.0f", percValue)
+			else 
+				percent:SetText(NEW) 
+			end 
+		else 
+			percent:SetText("ap") 
+		end 
+	end 
+	if element.colorValue then 
+		local color = element._owner.colors.artifact
+		value:SetTextColor(color[1], color[2], color[3])
+		if percent then 
+			percent:SetTextColor(color[1], color[2], color[3])
+		end 
+	end 
+end 
+
+local Minimap_Rep_OverrideValue = function(element, current, min, max, factionName, standingID, standingLabel, isFriend)
 	local value = element.Value or element:IsObjectType("FontString") and element 
 	local barMax = max - min 
 	local barValue = current - min
@@ -627,6 +657,7 @@ local Minimap_Rep_OverrideValue = function(element, current, min, max, factionNa
 	end 
 	if element.colorValue then 
 		local color = element._owner.colors.reaction[standingID]
+		local color = element._owner.colors[isFriend and "friendship" or "reaction"][standingID]
 		value:SetTextColor(color[1], color[2], color[3])
 		if percent then 
 			percent:SetTextColor(color[1], color[2], color[3])
@@ -2712,6 +2743,7 @@ Layouts.GroupTools = {
 
 -- Minimap
 Layouts.Minimap = {
+	AP_OverrideValue = Minimap_AP_OverrideValue,
 	BattleGroundEyeColor = { .90, .95, 1 }, 
 	BattleGroundEyePlace = { "CENTER", math_cos(45*math_pi/180) * (213/2 + 10), math_sin(45*math_pi/180) * (213/2 + 10) }, 
 	BattleGroundEyeSize = { 64, 64 }, 

@@ -1711,7 +1711,10 @@ LibTooltipScanner.GetTooltipDataForUnit = function(self, unit, tbl)
 				hasObjective = true
 				objectiveType = "complete"
 			else
-				print(string_format("|cffffd200LibTooltipScanner:|r |cfff0f0f0Unhandled textureID |r'|cff33aa33%d|r'.", texPath))
+				local texID = tonumber(texPath) or 0
+				if (texID ~= 0) then
+					print(string_format("|cffffd200LibTooltipScanner:|r |cfff0f0f0Unhandled textureID |r'|cff33aa33%d|r'.", texPath))
+				end
 			end 
 
 			if (hasObjective) then

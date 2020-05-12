@@ -25,15 +25,24 @@ local unpack = unpack
 -- WoW API
 local CancelTrackingBuff = CancelTrackingBuff
 local CastSpellByID = CastSpellByID
+local GetAzeriteItemXPInfo = C_AzeriteItem and C_AzeriteItem.GetAzeriteItemXPInfo
 local GetFactionInfo = GetFactionInfo
+local GetFactionParagonInfo = C_Reputation and C_Reputation.GetFactionParagonInfo
 local GetFramerate = GetFramerate
+local GetFriendshipReputation = GetFriendshipReputation
 local GetNetStats = GetNetStats
 local GetNumFactions = GetNumFactions
+local GetPowerLevel = C_AzeriteItem and C_AzeriteItem.GetPowerLevel
 local GetSpellInfo = GetSpellInfo
 local GetSpellTexture = GetSpellTexture
 local GetTrackingTexture = GetTrackingTexture
 local GetWatchedFactionInfo = GetWatchedFactionInfo
+local IsFactionParagon = C_Reputation and C_Reputation.IsFactionParagon
 local IsPlayerSpell = IsPlayerSpell
+local IsXPUserDisabled = IsXPUserDisabled
+local SetCursor = SetCursor
+local ToggleCalendar = ToggleCalendar
+local UnitExists = UnitExists
 local UnitLevel = UnitLevel
 local UnitRace = UnitRace
 
@@ -139,6 +148,13 @@ local Rep_PostUpdate = function(element, current, min, max, factionName, standin
 	end 
 end
 
+local AP_PostUpdate = function(element, min, max, level)
+	local description = element.Value and element.Value.Description
+	if description then 
+		description:SetText(L["to next level"])
+	end 
+end
+
 local Performance_UpdateTooltip = function(self)
 	local tooltip = Module:GetMinimapTooltip()
 
@@ -196,8 +212,9 @@ end
 local Toggle_UpdateTooltip = function(toggle)
 
 	local tooltip = Module:GetMinimapTooltip()
-	local hasXP = Module.PlayerHasXP()
-	local hasRep = Module.PlayerHasRep()
+	local hasXP = Module:PlayerHasXP()
+	local hasRep = Module:PlayerHasRep()
+	local hasAP = IsRetail and Module:PlayerHasAP()
 
 	local NC = "|r"
 	local colors = toggle._owner.colors 
@@ -214,14 +231,14 @@ local Toggle_UpdateTooltip = function(toggle)
 	local resting, restState, restedName, mult
 	local restedLeft, restedTimeLeft
 
-	if (hasXP or hasRep) then 
+	if (hasXP or hasAP or hasRep) then 
 		tooltip:SetDefaultAnchor(toggle)
 		tooltip:SetMaximumWidth(360)
 	end
 
 	-- XP tooltip
 	-- Currently more or less a clone of the blizzard tip, we should improve!
-	if hasXP then 
+	if (hasXP) then 
 		resting = IsResting()
 		restState, restedName, mult = GetRestState()
 		restedLeft, restedTimeLeft = GetXPExhaustion(), GetTimeToWellRested()
@@ -263,10 +280,39 @@ local Toggle_UpdateTooltip = function(toggle)
 		end
 	end 
 
+	-- New BfA Artifact Power tooltip!
+	if (hasAP) then 
+		if (hasXP) then 
+			tooltip:AddLine(" ")
+		end 
+
+		local min, max = GetAzeriteItemXPInfo(hasAP)
+		local level = GetPowerLevel(hasAP) 
+
+		tooltip:AddDoubleLine(ARTIFACT_POWER, level, rt, gt, bt, rt, gt, bt)
+		tooltip:AddDoubleLine(L["Current Artifact Power: "], fullXPString:format(normal..short(min)..NC, normal..short(max)..NC, highlight..math_floor(min/max*100).."%"..NC), rh, gh, bh, rgg, ggg, bgg)
+	end 
+	
 	-- Rep tooltip
-	if hasRep then 
+	if (hasRep) then 
+		if (hasXP or hasAP) then 
+			tooltip:AddLine(" ")
+		end 
 
 		local name, reaction, min, max, current, factionID = GetWatchedFactionInfo()
+
+		if (IsRetail) then
+			if (factionID and IsFactionParagon(factionID)) then
+				local currentValue, threshold, _, hasRewardPending = GetFactionParagonInfo(factionID)
+				if (currentValue and threshold) then
+					min, max = 0, threshold
+					current = currentValue % threshold
+					if (hasRewardPending) then
+						current = current + threshold
+					end
+				end
+			end
+		end
 	
 		local standingID, isFriend, friendText
 		local standingLabel, standingDescription
@@ -274,16 +320,38 @@ local Toggle_UpdateTooltip = function(toggle)
 			local factionName, description, standingId, barMin, barMax, barValue, atWarWith, canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild, factionID, hasBonusRepGain, canBeLFGBonus = GetFactionInfo(i)
 			
 			if (factionName == name) then
+
+				-- Retrieve friendship reputation info, if any.
+				if (IsRetail) then
+					local friendID, friendRep, friendMaxRep, friendName, friendText, friendTexture, friendTextLevel, friendThreshold, nextFriendThreshold = GetFriendshipReputation(factionID)
+
+					if (friendID) then
+						isFriend = true
+						if nextFriendThreshold then 
+							min = friendThreshold
+							max = nextFriendThreshold
+						else
+							min = 0
+							max = friendMaxRep
+							current = friendRep
+						end 
+						standingLabel = friendTextLevel
+						standingDescription = friendText
+					end
+				end
+
 				standingID = standingId
 				break
 			end
 		end
 
-		if standingID then 
-			if hasXP then 
+		if (standingID) then 
+			if (hasXP) then 
 				tooltip:AddLine(" ")
 			end 
-			standingLabel = _G["FACTION_STANDING_LABEL"..standingID]
+			if (not isFriend) then 
+				standingLabel = _G["FACTION_STANDING_LABEL"..standingID]
+			end 
 			tooltip:AddDoubleLine(name, standingLabel, rt, gt, bt, rt, gt, bt)
 
 			local barMax = max - min 
@@ -300,9 +368,9 @@ local Toggle_UpdateTooltip = function(toggle)
 	end
 	
 	-- Only adding the sticky toggle to the toggle button for now, not the frame.
-	if MouseIsOver(toggle) then 
+	if (MouseIsOver(toggle)) then 
 		tooltip:AddLine(" ")
-		if Module.db.stickyBars then 
+		if (Module.db.stickyBars) then 
 			tooltip:AddLine(L["%s to disable sticky bars."]:format(green..L["<Left-Click>"]..NC), rh, gh, bh)
 		else 
 			tooltip:AddLine(L["%s to enable sticky bars."]:format(green..L["<Left-Click>"]..NC), rh, gh, bh)
@@ -1225,14 +1293,32 @@ Module.UpdateBars = function(self, event, ...)
 	local Handler = self:GetMinimapHandler()
 	local hasXP = self:PlayerHasXP()
 	local hasRep = self:PlayerHasRep()
+	local hasAP = IsRetail and self:PlayerHasAP()
 
-	local first, second 
-	if (hasXP) then 
-		first = "XP"
-		second = hasRep and "Reputation"
-	elseif (hasRep) then 
-		first = "Reputation"
-	end 
+	local first, second
+	if (IsClassic) then
+		if (hasXP) then 
+			first = "XP"
+			second = hasRep and "Reputation"
+		elseif (hasRep) then 
+			first = "Reputation"
+		end 
+	elseif (IsRetail) then
+		if hasXP then 
+			first = "XP"
+		elseif hasRep then 
+			first = "Reputation"
+		elseif hasAP then 
+			first = "ArtifactPower"
+		end 
+		if first then 
+			if hasRep and (first ~= "Reputation") then 
+				second = "Reputation"
+			elseif hasAP and (first ~= "ArtifactPower") then 
+				second = "ArtifactPower"
+			end
+		end 
+	end
 
 	if (first or second) then
 		if (not Handler.Toggle:IsShown()) then  
@@ -1253,6 +1339,7 @@ Module.UpdateBars = function(self, event, ...)
 				Spinner[1]:SetSparkSize(unpack(layout.RingFrameOuterRingSparkSize))
 				Spinner[1]:SetSparkInset(unpack(layout.RingFrameOuterRingSparkInset))
 				Spinner[1].PostUpdate = nil
+				Spinner[2].PostUpdate = nil
 
 				layout.RingFrameOuterRingValueFunc(Spinner[1].Value, Handler)
 			end
@@ -1261,11 +1348,23 @@ Module.UpdateBars = function(self, event, ...)
 			if (self.spinner1 ~= first) then 
 
 				-- Disable the old element 
-				self:DisableMinimapElement(first)
+				if (self.spinner1) then
+					self:DisableMinimapElement(self.spinner1)
+				end
 
 				-- Link the correct spinner
-				Spinner[1].OverrideValue = (first == "XP") and layout.XP_OverrideValue or (first == "Reputation") and layout.Rep_OverrideValue
 				Handler[first] = Spinner[1]
+
+				-- Assign the correct post updates
+				if (first == "XP") then 
+					Spinner[1].OverrideValue = XP_OverrideValue
+	
+				elseif (first == "Reputation") then 
+					Spinner[1].OverrideValue = layout.Rep_OverrideValue
+	
+				elseif (first == "ArtifactPower") then 
+					Spinner[1].OverrideValue = layout.AP_OverrideValue
+				end
 
 				-- Enable the updated element 
 				self:EnableMinimapElement(first)
@@ -1277,7 +1376,9 @@ Module.UpdateBars = function(self, event, ...)
 			if (self.spinner2 ~= second) then 
 
 				-- Disable the old element 
-				self:DisableMinimapElement(second)
+				if (self.spinner2) then
+					self:DisableMinimapElement(self.spinner2)
+				end
 
 				-- Link the correct spinner
 				Handler[second] = Spinner[2]
@@ -1288,6 +1389,9 @@ Module.UpdateBars = function(self, event, ...)
 	
 				elseif (second == "Reputation") then 
 					Handler[second].OverrideValue = layout.Rep_OverrideValue
+	
+				elseif (second == "ArtifactPower") then 
+					Handler[second].OverrideValue = layout.AP_OverrideValue
 				end 
 
 				-- Enable the updated element 
@@ -1306,7 +1410,7 @@ Module.UpdateBars = function(self, event, ...)
 		else
 
 			-- Disable any previously active secondary element
-			if self.spinner2 and Handler[self.spinner2] then 
+			if (self.spinner2) and (Handler[self.spinner2]) then 
 				self:DisableMinimapElement(self.spinner2)
 				Handler[self.spinner2] = nil
 			end 
@@ -1327,6 +1431,8 @@ Module.UpdateBars = function(self, event, ...)
 				-- Hide 2nd spinner values
 				Spinner[2].Value:SetText("")
 				Spinner[2].Value.Percent:SetText("")
+
+				forceUpdate = true
 			end 
 
 			-- If the second spinner is still shown, hide it!
@@ -1335,22 +1441,52 @@ Module.UpdateBars = function(self, event, ...)
 			end 
 
 			-- Update the element if needed
+			local forceUpdate
 			if (self.spinner1 ~= first) then 
 
-				-- Update pointers and callbacks to the active element
-				Spinner[1].OverrideValue = hasXP and layout.XP_OverrideValue or hasRep and layout.Rep_OverrideValue
-				Spinner[1].PostUpdate = hasXP and XP_PostUpdate or hasRep and Rep_PostUpdate
+				-- Disable the old element 
+				if (self.spinner1) then
+					self:DisableMinimapElement(self.spinner1)
+				end
+
+				-- Link the correct spinner
 				Handler[first] = Spinner[1]
+
+				-- Assign the correct post updates
+				if (first == "XP") then 
+					Handler[first].OverrideValue = layout.XP_OverrideValue
+	
+				elseif (first == "Reputation") then 
+					Handler[first].OverrideValue = layout.Rep_OverrideValue
+	
+				elseif (first == "ArtifactPower") then 
+					Handler[first].OverrideValue = layout.AP_OverrideValue
+				end 
 
 				-- Enable the active element
 				self:EnableMinimapElement(first)
+
+				forceUpdate = true
+			end 
+
+			if (forceUpdate) then
+				-- Assign the correct post updates
+				if (first == "XP") then 
+					Handler[first].PostUpdate = XP_PostUpdate
+	
+				elseif (first == "Reputation") then 
+					Handler[first].PostUpdate = Rep_PostUpdate
+	
+				elseif (first == "ArtifactPower") then 
+					Handler[first].PostUpdate = AP_PostUpdate
+				end 
 
 				-- Make sure descriptions are updated
 				Handler[first].Value.Description:Show()
 
 				-- Update the visible element
 				Handler[first]:ForceUpdate()
-			end 
+			end
 
 			-- Store the current modes
 			self.spinnerMode = "Single"
@@ -1438,7 +1574,16 @@ Module.OnEnable = function(self)
 	self:RegisterEvent("PLAYER_ALIVE", "OnEvent")
 	self:RegisterEvent("PLAYER_FLAGS_CHANGED", "OnEvent")
 	self:RegisterEvent("PLAYER_LEVEL_UP", "OnEvent")
-	--self:RegisterEvent("PLAYER_XP_UPDATE", "OnEvent")
+	--self:RegisterEvent("PLAYER_XP_UPDATE", "OnEvent") -- not sure why I removed this, but surely a reason.
 	self:RegisterEvent("UPDATE_FACTION", "OnEvent")
+
+
+	if (IsRetail) then
+		self:RegisterEvent("AZERITE_ITEM_EXPERIENCE_CHANGED", "OnEvent") -- bar count updates
+		self:RegisterEvent("DISABLE_XP_GAIN", "OnEvent")
+		self:RegisterEvent("ENABLE_XP_GAIN", "OnEvent")
+		self:RegisterEvent("BAG_UPDATE", "OnEvent") -- needed for artifact power sometimes
+	end
+
 	self:EnableAllElements()
 end 

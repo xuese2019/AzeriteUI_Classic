@@ -7,7 +7,7 @@ end
 -- Note that there's still a lot of hardcoded things in this file, 
 -- and it will eventually be changed to be fully Layout driven. 
 local L = Wheel("LibLocale"):GetLocale(ADDON)
-local Module = Core:NewModule("ActionBarMain", "LibEvent", "LibMessage", "LibDB", "LibFrame", "LibSound", "LibTooltip", "LibSecureButton", "LibWidgetContainer", "LibPlayerData")
+local Module = Core:NewModule("ActionBarMain", "LibEvent", "LibMessage", "LibDB", "LibFrame", "LibSound", "LibTooltip", "LibSecureButton", "LibWidgetContainer", "LibPlayerData", "LibClientBuild")
 
 -- Lua API
 local _G = _G
@@ -19,20 +19,27 @@ local tonumber = tonumber
 local tostring = tostring
 
 -- WoW API
-local FindActiveAzeriteItem = _G.C_AzeriteItem and _G.C_AzeriteItem.FindActiveAzeriteItem
-local GetAzeriteItemXPInfo = _G.C_AzeriteItem and _G.C_AzeriteItem.GetAzeriteItemXPInfo
-local GetPowerLevel = _G.C_AzeriteItem and _G.C_AzeriteItem.GetPowerLevel
-local InCombatLockdown = _G.InCombatLockdown
-local IsMounted = _G.IsMounted
-local UnitLevel = _G.UnitLevel
-local UnitOnTaxi = _G.UnitOnTaxi
-local UnitRace = _G.UnitRace
+local FindActiveAzeriteItem = C_AzeriteItem and C_AzeriteItem.FindActiveAzeriteItem
+local GetAzeriteItemXPInfo = C_AzeriteItem and C_AzeriteItem.GetAzeriteItemXPInfo
+local GetPowerLevel = C_AzeriteItem and C_AzeriteItem.GetPowerLevel
+local HasOverrideActionBar = HasOverrideActionBar
+local HasTempShapeshiftActionBar = HasTempShapeshiftActionBar
+local HasVehicleActionBar = HasVehicleActionBar
+local InCombatLockdown = InCombatLockdown
+local IsMounted = IsMounted
+local UnitLevel = UnitLevel
+local UnitOnTaxi = UnitOnTaxi
+local UnitRace = UnitRace
 
 -- Private API
 local Colors = Private.Colors
 local GetConfig = Private.GetConfig
 local GetLayout = Private.GetLayout
 local GetMedia = Private.GetMedia
+
+-- Constants for client version
+local IsClassic = Module:IsClassic()
+local IsRetail = Module:IsRetail()
 
 -- Blizzard textures for generic styling
 local BLANK_TEXTURE = [[Interface\ChatFrame\ChatFrameBackground]]
@@ -459,6 +466,9 @@ ActionButton.PostLeave = function(self)
 end 
 
 ActionButton.SetRankVisibility = function(self, visible)
+	if (not IsClassic) then
+		return
+	end
 	local cache = Cache[self]
 
 	-- Show rank on self
@@ -486,6 +496,11 @@ end
 
 ActionButton.PostUpdate = function(self)
 	self:UpdateMouseOver()
+
+	-- The following is only for classic
+	if (not IsClassic) then
+		return
+	end
 
 	local cache = Cache[self]
 	if (not cache) then 
@@ -1334,6 +1349,11 @@ Module.UpdateButtonGrids = function(self)
 	local numButtons = db.extraButtonsCount + 7
 	local button, buttonHasContent, forceGrid
 
+	local forceDisableGrids
+	if (IsRetail) then
+		forceDisableGrids = HasOverrideActionBar() or HasTempShapeshiftActionBar() or HasVehicleActionBar()
+	end
+	
 	-- Counting backwards from the end
 	-- to find the last button with content.
 	for buttonID = numButtons,1,-1 do
@@ -1346,7 +1366,7 @@ Module.UpdateButtonGrids = function(self)
 			forceGrid = true
 		end
 
-		if (forceGrid) then 
+		if (forceGrid) and (not forceDisableGrids) then 
 			button.showGrid = true
 			button.overrideAlphaWhenEmpty = .95
 		else 
@@ -1492,6 +1512,8 @@ Module.OnEvent = function(self, event, ...)
 		IN_COMBAT = false
 	elseif (event == "ACTIONBAR_SLOT_CHANGED") then
 		self:UpdateButtonGrids()
+	else
+		self:UpdateButtonGrids()
 	end 
 end 
 
@@ -1525,4 +1547,9 @@ Module.OnEnable = function(self)
 	self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
 	self:RegisterEvent("PLAYER_REGEN_DISABLED", "OnEvent")
 	self:RegisterEvent("ACTIONBAR_SLOT_CHANGED", "OnEvent")
+
+	if (IsRetail) then
+		self:RegisterEvent("UPDATE_OVERRIDE_ACTIONBAR", "OnEvent")
+		self:RegisterEvent("UPDATE_VEHICLE_ACTIONBAR", "OnEvent")
+	end
 end

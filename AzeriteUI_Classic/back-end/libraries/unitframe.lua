@@ -1,4 +1,4 @@
-local LibUnitFrame = Wheel:Set("LibUnitFrame", 74)
+local LibUnitFrame = Wheel:Set("LibUnitFrame", 75)
 if (not LibUnitFrame) then	
 	return
 end
@@ -356,15 +356,17 @@ LibUnitFrame.GetUnitFrameVisibilityDriver = function(self, unit)
 			-- when we've blown the flight master's whistle and are getting picked up.
 			visDriver = "[@player,exists][vehicleui][possessbar][overridebar][mounted]show;hide"
 		end
+	elseif (unit == "pet") then
+		if (IsRetail) then
+			visDriver = "[@pet,exists][nooverridebar,vehicleui]show;hide"
+		end
 	else
 		local partyID = string_match(unit, "^party(%d+)")
 		if (partyID) then
 			visDriver = string_format("[nogroup:raid,@%s,exists]show;hide", unit)
-		else 
-			visDriver = string_format("[@%s,exists]show;hide", unit)
 		end
 	end
-	return visDriver
+	return visDriver or string_format("[@%s,exists]show;hide", unit)
 end 
 
 LibUnitFrame.GetUnitFrameUnitDriver = function(self, unit)
@@ -372,14 +374,14 @@ LibUnitFrame.GetUnitFrameUnitDriver = function(self, unit)
 	if (IsRetail) then
 		if (unit == "player") then 
 			-- Should work in all cases where the unitframe is replaced. It should always be the "pet" unit.
-			--vehicleDriver = "[vehicleui]pet;player"
-			vehicleDriver = "[nooverridebar,vehicleui]pet;[overridebar,@vehicle,exists]vehicle;player"
+			--unitDriver = "[vehicleui]pet;player"
+			unitDriver = "[nooverridebar,vehicleui]pet;[overridebar,@vehicle,exists]vehicle;player"
 		elseif (unit == "pet") then 
-			vehicleDriver = "[nooverridebar,vehicleui]player;pet"
+			unitDriver = "[nooverridebar,vehicleui]player;pet"
 		elseif (string_match(unit, "^party(%d+)")) then 
-			vehicleDriver = string_format("[unithasvehicleui,@%s]%s;%s", unit, unit.."pet", unit)
+			unitDriver = string_format("[unithasvehicleui,@%s]%s;%s", unit, unit.."pet", unit)
 		elseif (string_match(unit, "^raid(%d+)")) then 
-			vehicleDriver = string_format("[unithasvehicleui,@%s]%s;%s", unit, unit.."pet", unit)
+			unitDriver = string_format("[unithasvehicleui,@%s]%s;%s", unit, unit.."pet", unit)
 		end
 	end
 	return unitDriver
