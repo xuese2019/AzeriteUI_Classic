@@ -23,16 +23,28 @@ local unpack = unpack
 
 -- WoW API
 local GetItemInfo = GetItemInfo
+local GetMouseFocus = GetMouseFocus
 local GetQuestGreenRange = GetQuestGreenRange
+local UnitClass = UnitClass
 local UnitExists = UnitExists
+local UnitIsConnected = UnitIsConnected
+local UnitIsDeadOrGhost = UnitIsDeadOrGhost
+local UnitIsPlayer = UnitIsPlayer
+local UnitIsTapDenied = UnitIsTapDenied
 local UnitIsUnit = UnitIsUnit
 local UnitLevel = UnitLevel
+local UnitPlayerControlled = UnitPlayerControlled
+local UnitReaction = UnitReaction
 
 -- Private API
 local Colors = Private.Colors
 local GetFont = Private.GetFont
 local GetLayout = Private.GetLayout
 local GetMedia = Private.GetMedia
+
+-- Constants for client version
+local IsClassic = Module:IsClassic()
+local IsRetail = Module:IsRetail()
 
 -- Blizzard textures we use 
 local BOSS_TEXTURE = "|TInterface\\TargetingFrame\\UI-TargetingFrame-Skull:14:14:-2:1|t" -- 1:1
@@ -41,9 +53,22 @@ local FACTION_ALLIANCE_TEXTURE = "|TInterface\\TargetingFrame\\UI-PVP-Alliance:1
 local FACTION_NEUTRAL_TEXTURE = "|TInterface\\TargetingFrame\\UI-PVP-Neutral:14:10:-2:1:64:64:6:34:0:40|t" -- 4:3
 local FACTION_HORDE_TEXTURE = "|TInterface\\TargetingFrame\\UI-PVP-Horde:14:14:-4:0:64:64:0:40:0:40|t" -- 1:1
 
+-- Method template
+local Tooltip = CreateFrame("GameTooltip", ADDON.."TooltipMethodTemplate", WorldFrame, "GameTooltipTemplate")
+local TooltipMethods = getmetatable(Tooltip).__index
+
+-- Original Blizzard methods we need
+local Tooltip_AddLine = TooltipMethods.AddLine
+local Tooltip_AddDoubleLine = TooltipMethods.AddDoubleLine
+local Tooltip_SetText = TooltipMethods.SetText
+local Tooltip_SetTextColor = TooltipMethods.SetTextColor
+
+-- Lockdowns
+local LOCKDOWNS = {}
+
 -- Flag set to true if any other known
 -- addon with vendor sell prices is enabled.
-local DISABLE_VENDOR_PRICES = Module:IsRetail()
+local DISABLE_VENDOR_PRICES = IsRetail -- disable for retail for now
 if (not DISABLE_VENDOR_PRICES) then
 	DISABLE_VENDOR_PRICES = (function(...)
 		for i = 1,select("#", ...) do
@@ -51,11 +76,8 @@ if (not DISABLE_VENDOR_PRICES) then
 				return true
 			end
 		end
-	end)("Auctionator", "TradeSkillMaster")
+	end)("Auctionator") -- "TradeSkillMaster"
 end
-
--- Lockdowns
-local LOCKDOWNS = {} 
 
 -- Make the money display pretty
 local formatMoney = function(money)
@@ -82,13 +104,13 @@ local formatMoney = function(money)
 end
 
 -- Add or replace a line of text in the tooltip
-local AddLine = function(tooltip, lineIndex, msg, r, g, b)
+local AddIndexedLine = function(tooltip, lineIndex, msg, r, g, b)
 	r = r or Colors.offwhite[1]
 	g = g or Colors.offwhite[2]
 	b = b or Colors.offwhite[3]
 	local numLines = tooltip:NumLines()
 	if (lineIndex > numLines) then 
-		tooltip:AddLine(msg, r, g, b)
+		Tooltip_AddLine(tooltip, msg, r, g, b)
 	else
 		local left = _G[tooltip:GetName().."TextLeft"..lineIndex]
 		left:SetText(msg)
@@ -173,7 +195,7 @@ local GetTooltipUnit = function(tooltip)
 	if (not unit) and UnitExists("mouseover") then
 		unit = "mouseover"
 	end
-	if unit and UnitIsUnit(unit, "mouseover") then
+	if (unit) and UnitIsUnit(unit, "mouseover") then
 		unit = "mouseover"
 	end
 	return UnitExists(unit) and unit
@@ -265,6 +287,10 @@ end
 
 -- General scale and font object corrections on tooltip show. 
 local OnTooltipShow = function(tooltip)
+	if (tooltip:IsForbidden()) then 
+		return
+	end
+
 	-- Set the tooltip to the same scale as our own. 
 	local targetScale = Module:GetFrame("UICenter"):GetEffectiveScale()
 	local tooltipParentScale = (tooltip:GetParent() or WorldFrame):GetEffectiveScale()
@@ -292,6 +318,9 @@ local OnTooltipHide = function(tooltip)
 end
 
 local OnTooltipAddLine = function(tooltip, msg)
+	if (tooltip:IsForbidden()) then 
+		return
+	end
 	if not(LOCKDOWNS[tooltip]) then
 		return OnTooltipShow(tooltip)
 	end 
@@ -308,6 +337,9 @@ local OnTooltipAddLine = function(tooltip, msg)
 end
 
 local OnTooltipAddDoubleLine = function(tooltip, leftText, rightText)
+	if (tooltip:IsForbidden()) then 
+		return
+	end
 	if not(LOCKDOWNS[tooltip]) then
 		return OnTooltipShow(tooltip)
 	end 
@@ -330,11 +362,9 @@ local OnTooltipSetItem = function(tooltip)
 	if (tooltip:IsForbidden()) then 
 		return
 	end
-
 	if (DISABLE_VENDOR_PRICES) then 
 		return 
 	end
-
 	local frame = GetMouseFocus()
 	if (frame and frame.GetName and not frame:IsForbidden()) then
 		local name = frame:GetName()
@@ -342,8 +372,8 @@ local OnTooltipSetItem = function(tooltip)
 			local _,link = tooltip:GetItem()
 			if (link) then
 				local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount,
-				itemEquipLoc, itemIcon, itemSellPrice, itemClassID, itemSubClassID, bindType, expacID, itemSetID, 
-				isCraftingReagent = GetItemInfo(link)
+				      itemEquipLoc, itemIcon, itemSellPrice, itemClassID, itemSubClassID, bindType, expacID, itemSetID, 
+				      isCraftingReagent = GetItemInfo(link)
 				if (itemSellPrice and (itemSellPrice > 0)) then
 					LOCKDOWNS[tooltip] = nil
 
@@ -359,8 +389,8 @@ local OnTooltipSetItem = function(tooltip)
 					end
 
 					tooltip.vendorSellLineID = tooltip:NumLines() + 1
-					tooltip:AddLine(" ")
-					tooltip:AddDoubleLine(label, price, color[1], color[2], color[3], color[1], color[2], color[3])
+					Tooltip_AddLine(tooltip, " ")
+					Tooltip_AddDoubleLine(tooltip, label, price, color[1], color[2], color[3], color[1], color[2], color[3])
 
 					-- Not doing this yet. But we will. Oh yes we will. 
 					--LOCKDOWNS[tooltip] = true
@@ -393,12 +423,26 @@ local OnTooltipSetUnit = function(tooltip)
 	
 	tooltip.unit = unit
 
+	-- Kill off texts
 	local numLines = tooltip:NumLines()
+	local tooltipName = tooltip:GetName()
 	local lineIndex = 1
 	for i = numLines,1,-1 do 
-		local left = _G[tooltip:GetName().."TextLeft"..i]
-		local right = _G[tooltip:GetName().."TextRight"..i]
+		local left = _G[tooltipName.."TextLeft"..i]
+		local right = _G[tooltipName.."TextRight"..i]
 		if (left) then
+			-- Check to points to avoid indents
+			local pointID = 1
+			local point,anchor,rpoint,x,y = left:GetPoint(pointID)
+			while (point) do
+				if (point == "LEFT") and (rpoint == "LEFT") then
+					-- 10 is the tooltip default for only text,
+					-- ~28 is the default when textures are visible
+					left:SetPoint(point,anchor,rpoint,10,y)
+				end
+				pointID = pointID + 1
+				point,anchor,rpoint,x,y = left:GetPoint(pointID)
+			end
 			left:SetText("")
 		end
 		if (right) then
@@ -406,11 +450,21 @@ local OnTooltipSetUnit = function(tooltip)
 		end
 	end
 
+	-- Kill off textures
+	local textureID = 1
+	local texture = _G[tooltipName .. "Texture" .. textureID]
+	while (texture) and (texture:IsShown()) do
+		texture:SetTexture("")
+		texture:Hide()
+		textureID = textureID + 1
+		texture = _G[tooltipName .. "Texture" .. textureID]
+	end
+
 	-- name 
 	local displayName = data.name
-	if data.isPlayer then 
+	if (data.isPlayer) then 
 		if (data.showPvPFactionWithName) then 
-			if data.isFFA then
+			if (data.isFFA) then
 				displayName = FFA_TEXTURE .. " " .. displayName
 			elseif (data.isPVP and data.englishFaction) then
 				if (data.englishFaction == "Horde") then
@@ -429,7 +483,7 @@ local OnTooltipSetUnit = function(tooltip)
 		end
 
 	else 
-		if data.isBoss then
+		if (data.isBoss) then
 			displayName = BOSS_TEXTURE .. " " .. displayName
 		elseif (data.classification == "rare") or (data.classification == "rareelite") then
 			displayName = displayName .. Colors.quality[3].colorCode .. " (" .. ITEM_QUALITY3_DESC .. ")|r"
@@ -445,24 +499,24 @@ local OnTooltipSetUnit = function(tooltip)
 	end 
 
 	local r, g, b = GetUnitHealthColor(unit,data)
-	if levelText then 
-		lineIndex = AddLine(tooltip, lineIndex, levelText .. Colors.quest.gray.colorCode .. ": |r" .. displayName, r, g, b)
+	if (levelText) then 
+		lineIndex = AddIndexedLine(tooltip, lineIndex, levelText .. Colors.quest.gray.colorCode .. ": |r" .. displayName, r, g, b)
 	else
-		lineIndex = AddLine(tooltip, lineIndex, displayName, r, g, b)
+		lineIndex = AddIndexedLine(tooltip, lineIndex, displayName, r, g, b)
 	end 
 
 	-- Players
-	if data.isPlayer then 
-		if data.isDead then 
-			lineIndex = AddLine(tooltip, lineIndex, data.isGhost and DEAD or CORPSE, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
+	if (data.isPlayer) then 
+		if (data.isDead) then 
+			lineIndex = AddIndexedLine(tooltip, lineIndex, data.isGhost and DEAD or CORPSE, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
 		else 
-			if data.guild then 
-				lineIndex = AddLine(tooltip, lineIndex, "<"..data.guild..">", Colors.title[1], Colors.title[2], Colors.title[3])
+			if (data.guild) then 
+				lineIndex = AddIndexedLine(tooltip, lineIndex, "<"..data.guild..">", Colors.title[1], Colors.title[2], Colors.title[3])
 			end 
 
 			local levelLine
 
-			if data.raceDisplayName then 
+			if (data.raceDisplayName) then 
 				levelLine = (levelLine and levelLine.." " or "") .. data.raceDisplayName
 			end 
 
@@ -470,62 +524,89 @@ local OnTooltipSetUnit = function(tooltip)
 				levelLine = (levelLine and levelLine.." " or "") .. data.classDisplayName
 			end 
 
-			if levelLine then 
-				lineIndex = AddLine(tooltip, lineIndex, levelLine, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
+			if (levelLine) then 
+				lineIndex = AddIndexedLine(tooltip, lineIndex, levelLine, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
 			end 
 
 			-- player faction (Horde/Alliance/Neutral)
-			if data.localizedFaction then 
-				lineIndex = AddLine(tooltip, lineIndex, data.localizedFaction)
+			if (data.localizedFaction) then 
+				lineIndex = AddIndexedLine(tooltip, lineIndex, data.localizedFaction)
 			end 
 		end
 
 	-- All other NPCs
 	else 
-		if data.isDead then 
-			lineIndex = AddLine(tooltip, lineIndex, data.isGhost and DEAD or CORPSE, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
+		if (data.isDead) then 
+			lineIndex = AddIndexedLine(tooltip, lineIndex, data.isGhost and DEAD or CORPSE, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
 			if (data.isSkinnable) then 
-				lineIndex = AddLine(tooltip, lineIndex, data.skinnableMsg, data.skinnableColor[1], data.skinnableColor[2], data.skinnableColor[3])
+				lineIndex = AddIndexedLine(tooltip, lineIndex, data.skinnableMsg, data.skinnableColor[1], data.skinnableColor[2], data.skinnableColor[3])
 			end
 		else 
 			-- titles
-			if data.title then 
-				lineIndex = AddLine(tooltip, lineIndex, "<"..data.title..">", Colors.normal[1], Colors.normal[2], Colors.normal[3])
+			if (data.title) then 
+				lineIndex = AddIndexedLine(tooltip, lineIndex, "<"..data.title..">", Colors.normal[1], Colors.normal[2], Colors.normal[3])
 			end 
 
-			if data.city then 
-				lineIndex = AddLine(tooltip, lineIndex, data.city, Colors.title[1], Colors.title[2], Colors.title[3])
+			if (data.city) then 
+				lineIndex = AddIndexedLine(tooltip, lineIndex, data.city, Colors.title[1], Colors.title[2], Colors.title[3])
 			end 
 
 			-- Beast etc 
-			if data.creatureFamily then 
-				lineIndex = AddLine(tooltip, lineIndex, data.creatureFamily, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
+			if (data.creatureFamily) then 
+				lineIndex = AddIndexedLine(tooltip, lineIndex, data.creatureFamily, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
 
 			-- Humanoid, Crab, etc 
-			elseif data.creatureType then 
-				lineIndex = AddLine(tooltip, lineIndex, data.creatureType, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
+			elseif (data.creatureType) then 
+				lineIndex = AddIndexedLine(tooltip, lineIndex, data.creatureType, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
 			end 
 
-			-- player faction (Horde/Alliance/Neutral)
-			if data.localizedFaction then 
-				lineIndex = AddLine(tooltip, lineIndex, data.localizedFaction)
+			-- Player faction (Horde/Alliance/Neutral)
+			if (data.localizedFaction) then 
+				lineIndex = AddIndexedLine(tooltip, lineIndex, data.localizedFaction)
 			end 
 
+			-- Definitely important in classic!
 			if (data.isCivilian) then 
-				lineIndex = AddLine(tooltip, lineIndex, PVP_RANK_CIVILIAN, data.civilianColor[1], data.civilianColor[2], data.civilianColor[3])
+				lineIndex = AddIndexedLine(tooltip, lineIndex, PVP_RANK_CIVILIAN, data.civilianColor[1], data.civilianColor[2], data.civilianColor[3])
 			end
 		end
+
+		-- Add quest objectives
+		if (data.objectives) then
+			for objectiveID, objectiveData in ipairs(data.objectives) do
+				lineIndex = AddIndexedLine(tooltip, lineIndex, " ")
+				lineIndex = AddIndexedLine(tooltip, lineIndex, objectiveData.questTitle, Colors.title[1], Colors.title[2], Colors.title[3])
+
+				for objectiveID, questObjectiveData in ipairs(objectiveData.questObjectives) do
+					local objectiveType = questObjectiveData.objectiveType
+					if (objectiveType == "incomplete") then
+						lineIndex = AddIndexedLine(tooltip, lineIndex, questObjectiveData.objectiveText, Colors.quest.gray[1], Colors.quest.gray[2], Colors.quest.gray[3])
+					elseif (objectiveType == "complete") then
+						lineIndex = AddIndexedLine(tooltip, lineIndex, questObjectiveData.objectiveText, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
+					elseif (objectiveType == "failed") then
+						lineIndex = AddIndexedLine(tooltip, lineIndex, questObjectiveData.objectiveText, Colors.quest.red[1], Colors.quest.red[2], Colors.quest.red[3])
+					end
+				end
+			end
+		end
+
 	end 
 
-	tooltip:Show()
+	-- Bar should always be here, but who knows.
+	local bar = _G[tooltipName.."StatusBar"]
+	if (bar) then
+		bar.color = { r, g, b }
+		bar:ClearAllPoints()
+		bar:SetPoint("TOPLEFT", tooltip, "BOTTOMLEFT", 3, -1)
+		bar:SetPoint("TOPRIGHT", tooltip, "BOTTOMRIGHT", -3, -1)
+		bar:SetStatusBarColor(r, g, b)
+	end
+
+	-- We don't want additions.
 	LOCKDOWNS[tooltip] = true
 
-	local bar = _G[tooltip:GetName().."StatusBar"]
-	bar.color = { r, g, b }
-	bar:ClearAllPoints()
-	bar:SetPoint("TOPLEFT", tooltip, "BOTTOMLEFT", 3, -1)
-	bar:SetPoint("TOPRIGHT", tooltip, "BOTTOMRIGHT", -3, -1)
-	bar:SetStatusBarColor(r, g, b)
+	-- Aligns the backdrop to the current number of active lines.
+	tooltip:Show()
 end
 
 Module.OnInit = function(self)
@@ -541,36 +622,36 @@ Module.OnEnable = function(self)
 		self:SetBlizzardTooltipBackdropBorderColor(tooltip, unpack(self.layout.TooltipBackdropBorderColor))
 		self:SetBlizzardTooltipBackdropOffsets(tooltip, 10, 10, 10, 12)
 
-		if tooltip.SetText then 
+		if (tooltip.SetText) then 
 			hooksecurefunc(tooltip, "SetText", OnTooltipAddLine)
 		end
 
-		if tooltip.AddLine then 
+		if (tooltip.AddLine) then 
 			hooksecurefunc(tooltip, "AddLine", OnTooltipAddLine)
 		end 
 
-		if tooltip.AddDoubleLine then 
+		if (tooltip.AddDoubleLine) then 
 			hooksecurefunc(tooltip, "AddDoubleLine", OnTooltipAddDoubleLine)
 		end 
 
-		if tooltip:HasScript("OnTooltipSetUnit") then 
+		if (tooltip:HasScript("OnTooltipSetUnit")) then 
 			tooltip:HookScript("OnTooltipSetUnit", OnTooltipSetUnit)
 		end
 
-		if tooltip:HasScript("OnTooltipSetItem") then 
+		if (tooltip:HasScript("OnTooltipSetItem")) then 
 			tooltip:HookScript("OnTooltipSetItem", OnTooltipSetItem)
 		end
 
-		if tooltip:HasScript("OnHide") then 
+		if (tooltip:HasScript("OnHide")) then 
 			tooltip:HookScript("OnHide", OnTooltipHide)
 		end
 		
-		if tooltip:HasScript("OnShow") then 
+		if (tooltip:HasScript("OnShow")) then 
 			tooltip:HookScript("OnShow", OnTooltipShow)
 		end
 
 		local bar = _G[tooltip:GetName().."StatusBar"]
-		if bar then 
+		if (bar) then 
 			bar:ClearAllPoints()
 			bar:SetPoint("TOPLEFT", tooltip, "BOTTOMLEFT", 3, -1)
 			bar:SetPoint("TOPRIGHT", tooltip, "BOTTOMRIGHT", -3, -1)

@@ -1,4 +1,4 @@
-local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 48)
+local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 49)
 if (not LibTooltipScanner) then	
 	return
 end
@@ -1558,7 +1558,7 @@ LibTooltipScanner.GetTooltipDataForUnit = function(self, unit, tbl)
 		-- Retrieve special data from the tooltip
 
 		-- Players
-		if isPlayer then 
+		if (isPlayer) then 
 			local classDisplayName, class, classID = UnitClass(unit)
 			local englishFaction, localizedFaction = UnitFactionGroup(unit)
 			local guildName, guildRankName, guildRankIndex, realm = GetGuildInfo(unit)
@@ -1692,6 +1692,68 @@ LibTooltipScanner.GetTooltipDataForUnit = function(self, unit, tbl)
 				end 
 			end 
 		end 
+
+		-- Textures
+		local objectives = {}
+		local objectiveID
+		local currentObjectiveLineID, currentTitleLineID
+		local textureID = 1
+		local texture = _G[ScannerName .. "Texture" .. textureID]
+
+		while (texture) and (texture:IsShown()) do
+			local texPath = texture:GetTexture()
+
+			local hasObjective, objectiveType
+			if (texPath == 3083385) then -- Incomplete objective
+				hasObjective = true
+				objectiveType = "incomplete"
+			elseif (texPath == 628564) then -- Completed objective
+				hasObjective = true
+				objectiveType = "complete"
+			else
+				print(string_format("|cffffd200LibTooltipScanner:|r |cfff0f0f0Unhandled textureID |r'|cff33aa33%d|r'.", texPath))
+			end 
+
+			if (hasObjective) then
+				local _,textLine = texture:GetPoint()
+				local objectiveText = textLine:GetText()
+				local lineName, lineID = string_match(textLine:GetName(), "(.-)(%d)$")
+
+				-- Assume a new  quest if this is either the first found objective,
+				-- or if this objective has skipped a line or more since the previous objective.
+				if (not currentObjectiveLineID) or (lineID > currentObjectiveLineID + 1) then
+
+					-- Store the current quest title's lineID
+					currentTitleLineID = lineID - 1
+
+					-- Retrieve the quest title
+					local titleLine = _G[ScannerName .. "TextLeft" .. currentTitleLineID]
+					local titleText = titleLine:GetText()
+
+					-- Set a new local objective ID
+					objectiveID = #objectives + 1
+					objectives[objectiveID] = { questTitle = titleText, questObjectives = {} }
+				end
+
+				-- Store the data we've found about this objective
+				local questObjectives = objectives[objectiveID].questObjectives
+				questObjectives[#questObjectives + 1] = {
+					objectiveType = objectiveType,
+					objectiveText = objectiveText
+				}
+
+				-- Store or update the current objective's lineID
+				currentObjectiveLineID = lineID
+			end
+
+			-- Update the current texture
+			textureID = textureID + 1
+			texture = _G[ScannerName .. "Texture" .. textureID]
+		end
+
+		if (objectiveID) then
+			tbl.objectives = objectives
+		end
 
 		return tbl
 	end 

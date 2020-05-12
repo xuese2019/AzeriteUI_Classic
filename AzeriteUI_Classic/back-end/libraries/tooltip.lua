@@ -1,4 +1,4 @@
-local LibTooltip = Wheel:Set("LibTooltip", 72)
+local LibTooltip = Wheel:Set("LibTooltip", 73)
 if (not LibTooltip) then
 	return
 end
@@ -1528,6 +1528,25 @@ Tooltip.SetUnit = function(self, unit)
 						self:AddLine(PVP_RANK_CIVILIAN, data.civilianColor[1], data.civilianColor[2], data.civilianColor[3])
 					end
 				end
+
+				if (data.objectives) then
+					for objectiveID, objectiveData in ipairs(data.objectives) do
+						self:AddLine(" ")
+						self:AddLine(objectiveData.questTitle, colors.title[1], colors.title[2], colors.title[3])
+
+						for objectiveID, questObjectiveData in ipairs(objectiveData.questObjectives) do
+							local objectiveType = questObjectiveData.objectiveType
+							if (objectiveType == "incomplete") then
+								self:AddLine(questObjectiveData.objectiveText, colors.quest.gray[1], colors.quest.gray[2], colors.quest.gray[3])
+							elseif (objectiveType == "complete") then
+								self:AddLine(questObjectiveData.objectiveText, colors.offwhite[1], colors.offwhite[2], colors.offwhite[3])
+							elseif (objectiveType == "failed") then
+								self:AddLine(questObjectiveData.objectiveText, colors.quest.red[1], colors.quest.red[2], colors.quest.red[3])
+							end
+						end
+					end
+				end
+
 			end 
 
 			if self:UpdateBarValues(unit, true) then 

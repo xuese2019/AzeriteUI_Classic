@@ -1079,11 +1079,31 @@ end
 
 local PlayerHUD_ClassPowerPostUpdate = function(element, unit, min, max, newMax, powerType)
 	local style
+
+	-- 5 points: 4 circles, 1 larger crystal
 	if (powerType == "COMBO_POINTS") then 
 		style = "ComboPoints"
+
+	-- 5 points: 5 circles, center one larger
+	elseif (powerType == "CHI") then
+		style = "Chi"
+
+	--5 points: 3 circles, 3 crystals, last crystal larger
+	elseif (powerType == "ARCANE_CHARGES") or (powerType == "HOLY_POWER") or (powerType == "SOUL_SHARDS") then 
+		style = "SoulShards"
+
+	-- 3 points: 
+	elseif (powerType == "STAGGER") then 
+		style = "Stagger"
+
+	-- 6 points: 
+	elseif (powerType == "RUNES") then 
+		style = "Runes"
 	end 
+	
 	if (style ~= element.powerStyle) then 
 		local posMod = element.flipSide and -1 or 1
+		
 		if (style == "ComboPoints") then
 			local point1, point2, point3, point4, point5 = element[1], element[2], element[3], element[4], element[5]
 
@@ -1143,7 +1163,233 @@ local PlayerHUD_ClassPowerPostUpdate = function(element, unit, min, max, newMax,
 			point5.case:SetRotation(degreesToRadians(1*posMod))
 			point5.case:SetTexture(GetMedia("point_diamond"))
 
+		elseif (style == "Chi") then
+			local point1, point2, point3, point4, point5 = element[1], element[2], element[3], element[4], element[5]
+
+			point1:SetPoint("CENTER", -203*posMod,-137)
+			point1:SetSize(13,13)
+			point1:SetStatusBarTexture(GetMedia("point_crystal"))
+			point1:GetStatusBarTexture():SetRotation(degreesToRadians(6*posMod))
+			point1.slotTexture:SetTexture(GetMedia("point_crystal"))
+			point1.slotTexture:SetRotation(degreesToRadians(6*posMod))
+			point1.case:SetPoint("CENTER", 0, 0)
+			point1.case:SetSize(58,58)
+			point1.case:SetRotation(degreesToRadians(6*posMod))
+			point1.case:SetTexture(GetMedia("point_plate"))
+
+			point2:SetPoint("CENTER", -223*posMod,-109)
+			point2:SetSize(13,13)
+			point2:SetStatusBarTexture(GetMedia("point_crystal"))
+			point2:GetStatusBarTexture():SetRotation(degreesToRadians(5*posMod))
+			point2.slotTexture:SetTexture(GetMedia("point_crystal"))
+			point2.slotTexture:SetRotation(degreesToRadians(5*posMod))
+			point2.case:SetPoint("CENTER", 0, 0)
+			point2.case:SetSize(60,60)
+			point2.case:SetRotation(degreesToRadians(5*posMod))
+			point2.case:SetTexture(GetMedia("point_plate"))
+
+			point3:SetPoint("CENTER", -234*posMod,-73)
+			point3:SetSize(39,40)
+			point3:SetStatusBarTexture(GetMedia("point_hearth"))
+			point3:GetStatusBarTexture():SetRotation(0)
+			point3.slotTexture:SetTexture(GetMedia("point_hearth"))
+			point3.slotTexture:SetRotation(0)
+			point3.case:SetPoint("CENTER", 0,0)
+			point3.case:SetSize(80,80)
+			point3.case:SetRotation(0)
+			point3.case:SetTexture(GetMedia("point_plate"))
+		
+			point4:SetPoint("CENTER", -221*posMod,-36)
+			point4:SetSize(13,13)
+			point4:SetStatusBarTexture(GetMedia("point_crystal"))
+			point4:GetStatusBarTexture():SetRotation(0)
+			point4.slotTexture:SetTexture(GetMedia("point_crystal"))
+			point4.slotTexture:SetRotation(0)
+			point4.case:SetPoint("CENTER", 0, 0)
+			point4.case:SetSize(60,60)
+			point4.case:SetRotation(0)
+			point4.case:SetTexture(GetMedia("point_plate"))
+		
+			point5:SetPoint("CENTER", -203*posMod,-9)
+			point5:SetSize(13,13)
+			point5:SetStatusBarTexture(GetMedia("point_crystal"))
+			point5:GetStatusBarTexture():SetRotation(0)
+			point5.slotTexture:SetTexture(GetMedia("point_crystal"))
+			point5.slotTexture:SetRotation(0)
+			point5.case:SetPoint("CENTER",0, 0)
+			point5.case:SetSize(60,60)
+			point5.case:SetRotation(0)
+			point5.case:SetTexture(GetMedia("point_plate"))
+
+		elseif (style == "SoulShards") then 
+			local point1, point2, point3, point4, point5 = element[1], element[2], element[3], element[4], element[5]
+
+			point1:SetPoint("CENTER", -203*posMod,-137)
+			point1:SetSize(12,12)
+			point1:SetStatusBarTexture(GetMedia("point_crystal"))
+			point1:GetStatusBarTexture():SetRotation(degreesToRadians(6*posMod))
+			point1.slotTexture:SetTexture(GetMedia("point_crystal"))
+			point1.slotTexture:SetRotation(degreesToRadians(6*posMod))
+			point1.case:SetPoint("CENTER", 0, 0)
+			point1.case:SetSize(54,54)
+			point1.case:SetRotation(degreesToRadians(6*posMod))
+			point1.case:SetTexture(GetMedia("point_plate"))
+
+			point2:SetPoint("CENTER", -221*posMod,-111)
+			point2:SetSize(13,13)
+			point2:SetStatusBarTexture(GetMedia("point_crystal"))
+			point2:GetStatusBarTexture():SetRotation(degreesToRadians(5*posMod))
+			point2.slotTexture:SetTexture(GetMedia("point_crystal"))
+			point2.slotTexture:SetRotation(degreesToRadians(5*posMod))
+			point2.case:SetPoint("CENTER", 0, 0)
+			point2.case:SetSize(60,60)
+			point2.case:SetRotation(degreesToRadians(5*posMod))
+			point2.case:SetTexture(GetMedia("point_plate"))
+
+			point3:SetPoint("CENTER", -235*posMod,-80)
+			point3:SetSize(11,15)
+			point3:SetStatusBarTexture(GetMedia("point_crystal"))
+			point3:GetStatusBarTexture():SetRotation(degreesToRadians(3*posMod))
+			point3.slotTexture:SetTexture(GetMedia("point_crystal"))
+			point3.slotTexture:SetRotation(degreesToRadians(3*posMod))
+			point3.case:SetPoint("CENTER",0,0)
+			point3.case:SetSize(65,60)
+			point3.case:SetRotation(degreesToRadians(3*posMod))
+			point3.case:SetTexture(GetMedia("point_diamond"))
+		
+			point4:SetPoint("CENTER", -227*posMod,-44)
+			point4:SetSize(12,18)
+			point4:SetStatusBarTexture(GetMedia("point_crystal"))
+			point4:GetStatusBarTexture():SetRotation(degreesToRadians(3*posMod))
+			point4.slotTexture:SetTexture(GetMedia("point_crystal"))
+			point4.slotTexture:SetRotation(degreesToRadians(3*posMod))
+			point4.case:SetPoint("CENTER",0,0)
+			point4.case:SetSize(78,79)
+			point4.case:SetRotation(degreesToRadians(3*posMod))
+			point4.case:SetTexture(GetMedia("point_diamond"))
+		
+			point5:SetPoint("CENTER", -203*posMod,-11)
+			point5:SetSize(14,21)
+			point5:SetStatusBarTexture(GetMedia("point_crystal"))
+			point5:GetStatusBarTexture():SetRotation(degreesToRadians(1*posMod))
+			point5.slotTexture:SetTexture(GetMedia("point_crystal"))
+			point5.slotTexture:SetRotation(degreesToRadians(1*posMod))
+			point5.case:SetRotation(degreesToRadians(1*posMod))
+			point5.case:SetPoint("CENTER",0,0)
+			point5.case:SetSize(82,96)
+			point5.case:SetRotation(degreesToRadians(1*posMod))
+			point5.case:SetTexture(GetMedia("point_diamond"))
+
+
+			-- 1.414213562
+		elseif (style == "Stagger") then 
+			local point1, point2, point3 = element[1], element[2], element[3]
+
+			point1:SetPoint("CENTER", -223*posMod,-109)
+			point1:SetSize(13,13)
+			point1:SetStatusBarTexture(GetMedia("point_crystal"))
+			point1:GetStatusBarTexture():SetRotation(degreesToRadians(5*posMod))
+			point1.slotTexture:SetTexture(GetMedia("point_crystal"))
+			point1.slotTexture:SetRotation(degreesToRadians(5*posMod))
+			point1.case:SetPoint("CENTER", 0, 0)
+			point1.case:SetSize(60,60)
+			point1.case:SetRotation(degreesToRadians(5*posMod))
+			point1.case:SetTexture(GetMedia("point_plate"))
+
+			point2:SetPoint("CENTER", -234*posMod,-73)
+			point2:SetSize(39,40)
+			point2:SetStatusBarTexture(GetMedia("point_hearth"))
+			point2:GetStatusBarTexture():SetRotation(0)
+			point2.slotTexture:SetTexture(GetMedia("point_hearth"))
+			point2.slotTexture:SetRotation(0)
+			point2.case:SetPoint("CENTER", 0,0)
+			point2.case:SetSize(80,80)
+			point2.case:SetRotation(0)
+			point2.case:SetTexture(GetMedia("point_plate"))
+		
+			point3:SetPoint("CENTER", -221*posMod,-36)
+			point3:SetSize(13,13)
+			point3:SetStatusBarTexture(GetMedia("point_crystal"))
+			point3:GetStatusBarTexture():SetRotation(0)
+			point3.slotTexture:SetTexture(GetMedia("point_crystal"))
+			point3.slotTexture:SetRotation(0)
+			point3.case:SetPoint("CENTER", 0, 0)
+			point3.case:SetSize(60,60)
+			point3.case:SetRotation(0)
+			point3.case:SetTexture(GetMedia("point_plate"))
+
+
+		elseif (style == "Runes") then 
+			local point1, point2, point3, point4, point5, point6 = element[1], element[2], element[3], element[4], element[5], element[6]
+
+			point1:SetPoint("CENTER", -203*posMod,-131)
+			point1:SetSize(28,28)
+			point1:SetStatusBarTexture(GetMedia("point_rune2"))
+			point1:GetStatusBarTexture():SetRotation(0)
+			point1.slotTexture:SetTexture(GetMedia("point_rune2"))
+			point1.slotTexture:SetRotation(0)
+			point1.case:SetPoint("CENTER", 0, 0)
+			point1.case:SetSize(58,58)
+			point1.case:SetRotation(0)
+			point1.case:SetTexture(GetMedia("point_dk_block"))
+
+			point2:SetPoint("CENTER", -227*posMod,-107)
+			point2:SetSize(28,28)
+			point2:SetStatusBarTexture(GetMedia("point_rune4"))
+			point2:GetStatusBarTexture():SetRotation(0)
+			point2.slotTexture:SetTexture(GetMedia("point_rune4"))
+			point2.slotTexture:SetRotation(0)
+			point2.case:SetPoint("CENTER", 0, 0)
+			point2.case:SetSize(68,68)
+			point2.case:SetRotation(0)
+			point2.case:SetTexture(GetMedia("point_dk_block"))
+
+			point3:SetPoint("CENTER", -253*posMod,-83)
+			point3:SetSize(30,30)
+			point3:SetStatusBarTexture(GetMedia("point_rune1"))
+			point3:GetStatusBarTexture():SetRotation(0)
+			point3.slotTexture:SetTexture(GetMedia("point_rune1"))
+			point3.slotTexture:SetRotation(0)
+			point3.case:SetPoint("CENTER", 0,0)
+			point3.case:SetSize(74,74)
+			point3.case:SetRotation(0)
+			point3.case:SetTexture(GetMedia("point_dk_block"))
+		
+			point4:SetPoint("CENTER", -220*posMod,-64)
+			point4:SetSize(28,28)
+			point4:SetStatusBarTexture(GetMedia("point_rune3"))
+			point4:GetStatusBarTexture():SetRotation(0)
+			point4.slotTexture:SetTexture(GetMedia("point_rune3"))
+			point4.slotTexture:SetRotation(0)
+			point4.case:SetPoint("CENTER", 0, 0)
+			point4.case:SetSize(68,68)
+			point4.case:SetRotation(0)
+			point4.case:SetTexture(GetMedia("point_dk_block"))
+
+			point5:SetPoint("CENTER", -246*posMod,-38)
+			point5:SetSize(32,32)
+			point5:SetStatusBarTexture(GetMedia("point_rune2"))
+			point5:GetStatusBarTexture():SetRotation(0)
+			point5.slotTexture:SetTexture(GetMedia("point_rune2"))
+			point5.slotTexture:SetRotation(0)
+			point5.case:SetPoint("CENTER", 0, 0)
+			point5.case:SetSize(78,78)
+			point5.case:SetRotation(0)
+			point5.case:SetTexture(GetMedia("point_dk_block"))
+
+			point6:SetPoint("CENTER", -214*posMod,-10)
+			point6:SetSize(40,40)
+			point6:SetStatusBarTexture(GetMedia("point_rune1"))
+			point6:GetStatusBarTexture():SetRotation(0)
+			point6.slotTexture:SetTexture(GetMedia("point_rune1"))
+			point6.slotTexture:SetRotation(0)
+			point6.case:SetPoint("CENTER", 0, 0)
+			point6.case:SetSize(98,98)
+			point6.case:SetRotation(0)
+			point6.case:SetTexture(GetMedia("point_dk_block"))
+
 		end 
+
 		element.powerStyle = style
 	end 
 end

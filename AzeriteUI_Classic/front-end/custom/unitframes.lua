@@ -1524,7 +1524,9 @@ UnitStyles.StylePlayerHUDFrame = function(self, unit, id, layout, ...)
 	-- Sort order of the runes
 	classPower.runeSortOrder = layout.ClassPowerRuneSortOrder 
 
-	for i = 1,5 do 
+	-- We show all 6 runes in retail, but stick to 5 otherwise.
+	local numPoints = IsRetail and 6 or IsClassic and 5
+	for i = 1,numPoints do
 
 		-- Main point object
 		local point = classPower:CreateStatusBar() -- the widget require Wheel statusbars
