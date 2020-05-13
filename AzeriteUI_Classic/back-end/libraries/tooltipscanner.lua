@@ -1,4 +1,4 @@
-local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 49)
+local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 50)
 if (not LibTooltipScanner) then	
 	return
 end
@@ -1721,6 +1721,7 @@ LibTooltipScanner.GetTooltipDataForUnit = function(self, unit, tbl)
 				local _,textLine = texture:GetPoint()
 				local objectiveText = textLine:GetText()
 				local lineName, lineID = string_match(textLine:GetName(), "(.-)(%d)$")
+				lineID = tonumber(lineID)
 
 				-- Assume a new  quest if this is either the first found objective,
 				-- or if this objective has skipped a line or more since the previous objective.
