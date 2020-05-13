@@ -1231,16 +1231,24 @@ LibNamePlate.KillClassClutter = function(self)
 			end
 		end
 		if (IsRetail) then
-			DeathKnightResourceOverlayFrame:UnregisterAllEvents()
-			ClassNameplateBarMageFrame:UnregisterAllEvents()
-			ClassNameplateBarWindwalkerMonkFrame:UnregisterAllEvents()
-			ClassNameplateBarPaladinFrame:UnregisterAllEvents()
-			ClassNameplateBarRogueDruidFrame:UnregisterAllEvents()
-			ClassNameplateBarWarlockFrame:UnregisterAllEvents()
-			ClassNameplateManaBarFrame:UnregisterAllEvents()
-			ClassNameplateBrewmasterBarFrame:UnregisterAllEvents()
-			NamePlateDriverFrame:SetClassNameplateManaBar(nil)
-			NamePlateDriverFrame:SetClassNameplateBar(nil)
+			for _,frameName in ipairs({
+				"DeathKnightResourceOverlayFrame",
+				"ClassNameplateBarMageFrame",
+				"ClassNameplateBarWindwalkerMonkFrame",
+				"ClassNameplateBarPaladinFrame",
+				"ClassNameplateBarRogueDruidFrame",
+				"ClassNameplateBarWarlockFrame",
+				"ClassNameplateBrewmasterBarFrame",
+				"ClassNameplateManaBarFrame"
+			}) do
+				local frame = _G[frameName]
+				if (frame) then
+					frame:UnregisterAllEvents()
+					frame:SetParent(uiHider) -- taint or yay?
+				end
+				NamePlateDriverFrame:SetClassNameplateManaBar(nil)
+				NamePlateDriverFrame:SetClassNameplateBar(nil)
+			end
 		end
 	end
 end
