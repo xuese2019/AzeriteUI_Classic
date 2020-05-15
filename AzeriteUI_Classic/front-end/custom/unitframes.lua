@@ -18,6 +18,10 @@ end
 local LibClientBuild = Wheel("LibClientBuild")
 assert(LibClientBuild, "LibCast requires LibClientBuild to be loaded.")
 
+-- Constants for client version
+local IsClassic = LibClientBuild:IsClassic()
+local IsRetail = LibClientBuild:IsRetail()
+
 -- Primary Units
 local UnitFramePlayer = Core:NewModule("UnitFramePlayer", "LibDB", "LibEvent", "LibUnitFrame", "LibFrame")
 local UnitFramePlayerHUD = Core:NewModule("UnitFramePlayerHUD", "LibDB", "LibEvent", "LibUnitFrame", "LibFrame")
@@ -26,11 +30,26 @@ local UnitFrameTarget = Core:NewModule("UnitFrameTarget", "LibEvent", "LibUnitFr
 -- Secondary Units
 local UnitFramePet = Core:NewModule("UnitFramePet", "LibUnitFrame", "LibFrame")
 local UnitFrameToT = Core:NewModule("UnitFrameToT", "LibUnitFrame")
+local UnitFrameFocus = (IsRetail) and Core:NewModule("UnitFrameFocus", "LibUnitFrame")
 
 -- Grouped Units
+local UnitFrameArena = (IsRetail) and Core:NewModule("UnitFrameArena", "LibDB", "LibUnitFrame", "LibFrame")
 local UnitFrameBoss = Core:NewModule("UnitFrameBoss", "LibUnitFrame")
 local UnitFrameParty = Core:NewModule("UnitFrameParty", "LibDB", "LibFrame", "LibUnitFrame")
 local UnitFrameRaid = Core:NewModule("UnitFrameRaid", "LibDB", "LibFrame", "LibUnitFrame", "LibBlizzard")
+
+-- Incompatibilities
+-- *Note that Arena frames can also be manually disabled from our menu!
+--  The same is true for party- and raid frames, which is
+--  part of why we haven't included any auto-disabling of them.
+--  Other reason is that some like to combine, have our party frames,
+--  but use Grid for raids, or have our raid frames but another addon
+--  to rack specific groups like tanks and so on.
+if (UnitFrameArena) then
+	UnitFrameArena:SetIncompatible("sArena")
+	UnitFrameArena:SetIncompatible("Gladius")
+	UnitFrameArena:SetIncompatible("GladiusEx")
+end
 
 -- Keep these local
 local UnitStyles = {} 
@@ -71,10 +90,6 @@ local BLING_TEXTURE = [[Interface\Cooldown\star4]]
 -- Player data
 local _,PlayerClass = UnitClass("player")
 local _,PlayerLevel = UnitLevel("player")
-
--- Constants for client version
-local IsClassic = LibClientBuild:IsClassic()
-local IsRetail = LibClientBuild:IsRetail()
 
 -----------------------------------------------------------
 -- Secure Stuff
@@ -1947,6 +1962,10 @@ UnitStyles.StyleToTFrame = function(self, unit, id, layout, ...)
 	return StyleSmallFrame(self, unit, id, layout, ...)
 end
 
+UnitStyles.StyleFocusFrame = function(self, unit, id, layout, ...)
+	return StyleSmallFrame(self, unit, id, layout, ...)
+end
+
 UnitStyles.StylePetFrame = function(self, unit, id, layout, ...)
 	return StyleSmallFrame(self, unit, id, layout, ...)
 end
@@ -2103,6 +2122,18 @@ UnitFrameTarget.OnEvent = function(self, event, ...)
 			-- Play a sound indicating we lost our target
 			self:PlaySoundKitID(SOUNDKIT.INTERFACE_SOUND_LOST_TARGET_UNIT, "SFX")
 		end
+	end
+end
+
+-----------------------------------------------------------
+-- Focus
+-----------------------------------------------------------
+if (UnitFrameFocus) then
+	UnitFrameFocus.OnInit = function(self)
+		self.layout = GetLayout(self:GetName())
+		self.frame = self:SpawnUnitFrame("focus", "UICenter", function(frame, unit, id, _, ...)
+			return UnitStyles.StyleFocusFrame(frame, unit, id, self.layout, ...)
+		end)
 	end
 end
 

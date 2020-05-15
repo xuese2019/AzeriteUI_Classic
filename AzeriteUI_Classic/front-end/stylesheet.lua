@@ -4223,6 +4223,51 @@ Layouts.UnitFramePet = setmetatable({
 	Place = { "LEFT", "UICenter", "BOTTOMLEFT", 362, 125 }
 }, { __index = Template_SmallFrame })
 
+-- Focus
+if (IsRetail) then
+	Layouts.UnitFrameFocus = setmetatable({
+		AuraProperties = {
+			growthX = "RIGHT", 
+			growthY = "UP", 
+			spacingH = 4, 
+			spacingV = 4, 
+			auraSize = Constant.SmallAuraSize, auraWidth = nil, auraHeight = nil, 
+			maxVisible = nil, maxBuffs = nil, maxDebuffs = nil, 
+			filter = nil, filterBuffs = "HELPFUL", filterDebuffs = "HARMFUL", 
+			func = nil, funcBuffs = GetAuraFilterFunc("focus"), funcDebuffs = GetAuraFilterFunc("focus"), 
+			debuffsFirst = false, 
+			disableMouse = false, 
+			showSpirals = false, 
+			showDurations = true, 
+			showLongDurations = false,
+			tooltipDefaultPosition = false, 
+			tooltipPoint = "BOTTOMLEFT",
+			tooltipAnchor = nil,
+			tooltipRelPoint = "TOPLEFT",
+			tooltipOffsetX = 8,
+			tooltipOffsetY = 16
+		},
+		HealthColorClass = true, -- color players by class 
+		HealthColorDisconnected = true, -- color disconnected units
+		HealthColorHealth = false, -- color anything else in the default health color
+		HealthColorPetAsPlayer = true, -- color your pet as you 
+		HealthColorReaction = true, -- color NPCs by their reaction standing with us
+		HealthColorTapped = true, -- color tap denied units 
+		HealthFrequentUpdates = true, 
+		HideWhenUnitIsPlayer = false, -- hide the frame when the unit is the player, or the target
+		HideWhenTargetIsCritter = false, -- hide the frame when unit is a critter
+		NamePlace = { "BOTTOMLEFT", (Constant.SmallFrame[1] - Constant.SmallBar[1])/2, Constant.SmallFrame[2] - Constant.SmallBar[2] + 10 }, 
+		NameDrawLayer = { "OVERLAY", 1 },
+		NameJustifyH = "LEFT",
+		NameJustifyV = "TOP",
+		NameFont = GetFont(14, true),
+		NameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .75 },
+		NameSize = nil,
+		Place = { "RIGHT", "UICenter", "BOTTOMLEFT", 332, 270 }, -- collides with 2nd row of player auras.
+		--Place = { "RIGHT", "UICenter", "BOTTOMLEFT", 332, 270 + 50 }
+	}, { __index = Template_SmallFrame_Auras })
+end
+
 -- 6-40 player groups
 Layouts.UnitFrameRaid = setmetatable({
 
