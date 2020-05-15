@@ -1,4 +1,4 @@
-local LibNamePlate = Wheel:Set("LibNamePlate", 43)
+local LibNamePlate = Wheel:Set("LibNamePlate", 45)
 if (not LibNamePlate) then	
 	return
 end
@@ -49,6 +49,7 @@ local unpack = unpack
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local CreateFrame = CreateFrame
 local InCombatLockdown = InCombatLockdown
+local IsAddOnLoaded = IsAddOnLoaded
 local IsLoggedIn = IsLoggedIn
 local UnitClass = UnitClass
 local UnitClassification = UnitClassification
@@ -951,6 +952,7 @@ LibNamePlate.UpdateNamePlateOptions = function(self)
 		return 
 	end 
 	hasQueuedSettingsUpdate = nil
+	hasSetBlizzardSettings = true
 	self:ForAllEmbeds("PostUpdateNamePlateOptions")
 end
 
@@ -1006,15 +1008,6 @@ LibNamePlate.OnEvent = function(self, event, ...)
 	elseif (event == "PLAYER_ENTERING_WORLD") then
 		IN_COMBAT = InCombatLockdown() and true or false
 		self:ForAllEmbeds("PreUpdateNamePlateOptions")
-
-		if (not hasSetBlizzardSettings) then
-			if _G.C_NamePlate then
-				self:UpdateNamePlateOptions()
-			else
-				self:RegisterEvent("ADDON_LOADED", "OnEvent")
-			end
-			hasSetBlizzardSettings = true
-		end
 		self:UpdateAllScales()
 		self.frame.elapsed = 0
 		self.frame.throttle = THROTTLE
@@ -1035,7 +1028,7 @@ LibNamePlate.OnEvent = function(self, event, ...)
 	elseif (event == "PLAYER_REGEN_ENABLED") then 
 		IN_COMBAT = false 
 		for baseFrame, plate in pairs(allPlates) do
-			if plate and plate:IsShown() then
+			if (plate and plate:IsShown()) then
 				plate:UpdateAlpha()
 			end
 		end
@@ -1054,14 +1047,6 @@ LibNamePlate.OnEvent = function(self, event, ...)
 		if (name and ENFORCED_CVARS[name]) then 
 			self:EnforceConsoleVars()
 		end 
-
-	elseif (event == "ADDON_LOADED") then
-		local addon = ...
-		if (addon == "Blizzard_NamePlates") then
-			hasSetBlizzardSettings = true
-			self:UpdateNamePlateOptions()
-			self:UnregisterEvent("ADDON_LOADED")
-		end
 	end
 end
 
@@ -1188,7 +1173,7 @@ do
 end 
 
 LibNamePlate.Enable = function(self)
-	if self.enabled then 
+	if (self.enabled) then 
 		return
 	end 
 
@@ -1213,6 +1198,7 @@ LibNamePlate.Enable = function(self)
 
 	-- Remove Personal Resource Display clutter
 	self:KillClassClutter()
+	self:UpdateNamePlateOptions()
 
 	-- These we will enforce 
 	self:EnforceConsoleVars()
@@ -1222,34 +1208,26 @@ LibNamePlate.Enable = function(self)
 end 
 
 LibNamePlate.KillClassClutter = function(self)
-	if (NamePlateDriverFrame) then
-		if (IsClassic) then
-			local BlizzPlateManaBar = NamePlateDriverFrame.classNamePlatePowerBar
-			if BlizzPlateManaBar then
-				BlizzPlateManaBar:Hide()
-				BlizzPlateManaBar:UnregisterAllEvents()
+
+	local BlizzPlateManaBar = NamePlateDriverFrame.classNamePlatePowerBar
+	if (BlizzPlateManaBar) then
+		BlizzPlateManaBar:Hide()
+		BlizzPlateManaBar:UnregisterAllEvents()
+	end
+
+	if (NamePlateDriverFrame.SetupClassNameplateBars) then
+		hooksecurefunc(NamePlateDriverFrame, "SetupClassNameplateBars", function(frame)
+			if (not frame) or (frame:IsForbidden()) then
+				return
 			end
-		end
-		if (IsRetail) then
-			for _,frameName in ipairs({
-				"DeathKnightResourceOverlayFrame",
-				"ClassNameplateBarMageFrame",
-				"ClassNameplateBarWindwalkerMonkFrame",
-				"ClassNameplateBarPaladinFrame",
-				"ClassNameplateBarRogueDruidFrame",
-				"ClassNameplateBarWarlockFrame",
-				"ClassNameplateBrewmasterBarFrame",
-				"ClassNameplateManaBarFrame"
-			}) do
-				local frame = _G[frameName]
-				if (frame) then
-					frame:UnregisterAllEvents()
-					frame:SetParent(uiHider) -- taint or yay?
-				end
-				NamePlateDriverFrame:SetClassNameplateManaBar(nil)
-				NamePlateDriverFrame:SetClassNameplateBar(nil)
+			if (frame.classNamePlateMechanicFrame) then
+				frame.classNamePlateMechanicFrame:Hide()
 			end
-		end
+			if (frame.classNamePlatePowerBar) then
+				frame.classNamePlatePowerBar:Hide()
+				frame.classNamePlatePowerBar:UnregisterAllEvents()
+			end
+		end)
 	end
 end
 
