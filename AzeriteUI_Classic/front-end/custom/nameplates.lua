@@ -40,33 +40,21 @@ local Plates = {}
 -- but before the library calls its own updates.
 Module.PreUpdateNamePlateOptions = function(self)
 
-	--[[
-	local _, instanceType = IsInInstance()
-	if (instanceType == "none") then
-		SetCVar("nameplateMaxDistance", 30)
-	else
-		SetCVar("nameplateMaxDistance", 45)
-	end
-
-	local _, instanceType = IsInInstance()
-	if (instanceType == "none") then
-		if self.layout.SetConsoleVars then 
-			local value = self.layout.SetConsoleVars.nameplateMaxDistance or GetCVarDefault("nameplateMaxDistance")
-			SetCVar("nameplateMaxDistance", value)
-		else 
+	if (IsRetail) then
+		local _, instanceType = IsInInstance()
+		if (instanceType == "none") then
 			SetCVar("nameplateMaxDistance", 30)
-		end 
-	else
-		SetCVar("nameplateMaxDistance", 45)
+		else
+			SetCVar("nameplateMaxDistance", 45)
+		end
 	end
-	]]
 
 	-- If these are enabled the GameTooltip will become protected, 
 	-- and all sort of taints and bugs will occur.
 	-- This happens on specs that can dispel when hovering over nameplate auras.
 	-- We create our own auras anyway, so we don't need these. 
 	SetCVar("nameplateShowDebuffsOnFriendly", 0) 
-		
+
 end 
 
 -- Called when certain bindable blizzard settings change, 
@@ -83,7 +71,7 @@ Module.PostUpdateNamePlateOptions = function(self, isInInstace)
 		end 
 	end 
 
-	-- Setting the base size involves changing the size of secure unit buttons, 
+	-- Setting the base size involves changing the size of secure unit buttons,
 	-- but since we're using our out of combat wrapper, we should be safe.
 	-- Default size 110, 45
 	-- Note: No freaking effect at all in classic. >:(

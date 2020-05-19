@@ -1,4 +1,4 @@
-local LibFrame = Wheel:Set("LibFrame", 57)
+local LibFrame = Wheel:Set("LibFrame", 58)
 if (not LibFrame) then	
 	return
 end
@@ -23,22 +23,28 @@ LibSecureHook:Embed(LibFrame)
 
 -- Lua API
 local _G = _G
+local assert = assert
+local debugstack = debugstack
+local error = error
 local getmetatable = getmetatable
 local math_floor = math.floor
+local math_max = math.max
+local math_min = math.min
 local pairs = pairs
 local pcall = pcall
 local select = select
+local string_join = string_join
 local string_match = string.match
 local type = type
 
 -- WoW API
-local CreateFrame = _G.CreateFrame
-local InCombatLockdown = _G.InCombatLockdown
-local IsLoggedIn = _G.IsLoggedIn
+local CreateFrame = CreateFrame
+local InCombatLockdown = InCombatLockdown
+local IsLoggedIn = IsLoggedIn
 
 -- WoW Objects
-local UIParent = _G.UIParent
-local WorldFrame = _G.WorldFrame
+local UIParent = UIParent
+local WorldFrame = WorldFrame
 
 -- Default keyword used as a fallback. this will not be user editable.
 local KEYWORD_DEFAULT = "UICenter"
@@ -64,65 +70,53 @@ if (not IsLoggedIn()) and (not InCombatLockdown()) then
 end
 
 -- Return a value rounded to the nearest integer.
-local round = function(value)
+local math_round = function(value)
 	return (value + .5) - (value + .5)%1
 end
 
-local SetDisplaySize = function(ratio, insetLeft, insetRight, insetTop, insetBottom)
+-- This doesn't check for parameter validity or combat status,
+-- so take care to only call this when it is safe to do so.
+local SetDisplaySize = function(ratio, altRatio, useSmallestRatio)
 	local width, height = WorldFrame:GetSize()
-	width = round(width)
-	height = round(height)
+	width = math_round(width)
+	height = math_round(height)
 
-	local precision = 1e5
+	-- Set up default fullwidth values. Somewhat supportive of EyeFinity.
 	local scale = height/1080
 	local displayWidth = (((width/height) >= (16/10)*3) and width/3 or width)/scale
 	local displayHeight = height/scale
 	local displayRatio = displayWidth/displayHeight
 
-	-- Implement this later when we've create an API for it.
-	if false then 
+	-- If first arg is missing, use stored values if available.
+	if (not ratio) then
+		ratio = LibFrame.ratio
+		altRatio = LibFrame.altRatio
+		useSmallestRatio = LibFrame.useSmallestRatio
+	end
 
-		-- Higher ratio means a narrower screen.
-		local desiredRatioMin = LibFrame.DesiredRatioMin or 4/3 -- 16/10 
-		local desiredRatioMax = LibFrame.DesiredRatioMax or 16/10 -- 16/9
+	-- If a stored set of ratios exist, apply them.
+	if (ratio) then 
+		local ratioWidth = math_round(displayHeight*ratio)
+		local altRatioWidth = math_round(displayHeight*(altRatio or ratio))
 
-		local deviation = ((round(displayRatio*precision))/precision) - displayRatio
+		local smallestWidth = math_min(displayWidth, math_min(ratioWidth, altRatioWidth))
+		local largestWidth = math_min(displayWidth, math_max(ratioWidth, altRatioWidth))
 
-		-- if the goal range exists, figure out which one to use. 
-		local min = ((desiredRatioMin - deviation) <= displayRatio) and ((desiredRatioMin + deviation) >= displayRatio)
-		local max = ((desiredRatioMax - deviation) <= displayRatio) and ((desiredRatioMax + deviation) >= displayRatio)
-
-		--print("Minratio, maxratio, deviation", desiredRatioMin, desiredRatioMax, deviation)
-
-		-- The desired ratio is within the bounds of the screen size, apply it!
-		if min then
-			displayWidth = round(displayHeight*desiredRatioMin)
-			--print("Going with Minratio, it's a fit!")
-		elseif max then 
-			displayWidth = round(displayHeight*desiredRatioMax)
-			--print("Going with Maxratio, it's a fit!")
-		else
-			if (displayRatio > desiredRatioMax) then
-				displayWidth = round(displayHeight*desiredRatioMax)
-				--print("Going with Maxratio, as it's closest to our goal")
-			elseif (displayRatio > desiredRatioMin) then 
-				displayWidth = round(displayHeight*desiredRatioMin)
-				--print("Going with Minratio, as it's closest to our goal")
-			end
-		end
+		displayWidth = useSmallestRatio and smallestWidth or largestWidth
 	end
 	
+	-- If this is in combat, the world will implode. Take care!
 	LibFrame.frame:SetIgnoreParentScale(true)
 	LibFrame.frame:SetFrameStrata(UIParent:GetFrameStrata())
 	LibFrame.frame:SetFrameLevel(UIParent:GetFrameLevel())
 	LibFrame.frame:ClearAllPoints()
 	LibFrame.frame:SetPoint("BOTTOM", UIParent, "BOTTOM")
 	LibFrame.frame:SetScale(scale)
-	LibFrame.frame:SetSize(round(displayWidth), round(displayHeight))
+	LibFrame.frame:SetSize(math_round(displayWidth), math_round(displayHeight))
 end
 SetDisplaySize()
 
--- Keep it and all its children hidden during pet battles. 
+-- Keep it and all its children hidden during pet battles.
 RegisterAttributeDriver(LibFrame.frame, "state-visibility", "[petbattle] hide; show")
 
 -- Keyword registry to translate words to frame handles used for anchoring or parenting
@@ -157,6 +151,19 @@ local blizzSetHeight = FrameMethods.SetHeight
 
 -- Utility Functions
 -----------------------------------------------------------------
+-- Syntax check 
+local check = function(value, num, ...)
+	assert(type(num) == "number", ("Bad argument #%.0f to '%s': %s expected, got %s"):format(2, "Check", "number", type(num)))
+	for i = 1,select("#", ...) do
+		if type(value) == select(i, ...) then 
+			return 
+		end
+	end
+	local types = string_join(", ", ...)
+	local name = string_match(debugstack(2, 2, 0), ": in function [`<](.-)['>]")
+	error(("Bad argument #%.0f to '%s': %s expected, got %s"):format(num, name, types, type(value)), 3)
+end
+
 -- Translate keywords to frame handles used for anchoring.
 local parseAnchor = function(anchor)
 	return anchor and (keyWords[anchor] and keyWords[anchor]() or _G[anchor] and _G[anchor] or anchor) or KEYWORD_DEFAULT and keyWords[KEYWORD_DEFAULT]() or WorldFrame
@@ -173,7 +180,6 @@ local isRestricted = function(frame)
 		return true
 	end
 end
-
 
 -- Embed source methods into target.
 local embed = function(target, source)
@@ -350,6 +356,20 @@ LibFrame.GetFrame = function(self, anchor)
 	return anchor and parseAnchor(anchor) or self.frame or DisplayFrame
 end
 
+LibFrame.SetAspectRatio = function(self, ratio, altRatio, useSmallestRatio)
+	check(ratio, 1, "number", "nil")
+	check(altRatio, 2, "number", "nil")
+	check(useSmallest, 3, "boolean", "nil")
+
+	-- Store the values in the library
+	LibFrame.ratio = ratio
+	LibFrame.altRatioWidth = altRatio
+	LibFrame.useSmallestRatio = useSmallestRatio
+
+	-- Attempt to apply, or queue up to combat end.
+	LibFrame:UpdateDisplaySize()
+end
+
 LibFrame.UpdateDisplaySize = function(self)
 	if (InCombatLockdown()) then 
 		return self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnEvent") 
@@ -410,7 +430,8 @@ LibFrame:Enable()
 local embedMethods = {
 	CreateFrame = true,
 	GetFrame = true,
-	RegisterKeyword = true
+	RegisterKeyword = true,
+	SetAspectRatio = true
 }
 
 LibFrame.Embed = function(self, target)

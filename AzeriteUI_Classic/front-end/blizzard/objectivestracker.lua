@@ -192,6 +192,9 @@ end
 -- Styling
 -----------------------------------------------------------------
 Module.StyleClassicLog = function(self)
+	if (not IsClassic) then
+		return
+	end
 	-- Just hook the global functions as far as possible
 	hooksecurefunc("QuestLog_Update", QuestLog_Update)
 	hooksecurefunc("QuestLogTitleButton_OnEnter", QuestLogTitleButton_OnEnter)
@@ -204,8 +207,10 @@ Module.StyleClassicLog = function(self)
 end
 
 Module.StyleClassicTracker = function(self)
+	if (not IsClassic) then
+		return
+	end
 	local layout = self.layout
-
 	local scaffold = self:CreateFrame("Frame", nil, "UICenter")
 	scaffold:SetWidth(layout.Width)
 	scaffold:SetHeight(22)
@@ -401,25 +406,33 @@ Module.StyleClassicTracker = function(self)
 end
 
 Module.StyleRetailTracker = function(self)
-	hooksecurefunc("ObjectiveTracker_Update", function()
-		local frame = ObjectiveTrackerFrame.MODULES
-		if (frame) then
-			for i = 1, #frame do
-				local modules = frame[i]
-				if (modules) then
-					local header = modules.Header
-					local background = modules.Header.Background
-					background:SetAtlas(nil)
+	if (not IsRetail) then
+		return
+	end
+	if (ObjectiveTracker_Update) then 
+		hooksecurefunc("ObjectiveTracker_Update", function()
+			local frame = ObjectiveTrackerFrame.MODULES
+			if (frame) then
+				for i = 1, #frame do
+					local modules = frame[i]
+					if (modules) then
+						local header = modules.Header
+						local background = modules.Header.Background
+						background:SetAtlas(nil)
 
-					local text = modules.Header.Text
-					text:SetParent(header)
+						local text = modules.Header.Text
+						text:SetParent(header)
+					end
 				end
 			end
-		end
-	end)
-end 
+		end)
+	end
+end
 
 Module.PositionRetailTracker = function(self)
+	if (not IsRetail) then
+		return
+	end
 	if (not ObjectiveTrackerFrame) then 
 		return self:RegisterEvent("ADDON_LOADED", "OnEvent")
 	end

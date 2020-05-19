@@ -150,7 +150,7 @@ colorDB.ui = {
 -- quest difficulty coloring 
 colorDB.quest = {}
 colorDB.quest.red = createColor(204/255, 26/255, 26/255)
-colorDB.quest.orange = createColor(255/255, 128/255, 64/255)
+colorDB.quest.orange = createColor(255/255, 106/255, 26/255)
 colorDB.quest.yellow = createColor(255/255, 178/255, 38/255)
 colorDB.quest.green = createColor(89/255, 201/255, 89/255)
 colorDB.quest.gray = createColor(120/255, 120/255, 120/255)
@@ -397,18 +397,12 @@ auraFilters.player = function(element, isBuff, unit, isOwnedByPlayer, name, icon
 		if (HasUserFlags(Private, spellID, Never)) then -- fully blacklisted
 			return nil, nil, hideFilteredSpellID
 
-		-- Whitelisted
-		elseif (HasUserFlags(Private, spellID, Always)) -- fully whitelisted
-			or (HasUserFlags(Private, spellID, OnPlayer)) -- shown on player
-			or (HasUserFlags(Private, spellID, PrioBoss)) then -- shown when cast by boss
-			
-				return true, nil, hideFilteredSpellID
-
 		-- Attempting to show vehicle or possessed unit's buffs 
 		-- *This fixes style multipliers now showing in the BFA horse riding
 		elseif (IsRetail) and (UnitHasVehicleUI("player") and (isCastByPlayer or unitCaster == "pet" or unitCaster == "vehicle")) then
 			return true, nil, hideFilteredSpellID
 
+		-- Hidden in combat
 		elseif (UnitAffectingCombat("player") and HasUserFlags(Private, spellID, NoCombat)) then 
 			if (isBuff and HasUserFlags(Private, spellID, Warn)) then 
 				local timeLeft 
@@ -424,7 +418,11 @@ auraFilters.player = function(element, isBuff, unit, isOwnedByPlayer, name, icon
 				return nil, nil, hideFilteredSpellID
 			end
 
-		elseif (HasUserFlags(Private, spellID, OnPlayer)) then 
+		-- Whitelisted
+		elseif (HasUserFlags(Private, spellID, Always)) -- fully whitelisted
+			or (HasUserFlags(Private, spellID, OnPlayer)) -- shown on player
+			or (HasUserFlags(Private, spellID, PrioBoss)) then -- shown when cast by boss
+		
 			return true, nil, hideFilteredSpellID
 		end
 	end 
@@ -462,13 +460,6 @@ auraFilters.target = function(element, isBuff, unit, isOwnedByPlayer, name, icon
 		if (HasUserFlags(Private, spellID, Never)) then -- fully blacklisted
 			return nil, nil, hideFilteredSpellID
 
-		-- Whitelisted
-		elseif (HasUserFlags(Private, spellID, Always)) -- fully whitelisted
-			or (HasUserFlags(Private, spellID, OnTarget)) -- shown on target
-			or (HasUserFlags(Private, spellID, PrioBoss)) then -- shown when cast by boss
-			
-			return true, nil, hideFilteredSpellID
-
 		elseif (UnitAffectingCombat("player") and HasUserFlags(Private, spellID, NoCombat)) then 
 			if (isBuff and HasUserFlags(Private, spellID, Warn)) then 
 				local timeLeft 
@@ -484,7 +475,11 @@ auraFilters.target = function(element, isBuff, unit, isOwnedByPlayer, name, icon
 				return nil, nil, hideFilteredSpellID
 			end
 
-		elseif (HasUserFlags(Private, spellID, OnTarget)) then 
+		-- Whitelisted
+		elseif (HasUserFlags(Private, spellID, Always)) -- fully whitelisted
+			or (HasUserFlags(Private, spellID, OnTarget)) -- shown on target
+			or (HasUserFlags(Private, spellID, PrioBoss)) then -- shown when cast by boss
+		
 			return true, nil, hideFilteredSpellID
 		end
 	end 
@@ -518,7 +513,7 @@ auraFilters.nameplate = function(element, isBuff, unit, isOwnedByPlayer, name, i
 	local hasFlags = not not GetUserFlags(Private)[spellID]
 	if (hasFlags) then 
 		-- Blacklisted
-		if (HasUserFlags(Private, spellID, Never)) then -- fully blacklisted
+		if (HasUserFlags(Private, spellID, Never)) -- fully blacklisted
 		or (HasUserFlags(Private, spellID, NeverOnPlate)) then -- blacklisted on plates
 				return nil, nil, hideFilteredSpellID
 

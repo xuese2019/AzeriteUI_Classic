@@ -1,4 +1,4 @@
-local LibNamePlate = Wheel:Set("LibNamePlate", 45)
+local LibNamePlate = Wheel:Set("LibNamePlate", 46)
 if (not LibNamePlate) then	
 	return
 end
@@ -51,6 +51,7 @@ local CreateFrame = CreateFrame
 local InCombatLockdown = InCombatLockdown
 local IsAddOnLoaded = IsAddOnLoaded
 local IsLoggedIn = IsLoggedIn
+local SetCVar = SetCVar
 local UnitClass = UnitClass
 local UnitClassification = UnitClassification
 local UnitExists = UnitExists
@@ -177,12 +178,12 @@ local ALPHA_NONE_INDEX = 0
 -- Opacity Settings
 -- *From library build 25 we're keeping these local
 local ALPHA = {
-	[ALPHA_NONE_INDEX] 		= ALPHA_NONE, 		-- Not visible.  
-	[ALPHA_FULL_INDEX] 		= ALPHA_FULL, 		-- For the current target, if any
-	[ALPHA_VERYHIGH_INDEX] 	= ALPHA_VERYHIGH, 	-- For players when not having a target, also for World Bosses when not targeted
-	[ALPHA_HIGH_INDEX] 		= ALPHA_HIGH, 		-- For non-targeted players when having a target
-	[ALPHA_LOW_INDEX] 		= ALPHA_LOW, 		-- For non-targeted trivial mobs
-	[ALPHA_VERYLOW_INDEX] 	= ALPHA_VERYLOW, 	-- For non-targeted friendly NPCs 
+	[ALPHA_NONE_INDEX] 		= ALPHA_NONE,
+	[ALPHA_FULL_INDEX] 		= ALPHA_FULL,
+	[ALPHA_VERYHIGH_INDEX] 	= ALPHA_VERYHIGH,
+	[ALPHA_HIGH_INDEX] 		= ALPHA_HIGH,
+	[ALPHA_LOW_INDEX] 		= ALPHA_LOW,
+	[ALPHA_VERYLOW_INDEX] 	= ALPHA_VERYLOW,
 	[ALPHA_LOWEST_INDEX] 	= ALPHA_LOWEST
 }
 
@@ -1043,10 +1044,6 @@ LibNamePlate.OnEvent = function(self, event, ...)
 	elseif (event == "UI_SCALE_CHANGED") then
 		self:UpdateAllScales()
 
-	elseif (event == "GP_CVAR_UPDATED") then 
-		if (name and ENFORCED_CVARS[name]) then 
-			self:EnforceConsoleVars()
-		end 
 	end
 end
 
@@ -1152,25 +1149,17 @@ LibNamePlate.OnUpdate = function(self, elapsed)
 	self.elapsed = 0
 end 
 
-do 
-	local enforcing 
-	LibNamePlate.EnforceConsoleVars = function(self, event, ...)
-		if enforcing then 
-			return 
-		end 
-		if InCombatLockdown() then 
-			return self:RegisterEvent("PLAYER_REGEN_ENABLED", "EnforceConsoleVars")
-		end 
-		if (event == "PLAYER_REGEN_ENABLED") then 
-			self:UnregisterEvent("PLAYER_REGEN_ENABLED", "EnforceConsoleVars")
-		end
-		enforcing = true 
-		for name,value in pairs(ENFORCED_CVARS) do 
-			SetCVar(name,value)
-		end 
-		enforcing = nil 
+LibNamePlate.SetConsoleVars = function(self, event, ...)
+	if (InCombatLockdown()) then 
+		return self:RegisterEvent("PLAYER_REGEN_ENABLED", "SetConsoleVars")
+	end 
+	if (event == "PLAYER_REGEN_ENABLED") then 
+		self:UnregisterEvent("PLAYER_REGEN_ENABLED", "SetConsoleVars")
 	end
-end 
+	for name,value in pairs(ENFORCED_CVARS) do 
+		SetCVar(name,value)
+	end
+end
 
 LibNamePlate.Enable = function(self)
 	if (self.enabled) then 
@@ -1200,9 +1189,8 @@ LibNamePlate.Enable = function(self)
 	self:KillClassClutter()
 	self:UpdateNamePlateOptions()
 
-	-- These we will enforce 
-	self:EnforceConsoleVars()
-	self:SetSecureHook("SetCVar", "OnEvent", "GP_CVAR_UPDATED")
+	-- These we will enforce
+	self:SetConsoleVars()
 
 	self.enabled = true
 end 

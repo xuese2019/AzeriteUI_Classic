@@ -753,8 +753,33 @@ Module.CreateMenuTable = function(self)
 		proxyModule = nil, useCore = true
 	})
 	table_insert(MenuTable, DebugMenu)
+
+	-- Aspect Ratio Options
+	table_insert(MenuTable, {
+		title = L["Aspect Ratio"], type = nil, hasWindow = true, 
+		buttons = {
+			{
+				title = L["Widescreen (16:9)"],
+				type = "SET_VALUE", 
+				configDB = ADDON, configKey = "aspectRatio", optionArgs = { "wide" }, 
+				proxyModule = nil, useCore = true
+			},
+			{
+				title = L["Ultrawide (21:9)"],
+				type = "SET_VALUE", 
+				configDB = ADDON, configKey = "aspectRatio", optionArgs = { "ultrawide" }, 
+				proxyModule = nil, useCore = true
+			},
+			{
+				title = L["Unlimited"],
+				type = "SET_VALUE", 
+				configDB = ADDON, configKey = "aspectRatio", optionArgs = { "full" }, 
+				proxyModule = nil, useCore = true
+			}
+		}
+	})
 	
-	-- Actionbars 
+	-- Actionbars
 	local ActionBarMain = Core:GetModule("ActionBarMain", true)
 	if ActionBarMain and not (ActionBarMain:IsIncompatible() or ActionBarMain:DependencyFailed()) then 
 		local ActionBarMenu =  {

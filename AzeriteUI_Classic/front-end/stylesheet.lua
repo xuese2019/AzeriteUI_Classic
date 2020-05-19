@@ -2081,6 +2081,9 @@ local Template_TinyFrame = {
 local Defaults = {}
 
 Defaults[ADDON] = {
+
+	aspectRatio = "wide",
+
 	-- Enables a layout switch targeted towards healers
 	enableHealerMode = false,
 
@@ -2212,7 +2215,7 @@ Layouts[ADDON] = {
 		LevelUpDisplay = true, -- Retail
 		Minimap = true,
 		OrderHall = true,
-		--ObjectiveTracker = true, -- Retail
+		ObjectiveTracker = true, -- Retail
 		PlayerPowerBarAlt = true, -- Retail
 		--QuestWatchFrame = true, -- Classic
 		TotemFrame = true, -- Retail
@@ -3030,14 +3033,6 @@ Layouts.NamePlates = {
 		nameplateGlobalScale = 1,
 		NamePlateHorizontalScale = 1,
 		NamePlateVerticalScale = 1,
-	
-		-- Alpha defaults (these are enforced to other values by the back-end now)
-		nameplateMaxAlpha = false, 
-		nameplateMinAlphaDistance = false, 
-		nameplateMinAlpha = false,
-		nameplateMaxAlphaDistance = false,
-		nameplateOccludedAlphaMult = false, 
-		nameplateSelectedAlpha = false, 
 	
 		-- The minimum distance from the camera plates will reach their minimum scale and alpha
 		nameplateMinScaleDistance = false, 

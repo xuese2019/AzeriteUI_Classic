@@ -73,6 +73,10 @@ local SECURE = {
 			-- *Note that we're not actually listing is as a mode in the menu. 
 			self:CallMethod("OnModeToggle", "healerMode"); 
 
+		elseif (name == "change-aspectratio") then 
+			self:SetAttribute("aspectRatio", value); 
+			self:CallMethod("UpdateAspectRatio"); 
+
 		elseif (name == "change-enabledebugconsole") then 
 			--self:SetAttribute("enableDebugConsole", value); 
 			self:CallMethod("UpdateDebugConsole"); 
@@ -191,6 +195,10 @@ Core.GetSecureUpdater = function(self)
 			self:UpdateDebugConsole()
 		end
 
+		callbackFrame.UpdateAspectRatio = function(callbackFrame)
+			self:UpdateAspectRatio()
+		end
+
 		-- Register module db with the secure proxy.
 		if db then 
 			for key,value in pairs(db) do 
@@ -229,6 +237,21 @@ Core.UpdateDebugConsole = function(self)
 		self:ShowDebugFrame()
 	else
 		self:HideDebugFrame()
+	end
+end
+
+Core.UpdateAspectRatio = function(self)
+	local db = self.db
+	if (db.aspectRatio == "wide") then
+		self:SetAspectRatio(16/9, nil, false)
+	elseif (db.aspectRatio == "ultrawide") then
+		self:SetAspectRatio(21/9, nil, false)
+	elseif (db.aspectRatio == "full") then
+		self:SetAspectRatio(nil, nil, false)
+	else
+		-- Use 16:9 as the UI was designed for
+		-- as the emergency fallback.
+		self:SetAspectRatio(16/9, nil, false)
 	end
 end
 
