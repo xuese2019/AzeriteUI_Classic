@@ -1373,7 +1373,6 @@ Module.UpdateButtonGrids = function(self)
 			-- and if so start forcing the grids.
 			if (buttonHasContent) then
 				forceGrid = true
-				print("found content at", buttonID)
 			else
 				button.showGrid = nil
 				button.overrideAlphaWhenEmpty = nil
