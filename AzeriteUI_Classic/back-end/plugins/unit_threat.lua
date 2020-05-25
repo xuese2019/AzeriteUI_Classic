@@ -40,7 +40,7 @@ if (IsClassic) then
 	UnitThreatDB.frames = UnitThreatDB.frames or {}
 
 	-- Shortcut it
-	Frames = UnitRangeDB.frames
+	Frames = UnitThreatDB.frames
 
 end
 
