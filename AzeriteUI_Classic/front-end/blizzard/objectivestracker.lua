@@ -282,7 +282,7 @@ Module.StyleClassicTracker = function(self)
 			if (questIndex) then
 				numObjectives = GetNumQuestLeaderBoards(questIndex)
 				if (numObjectives > 0) then
-
+					-- Set quest title
 					watchText = _G["QuestWatchLine"..watchTextIndex]
 					watchText.isTitle = true
 
@@ -306,6 +306,8 @@ Module.StyleClassicTracker = function(self)
 					-- Style the objectives
 					objectivesCompleted = 0
 					for j = 1, numObjectives do
+
+						-- Set Objective text
 						text, type, finished = GetQuestLogLeaderBoard(j, questIndex)
 						watchText = _G["QuestWatchLine"..watchTextIndex]
 						watchText.isTitle = nil

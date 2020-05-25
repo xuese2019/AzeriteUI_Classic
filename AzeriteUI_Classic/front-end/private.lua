@@ -170,6 +170,7 @@ colorDB.artifact = createColor(229/255, 204/255, 127/255) -- artifact or azerite
 
 -- Unit Class Coloring
 -- Original colors at https://wow.gamepedia.com/Class#Class_colors
+colorDB.blizzclass = createColorGroup(RAID_CLASS_COLORS)
 colorDB.class = {}
 colorDB.class.DEATHKNIGHT = createColor(176/255, 31/255, 79/255)
 colorDB.class.DEMONHUNTER = createColor(163/255, 48/255, 201/255)
@@ -334,7 +335,17 @@ colorDB.zone.sanctuary = createColor(104/255, 204/255, 239/255)
 colorDB.zone.unknown = createColor(255/255, 234/255, 137/255) -- instances, bgs, contested zones on pve realms 
 
 -- Item rarity coloring
-colorDB.quality = createColorGroup(ITEM_QUALITY_COLORS)
+colorDB.blizzquality = createColorGroup(ITEM_QUALITY_COLORS)
+colorDB.quality = {}
+colorDB.quality[0] = createColor(157/255, 157/255, 157/255) -- Poor
+colorDB.quality[1] = createColor(240/255, 240/255, 240/255) -- Common
+colorDB.quality[2] = createColor( 30/255, 178/255,   0/255) -- Uncommon
+colorDB.quality[3] = createColor(  0/255, 112/255, 221/255) -- Rare
+colorDB.quality[4] = createColor(163/255,  53/255, 238/255) -- Epic
+colorDB.quality[5] = createColor(255/255, 128/255,   0/255) -- Legendary
+colorDB.quality[6] = createColor(230/255, 204/255, 128/255) -- Artifact
+colorDB.quality[7] = createColor(  0/255, 204/255, 255/255) -- Heirloom
+colorDB.quality[8] = createColor(  0/255, 204/255, 255/255) -- Blizard
 
 -- world quest quality coloring
 -- using item rarities for these colors
@@ -448,7 +459,72 @@ auraFilters.player = function(element, isBuff, unit, isOwnedByPlayer, name, icon
 	else 
 		return true, nil, hideUnfilteredSpellID
 	end 
-end 
+end
+
+auraFilters["player-strict"] = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
+
+	local all = element.all
+	local hasFlags = not not GetUserFlags(Private)[spellID]
+
+	if (hasFlags) then
+		-- Blacklisted
+		if (HasUserFlags(Private, spellID, Never)) then -- fully blacklisted
+			return nil, nil, hideFilteredSpellID
+
+		-- Attempting to show vehicle or possessed unit's buffs 
+		-- *This fixes style multipliers now showing in the BFA horse riding
+		elseif (IsRetail) and (UnitHasVehicleUI("player") and (isCastByPlayer or unitCaster == "pet" or unitCaster == "vehicle")) then
+			return true, nil, hideFilteredSpellID
+
+		-- Hidden in combat
+		elseif (UnitAffectingCombat("player") and HasUserFlags(Private, spellID, NoCombat)) then 
+			if (isBuff and HasUserFlags(Private, spellID, Warn)) then 
+				local timeLeft 
+				if (expirationTime and expirationTime > 0) then 
+					timeLeft = expirationTime - GetTime()
+				end
+				if (timeLeft and (timeLeft > 0) and (timeLeft < buffDurationThreshold)) or (duration and (duration > 0) and (duration < buffDurationThreshold)) then
+					return true, nil, hideFilteredSpellID
+				else 
+					return nil, nil, hideFilteredSpellID
+				end
+			else
+				return nil, nil, hideFilteredSpellID
+			end
+
+		-- Whitelisted
+		elseif (HasUserFlags(Private, spellID, Always)) -- fully whitelisted
+			or (HasUserFlags(Private, spellID, OnPlayer)) -- shown on player
+			or (HasUserFlags(Private, spellID, PrioBoss)) then -- shown when cast by boss
+	
+
+			return true, nil, hideFilteredSpellID
+		end
+	end 
+
+	local timeLeft
+	if (expirationTime and expirationTime > 0) then 
+		timeLeft = expirationTime - GetTime()
+	end
+	if (isBuff) then 
+		if (timeLeft and (timeLeft > 0) and (timeLeft < buffDurationThreshold)) or (duration and (duration > 0) and (duration < buffDurationThreshold)) then
+			return true, nil, hideUnfilteredSpellID
+		elseif (count and count > 1) then
+			return true, nil, hideUnfilteredSpellID
+		else
+			return nil, nil, hideUnfilteredSpellID
+		end
+	else 
+		if (timeLeft and (timeLeft > 0) and (timeLeft < debuffDurationThreshold)) then 
+			return true, nil, hideUnfilteredSpellID
+		elseif (count and count > 1) then
+			return true, nil, hideUnfilteredSpellID
+		else
+			return nil, nil, hideUnfilteredSpellID
+		end
+	end
+
+end
 
 auraFilters.target = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
 
@@ -504,6 +580,65 @@ auraFilters.target = function(element, isBuff, unit, isOwnedByPlayer, name, icon
 		end 
 	else 
 		return true, nil, hideUnfilteredSpellID
+	end 
+end
+
+auraFilters.target = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
+
+	local all = element.all
+	local hasFlags = not not GetUserFlags(Private)[spellID]
+
+	if (hasFlags) then 
+		-- Blacklisted
+		if (HasUserFlags(Private, spellID, Never)) then -- fully blacklisted
+			return nil, nil, hideFilteredSpellID
+
+		elseif (UnitAffectingCombat("player") and HasUserFlags(Private, spellID, NoCombat)) then 
+			if (isBuff and HasUserFlags(Private, spellID, Warn)) then 
+				local timeLeft 
+				if (expirationTime and expirationTime > 0) then 
+					timeLeft = expirationTime - GetTime()
+				end
+				if (timeLeft and (timeLeft > 0) and (timeLeft < buffDurationThreshold)) or (duration and (duration > 0) and (duration < buffDurationThreshold)) then
+					return true, nil, hideFilteredSpellID
+				else 
+					return nil, nil, hideFilteredSpellID
+				end
+			else
+				return nil, nil, hideFilteredSpellID
+			end
+
+		-- Whitelisted
+		elseif (HasUserFlags(Private, spellID, Always)) -- fully whitelisted
+			or (HasUserFlags(Private, spellID, OnTarget)) -- shown on target
+			or (HasUserFlags(Private, spellID, PrioBoss)) then -- shown when cast by boss
+		
+			return true, nil, hideFilteredSpellID
+		end
+	end 
+	
+	local timeLeft 
+	if (expirationTime and expirationTime > 0) then 
+		timeLeft = expirationTime - GetTime()
+	end
+	if (isBuff) then
+		if (timeLeft and (timeLeft > 0) and (timeLeft < buffDurationThreshold)) or (duration and (duration > 0) and (duration < buffDurationThreshold)) then
+			return true, nil, hideUnfilteredSpellID
+		elseif (count and count > 1) then
+			return true, nil, hideUnfilteredSpellID
+		else 
+			return nil, nil, hideUnfilteredSpellID
+		end
+	else
+		if (not isCastByPlayer) then 
+			return nil, nil, hideUnfilteredSpellID
+		elseif (timeLeft and (timeLeft > 0) and (timeLeft < debuffDurationThreshold)) then 
+			return true, nil, hideUnfilteredSpellID
+		elseif (count and count > 1) then
+			return true, nil, hideUnfilteredSpellID
+		else
+			return nil, nil, hideUnfilteredSpellID
+		end
 	end 
 end
 
@@ -567,17 +702,20 @@ end
 auraFilters.boss = function(element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
 end
 
-
--- Add a fallback system
--- *needed in case non-existing unit filters are requested 
-local filterFuncs = setmetatable(auraFilters, { __index = function(t,k) return rawget(t,k) or rawget(t, "default") end})
-
 -- Private API
 -----------------------------------------------------------------
 Private.Colors = colorDB
 
-Private.GetAuraFilterFunc = function(unit) 
-	return filterFuncs[unit or "default"] 
+Private.GetAuraFilterFunc = function(name, suffix)
+	local filter
+	if (name) then
+		local newName
+		if (suffix) then
+			newName = name .."-"..suffix
+		end
+		filter = auraFilters[newName] or auraFilters[name]
+	end
+	return filter or auraFilters.default
 end
 
 Private.GetFont = function(size, useOutline, useChatFont)
@@ -682,12 +820,12 @@ local PopulateClassicDatabase = function()
 	AddUserFlags(Private, 16689, OnPlayer) 	-- Nature's Grasp (Rank 6)
 	AddUserFlags(Private, 16864, OnPlayer + NoCombat + Warn) 	-- Omen of Clarity (Buff)
 	AddUserFlags(Private, 16870, OnPlayer + NoCombat + Warn) 	-- Omen of Clarity (Proc)
-	AddUserFlags(Private,   467, ByPlayer + NoCombat + Warn) 	-- Thorns (Rank 1)
-	AddUserFlags(Private,   782, ByPlayer + NoCombat + Warn) 	-- Thorns (Rank 2)
-	AddUserFlags(Private,  1075, ByPlayer + NoCombat + Warn) 	-- Thorns (Rank 3)
-	AddUserFlags(Private,  8914, ByPlayer + NoCombat + Warn) 	-- Thorns (Rank 4)
-	AddUserFlags(Private,  9756, ByPlayer + NoCombat + Warn) 	-- Thorns (Rank 5)
-	AddUserFlags(Private,  9910, ByPlayer + NoCombat + Warn) 	-- Thorns (Rank 6)
+	AddUserFlags(Private,   467, OnPlayer + NoCombat + Warn) 	-- Thorns (Rank 1)
+	AddUserFlags(Private,   782, OnPlayer + NoCombat + Warn) 	-- Thorns (Rank 2)
+	AddUserFlags(Private,  1075, OnPlayer + NoCombat + Warn) 	-- Thorns (Rank 3)
+	AddUserFlags(Private,  8914, OnPlayer + NoCombat + Warn) 	-- Thorns (Rank 4)
+	AddUserFlags(Private,  9756, OnPlayer + NoCombat + Warn) 	-- Thorns (Rank 5)
+	AddUserFlags(Private,  9910, OnPlayer + NoCombat + Warn) 	-- Thorns (Rank 6)
 
 	AddUserFlags(Private, 00000, OnTarget) 	-- Faerie Fire (Rank 2)
 	AddUserFlags(Private, 00000, OnTarget) 	-- Faerie Fire (Rank 3)
@@ -730,13 +868,13 @@ local PopulateClassicDatabase = function()
 	------------------------------------------------------------------------
 	AddUserFlags(Private,  2893, ByPlayer) 			-- Abolish Poison
 	AddUserFlags(Private, 29166, ByPlayer) 			-- Innervate
-	AddUserFlags(Private,  1126, ByPlayer + NoCombat + Warn) 	-- Mark of the Wild (Rank 1)
-	AddUserFlags(Private,  5232, ByPlayer + NoCombat + Warn) 	-- Mark of the Wild (Rank 2)
-	AddUserFlags(Private,  6756, ByPlayer + NoCombat + Warn) 	-- Mark of the Wild (Rank 3)
-	AddUserFlags(Private,  5234, ByPlayer + NoCombat + Warn) 	-- Mark of the Wild (Rank 4)
-	AddUserFlags(Private,  8907, ByPlayer + NoCombat + Warn) 	-- Mark of the Wild (Rank 5)
-	AddUserFlags(Private,  9884, ByPlayer + NoCombat + Warn) 	-- Mark of the Wild (Rank 6)
-	AddUserFlags(Private,  9885, ByPlayer + NoCombat + Warn) 	-- Mark of the Wild (Rank 7)
+	AddUserFlags(Private,  1126, OnPlayer + NoCombat + Warn) 	-- Mark of the Wild (Rank 1)
+	AddUserFlags(Private,  5232, OnPlayer + NoCombat + Warn) 	-- Mark of the Wild (Rank 2)
+	AddUserFlags(Private,  6756, OnPlayer + NoCombat + Warn) 	-- Mark of the Wild (Rank 3)
+	AddUserFlags(Private,  5234, OnPlayer + NoCombat + Warn) 	-- Mark of the Wild (Rank 4)
+	AddUserFlags(Private,  8907, OnPlayer + NoCombat + Warn) 	-- Mark of the Wild (Rank 5)
+	AddUserFlags(Private,  9884, OnPlayer + NoCombat + Warn) 	-- Mark of the Wild (Rank 6)
+	AddUserFlags(Private,  9885, OnPlayer + NoCombat + Warn) 	-- Mark of the Wild (Rank 7)
 	AddUserFlags(Private,  8936, ByPlayer) 	-- Regrowth (Rank 1)
 	AddUserFlags(Private,  8938, ByPlayer) 	-- Regrowth (Rank 2)
 	AddUserFlags(Private,  8939, ByPlayer) 	-- Regrowth (Rank 3)

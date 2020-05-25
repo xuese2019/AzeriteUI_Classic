@@ -1,4 +1,4 @@
-local LibNamePlate = Wheel:Set("LibNamePlate", 46)
+local LibNamePlate = Wheel:Set("LibNamePlate", 47)
 if (not LibNamePlate) then	
 	return
 end
@@ -159,32 +159,20 @@ local FADE_IN = .75 -- time in seconds to fade in
 local FADE_OUT = .05 -- time in seconds to fade out
 local FADE_DOWN = .25 -- time in seconds to fade down, but not out
 
-local ALPHA_FULL = 1
-local ALPHA_VERYHIGH = .85
-local ALPHA_HIGH = .75
-local ALPHA_LOW = .5
-local ALPHA_VERYLOW = .25
-local ALPHA_LOWEST = .1
-local ALPHA_NONE = 0
-
-local ALPHA_FULL_INDEX = 1
-local ALPHA_VERYHIGH_INDEX = 2
-local ALPHA_HIGH_INDEX = 3
-local ALPHA_LOW_INDEX = 4
-local ALPHA_VERYLOW_INDEX = 5
-local ALPHA_LOWEST_INDEX = 6
-local ALPHA_NONE_INDEX = 0
-
 -- Opacity Settings
 -- *From library build 25 we're keeping these local
+local ALPHA_FULL_INDEX = 1
+local ALPHA_HIGH_INDEX = 2
+local ALPHA_MEDIUM_INDEX = 3
+local ALPHA_LOW_INDEX = 4
+local ALPHA_NONE_INDEX = 5
+
 local ALPHA = {
-	[ALPHA_NONE_INDEX] 		= ALPHA_NONE,
-	[ALPHA_FULL_INDEX] 		= ALPHA_FULL,
-	[ALPHA_VERYHIGH_INDEX] 	= ALPHA_VERYHIGH,
-	[ALPHA_HIGH_INDEX] 		= ALPHA_HIGH,
-	[ALPHA_LOW_INDEX] 		= ALPHA_LOW,
-	[ALPHA_VERYLOW_INDEX] 	= ALPHA_VERYLOW,
-	[ALPHA_LOWEST_INDEX] 	= ALPHA_LOWEST
+	[ALPHA_FULL_INDEX] = 1,
+	[ALPHA_HIGH_INDEX] = .85,
+	[ALPHA_MEDIUM_INDEX] = .75,
+	[ALPHA_LOW_INDEX] = .25,
+	[ALPHA_NONE_INDEX] = 0
 }
 
 -- New from build 29
@@ -193,7 +181,7 @@ local ENFORCED_CVARS = {
 	nameplateMinAlpha = .4, -- .6
 	nameplateOccludedAlphaMult = .15, -- .4
 	nameplateSelectedAlpha = 1, -- 1
-	nameplateMaxAlphaDistance = 30, -- 40
+	nameplateMaxAlphaDistance = IsClassic and 20 or IsRetail and 30, -- 40
 	nameplateMinAlphaDistance = 10 -- 10
 }
 
@@ -349,11 +337,11 @@ NamePlate.UpdateAlpha = function(self)
 
 					-- Enemy Players
 					if (self.isEnemy) then
-						alphaLevel = ALPHA_VERYHIGH_INDEX
+						alphaLevel = ALPHA_HIGH_INDEX
 
 					-- Friendly Players
 				elseif (self.isFriend) then
-						alphaLevel = ALPHA_VERYHIGH_INDEX
+						alphaLevel = ALPHA_HIGH_INDEX
 						alphaReduction = true
 					end
 				else
@@ -369,18 +357,18 @@ NamePlate.UpdateAlpha = function(self)
 
 					-- Enemy NPCs
 					elseif (self.isEnemy) then
-						alphaLevel = ALPHA_VERYHIGH_INDEX
+						alphaLevel = ALPHA_HIGH_INDEX
 
 					-- Friendly NPCs
 					elseif (self.isFriend) then
-						alphaLevel = ALPHA_VERYLOW_INDEX
+						alphaLevel = ALPHA_LOW_INDEX
 
 					-- Trivial NPCs (do the even exist in Classic?)
 					elseif (self.isTrivial) then 
-						alphaLevel = ALPHA_VERYLOW_INDEX
+						alphaLevel = ALPHA_LOW_INDEX
 					else
 						-- Those that fall inbetween. Neutral NPCs?
-						alphaLevel = ALPHA_HIGH_INDEX
+						alphaLevel = ALPHA_MEDIUM_INDEX
 					end
 				end
 
@@ -391,11 +379,11 @@ NamePlate.UpdateAlpha = function(self)
 
 					-- Enemy Players
 					if (self.isEnemy) then
-						alphaLevel = ALPHA_HIGH_INDEX
+						alphaLevel = ALPHA_MEDIUM_INDEX
 
 					-- Friendly Players
 					elseif (self.isFriend) then
-						alphaLevel = ALPHA_HIGH_INDEX
+						alphaLevel = ALPHA_MEDIUM_INDEX
 						alphaReduction = true
 					end
 				else
@@ -403,26 +391,26 @@ NamePlate.UpdateAlpha = function(self)
 					-- Important NPCs
 					if (self.isElite or self.isRare or self.isBoss) then
 						if (self.isFriend) then 
-							alphaLevel = ALPHA_VERYHIGH_INDEX
+							alphaLevel = ALPHA_HIGH_INDEX
 							alphaReduction = true
 						else
-							alphaLevel = ALPHA_VERYHIGH_INDEX
+							alphaLevel = ALPHA_HIGH_INDEX
 						end
 
 					-- Enemy NPCs
 					elseif (self.isEnemy) then
-						alphaLevel = ALPHA_HIGH_INDEX
+						alphaLevel = ALPHA_MEDIUM_INDEX
 
 					-- Friendly NPCs
 					elseif (self.isFriend) then
-						alphaLevel = ALPHA_VERYLOW_INDEX
+						alphaLevel = ALPHA_LOW_INDEX
 
 					-- Trivial NPCs (do the even exist in Classic?)
 					elseif (self.isTrivial) then 
-						alphaLevel = ALPHA_VERYLOW_INDEX
+						alphaLevel = ALPHA_LOW_INDEX
 					else
 						-- Those that fall inbetween. Neutral NPCs?
-						alphaLevel = ALPHA_HIGH_INDEX
+						alphaLevel = ALPHA_MEDIUM_INDEX
 					end
 				end
 			end

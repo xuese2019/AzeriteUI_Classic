@@ -1,4 +1,4 @@
-local LibChatBubble = Wheel:Set("LibChatBubble", 15)
+local LibChatBubble = Wheel:Set("LibChatBubble", 16)
 if (not LibChatBubble) then	
 	return
 end
@@ -44,6 +44,17 @@ LibChatBubble.messageToSender = LibChatBubble.messageToSender or {}
 LibChatBubble.customBubbles = LibChatBubble.customBubbles or {} -- local bubble registry
 LibChatBubble.numChildren = LibChatBubble.numChildren or -1 -- worldframe children
 LibChatBubble.numBubbles = LibChatBubble.numBubbles or 0 -- worldframe customBubbles
+
+-- Visibility settings
+for k,v in pairs({
+	showInInstances = false, combatHideInInstances = true,
+	showInWorld = true, combatHideInWorld = true
+}) do
+	-- If the value doesn't exist, set it to default
+	if (LibChatBubble[k] == nil) then
+		LibChatBubble[k] = v
+	end
+end
 
 -- Custom Bubble parent frame
 LibChatBubble.BubbleBox = LibChatBubble.BubbleBox or CreateFrame("Frame", nil, UIParent)
@@ -298,6 +309,26 @@ LibChatBubble.UpdateBubbleVisibility = function(self)
 	end
 end
 
+LibChatBubble.SetBubbleVisibleInInstances = function(self, showInInstances)
+	LibChatBubble.showInInstances = showInInstances
+	LibChatBubble:OnEvent("PLAYER_ENTERING_WORLD")
+end
+
+LibChatBubble.SetBubbleVisibleInWorld = function(self, showInWorld)
+	LibChatBubble.showInWorld = showInWorld
+	LibChatBubble:OnEvent("PLAYER_ENTERING_WORLD")
+end
+
+LibChatBubble.SetBubbleCombatHideInInstances = function(self, combatHideInInstances)
+	LibChatBubble.combatHideInInstances = combatHideInInstances
+	LibChatBubble:OnEvent("PLAYER_ENTERING_WORLD")
+end
+
+LibChatBubble.SetBubbleCombatHideInWorld = function(self, combatHideInWorld)
+	LibChatBubble.combatHideInWorld = combatHideInWorld
+	LibChatBubble:OnEvent("PLAYER_ENTERING_WORLD")
+end
+
 LibChatBubble.EnableBubbleStyling = function(self)
 	LibChatBubble.stylingEnabled = true
 	LibChatBubble:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
@@ -327,22 +358,41 @@ LibChatBubble.OnEvent = function(self, event, ...)
 			return self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
 		end
 
-		if self.stylingEnabled then 
+		if (self.stylingEnabled) then
 			local _, instanceType = IsInInstance()
 			if (instanceType == "none") then
-				if UnitAffectingCombat("player") then 
+				if (self.showInWorld) then
+					if (self.combatHideInWorld) then
+						-- We could be sent here by PLAYER_REGEN_DISABLED,
+						-- which fires before combat lockdown starts.
+						-- UnitAffectingCombat already returns true at this point,
+						-- and can thus be used to toggle CVars before/after combat.
+						-- I think.
+						if (UnitAffectingCombat("player")) then
+							SetCVar("chatBubbles", 0)
+						else
+							SetCVar("chatBubbles", 1)
+						end
+					else
+						SetCVar("chatBubbles", 1)
+					end
+				else
 					SetCVar("chatBubbles", 0)
-				else 
-					SetCVar("chatBubbles", 1)
-				end 
-				--SetCVar("chatBubbles", 1)
+				end
 			else
-				if UnitAffectingCombat("player") then 
+				if (self.showInInstances) then
+					if (self.combatHideInInstances) then
+						if (UnitAffectingCombat("player")) then
+							SetCVar("chatBubbles", 0)
+						else
+							SetCVar("chatBubbles", 1)
+						end
+					else
+						SetCVar("chatBubbles", 1)
+					end
+				else
 					SetCVar("chatBubbles", 0)
-				else 
-					SetCVar("chatBubbles", 1)
-				end 
-				--SetCVar("chatBubbles", 0)
+				end
 			end
 
 			self:SetHook(UIParent, "OnHide", "UpdateBubbleVisibility", "GP_UIPARENT_ONHIDE_BUBBLEUPDATE")
@@ -369,14 +419,18 @@ LibChatBubble.OnEvent = function(self, event, ...)
 		return self:OnEvent("PLAYER_ENTERING_WORLD")
 
 	end
-end 
+end
 
 -- Module embedding
 local embedMethods = {
 	EnableBubbleStyling = true,
 	DisableBubbleStyling = true,
 	SetBubblePostCreateFunc = true,
-	SetBubblePostUpdateFunc = true
+	SetBubblePostUpdateFunc = true,
+	SetBubbleVisibleInInstances = true,
+	SetBubbleVisibleInWorld = true,
+	SetBubbleCombatHideInInstances = true,
+	SetBubbleCombatHideInWorld = true
 }
 
 LibChatBubble.Embed = function(self, target)

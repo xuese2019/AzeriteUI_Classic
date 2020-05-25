@@ -1,4 +1,4 @@
-local LibTooltip = Wheel:Set("LibTooltip", 73)
+local LibTooltip = Wheel:Set("LibTooltip", 74)
 if (not LibTooltip) then
 	return
 end
@@ -338,8 +338,19 @@ local Colors = {
 	-- class and reaction
 	class = prepareGroup(RAID_CLASS_COLORS),
 	reaction = prepareGroup(FACTION_BAR_COLORS),
-	quality = prepareGroup(ITEM_QUALITY_COLORS),
-	
+	blizzquality = prepareGroup(ITEM_QUALITY_COLORS),
+	quality = {
+		[0] = prepare( 157/255, 157/255, 157/255 ), -- Poor
+		[1] = prepare( 240/255, 240/255, 240/255 ), -- Common
+		[2] = prepare(  30/255, 178/255,   0/255 ), -- Uncommon
+		[3] = prepare(   0/255, 112/255, 221/255 ), -- Rare
+		[4] = prepare( 163/255,  53/255, 238/255 ), -- Epic
+		[5] = prepare( 255/255, 128/255,   0/255 ), -- Legendary
+		[6] = prepare( 230/255, 204/255, 128/255 ), -- Artifact
+		[7] = prepare(   0/255, 204/255, 255/255 ), -- Heirloom
+		[8] = prepare(   0/255, 204/255, 255/255 )  -- Blizard
+	},
+
 	-- magic school coloring
 	debuff = prepareGroup(DebuffTypeColor),
 

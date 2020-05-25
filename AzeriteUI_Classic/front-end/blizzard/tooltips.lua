@@ -362,18 +362,36 @@ local OnTooltipSetItem = function(tooltip)
 	if (tooltip:IsForbidden()) then 
 		return
 	end
-	if (DISABLE_VENDOR_PRICES) then 
-		return 
-	end
 	local frame = GetMouseFocus()
 	if (frame and frame.GetName and not frame:IsForbidden()) then
 		local name = frame:GetName()
+		local _,link = tooltip:GetItem()
+
+		local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount,
+			itemEquipLoc, itemIcon, itemSellPrice, itemClassID, itemSubClassID, bindType, expacID, itemSetID,
+			isCraftingReagent
+
+		-- Recolor items with our own item colors
+		if (link) then
+			itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount,
+			itemEquipLoc, itemIcon, itemSellPrice, itemClassID, itemSubClassID, bindType, expacID, itemSetID,
+			isCraftingReagent = GetItemInfo(link)
+			if (itemName) and (itemRarity) then
+				local line = _G[tooltip:GetName().."TextLeft1"]
+				if (line) then
+					local color = Colors.quality[itemRarity]
+					line:SetTextColor(color[1], color[2], color[3])
+				end
+			end
+		end
+
+		if (DISABLE_VENDOR_PRICES) then 
+			return 
+		end
+	
 		if (not MerchantFrame:IsShown()) or (name and (string_find(name, "Character") or string_find(name, "TradeSkill"))) then
 			local _,link = tooltip:GetItem()
 			if (link) then
-				local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount,
-				      itemEquipLoc, itemIcon, itemSellPrice, itemClassID, itemSubClassID, bindType, expacID, itemSetID, 
-				      isCraftingReagent = GetItemInfo(link)
 				if (itemSellPrice and (itemSellPrice > 0)) then
 					LOCKDOWNS[tooltip] = nil
 
