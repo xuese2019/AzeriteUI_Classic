@@ -1349,31 +1349,36 @@ Module.UpdateButtonGrids = function(self)
 	local numButtons = db.extraButtonsCount + 7
 	local button, buttonHasContent, forceGrid
 
-	local forceDisableGrids
 	if (IsRetail) then
-		forceDisableGrids = HasOverrideActionBar() or HasTempShapeshiftActionBar() or HasVehicleActionBar()
+		if (HasOverrideActionBar() or HasTempShapeshiftActionBar() or HasVehicleActionBar()) then
+			for buttonID = numButtons,1,-1 do
+				button = Buttons[buttonID]
+				button.showGrid = nil
+				button.overrideAlphaWhenEmpty = nil
+				button:UpdateGrid()
+			end
+			return
+		end
 	end
 	
-	-- Counting backwards from the end
-	-- to find the last button with content.
 	for buttonID = numButtons,1,-1 do
 		button = Buttons[buttonID]
 		buttonHasContent = button:HasContent()
 
-		-- Check if the button has content,
-		-- and if so start forcing the grids.
-		if (not forceGrid) and (buttonHasContent) then
-			forceGrid = true
-		end
-
-		if (forceGrid) and (not forceDisableGrids) then 
+		if (forceGrid) then
 			button.showGrid = true
 			button.overrideAlphaWhenEmpty = .95
-		else 
-			button.showGrid = nil
-			button.overrideAlphaWhenEmpty = nil
+		else
+			-- Check if the button has content,
+			-- and if so start forcing the grids.
+			if (buttonHasContent) then
+				forceGrid = true
+				print("found content at", buttonID)
+			else
+				button.showGrid = nil
+				button.overrideAlphaWhenEmpty = nil
+			end
 		end
-
 		button:UpdateGrid()
 	end
 end
