@@ -1,7 +1,7 @@
 local LibClientBuild = Wheel("LibClientBuild")
 assert(LibClientBuild, "UnitAltPower requires LibClientBuild to be loaded.")
 
--- This library is for Classic only!
+-- This library is for Retail only!
 if (LibClientBuild:IsClassic()) then
 	return
 end
