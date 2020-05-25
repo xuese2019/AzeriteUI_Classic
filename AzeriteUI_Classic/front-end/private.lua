@@ -339,13 +339,19 @@ colorDB.blizzquality = createColorGroup(ITEM_QUALITY_COLORS)
 colorDB.quality = {}
 colorDB.quality[0] = createColor(157/255, 157/255, 157/255) -- Poor
 colorDB.quality[1] = createColor(240/255, 240/255, 240/255) -- Common
+--colorDB.quality[2] = createColor( 30/255, 255/255,   0/255) -- Uncommon
 colorDB.quality[2] = createColor( 30/255, 178/255,   0/255) -- Uncommon
 colorDB.quality[3] = createColor(  0/255, 112/255, 221/255) -- Rare
 colorDB.quality[4] = createColor(163/255,  53/255, 238/255) -- Epic
-colorDB.quality[5] = createColor(255/255, 128/255,   0/255) -- Legendary
+--colorDB.quality[5] = createColor(255/255, 128/255,   0/255) -- Legendary
+colorDB.quality[5] = createColor(225/255,  96/255,   0/255) -- Legendary
 colorDB.quality[6] = createColor(230/255, 204/255, 128/255) -- Artifact
-colorDB.quality[7] = createColor(  0/255, 204/255, 255/255) -- Heirloom
-colorDB.quality[8] = createColor(  0/255, 204/255, 255/255) -- Blizard
+--colorDB.quality[7] = createColor(  0/255, 204/255, 255/255) -- Heirloom
+--colorDB.quality[8] = createColor(  0/255, 204/255, 255/255) -- Blizard
+colorDB.quality[7] = createColor( 79/255, 196/255, 225/255) -- Heirloom
+colorDB.quality[8] = createColor( 79/255, 196/255, 225/255) -- Blizard
+
+--/script DEFAULT_CHAT_FRAME:AddMessage("\124cffff8000\124Hitem:17182::::::::60:::::\124h[Sulfuras, Hand of Ragnaros]\124h\124r");
 
 -- world quest quality coloring
 -- using item rarities for these colors
