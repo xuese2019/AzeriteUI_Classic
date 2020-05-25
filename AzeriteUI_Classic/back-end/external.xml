@@ -9,4 +9,7 @@
 <Script file='external\LibAuraTypes\LibAuraTypes.lua'/>
 <Script file='external\LibSpellLocks\LibSpellLocks.lua'/>
 
+<!-- Classic Threat -->
+<Include file='external\LibThreatClassic2\lib.xml'/>
+
 </Ui>

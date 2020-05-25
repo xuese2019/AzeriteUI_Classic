@@ -40,5 +40,6 @@
 <Script file='plugins\unit_targeted.lua'/>
 <Script file='plugins\unit_targethighlight.lua'/>
 <Script file='plugins\unit_totem.lua'/>
+<Script file='plugins\unit_threat.lua'/>
 
 </Ui>
